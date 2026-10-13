@@ -44,8 +44,6 @@ export const UniversalObjectInspector: React.FC<UniversalObjectInspectorProps> =
     // Notify domain manager
     if (object.objectType === 'wall') {
       planManager.setWallFinish(object.id, finish, activeSurfaceKey as any);
-    } else if (object.objectType === 'column') {
-      planManager.setColumnFinish(object.id, finish, activeSurfaceKey as any);
     } else if (object.objectType === 'furniture') {
       if (activeSurfaceKey === 'all') {
         planManager.setFurnitureFinish(object.id, finish);
@@ -61,8 +59,6 @@ export const UniversalObjectInspector: React.FC<UniversalObjectInspectorProps> =
 
     if (object.objectType === 'wall') {
       planManager.setWallFinish(object.id, { type: 'plaster', variant: 'smooth', color: '#efede8' }, activeSurfaceKey as any);
-    } else if (object.objectType === 'column') {
-      planManager.setColumnFinish(object.id, { type: 'plaster', variant: 'smooth', color: '#f1f5f9' }, activeSurfaceKey as any);
     } else if (object.objectType === 'furniture') {
       if (activeSurfaceKey === 'all') {
         planManager.setFurnitureFinish(object.id, undefined);

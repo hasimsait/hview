@@ -29,8 +29,10 @@ used or changed. A single worker prevents tests from racing over the plan file.
 The browser suite checks sample-plan counts, real WebGL draw calls, view switching,
 ceiling/cutaway toggles, asset search, JSON disk persistence, invalid saves, and
 template reset. These are behavioral smoke tests, not visual regression tests.
-The root template has 60 walls; the working public plan has 64. Both have 12 rooms
-and 119 furniture objects.
+Legacy column outlines and spaces below 0.5 m² import as solid, thick walls.
+The root template has 47 walls; the working public plan has 50. Both have 10 usable
+rooms and 119 furniture objects. Columns and chimneys use ordinary wall selection,
+finishes, end caps, and recess controls.
 
 The workflow suite additionally selects a real mesh through raycasting, drags the
 translation gizmo, edits position/elevation/rotation/dimensions in the inspector,

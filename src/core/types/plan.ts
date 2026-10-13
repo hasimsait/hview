@@ -91,6 +91,7 @@ export interface ColumnEntity {
 export type WallFrameStyle = 'none' | 'perimeter' | 'grid_3' | 'grid_4' | 'grid_2x3';
 
 export interface WallEntity {
+  isColumn?: boolean; // Solid column represented by a single thick wall
   id: string;
   p1: Point2D;          // meters
   p2: Point2D;          // meters

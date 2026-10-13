@@ -1,9 +1,10 @@
 import * as THREE from 'three';
+import { intersectVisibleObjects } from '@services/interaction/VisibleRaycast';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { PlanDocument, FurnitureEntity, OpeningEntity, WallEntity, ColumnEntity, SurfaceFinishConfig, ColumnSide, RoomEntity } from '@core/types/plan';
+import { PlanDocument, FurnitureEntity, OpeningEntity, WallEntity, SurfaceFinishConfig, RoomEntity } from '@core/types/plan';
 import { ISceneService, ViewMode, ViewportSettings, IAssetRegistryService, ISurfaceFinishService } from '@core/types/services';
-import { WallGeometryService, WallColumn } from './WallGeometryService';
+import { WallGeometryService } from './WallGeometryService';
 import { WallJunctionService } from './WallJunctionService';
 import { OpeningGeometryService } from './OpeningGeometryService';
 import { FloorGeometryService } from './FloorGeometryService';
@@ -32,16 +33,12 @@ export class ThreeSceneService implements ISceneService {
   private selectionHelper: THREE.BoxHelper | null = null;
   private openingSelectionHelper: THREE.BoxHelper | null = null;
   private wallSelectionHelper: THREE.BoxHelper | null = null;
-  private columnSelectionHelper: THREE.BoxHelper | null = null;
   private floorSelectionHelper: THREE.Group | null = null;
   private splitPreviewHelper: THREE.Group | null = null;
   private furnitureMeshMap = new Map<string, THREE.Object3D>();
   private openingMeshMap = new Map<string, THREE.Group>();
   private wallMeshMap = new Map<string, THREE.Group>();
-  private columnMeshMap = new Map<string, THREE.Mesh>();
   private floorMeshMap = new Map<string, THREE.Group>();
-  private cachedCutoutsByWallId = new Map<string, { start: number; end: number }[]>();
-  private cachedStubIds = new Set<string>();
   private currentPlan: PlanDocument | null = null;
 
   private finishService: SurfaceFinishService;
@@ -251,7 +248,6 @@ export class ThreeSceneService implements ISceneService {
       this.openingsGroup.remove(this.openingsGroup.children[0]);
     }
     this.wallMeshMap.clear();
-    this.columnMeshMap.clear();
     this.openingMeshMap.clear();
 
     if (this.wallSelectionHelper) {
@@ -259,11 +255,7 @@ export class ThreeSceneService implements ISceneService {
       this.wallSelectionHelper.dispose();
       this.wallSelectionHelper = null;
     }
-    if (this.columnSelectionHelper) {
-      this.helpersGroup.remove(this.columnSelectionHelper);
-      this.columnSelectionHelper.dispose();
-      this.columnSelectionHelper = null;
-    }
+
     if (this.openingSelectionHelper) {
       this.helpersGroup.remove(this.openingSelectionHelper);
       this.openingSelectionHelper = null;
@@ -273,29 +265,11 @@ export class ThreeSceneService implements ISceneService {
 
     const cutawayH = this.settings.wallCutaway ? 1.15 : undefined;
 
-    // Detect column clusters attached to walls first so stubs are excluded from wall junctions
-    const { columns: detectedColumns, cutoutsByWallId, stubIds } = this.detectWallColumns(plan);
-    this.cachedStubIds = stubIds;
-    this.cachedCutoutsByWallId = cutoutsByWallId;
+    // Columns are ordinary thick walls; include them in junctions and selection.
+    WallJunctionService.computeJunctionOffsets(plan.walls);
 
-    // Filter real walls only (exclude column stubs)
-    const realWalls = plan.walls.filter((w) => !stubIds.has(w.id));
-
-    // Compute non-penetrating wall corner offsets on real walls
-    WallJunctionService.computeJunctionOffsets(realWalls);
-
-    // Build Walls and Openings
-    for (const wall of realWalls) {
-      // Skip walls whose every roomId belongs to a tiny-area room (< 0.5 m²) - chimney interior walls
-      if (wall.roomIds && wall.roomIds.length > 0) {
-        const onlyTinyRooms = wall.roomIds.every((rid) => {
-          const r = plan.rooms.find((rm) => rm.id === rid);
-          return r && r.area < 0.5;
-        });
-        if (onlyTinyRooms) continue;
-      }
-
-      const wallCutouts = cutoutsByWallId.get(wall.id);
+    for (const wall of plan.walls) {
+      const wallCutouts = undefined;
       const recessHoles = this.getRecessHolesForWall(wall);
       const wallMeshGroup = this.wallGeometryService.buildWall(wall, cutawayH, wallCutouts, recessHoles);
       this.wallsGroup.add(wallMeshGroup);
@@ -310,132 +284,6 @@ export class ThreeSceneService implements ISceneService {
       }
     }
 
-    // Build solid closed columns / chimneys for rooms with area < 0.5 m²
-    const wallHeight = plan.totalHeight || 2.7;
-    const effectiveWallHeight = cutawayH !== undefined ? cutawayH : wallHeight;
-    const existingColsMap = new Map((plan.columns || []).map((c) => [c.id, c]));
-    const planColumns: ColumnEntity[] = [];
-    const builtColIds = new Set<string>();
-
-    // 1. Chimney columns: seal top with a thin cap at ceiling level, avoiding monolith penetration into walls
-    for (const room of plan.rooms) {
-      if (room.area < 0.5) {
-        const existing = existingColsMap.get(room.id);
-        const finish = existing?.finish || room.wallFinish;
-        const capThickness = 0.02;
-        const columnMesh = this.wallGeometryService.buildColumn(room, capThickness, finish);
-        if (columnMesh) {
-          columnMesh.position.y = effectiveWallHeight - capThickness;
-          this.wallsGroup.add(columnMesh);
-          this.columnMeshMap.set(room.id, columnMesh);
-          const colEntity: ColumnEntity = {
-            ...existing,
-            id: room.id,
-            name: `Chimney Shaft (${room.area.toFixed(2)} m²)`,
-            type: 'chimney',
-            width: 0.5,
-            depth: 0.5,
-            area: room.area,
-            worldPos: { x: room.polygon[0].x, y: 0, z: room.polygon[0].y },
-            rotationY: 0,
-            roomId: room.id,
-            roomIds: [room.id],
-            roomName: room.name,
-            finish,
-          };
-          planColumns.push(colEntity);
-          builtColIds.add(room.id);
-        }
-      }
-    }
-
-    // 2. Synthesize/build detected columns from wall stubs, inheriting any user finishes
-    for (const col of detectedColumns) {
-      if (builtColIds.has(col.id)) continue;
-      const allTiny = col.stubIds.every((sId) => {
-        const w = plan.walls.find((wall) => wall.id === sId);
-        return (
-          w?.roomIds &&
-          w.roomIds.length > 0 &&
-          w.roomIds.every((rid) => {
-            const r = plan.rooms.find((rm) => rm.id === rid);
-            return r && r.area < 0.5;
-          })
-        );
-      });
-      if (allTiny) continue;
-
-      const existing = existingColsMap.get(col.id);
-      const colToBuild: WallColumn = {
-        ...col,
-        width: existing?.width && existing.width > 0 ? existing.width : col.width,
-        depth: existing?.depth && existing.depth > 0 ? existing.depth : col.depth,
-        worldPos: existing?.worldPos && typeof existing.worldPos.x === 'number' ? existing.worldPos : col.worldPos,
-        rotationY: existing?.rotationY !== undefined ? existing.rotationY : col.rotationY,
-        finish: existing?.finish || col.finish,
-        finishFront: existing?.finishFront || col.finishFront,
-        finishBack: existing?.finishBack || col.finishBack,
-        finishLeft: existing?.finishLeft || col.finishLeft,
-        finishRight: existing?.finishRight || col.finishRight,
-      };
-
-      const colMesh = this.wallGeometryService.buildRectangularColumn(colToBuild, effectiveWallHeight);
-      if (colMesh) {
-        this.wallsGroup.add(colMesh);
-        this.columnMeshMap.set(col.id, colMesh);
-        planColumns.push({
-          id: col.id,
-          name: existing?.name || `Column (${(colToBuild.width * 100).toFixed(0)}×${(colToBuild.depth * 100).toFixed(0)}cm)`,
-          type: 'column',
-          width: colToBuild.width,
-          depth: colToBuild.depth,
-          height: effectiveWallHeight,
-          worldPos: colToBuild.worldPos,
-          rotationY: colToBuild.rotationY,
-          stubIds: col.stubIds,
-          roomId: col.roomId,
-          roomIds: col.roomIds,
-          roomName: col.roomName,
-          finish: colToBuild.finish,
-          finishFront: colToBuild.finishFront,
-          finishBack: colToBuild.finishBack,
-          finishLeft: colToBuild.finishLeft,
-          finishRight: colToBuild.finishRight,
-        });
-        builtColIds.add(col.id);
-      }
-    }
-
-    // 3. Build any remaining registered persistent columns (e.g. from wall splits or custom placement)
-    for (const existingCol of plan.columns || []) {
-      if (builtColIds.has(existingCol.id)) continue;
-      // Guard: must have valid 3D geometry to be built standalone
-      if (!existingCol.worldPos || typeof existingCol.worldPos.x !== 'number' || !existingCol.width || !existingCol.depth) {
-        continue;
-      }
-      const colToBuild: WallColumn = {
-        id: existingCol.id,
-        width: existingCol.width,
-        depth: existingCol.depth,
-        worldPos: existingCol.worldPos,
-        rotationY: existingCol.rotationY || 0,
-        stubIds: existingCol.stubIds || [],
-        finish: existingCol.finish,
-        finishFront: existingCol.finishFront,
-        finishBack: existingCol.finishBack,
-        finishLeft: existingCol.finishLeft,
-        finishRight: existingCol.finishRight,
-      };
-      const colMesh = this.wallGeometryService.buildRectangularColumn(colToBuild, effectiveWallHeight);
-      if (colMesh) {
-        this.wallsGroup.add(colMesh);
-        this.columnMeshMap.set(existingCol.id, colMesh);
-        planColumns.push(existingCol);
-        builtColIds.add(existingCol.id);
-      }
-    }
-
-    plan.columns = planColumns;
     this.applyVisibilitySettings();
   }
 
@@ -468,259 +316,6 @@ export class ThreeSceneService implements ISceneService {
     this.fitPlanInView();
   }
 
-  /**
-   * Detect column clusters formed by short attached wall stubs on parent walls,
-   * compute solid rectangular column geometry, and calculate full-height cutouts
-   * on all touching or overlapping walls.
-   */
-  private detectWallColumns(plan: PlanDocument): {
-    columns: WallColumn[];
-    cutoutsByWallId: Map<string, { start: number; end: number }[]>;
-    stubIds: Set<string>;
-  } {
-    const rawWalls: Record<string, any> =
-      plan.rawPlan?.walls || plan.rawPlan?.plan?.walls || {};
-    if (Object.keys(rawWalls).length === 0 && plan.walls) {
-      for (const w of plan.walls) {
-        if (w.rawWall) rawWalls[w.id] = w.rawWall;
-      }
-    }
-
-    const cutoutsByWallId = new Map<string, { start: number; end: number }[]>();
-    for (const w of plan.walls) {
-      cutoutsByWallId.set(w.id, []);
-    }
-
-    const columns: WallColumn[] = [];
-    const stubIds = new Set<string>();
-
-    const getWallCorners = (w: WallEntity) => {
-      const p1 = new THREE.Vector2(w.p1.x, w.p1.y);
-      const p2 = new THREE.Vector2(w.p2.x, w.p2.y);
-      const len = p1.distanceTo(p2);
-      const dir = len > 0.001 ? new THREE.Vector2().subVectors(p2, p1).normalize() : new THREE.Vector2(1, 0);
-      const norm = new THREE.Vector2(-dir.y, dir.x);
-      const halfT = (w.thickness || 0.1) / 2;
-      return [
-        new THREE.Vector2().copy(p1).addScaledVector(norm, halfT),
-        new THREE.Vector2().copy(p1).addScaledVector(norm, -halfT),
-        new THREE.Vector2().copy(p2).addScaledVector(norm, halfT),
-        new THREE.Vector2().copy(p2).addScaledVector(norm, -halfT),
-      ];
-    };
-
-    const knownColStubIds = new Set<string>();
-    for (const col of plan.columns || []) {
-      if (col.stubIds && col.stubIds.length > 0) {
-        for (const sid of col.stubIds) knownColStubIds.add(sid);
-      } else if (col.id.startsWith('col__')) {
-        const parts = col.id.replace('col__', '').split('__');
-        for (const p of parts) {
-          knownColStubIds.add(p);
-          knownColStubIds.add(`_${p}`);
-        }
-      }
-    }
-
-    const isConnectedToLongWallNode = (w: WallEntity) => {
-      for (const other of plan.walls) {
-        if (other.id === w.id) continue;
-        const oLen = Math.hypot(other.p2.x - other.p1.x, other.p2.y - other.p1.y);
-        if (oLen <= 0.65) continue;
-        const d11 = Math.hypot(w.p1.x - other.p1.x, w.p1.y - other.p1.y);
-        const d12 = Math.hypot(w.p1.x - other.p2.x, w.p1.y - other.p2.y);
-        const d21 = Math.hypot(w.p2.x - other.p1.x, w.p2.y - other.p1.y);
-        const d22 = Math.hypot(w.p2.x - other.p2.x, w.p2.y - other.p2.y);
-        if (d11 < 0.08 || d12 < 0.08 || d21 < 0.08 || d22 < 0.08) return true;
-      }
-      return false;
-    };
-
-    const isColumnCandidate = (w: WallEntity) => {
-      // If the stub is part of an explicitly configured column in plan.columns, it is always a candidate
-      if (knownColStubIds.has(w.id)) return true;
-
-      const len = Math.hypot(w.p2.x - w.p1.x, w.p2.y - w.p1.y);
-      if (len > 0.65 || (w.openings && w.openings.length > 0)) return false;
-
-      // Exclude real partition walls that connect to long walls (>0.65m) at a node corner/continuation
-      if (isConnectedToLongWallNode(w)) return false;
-
-      // Exclude walls that border a tiny room (< 0.5 m²) - they are chimney/vent perimeter walls
-      if (w.roomIds && w.roomIds.length > 0) {
-        const touchesTiny = w.roomIds.some((rid) => {
-          const r = plan.rooms.find((rm) => rm.id === rid);
-          return r && r.area < 0.5;
-        });
-        if (touchesTiny) return false;
-      }
-      return true;
-    };
-
-    const candidateStubs = plan.walls.filter(isColumnCandidate);
-    const visited = new Set<string>();
-    const rawClusters: WallEntity[][] = [];
-
-    for (const sw of candidateStubs) {
-      if (visited.has(sw.id)) continue;
-      const cluster = [sw];
-      visited.add(sw.id);
-      let added = true;
-      while (added) {
-        added = false;
-        for (const other of candidateStubs) {
-          if (visited.has(other.id)) continue;
-          const connects = cluster.some((cw) => {
-            const d1 = Math.hypot(cw.p1.x - other.p1.x, cw.p1.y - other.p1.y);
-            const d2 = Math.hypot(cw.p1.x - other.p2.x, cw.p1.y - other.p2.y);
-            const d3 = Math.hypot(cw.p2.x - other.p1.x, cw.p2.y - other.p1.y);
-            const d4 = Math.hypot(cw.p2.x - other.p2.x, cw.p2.y - other.p2.y);
-            return Math.min(d1, d2, d3, d4) < 0.15;
-          });
-          if (connects) {
-            cluster.push(other);
-            visited.add(other.id);
-            added = true;
-          }
-        }
-      }
-      rawClusters.push(cluster);
-    }
-
-    // Filter clusters: require at least 2 connected stubs, or a single stub of length <= 0.40m
-    const clusters = rawClusters.filter((c) => {
-      if (c.length >= 2) return true;
-      const len = Math.hypot(c[0].p2.x - c[0].p1.x, c[0].p2.y - c[0].p1.y);
-      return len <= 0.40;
-    });
-
-    for (const cluster of clusters) {
-      for (const sw of cluster) {
-        stubIds.add(sw.id);
-      }
-
-      // Find primary parent wall
-      let parentWall: WallEntity | null = null;
-      for (const sw of cluster) {
-        const raw = sw.rawWall;
-        if (raw) {
-          for (const l of [raw.p1?.link, raw.p2?.link]) {
-            if (l?.ct === 'edge' && l?.id) {
-              parentWall = plan.walls.find((w) => w.id === l.id) || null;
-              if (parentWall) break;
-            }
-          }
-        }
-        if (parentWall) break;
-      }
-      if (!parentWall) {
-        let minDist = Infinity;
-        for (const w of plan.walls) {
-          if (cluster.some((sw) => sw.id === w.id)) continue;
-          const d = Math.hypot(
-            (w.p1.x + w.p2.x) / 2 - cluster[0].p1.x,
-            (w.p1.y + w.p2.y) / 2 - cluster[0].p1.y
-          );
-          if (d < minDist) {
-            minDist = d;
-            parentWall = w;
-          }
-        }
-      }
-      if (!parentWall) continue;
-
-      const p1 = new THREE.Vector2(parentWall.p1.x, parentWall.p1.y);
-      const p2 = new THREE.Vector2(parentWall.p2.x, parentWall.p2.y);
-      const dir = new THREE.Vector2().subVectors(p2, p1).normalize();
-      const norm = new THREE.Vector2(-dir.y, dir.x);
-      const parentThick = parentWall.thickness || 0.1;
-      const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
-
-      const stubCorners: THREE.Vector2[] = [];
-      for (const sw of cluster) {
-        stubCorners.push(...getWallCorners(sw));
-      }
-
-      const alongDists = stubCorners.map((c) => new THREE.Vector2().subVectors(c, p1).dot(dir));
-      const normDists = stubCorners.map((c) => new THREE.Vector2().subVectors(c, p1).dot(norm));
-
-      const minA = Math.min(...alongDists), maxA = Math.max(...alongDists);
-      const avgN = normDists.reduce((a, b) => a + b, 0) / normDists.length;
-
-      // Pilaster column sits flush against the parent wall face: zero penetration into parent wall
-      let minN: number, maxN: number;
-      if (avgN >= 0) {
-        minN = parentThick / 2;
-        maxN = Math.max(parentThick / 2 + 0.05, ...normDists);
-      } else {
-        minN = Math.min(-parentThick / 2 - 0.05, ...normDists);
-        maxN = -parentThick / 2;
-      }
-
-      const colLen = maxA - minA;
-      const colDepth = maxN - minN;
-
-      if (colLen < 0.10 || colDepth < 0.05 || colLen > 1.2 || colDepth > 1.2) continue;
-
-      const centerA = (minA + maxA) / 2;
-      const centerN = (minN + maxN) / 2;
-      const worldX = p1.x + Math.cos(angle) * centerA - Math.sin(angle) * centerN;
-      const worldZ = p1.y + Math.sin(angle) * centerA + Math.cos(angle) * centerN;
-
-      // Determine rooms this column belongs to / borders
-      const colRooms = new Set<string>();
-      if (parentWall?.roomIds) {
-        for (const rid of parentWall.roomIds) colRooms.add(rid);
-      }
-      for (const sw of cluster) {
-        if (sw.roomIds) {
-          for (const rid of sw.roomIds) colRooms.add(rid);
-        }
-      }
-      // Also check 2D polygon proximity
-      for (const r of plan.rooms) {
-        if (colRooms.has(r.id)) continue;
-        const poly = r.polygon;
-        let minDist = Infinity;
-        for (let i = 0; i < poly.length; i++) {
-          const a = poly[i];
-          const b = poly[(i + 1) % poly.length];
-          const abx = b.x - a.x;
-          const aby = b.y - a.y;
-          const lenSq = abx * abx + aby * aby;
-          let t = lenSq > 0 ? ((worldX - a.x) * abx + (worldZ - a.y) * aby) / lenSq : 0;
-          t = Math.max(0, Math.min(1, t));
-          const px = a.x + t * abx;
-          const py = a.y + t * aby;
-          const d = Math.hypot(worldX - px, worldZ - py);
-          if (d < minDist) minDist = d;
-        }
-        if (minDist <= Math.max(colLen, colDepth) / 2 + 0.15) {
-          colRooms.add(r.id);
-        }
-      }
-
-      const roomIdsArr = Array.from(colRooms);
-      const primaryRoomId = roomIdsArr[0];
-      const primaryRoom = primaryRoomId ? plan.rooms.find((r) => r.id === primaryRoomId) : null;
-
-      const col: WallColumn = {
-        id: `col_${cluster.map((w) => w.id).join('_')}`,
-        stubIds: cluster.map((w) => w.id),
-        worldPos: { x: worldX, y: 0, z: worldZ },
-        rotationY: -angle,
-        width: colLen,
-        depth: colDepth,
-        roomId: primaryRoomId,
-        roomIds: roomIdsArr,
-        roomName: primaryRoom?.name,
-      };
-      columns.push(col);
-    }
-
-    return { columns, cutoutsByWallId, stubIds };
-  }
-
   private clearPlanMeshes(): void {
     while (this.wallsGroup.children.length > 0) {
       this.wallsGroup.remove(this.wallsGroup.children[0]);
@@ -741,7 +336,6 @@ export class ThreeSceneService implements ISceneService {
       this.fixturesGroup.remove(this.fixturesGroup.children[0]);
     }
     this.wallMeshMap.clear();
-    this.columnMeshMap.clear();
     this.floorMeshMap.clear();
     this.furnitureMeshMap.clear();
     this.openingMeshMap.clear();
@@ -758,11 +352,7 @@ export class ThreeSceneService implements ISceneService {
       this.wallSelectionHelper.dispose();
       this.wallSelectionHelper = null;
     }
-    if (this.columnSelectionHelper) {
-      this.helpersGroup.remove(this.columnSelectionHelper);
-      this.columnSelectionHelper.dispose();
-      this.columnSelectionHelper = null;
-    }
+
     if (this.floorSelectionHelper) {
       this.helpersGroup.remove(this.floorSelectionHelper);
       this.floorSelectionHelper.traverse((child) => {
@@ -1347,9 +937,8 @@ export class ThreeSceneService implements ISceneService {
     }
 
     const cutawayH = this.settings.wallCutaway ? 1.15 : undefined;
-    const cutouts = this.cachedCutoutsByWallId.get(wall.id);
     const recessHoles = this.getRecessHolesForWall(wall);
-    const newMesh = this.wallGeometryService.buildWall(wall, cutawayH, cutouts, recessHoles);
+    const newMesh = this.wallGeometryService.buildWall(wall, cutawayH, undefined, recessHoles);
     this.wallsGroup.add(newMesh);
     this.wallMeshMap.set(wall.id, newMesh);
 
@@ -1385,86 +974,6 @@ export class ThreeSceneService implements ISceneService {
 
     this.controls.target.copy(center);
     this.controls.update();
-  }
-
-  updateColumnFinish(columnId: string, finish: SurfaceFinishConfig, side: ColumnSide = 'all'): void {
-    const mesh = this.columnMeshMap.get(columnId);
-    if (!mesh) return;
-
-    const newMat = this.finishService.getMaterial(finish, { side: THREE.FrontSide });
-    const isChimney = mesh.userData?.isChimney;
-
-    if (Array.isArray(mesh.material)) {
-      const matArr = [...mesh.material];
-      const frontIdx = isChimney ? 3 : 4;
-      const backIdx = isChimney ? 4 : 5;
-      const rightIdx = 0;
-      const leftIdx = 1;
-
-      if (side === 'all') {
-        matArr[frontIdx] = newMat;
-        matArr[backIdx] = newMat;
-        matArr[rightIdx] = newMat;
-        matArr[leftIdx] = newMat;
-      } else if (side === 'front') {
-        matArr[frontIdx] = newMat;
-      } else if (side === 'back') {
-        matArr[backIdx] = newMat;
-      } else if (side === 'right') {
-        matArr[rightIdx] = newMat;
-      } else if (side === 'left') {
-        matArr[leftIdx] = newMat;
-      }
-      mesh.material = matArr;
-    } else {
-      if (side === 'all') {
-        mesh.material = newMat;
-      }
-    }
-
-    if (mesh.userData?.column) {
-      if (side === 'all') {
-        mesh.userData.column.finish = finish;
-        mesh.userData.column.finishFront = finish;
-        mesh.userData.column.finishBack = finish;
-        mesh.userData.column.finishLeft = finish;
-        mesh.userData.column.finishRight = finish;
-      } else if (side === 'front') {
-        mesh.userData.column.finishFront = finish;
-      } else if (side === 'back') {
-        mesh.userData.column.finishBack = finish;
-      } else if (side === 'left') {
-        mesh.userData.column.finishLeft = finish;
-      } else if (side === 'right') {
-        mesh.userData.column.finishRight = finish;
-      }
-    }
-    if (mesh.userData?.room) {
-      if (side === 'all') {
-        mesh.userData.room.wallFinish = finish;
-      }
-    }
-
-    if (this.columnSelectionHelper && (this.columnSelectionHelper as any).userData?.id === columnId) {
-      this.columnSelectionHelper.update();
-    }
-  }
-
-  setColumnSelectionHighlight(column: ColumnEntity | null, _side?: ColumnSide): void {
-    if (this.columnSelectionHelper) {
-      this.helpersGroup.remove(this.columnSelectionHelper);
-      this.columnSelectionHelper.dispose();
-      this.columnSelectionHelper = null;
-    }
-
-    if (!column) return;
-
-    const mesh = this.columnMeshMap.get(column.id);
-    if (!mesh) return;
-
-    this.columnSelectionHelper = new THREE.BoxHelper(mesh, 0x38bdf8); // sky blue highlight
-    (this.columnSelectionHelper as any).userData = { id: column.id };
-    this.helpersGroup.add(this.columnSelectionHelper);
   }
 
   updateRoomFloorFinish(room: RoomEntity): void {
@@ -1628,18 +1137,6 @@ export class ThreeSceneService implements ISceneService {
     }
   }
 
-  focusOnColumn(column: ColumnEntity): void {
-    if (!this.controls) return;
-    const mesh = this.columnMeshMap.get(column.id);
-    if (!mesh) return;
-
-    const box = new THREE.Box3().setFromObject(mesh);
-    const center = box.getCenter(new THREE.Vector3());
-
-    this.controls.target.copy(center);
-    this.controls.update();
-  }
-
   toggleCeilings(): boolean {
     this.settings.showCeiling = !this.settings.showCeiling;
     this.applyVisibilitySettings();
@@ -1648,10 +1145,6 @@ export class ThreeSceneService implements ISceneService {
 
   getShowCeilings(): boolean {
     return this.settings.showCeiling;
-  }
-
-  getStubIds(): Set<string> {
-    return this.cachedStubIds;
   }
 
   setViewMode(mode: ViewMode): void {
@@ -1791,41 +1284,7 @@ export class ThreeSceneService implements ISceneService {
     }
 
     for (const child of this.wallsGroup.children) {
-      if (child.userData?.type === 'column') {
-        const col = child.userData.column as WallColumn | undefined;
-        const colEntity = this.currentPlan?.columns?.find((c) => c.id === child.userData.id);
-        const colRooms: string[] = [];
-        if (colEntity?.roomIds) colRooms.push(...colEntity.roomIds);
-        if (colEntity?.roomId && !colRooms.includes(colEntity.roomId)) colRooms.push(colEntity.roomId);
-        if (col?.roomIds) {
-          for (const rid of col.roomIds) {
-            if (!colRooms.includes(rid)) colRooms.push(rid);
-          }
-        }
-        if (col?.roomId && !colRooms.includes(col.roomId)) colRooms.push(col.roomId);
-        if (child.userData?.isChimney && child.userData?.id) {
-          if (!colRooms.includes(child.userData.id)) colRooms.push(child.userData.id);
-        }
-
-        if (!isIso) {
-          child.visible = true;
-        } else if (colRooms.some((rid) => isoIds.includes(rid))) {
-          child.visible = true;
-        } else {
-          // Column is visible if any visible wall touches this column or its stubs
-          const touchesVisibleWall = this.currentPlan?.walls.some(
-            (w) =>
-              visibleWallIds.has(w.id) &&
-              (colEntity?.stubIds?.includes(w.id) ||
-                col?.stubIds?.includes(w.id) ||
-                (w.roomIds && w.roomIds.some((rid) => colRooms.includes(rid))))
-          );
-          child.visible = !!touchesVisibleWall;
-        }
-      } else {
-        const wallId = child.userData?.id;
-        child.visible = visibleWallIds.has(wallId);
-      }
+      child.visible = visibleWallIds.has(child.userData?.id);
     }
 
     for (const child of this.openingsGroup.children) {
@@ -1958,7 +1417,7 @@ export class ThreeSceneService implements ISceneService {
 
     for (const sample of screenSamples) {
       raycaster.setFromCamera(new THREE.Vector2(sample.x, sample.y), this.activeCamera);
-      const intersects = raycaster.intersectObjects(this.wallsGroup.children, true);
+      const intersects = intersectVisibleObjects(raycaster, this.wallsGroup.children);
 
       for (const hit of intersects) {
         if (hit.object instanceof THREE.LineSegments) continue;

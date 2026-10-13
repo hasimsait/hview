@@ -1,8 +1,8 @@
 # Confirmed product bugs
 
-These tests assert the intended behavior and currently fail. They remain enabled
-and make the runners return a nonzero exit status until the application is fixed.
-Application source has not been modified as part of this test expansion.
+Unresolved regressions remain enabled and make the runners return a nonzero exit
+status until fixed. Resolved issues are marked below; their tests remain enabled
+to prevent regressions.
 
 ## 1. Asset replacement is lost on reload
 
@@ -29,15 +29,15 @@ verifies that the old cached plan remains, and asserts that saving must fail.
 Test: `plan-persistence.test.ts`, “does not report an offline save as successful
 when storage is full”.
 
-## 3. Export controls fall outside common desktop viewports
+## 3. Fixed: header controls and finish categories overflow
 
-Reproduction: open the editor at 1440px width. The header does not wrap or provide
-a usable responsive overflow layout, while the page clips overflow. The
-`Export .plan` button's right edge is approximately 1574px, beyond the viewport;
-the standalone export controls are farther to the right.
+The header and its control groups now wrap onto additional lines. Its height
+grows with the controls, and the viewport and inspectors fit the remaining space.
+Finish-picker category tabs also wrap, keeping each category label together.
 
-Test: `workflows.spec.ts`, “export controls are reachable on a 1440px desktop
-viewport”.
+Tests: `workflows.spec.ts`, “export controls wrap and remain reachable at desktop
+widths” (1440px and 1024px) and “finish categories wrap within the inspector
+without horizontal scrolling”.
 
 ## 4. An older save clears the dirty flag for newer edits
 
@@ -68,17 +68,15 @@ Tests: `workflows.spec.ts`, “offline editor can re-export Full Editor (.html)
 without fetching a template” and the equivalent iPad Viewer export case. Each
 requires an actual HTML download with valid embedded plan data.
 
-## 6. Selected paint swatch stays stale until the surface is reselected
+## 6. Fixed: selected paint swatch stays stale
 
-Reproduction: select a wall surface painted Chantilly Lace and choose White Dove.
-The scene and saved plan change to White Dove, but the picker still highlights
-Chantilly Lace. Close the inspector and select the same wall again; the picker
-then highlights White Dove.
+Previously, painting a selected wall updated the scene and saved plan but left
+its highlighted swatch unchanged until the wall was reselected.
 
-The browser regression confirms the saved color and the reselection workaround,
-then asserts that the active background must have changed before unfocusing.
-The service regression also shows that changing the selected wall's paint emits
-no selected-wall update to its subscribers.
+`setWallFinish` now emits the selected-wall notification with the updated wall
+snapshot and current side, immediately refreshing the inspector and paint picker.
+Choosing a face in the inspector also updates the selected side, so this refresh
+preserves the face being edited.
 
 Tests: `reported-bugs.spec.ts` (paint highlight),
 `reported-surface-room.test.ts` (selected-wall notification).

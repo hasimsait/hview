@@ -751,11 +751,11 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
       </div>
 
       {/* Category Tabs */}
-      <div className="flex border-b border-slate-800 gap-1 pb-1">
+      <div className="flex flex-wrap border-b border-slate-800 gap-1 pb-1">
         <button
           type="button"
           onClick={() => setActiveTab('paint')}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
+          className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
             activeTab === 'paint'
               ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30'
               : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
@@ -768,7 +768,7 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('lambri')}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
+          className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
             activeTab === 'lambri'
               ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
               : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
@@ -781,7 +781,7 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('tile')}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
+          className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
             activeTab === 'tile'
               ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
               : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
@@ -794,7 +794,7 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('glass')}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
+          className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
             activeTab === 'glass'
               ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
               : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
@@ -807,7 +807,7 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('metal')}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
+          className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
             activeTab === 'metal'
               ? 'bg-zinc-500/20 text-zinc-300 border border-zinc-500/30'
               : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
@@ -820,7 +820,7 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('fabric')}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
+          className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
             activeTab === 'fabric'
               ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
               : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
@@ -834,7 +834,7 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('ceiling')}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
+            className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
               activeTab === 'ceiling'
                 ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'

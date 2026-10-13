@@ -1,4 +1,4 @@
-import { PlanDocument, FurnitureEntity, OpeningEntity, WallEntity, SurfaceFinishConfig, ColumnEntity, Point2D, ColumnSide, RoomEntity, LightFixtureConfig, WallFrameStyle, CavityModifier } from '@core/types/plan';
+import { PlanDocument, FurnitureEntity, OpeningEntity, WallEntity, SurfaceFinishConfig, Point2D, RoomEntity, LightFixtureConfig, WallFrameStyle, CavityModifier } from '@core/types/plan';
 import { WallJunctionService } from '../rendering/WallJunctionService';
 import {
   IPlanManagerService,
@@ -14,8 +14,6 @@ import {
   OpeningSelectionChangeListener,
   WallUpdatedListener,
   WallSelectionChangeListener,
-  ColumnUpdatedListener,
-  ColumnSelectionChangeListener,
   RoomSelectionChangeListener,
   RoomUpdatedListener,
   WallSide,
@@ -30,8 +28,6 @@ export class PlanManagerService implements IPlanManagerService {
   private selectedFurnitureSection: string = 'all';
   private selectedOpening: { opening: OpeningEntity; wall: WallEntity } | null = null;
   private selectedWall: WallEntity | null = null;
-  private selectedColumn: ColumnEntity | null = null;
-  private selectedColumnSide: ColumnSide = 'all';
   private selectedWallSide: WallSide = 'A';
   private selectedRoom: RoomEntity | null = null;
   private planChangeListeners = new Set<PlanChangeListener>();
@@ -44,8 +40,6 @@ export class PlanManagerService implements IPlanManagerService {
   private openingSelectionChangeListeners = new Set<OpeningSelectionChangeListener>();
   private wallUpdatedListeners = new Set<WallUpdatedListener>();
   private wallSelectionChangeListeners = new Set<WallSelectionChangeListener>();
-  private columnUpdatedListeners = new Set<ColumnUpdatedListener>();
-  private columnSelectionChangeListeners = new Set<ColumnSelectionChangeListener>();
   private roomSelectionChangeListeners = new Set<RoomSelectionChangeListener>();
   private roomUpdatedListeners = new Set<RoomUpdatedListener>();
   private isDirty = false;
@@ -66,7 +60,6 @@ export class PlanManagerService implements IPlanManagerService {
     this.selectedFurniture = null;
     this.selectedOpening = null;
     this.selectedWall = null;
-    this.selectedColumn = null;
     this.selectedRoom = null;
     this.isDirty = false;
     this.notifyPlanLoaded(this.currentPlan);
@@ -74,7 +67,6 @@ export class PlanManagerService implements IPlanManagerService {
     this.notifySelectionChange();
     this.notifyOpeningSelectionChange();
     this.notifyWallSelectionChange();
-    this.notifyColumnSelectionChange();
     this.notifyRoomSelectionChange();
     return this.currentPlan;
   }
@@ -182,11 +174,9 @@ export class PlanManagerService implements IPlanManagerService {
     if (item) {
       this.selectedOpening = null;
       this.selectedWall = null;
-      this.selectedColumn = null;
       this.selectedRoom = null;
       this.notifyOpeningSelectionChange();
       this.notifyWallSelectionChange();
-      this.notifyColumnSelectionChange();
       this.notifyRoomSelectionChange();
     }
     this.notifySelectionChange();
@@ -280,11 +270,9 @@ export class PlanManagerService implements IPlanManagerService {
     if (selected) {
       this.selectedFurniture = null;
       this.selectedWall = null;
-      this.selectedColumn = null;
       this.selectedRoom = null;
       this.notifySelectionChange();
       this.notifyWallSelectionChange();
-      this.notifyColumnSelectionChange();
       this.notifyRoomSelectionChange();
     }
     this.notifyOpeningSelectionChange();
@@ -319,46 +307,12 @@ export class PlanManagerService implements IPlanManagerService {
     if (wall) {
       this.selectedFurniture = null;
       this.selectedOpening = null;
-      this.selectedColumn = null;
       this.selectedRoom = null;
       this.notifySelectionChange();
       this.notifyOpeningSelectionChange();
-      this.notifyColumnSelectionChange();
       this.notifyRoomSelectionChange();
     }
     this.notifyWallSelectionChange();
-  }
-
-  getSelectedColumn(): ColumnEntity | null {
-    return this.selectedColumn;
-  }
-
-  getSelectedColumnSide(): ColumnSide {
-    return this.selectedColumnSide;
-  }
-
-  setSelectedColumn(col: ColumnEntity | null, side?: ColumnSide): void {
-    if (side) {
-      this.selectedColumnSide = side;
-    } else if (!col) {
-      this.selectedColumnSide = 'all';
-    }
-    if (this.selectedColumn?.id === col?.id && (!side || this.selectedColumnSide === side)) {
-      if (side) this.notifyColumnSelectionChange();
-      return;
-    }
-    this.selectedColumn = col;
-    if (col) {
-      this.selectedFurniture = null;
-      this.selectedOpening = null;
-      this.selectedWall = null;
-      this.selectedRoom = null;
-      this.notifySelectionChange();
-      this.notifyOpeningSelectionChange();
-      this.notifyWallSelectionChange();
-      this.notifyRoomSelectionChange();
-    }
-    this.notifyColumnSelectionChange();
   }
 
   getSelectedRoom(): RoomEntity | null {
@@ -374,11 +328,9 @@ export class PlanManagerService implements IPlanManagerService {
       this.selectedFurniture = null;
       this.selectedOpening = null;
       this.selectedWall = null;
-      this.selectedColumn = null;
       this.notifySelectionChange();
       this.notifyOpeningSelectionChange();
       this.notifyWallSelectionChange();
-      this.notifyColumnSelectionChange();
     }
     this.notifyRoomSelectionChange();
   }
@@ -403,58 +355,8 @@ export class PlanManagerService implements IPlanManagerService {
     this.notifyPlanChange();
   }
 
-  setColumnFinish(columnId: string, finish: SurfaceFinishConfig, side: ColumnSide = 'all'): void {
-    if (!this.currentPlan) return;
-    let foundCol = this.currentPlan.columns?.find((c) => c.id === columnId);
-    if (!foundCol && this.selectedColumn?.id === columnId) {
-      foundCol = this.selectedColumn;
-    }
-    if (foundCol) {
-      if (side === 'all') {
-        foundCol.finish = { ...finish };
-        foundCol.finishFront = { ...finish };
-        foundCol.finishBack = { ...finish };
-        foundCol.finishLeft = { ...finish };
-        foundCol.finishRight = { ...finish };
-      } else if (side === 'front') {
-        foundCol.finishFront = { ...finish };
-      } else if (side === 'back') {
-        foundCol.finishBack = { ...finish };
-      } else if (side === 'left') {
-        foundCol.finishLeft = { ...finish };
-      } else if (side === 'right') {
-        foundCol.finishRight = { ...finish };
-      }
-
-      if (foundCol.stubIds) {
-        for (const sId of foundCol.stubIds) {
-          const w = this.currentPlan.walls.find((wall) => wall.id === sId);
-          if (w) {
-            if (side === 'all') {
-              w.finish = { ...finish };
-              w.finishSideA = { ...finish };
-              w.finishSideB = { ...finish };
-              w.finishEdges = { ...finish };
-            }
-          }
-        }
-      }
-      this.isDirty = true;
-      this.notifyColumnUpdated(foundCol, side);
-      this.notifyPlanChange();
-    }
-  }
-
   private isWallInvisible(wall: WallEntity): boolean {
     if (!this.currentPlan) return false;
-    // Chimney interior walls: all roomIds belong to a tiny room (< 0.5 m²) AND no other room
-    if (wall.roomIds && wall.roomIds.length > 0) {
-      const allTiny = wall.roomIds.every((rid) => {
-        const r = this.currentPlan!.rooms.find((rm) => rm.id === rid);
-        return r && r.area < 0.5;
-      });
-      if (allTiny) return true;
-    }
     // Only completely degenerate zero-length walls (< 0.02m) are invisible
     const len = Math.hypot(wall.p2.x - wall.p1.x, wall.p2.y - wall.p1.y);
     if (len < 0.02) {
@@ -505,6 +407,7 @@ export class PlanManagerService implements IPlanManagerService {
     this.isDirty = true;
     if (this.selectedWall && this.selectedWall.id === wallId) {
       this.selectedWall = { ...wall };
+      this.notifyWallSelectionChange();
     }
     this.notifyWallUpdated(wall);
     this.notifyPlanChange();
@@ -582,20 +485,6 @@ export class PlanManagerService implements IPlanManagerService {
 
         if (modified) {
           this.notifyWallUpdated(wall);
-        }
-      }
-    }
-
-    // Also update columns in this room!
-    if (this.currentPlan.columns) {
-      for (const col of this.currentPlan.columns) {
-        if (col.roomId === roomId) {
-          col.finish = { ...finish };
-          col.finishFront = { ...finish };
-          col.finishBack = { ...finish };
-          col.finishLeft = { ...finish };
-          col.finishRight = { ...finish };
-          this.notifyColumnUpdated(col, 'all');
         }
       }
     }
@@ -751,17 +640,6 @@ export class PlanManagerService implements IPlanManagerService {
     }
 
     this.currentPlan.walls.splice(wallIdx, 1, wall1, wall2);
-
-    // Update column references to retain persistent columns attached to the split wall
-    if (this.currentPlan.columns) {
-      for (const col of this.currentPlan.columns) {
-        if (col.stubIds && col.stubIds.includes(wallId)) {
-          col.stubIds = col.stubIds.flatMap((sId) =>
-            sId === wallId ? [wall1Id, wall2Id] : [sId]
-          );
-        }
-      }
-    }
 
     // Recompute non-penetrating wall corner offsets
     WallJunctionService.computeJunctionOffsets(this.currentPlan.walls);
@@ -1039,16 +917,6 @@ export class PlanManagerService implements IPlanManagerService {
     return () => this.wallSelectionChangeListeners.delete(listener);
   }
 
-  onColumnUpdated(listener: ColumnUpdatedListener): () => void {
-    this.columnUpdatedListeners.add(listener);
-    return () => this.columnUpdatedListeners.delete(listener);
-  }
-
-  onColumnSelectionChange(listener: ColumnSelectionChangeListener): () => void {
-    this.columnSelectionChangeListeners.add(listener);
-    return () => this.columnSelectionChangeListeners.delete(listener);
-  }
-
   onRoomSelectionChange(listener: RoomSelectionChangeListener): () => void {
     this.roomSelectionChangeListeners.add(listener);
     return () => this.roomSelectionChangeListeners.delete(listener);
@@ -1162,18 +1030,6 @@ export class PlanManagerService implements IPlanManagerService {
   private notifySelectionChange(): void {
     for (const listener of this.selectionChangeListeners) {
       listener(this.selectedFurniture, this.selectedFurnitureSection);
-    }
-  }
-
-  private notifyColumnUpdated(column: ColumnEntity, side?: ColumnSide): void {
-    for (const listener of this.columnUpdatedListeners) {
-      listener(column, side);
-    }
-  }
-
-  private notifyColumnSelectionChange(): void {
-    for (const listener of this.columnSelectionChangeListeners) {
-      listener(this.selectedColumn, this.selectedColumnSide);
     }
   }
 

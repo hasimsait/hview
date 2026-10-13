@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { PlanDocument, FurnitureEntity, OpeningEntity, WallEntity, ColumnEntity, RoomEntity, SurfaceFinishConfig } from '@core/types/plan';
+import { PlanDocument, FurnitureEntity, OpeningEntity, WallEntity, RoomEntity, SurfaceFinishConfig } from '@core/types/plan';
+import { intersectVisibleObjects } from '@services/interaction/VisibleRaycast';
 import { ThreeSceneService } from '@services/rendering/ThreeSceneService';
 import { PlanParserService } from '@services/plan/PlanParserService';
 import { AssetRegistryService } from '@services/rendering/AssetRegistryService';
@@ -281,7 +282,7 @@ export class StandaloneViewerApp {
     if (wallsGroup?.visible) candidates.push(...wallsGroup.children);
     if (floorsGroup?.visible) candidates.push(...floorsGroup.children);
 
-    const hits = this.raycaster.intersectObjects(candidates, true);
+    const hits = intersectVisibleObjects(this.raycaster, candidates);
 
     for (const hit of hits) {
       if (hit.object instanceof THREE.LineSegments) continue;
@@ -317,24 +318,6 @@ export class StandaloneViewerApp {
       if (foundFurniture) {
         this.showFurnitureSpec(foundFurniture);
         return;
-      }
-
-      // Check column / chimney
-      let foundColumnId: string | null = null;
-      curr = hit.object;
-      while (curr && curr !== wallsGroup && curr !== scene) {
-        if (curr.userData?.type === 'column' && curr.userData?.id) {
-          foundColumnId = curr.userData.id;
-          break;
-        }
-        curr = curr.parent;
-      }
-      if (foundColumnId) {
-        const col = this.currentPlan.columns?.find((c) => c.id === foundColumnId);
-        if (col) {
-          this.showColumnSpec(col);
-          return;
-        }
       }
 
       // Check wall
@@ -535,25 +518,6 @@ export class StandaloneViewerApp {
       finish: finishName,
       details,
       color: finish?.color,
-    });
-  }
-
-  private showColumnSpec(col: ColumnEntity): void {
-    const wCm = Math.round(col.width * 100);
-    const dCm = Math.round(col.depth * 100);
-    const hM = col.height || this.currentPlan?.totalHeight || 2.7;
-    const roomName = this.findEnclosingRoomName(col.worldPos.x, col.worldPos.z);
-
-    const finishName = col.finish ? this.formatFinishName(col.finish) : 'Standard Plaster & Paint';
-
-    this.renderDrawer({
-      category: 'Structural / Shaft',
-      title: col.type === 'chimney' ? 'Ventilation / Plumbing Shaft' : 'Reinforced Concrete Column',
-      dimensions: `${wCm} × ${dCm} cm × ${hM.toFixed(2)} m (H)`,
-      room: roomName,
-      finish: finishName,
-      details: `Type: ${col.type}. Location: X:${col.worldPos.x.toFixed(2)}m, Z:${col.worldPos.z.toFixed(2)}m`,
-      color: col.finish?.color,
     });
   }
 

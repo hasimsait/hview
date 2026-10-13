@@ -151,11 +151,42 @@ test(`offline editor can re-export ${exportButton} without fetching a template`,
 });
 }
 
-test('export controls are reachable on a 1440px desktop viewport', async ({ page }) => {
+test('export controls wrap and remain reachable at desktop widths', async ({ page }) => {
+  await page.goto('/'); await expect(page.getByText('1 Objects')).toBeVisible();
+  for (const width of [1440, 1024]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const name of ['Export .plan', 'iPad Viewer (.html)', 'Full Editor (.html)']) {
+      const bounds = await page.getByRole('button', { name, exact: true }).boundingBox();
+      expect(bounds).not.toBeNull();
+      expect(bounds!.x).toBeGreaterThanOrEqual(0);
+      expect(bounds!.x + bounds!.width, `${name} must fit at ${width}px`).toBeLessThanOrEqual(width);
+    }
+    const header = await page.locator('header').evaluate(el => ({ width: el.clientWidth, content: el.scrollWidth }));
+    expect(header.content).toBeLessThanOrEqual(header.width);
+    const main = await page.locator('main').boundingBox();
+    expect(main!.y + main!.height).toBeLessThanOrEqual(900);
+  }
+});
+
+test('finish categories wrap within the inspector without horizontal scrolling', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/'); await expect(page.getByText('1 Objects')).toBeVisible();
-  const button = page.getByRole('button', { name: 'Export .plan', exact: true });
-  const bounds = await button.boundingBox();
-  expect(bounds).not.toBeNull();
-  expect(bounds!.x + bounds!.width, 'Export .plan right edge must fit the visible viewport').toBeLessThanOrEqual(1440);
+  await selectSofa(page);
+  const names = ['Paint & Plaster', 'Wood & Parquet', 'Tile & Marble', 'Glass', 'Metal & Fixtures', 'Velvet & Fabric'];
+  const tabs = page.getByRole('button', { name: names[0], exact: true }).locator('..');
+  const row = await tabs.boundingBox();
+  const tops: number[] = [];
+  for (const name of names) {
+    const button = page.getByRole('button', { name, exact: true });
+    const bounds = await button.boundingBox();
+    expect(bounds).not.toBeNull();
+    expect(bounds!.x).toBeGreaterThanOrEqual(row!.x);
+    expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(row!.x + row!.width + 1);
+    tops.push(bounds!.y);
+  }
+  expect(new Set(tops).size).toBeGreaterThan(1);
+  const size = await tabs.evaluate(el => ({ width: el.clientWidth, content: el.scrollWidth }));
+  expect(size.content).toBeLessThanOrEqual(size.width);
+  await page.getByRole('button', { name: 'Velvet & Fabric', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Velvet & Fabric', exact: true })).toHaveClass(/text-rose-300/);
 });

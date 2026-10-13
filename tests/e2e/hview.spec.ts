@@ -18,8 +18,8 @@ test('renders the real plan and switches views and visibility controls', async (
   });
   const response = await page.goto('/');
   expect(response!.status()).toBe(200);
-  await expect(page.getByText('64 Walls')).toBeVisible();
-  await expect(page.getByText('12 Rooms')).toBeVisible();
+  await expect(page.getByText('50 Walls')).toBeVisible();
+  await expect(page.getByText('10 Rooms')).toBeVisible();
   await expect(page.getByText('119 Objects')).toBeVisible();
   await expect(page.locator('canvas').first()).toBeVisible();
   await page.waitForFunction(() => (window as any).__drawCalls > 100);

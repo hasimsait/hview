@@ -1,4 +1,7 @@
-# Validation results
+# Baseline validation results
+
+These results describe the original test branch before subsequent fixes.
+See `KNOWN_BUGS.md` for resolved issues.
 
 Unit/service suite: **75 passed, 5 failed (80 total)**. The failures reproduce
 asset replacement reverting after export/reload, incorrect dirty-state tracking

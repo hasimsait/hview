@@ -188,7 +188,7 @@ export const Header: React.FC<HeaderProps> = ({
     : `🏠 ${isolatedRoomIds.length} Rooms`;
 
   return (
-    <header className="h-14 border-b border-slate-800 bg-slate-900/90 backdrop-blur px-4 flex items-center justify-between z-20 select-none">
+    <header className="min-h-14 shrink-0 border-b border-slate-800 bg-slate-900/90 backdrop-blur px-4 py-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 z-20 select-none">
       {/* Brand & Stats */}
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2">
@@ -221,7 +221,7 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Center Controls: View Mode & Cutaway */}
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 min-w-0 max-w-full">
         <div className="flex bg-slate-800/80 p-0.5 rounded-lg border border-slate-700/60">
           <button
             onClick={() => onViewModeChange('perspective')}
@@ -618,7 +618,7 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Right Controls: Save, Open & Export */}
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 min-w-0 max-w-full">
         <input
           ref={fileInputRef}
           type="file"

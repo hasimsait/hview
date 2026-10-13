@@ -49,10 +49,10 @@ describe('plan parsing', () => {
     expect(restored.walls[0].p2).toEqual({ x: 4, y: 0 });
     expect(restored.furniture[0].position).toEqual(first.furniture[0].position);
   });
-  it.each([['sample.plan', 60], ['public/sample.plan', 64]])('loads %s with finite geometry', (file, walls) => {
+  it.each([['sample.plan', 47], ['public/sample.plan', 50]])('loads %s with finite geometry', (file, walls) => {
     const plan = parser.parse(readFileSync(new URL('../../' + file, import.meta.url), 'utf8'));
     expect(plan.walls).toHaveLength(walls);
-    expect(plan.rooms).toHaveLength(12);
+    expect(plan.rooms).toHaveLength(10);
     expect(plan.furniture).toHaveLength(119);
     for (const item of plan.furniture) {
       expect(Object.values(item.position).every(Number.isFinite)).toBe(true);

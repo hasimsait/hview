@@ -202,14 +202,34 @@ describe('plan manager', () => {
     manager.setFurnitureHasLids('sofa', false);
     expect(parser.parse(manager.exportPlanJson()).furniture[0]).toMatchObject({ lightConfig: { intensity: 0.8, color: '#fff000', enabled: false }, hasLids: false });
   });
-  it.each(['all', 'front', 'back', 'left', 'right'] as const)('persists column finish on %s', side => {
-    const plan = manager.loadPlan(rawPlan());
-    const column = { id: 'column', name: 'Column', type: 'column' as const, width: 0.4, depth: 0.4, height: 3, worldPos: { x: 0, y: 0, z: 0 }, rotationY: 0, stubIds: ['wall'] };
-    plan.columns = [column]; manager.setSelectedColumn(column, side);
-    manager.setColumnFinish('column', { type: 'paint', color: '#abcdef' }, side);
+  it.each(['A', 'B', 'edge_start', 'edge_end'] as const)('persists a thick column wall finish on %s', side => {
+    const raw = rawPlan();
+    Object.assign(raw.plan, { columns: [{ id: 'column', type: 'column', width: 0.4, depth: 0.3,
+      height: 3, worldPos: { x: 2, y: 0, z: 2 }, rotationY: 0 }] });
+    const plan = manager.loadPlan(raw);
+    const wall = plan.walls.find(w => w.id === 'column')!;
+    manager.setSelectedWall(wall, side);
+    manager.setWallFinish('column', { type: 'paint', color: '#abcdef' }, side);
     const restored = parser.parse(manager.exportPlanJson());
-    const field = side === 'all' ? 'finish' : `finish${side[0].toUpperCase()}${side.slice(1)}`;
-    expect((restored.columns![0] as any)[field]).toEqual({ type: 'paint', color: '#abcdef' });
-    if (side === 'all') expect(restored.walls[0].finishSideA!.color).toBe('#abcdef');
+    expect(restored.columns).toEqual([]);
+    const column = restored.walls.find(w => w.id === 'column')!;
+    const field = { A: 'finishSideA', B: 'finishSideB', edge_start: 'finishEdgeStart', edge_end: 'finishEdgeEnd' }[side];
+    expect((column as any)[field]).toEqual({ type: 'paint', color: '#abcdef' });
   });
+  it('supports a recess and wall splitting on a column without recreating it on reload', () => {
+    const raw = rawPlan();
+    Object.assign(raw.plan, { columns: [{ id: 'column', type: 'column', width: 1.2, depth: 0.6,
+      height: 3, worldPos: { x: 2, y: 0, z: 2 }, rotationY: 0 }] });
+    manager.loadPlan(raw);
+    const recess = manager.addWallRecess('column', { width: 0.2, height: 0.5, elevation: 0.7, depth: 0.1, distanceAlongWall: 0.3 });
+    expect(recess).not.toBeNull();
+    expect(manager.getWallRecesses('column').map(r => r.id)).toContain(recess!.id);
+    const restored = parser.parse(manager.exportPlanJson());
+    expect(restored.furniture.find(f => f.id === recess!.id)?.rawItem?.wallId).toBe('column');
+    expect(manager.splitWall('column', 0.6)).not.toBeNull();
+    const split = parser.parse(manager.exportPlanJson());
+    expect(split.walls.some(w => w.id === 'column')).toBe(false);
+    expect(split.walls.filter(w => w.id.startsWith('column_')).map(w => w.id)).toEqual(['column_a', 'column_b']);
+  });
+
 });

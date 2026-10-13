@@ -68,25 +68,6 @@ export const Viewport3D: React.FC = () => {
       sceneService.rebuildWalls?.(plan);
     });
 
-    // Subscribe to column updates (finishes, colors, textures)
-    const unsubscribeColumnUpdated = planManager.onColumnUpdated?.((column, side) => {
-      const activeSide = side || planManager.getSelectedColumnSide?.() || 'all';
-      const finish =
-        activeSide === 'front' ? column.finishFront || column.finish :
-        activeSide === 'back' ? column.finishBack || column.finish :
-        activeSide === 'left' ? column.finishLeft || column.finish :
-        activeSide === 'right' ? column.finishRight || column.finish :
-        column.finish;
-      if (finish) {
-        sceneService.updateColumnFinish?.(column.id, finish, activeSide);
-      }
-    });
-
-    // Subscribe to column selection changes
-    const unsubscribeColumnSelected = planManager.onColumnSelectionChange?.((selected, side) => {
-      sceneService.setColumnSelectionHighlight?.(selected, side);
-    });
-
     // Subscribe to room floor finish updates
     const unsubscribeRoomUpdated = planManager.onRoomUpdated?.((room) => {
       sceneService.updateRoomFloorFinish(room);
@@ -106,8 +87,6 @@ export const Viewport3D: React.FC = () => {
       unsubscribeOpeningSelected();
       unsubscribeWallUpdated();
       unsubscribeWallSelected();
-      unsubscribeColumnUpdated?.();
-      unsubscribeColumnSelected?.();
       unsubscribeRoomUpdated?.();
       unsubscribeRoomSelected?.();
       interactionService.dispose();

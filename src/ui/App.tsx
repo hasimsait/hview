@@ -2,13 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useService } from '@ui/context/DIContext';
 import { TOKENS } from '@core/di/tokens';
 import { IPlanManagerService, ISceneService, ViewMode, ViewportSettings, IPlanPersistenceService, AssetDefinition } from '@core/types/services';
-import { FurnitureEntity, OpeningEntity, WallEntity, ColumnEntity, RoomEntity } from '@core/types/plan';
+import { FurnitureEntity, OpeningEntity, WallEntity, RoomEntity } from '@core/types/plan';
 import { Header } from '@ui/components/Header';
 import { Viewport3D } from '@ui/components/Viewport3D';
 import { Inspector } from '@ui/components/Inspector';
 import { DoorInspector } from '@ui/components/DoorInspector';
 import { WallInspector } from '@ui/components/WallInspector';
-import { ColumnInspector } from '@ui/components/ColumnInspector';
 import { FloorInspector } from '@ui/components/FloorInspector';
 import { AssetReplacementModal } from '@ui/components/AssetReplacementModal';
 import { ErrorBoundary } from '@ui/components/ErrorBoundary';
@@ -20,7 +19,6 @@ export const App: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<FurnitureEntity | null>(null);
   const [selectedOpening, setSelectedOpening] = useState<{ opening: OpeningEntity; wall: WallEntity } | null>(null);
   const [selectedWall, setSelectedWall] = useState<WallEntity | null>(null);
-  const [selectedColumn, setSelectedColumn] = useState<ColumnEntity | null>(null);
   const [selectedRoom, setSelectedRoom] = useState<RoomEntity | null>(null);
   const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false);
   const [isAddAssetModalOpen, setIsAddAssetModalOpen] = useState(false);
@@ -67,10 +65,6 @@ export const App: React.FC = () => {
       setSelectedWall(wall);
     });
 
-    const unsubscribeColumnSelection = planManager.onColumnSelectionChange?.((col) => {
-      setSelectedColumn(col);
-    });
-
     const unsubscribeRoomSelection = planManager.onRoomSelectionChange?.((room) => {
       setSelectedRoom(room);
     });
@@ -79,7 +73,6 @@ export const App: React.FC = () => {
       unsubscribeSelection();
       unsubscribeOpeningSelection();
       unsubscribeWallSelection();
-      unsubscribeColumnSelection?.();
       unsubscribeRoomSelection?.();
     };
   }, [planManager]);
@@ -211,7 +204,7 @@ export const App: React.FC = () => {
       />
 
       {/* Main 3D Canvas Area */}
-      <main className="flex-1 relative w-full h-full">
+      <main className="flex-1 min-h-0 relative w-full">
         <Viewport3D />
 
         {/* Inspector Drawers wrapped in ErrorBoundary */}
@@ -238,14 +231,6 @@ export const App: React.FC = () => {
             <WallInspector
               wall={selectedWall}
               onClose={() => planManager.setSelectedWall(null)}
-            />
-          )}
-
-          {/* Selected Column & Chimney Inspector */}
-          {selectedColumn && (
-            <ColumnInspector
-              column={selectedColumn}
-              onClose={() => planManager.setSelectedColumn(null)}
             />
           )}
 
