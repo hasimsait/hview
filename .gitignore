@@ -44,6 +44,11 @@ Thumbs.db
 # TypeScript cache
 *.tsbuildinfo
 
+# Test reports
+coverage/
+playwright-report/
+test-results/
+
 # Scratch & temporary test directories
 scratch/
 .tempmediaStorage/
