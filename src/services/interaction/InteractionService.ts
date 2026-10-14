@@ -14,6 +14,7 @@ export class InteractionService implements IInteractionService {
   private selectedObject: THREE.Object3D | null = null;
   private gizmoMode: 'translate' | 'rotate' = 'translate';
   private gizmoShowY = false;
+  private enabled = true;
 
   private pointerDownPos = { x: 0, y: 0 };
   private boundPointerDown: (e: PointerEvent) => void;
@@ -44,10 +45,10 @@ export class InteractionService implements IInteractionService {
     const controls = this.sceneService.getControls();
     this.transformControls.addEventListener('dragging-changed', (event) => {
       if (controls) {
-        controls.enabled = !event.value;
+        controls.enabled = this.enabled && !event.value;
       }
       // When dragging finishes, ensure final coordinates are committed
-      if (!event.value && this.selectedObject && this.planManager) {
+      if (this.enabled && !event.value && this.selectedObject && this.planManager) {
         const entity = this.selectedObject.userData.entity as FurnitureEntity | undefined;
         if (entity) {
           this.planManager.updateFurniture(entity.id, {
@@ -69,7 +70,7 @@ export class InteractionService implements IInteractionService {
     });
 
     this.transformControls.addEventListener('objectChange', () => {
-      if (!this.selectedObject || !this.planManager) return;
+      if (!this.enabled || !this.selectedObject || !this.planManager) return;
       const entity = this.selectedObject.userData.entity as FurnitureEntity | undefined;
       if (!entity) return;
 
@@ -146,6 +147,17 @@ export class InteractionService implements IInteractionService {
     });
   }
 
+  setEnabled(enabled: boolean): void {
+    this.enabled = enabled;
+    if (this.transformControls) {
+      this.transformControls.enabled = enabled;
+      if (!enabled) {
+        this.transformControls.dragging = false;
+        this.transformControls.axis = null;
+      }
+    }
+  }
+
   dispose(): void {
     const domElement = this.sceneService?.getDomElement();
     if (domElement) {
@@ -204,10 +216,12 @@ export class InteractionService implements IInteractionService {
   }
 
   private onPointerDown(e: PointerEvent): void {
+    if (!this.enabled) return;
     this.pointerDownPos = { x: e.clientX, y: e.clientY };
   }
 
   private onPointerUp(e: PointerEvent): void {
+    if (!this.enabled) return;
     // Only count as click if pointer didn't drag (tolerance up to 8px for trackpad/mouse clicks)
     const dist = Math.hypot(e.clientX - this.pointerDownPos.x, e.clientY - this.pointerDownPos.y);
     if (dist > 8) return;

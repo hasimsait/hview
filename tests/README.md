@@ -15,7 +15,7 @@ npm run test:workflows   # Edit/reload, manipulation and offline export workflow
 ```
 
 Unit tests cover plan parsing, edit/export/reload round trips, manager events and
-selection, debounced autosave, local-storage backups, offline fallbacks, and save
+selection, explicit manual saves, browser backups, offline fallbacks, and save
 and reset failure handling. All timer-based checks use virtual time.
 
 Run `npm run build` before `npm test` or `npm run test:state`; the offline export
@@ -46,7 +46,7 @@ finishes, end caps, and recess controls.
 
 The workflow suite additionally selects a real mesh through raycasting, drags the
 translation gizmo, edits position/elevation/rotation/dimensions in the inspector,
-and verifies autosave, reload, and downloaded plan data. It uses a small plan in
+and verifies manual saves, reload, and downloaded plan data. `manual-save.spec.ts` also holds a save request open to verify the modal application lock, keyboard navigation, and failure/retry behavior. It uses a small plan in
 the disposable checkout so pointer tests are faster and deterministic.
 
 Standalone templates are built from current source inside that copy before the

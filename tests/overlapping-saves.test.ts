@@ -92,18 +92,20 @@ test('loading another plan invalidates saves of the previous plan', async (t) =>
   assert.equal(manager.hasUnsavedChanges(), true);
 });
 
-test('autosave remains scheduled for edits made during an older save', async (t) => {
+test('edits never schedule saves, including edits made during a manual save', async (t) => {
   const { manager, saves, edit } = setup(t);
   edit('chair');
-  t.mock.timers.tick(600);
-  assert.equal(saves.length, 1);
+  t.mock.timers.tick(10_000);
+  assert.equal(saves.length, 0);
+  const older = manager.saveCurrentPlan();
   edit('bed');
   saves[0].resolve(true);
-  await Promise.resolve();
+  await older;
   assert.equal(manager.hasUnsavedChanges(), true);
-  t.mock.timers.tick(600);
-  assert.equal(saves.length, 2);
+  t.mock.timers.tick(10_000);
+  assert.equal(saves.length, 1);
+  const latest = manager.saveCurrentPlan();
   saves[1].resolve(true);
-  await Promise.resolve();
+  await latest;
   assert.equal(manager.hasUnsavedChanges(), false);
 });

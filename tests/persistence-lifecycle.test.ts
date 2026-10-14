@@ -73,7 +73,7 @@ test('overlapping saves cannot send an older write concurrently with a newer wri
   assert.equal(concurrent, 1);
 });
 
-test('reloading before the autosave debounce expires persists the latest edit', async (t) => {
+test('editing leaves both server and browser copies at the last manual save', async (t) => {
   const { service, stored, unload, pending } = setup(t);
   const manager = new PlanManagerService(new PlanParserService(), new PlanExportService(), service);
   manager.loadPlan({ plan: { items: { item_1: { name: 'sofa', pc: { x: 0, y: 0 } } } } });
@@ -81,8 +81,11 @@ test('reloading before the autosave debounce expires persists the latest edit', 
   pending[0](new Response('{"success":true}'));
   await save;
   manager.replaceFurnitureAsset('item_1', 'chair');
-  unload[0]();
-  assert.equal(JSON.parse(stored.get('hview_current_plan')!).plan.items.item_1.assetKey, 'chair');
+  t.mock.timers.tick(10_000);
+  assert.equal(unload.length, 0);
+  assert.equal(pending.length, 1);
+  assert.equal(JSON.parse(stored.get('hview_current_plan')!).plan.items.item_1.assetKey, 'sofa');
+  assert.equal(manager.hasUnsavedChanges(), true);
 });
 
 test('a failed older write releases the queue and cannot mark a newer save failed', async (t) => {
@@ -110,7 +113,7 @@ test('an edit during a save invalidates its completion and idle timer', async (t
   assert.equal(stored.get('hview_current_plan'), '{"revision":2}');
 });
 
-test('reset waits for earlier writes and replaces the snapshot used on unload', async (t) => {
+test('reset waits for earlier writes and replaces the saved browser snapshot', async (t) => {
   const { service, pending, stored, unload } = setup(t);
   const save = service.savePlan('{"old":true}');
   const reset = service.resetToTemplate();
@@ -120,12 +123,12 @@ test('reset waits for earlier writes and replaces the snapshot used on unload', 
   assert.equal(pending.length, 2);
   pending[1](new Response(JSON.stringify({ plan: '{"template":true}' })));
   assert.equal(await reset, '{"template":true}');
-  unload[0]();
+  assert.equal(unload.length, 0);
   assert.equal(stored.get('hview_current_plan'), '{"template":true}');
   assert.equal(service.getSaveStatus(), 'idle');
 });
 
-test('unload cannot bypass queued writes with a competing beacon', async (t) => {
+test('persistence installs no unload writes or beacons', async (t) => {
   const { service, pending, unload, stored } = setup(t);
   const beacon = t.mock.fn(() => true);
   const original = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
@@ -136,7 +139,7 @@ test('unload cannot bypass queued writes with a competing beacon', async (t) => 
   });
   const save = service.savePlan('{"revision":1}');
   service.cachePlan('{"revision":2}');
-  unload[0]();
+  assert.equal(unload.length, 0);
   assert.equal(beacon.mock.callCount(), 0);
   assert.equal(stored.get('hview_current_plan'), '{"revision":2}');
   pending[0](new Response('{"success":true}'));

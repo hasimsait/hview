@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useService } from '@ui/context/DIContext';
 import { TOKENS } from '@core/di/tokens';
 import { ISceneService, IInteractionService, IPlanManagerService } from '@core/types/services';
 import { Move, RotateCw, Compass } from 'lucide-react';
 
-export const Viewport3D: React.FC = () => {
+export const Viewport3D: React.FC<{ disabled?: boolean }> = ({ disabled = false }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneService = useService<ISceneService>(TOKENS.SceneService);
   const interactionService = useService<IInteractionService>(TOKENS.InteractionService);
@@ -93,6 +93,11 @@ export const Viewport3D: React.FC = () => {
       sceneService.dispose();
     };
   }, [sceneService, interactionService, planManager]);
+
+  useLayoutEffect(() => {
+    sceneService.setInteractionEnabled(!disabled);
+    interactionService.setEnabled(!disabled);
+  }, [disabled, sceneService, interactionService]);
 
   const handleGizmoModeChange = (mode: 'translate' | 'rotate') => {
     setGizmoMode(mode);

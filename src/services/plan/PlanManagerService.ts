@@ -46,7 +46,6 @@ export class PlanManagerService implements IPlanManagerService {
   private isDirty = false;
   private planRevision = 0;
   private planLoadRequest = 0;
-  private autoSaveTimer: any = null;
 
   constructor(
     private parser: IPlanParserService,
@@ -60,7 +59,6 @@ export class PlanManagerService implements IPlanManagerService {
 
   loadPlan(rawJson: string | object): PlanDocument {
     this.currentPlan = this.parser.parse(rawJson);
-    if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
     this.planRevision++;
     this.planLoadRequest++;
     this.selectedFurniture = null;
@@ -966,16 +964,10 @@ export class PlanManagerService implements IPlanManagerService {
   async resetToTemplate(): Promise<PlanDocument> {
     if (!this.persistence) throw new Error('Persistence service not available');
     const revision = this.planRevision;
-    if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
-    try {
-      const planJson = await this.persistence.resetToTemplate();
-      // A reset response must not discard edits/imports made while waiting.
-      if (revision !== this.planRevision && this.currentPlan) return this.currentPlan;
-      return this.loadPlan(planJson);
-    } catch (err) {
-      if (this.isDirty) this.triggerDebouncedSave();
-      throw err;
-    }
+    const planJson = await this.persistence.resetToTemplate();
+    // A reset response must not discard edits/imports made while waiting.
+    if (revision !== this.planRevision && this.currentPlan) return this.currentPlan;
+    return this.loadPlan(planJson);
   }
 
   onSaveStatusChange(listener: PlanSaveStatusListener): () => void {
@@ -990,15 +982,6 @@ export class PlanManagerService implements IPlanManagerService {
     // Advance before notifying listeners so saves capture the edited revision.
     this.planRevision++;
     this.isDirty = true;
-  }
-
-  private triggerDebouncedSave(): void {
-    if (this.autoSaveTimer) {
-      clearTimeout(this.autoSaveTimer);
-    }
-    this.autoSaveTimer = setTimeout(() => {
-      this.saveCurrentPlan();
-    }, 600);
   }
 
   private notifyPlanLoaded(plan: PlanDocument): void {
@@ -1051,10 +1034,6 @@ export class PlanManagerService implements IPlanManagerService {
 
   private notifyPlanChange(): void {
     if (!this.currentPlan) return;
-    if (this.isDirty && this.persistence) {
-      this.persistence.cachePlan?.(this.exportPlanJson());
-      this.triggerDebouncedSave();
-    }
     for (const listener of this.planChangeListeners) {
       listener(this.currentPlan);
     }

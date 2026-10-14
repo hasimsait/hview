@@ -68,7 +68,7 @@ for (const [label, protocol, standalone] of [
     assert.equal(statuses.includes('saved'), false);
     assert.equal(stored.get('hview_current_plan'), '{"previous":true}');
     t.mock.timers.tick(3000);
-    // The pending autosave retry also fails; let its network rejection settle.
+    // No automatic retry is scheduled after a failed manual save.
     await new Promise<void>((resolve) => setImmediate(resolve));
     assert.equal(persistence.getSaveStatus(), 'error');
   });

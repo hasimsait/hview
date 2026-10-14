@@ -26,6 +26,8 @@ import {
 } from 'lucide-react';
 
 interface HeaderProps {
+  onSave: () => Promise<void>;
+  isSaving: boolean;
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
   wallCutaway: boolean;
@@ -45,6 +47,8 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
+  onSave,
+  isSaving,
   viewMode,
   onViewModeChange,
   wallCutaway,
@@ -87,8 +91,9 @@ export const Header: React.FC<HeaderProps> = ({
   }, [planManager]);
 
   useEffect(() => {
-    const unsubLoaded = planManager.onPlanLoaded(setPlan);
-    const unsubChange = planManager.onPlanChange(setPlan);
+    const updatePlan = (nextPlan: NonNullable<typeof plan>) => setPlan({ ...nextPlan });
+    const unsubLoaded = planManager.onPlanLoaded(updatePlan);
+    const unsubChange = planManager.onPlanChange(updatePlan);
     return () => {
       unsubLoaded();
       unsubChange();
@@ -176,6 +181,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   const visibleRooms = plan?.rooms.filter((r) => r.area >= 0.5) ?? [];
+  const hasUnsavedChanges = planManager.hasUnsavedChanges();
   const isIso = isolatedRoomIds.length > 0;
   const singleIsoRoom = isolatedRoomIds.length === 1
     ? plan?.rooms.find((r) => r.id === isolatedRoomIds[0])
@@ -629,24 +635,25 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Live Persistence Status & Manual Save */}
         <button
-          onClick={() => planManager.saveCurrentPlan?.()}
+          onClick={onSave}
+          disabled={isSaving || !plan}
           className={`px-2.5 py-1.5 text-xs font-medium rounded-lg border flex items-center gap-1.5 transition-colors ${
             saveStatus === 'saving'
               ? 'border-amber-500/40 bg-amber-500/10 text-amber-300'
-              : saveStatus === 'saved'
+              : saveStatus === 'saved' && !hasUnsavedChanges
               ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300'
               : saveStatus === 'error'
               ? 'border-red-500/40 bg-red-500/10 text-red-300'
               : 'border-slate-700 bg-slate-800/60 text-slate-300 hover:bg-slate-700/80 hover:text-white'
           }`}
-          title="Plan auto-saves to public/sample.plan. Click to save immediately."
+          title="Save this plan. Changes are saved only when you click Save."
         >
-          {saveStatus === 'saving' ? (
+          {isSaving ? (
             <>
               <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-400" />
               <span>Saving...</span>
             </>
-          ) : saveStatus === 'saved' ? (
+          ) : saveStatus === 'saved' && !hasUnsavedChanges ? (
             <>
               <Check className="w-3.5 h-3.5 text-emerald-400" />
               <span>Saved</span>
@@ -654,10 +661,11 @@ export const Header: React.FC<HeaderProps> = ({
           ) : (
             <>
               <Save className="w-3.5 h-3.5 text-slate-400" />
-              <span>Save .plan</span>
+              <span>{saveStatus === 'error' ? 'Save failed · Retry' : 'Save .plan'}</span>
             </>
           )}
         </button>
+        {hasUnsavedChanges && !isSaving && <span className="text-xs text-amber-300">Unsaved changes</span>}
 
         {/* Reset to pristine template */}
         <button

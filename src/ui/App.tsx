@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useService } from '@ui/context/DIContext';
 import { TOKENS } from '@core/di/tokens';
-import { IPlanManagerService, ISceneService, ViewMode, ViewportSettings, IPlanPersistenceService, AssetDefinition } from '@core/types/services';
+import { IPlanManagerService, ISceneService, ViewMode, ViewportSettings, IPlanPersistenceService, AssetDefinition, PlanSaveStatus } from '@core/types/services';
 import { FurnitureEntity, OpeningEntity, WallEntity, RoomEntity } from '@core/types/plan';
 import { Header } from '@ui/components/Header';
 import { Viewport3D } from '@ui/components/Viewport3D';
@@ -11,6 +11,7 @@ import { WallInspector } from '@ui/components/WallInspector';
 import { FloorInspector } from '@ui/components/FloorInspector';
 import { AssetReplacementModal } from '@ui/components/AssetReplacementModal';
 import { ErrorBoundary } from '@ui/components/ErrorBoundary';
+import { SavingOverlay } from '@ui/components/SavingOverlay';
 import { restoreInitialPlan } from '@services/plan/PlanBootstrap';
 
 export const App: React.FC = () => {
@@ -33,7 +34,27 @@ export const App: React.FC = () => {
   const [spotLightIntensity, setSpotLightIntensity] = useState<number>(1.0);
   const [chandelierIntensity, setChandelierIntensity] = useState<number>(1.0);
   const [loading, setLoading] = useState<boolean>(true);
+  const [saveRequested, setSaveRequested] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<PlanSaveStatus>(planManager.getSaveStatus());
+  const saveInProgress = useRef(false);
+  const isSaving = saveRequested || saveStatus === 'saving';
   const persistenceService = useService<IPlanPersistenceService>(TOKENS.PlanPersistenceService);
+
+  useEffect(() => planManager.onSaveStatusChange(setSaveStatus), [planManager]);
+
+  const handleSave = async () => {
+    if (saveInProgress.current || isSaving) return;
+    saveInProgress.current = true;
+    setSaveRequested(true);
+    try {
+      // Paint the lock before serialization or synchronous offline storage.
+      await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+      await planManager.saveCurrentPlan();
+    } finally {
+      saveInProgress.current = false;
+      setSaveRequested(false);
+    }
+  };
 
   // Load plan automatically on initial launch
   useEffect(() => {
@@ -180,6 +201,8 @@ export const App: React.FC = () => {
     <div className="flex flex-col h-screen w-screen overflow-hidden bg-slate-950 text-slate-100">
       {/* Top Header */}
       <Header
+        onSave={handleSave}
+        isSaving={isSaving}
         viewMode={viewMode}
         onViewModeChange={handleViewModeChange}
         wallCutaway={wallCutaway}
@@ -200,7 +223,7 @@ export const App: React.FC = () => {
 
       {/* Main 3D Canvas Area */}
       <main className="flex-1 min-h-0 relative w-full">
-        <Viewport3D />
+        <Viewport3D disabled={isSaving} />
 
         {/* Inspector Drawers wrapped in ErrorBoundary */}
         <ErrorBoundary>
@@ -265,6 +288,7 @@ export const App: React.FC = () => {
         mode="add"
         onSelectAsset={handleAddAsset}
       />
+      {isSaving && <SavingOverlay />}
     </div>
   );
 };

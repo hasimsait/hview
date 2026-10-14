@@ -108,14 +108,14 @@ For job-site presentation to craftsmen where no web server can be deployed, HVie
 > 1. **Bidirectional Serialization in Services**:
 >    - **[`PlanExportService.ts`](src/services/plan/PlanExportService.ts)**: You **MUST** update `exportPlan()` to serialize the new properties into the JSON structure.
 >    - **[`PlanParserService.ts`](src/services/plan/PlanParserService.ts)**: You **MUST** update `parse()` to restore those properties back into the strongly-typed `PlanDocument` model.
-> 2. **State & Auto-Save Trigger**:
+> 2. **State & Manual Save**:
 >    - In **[`PlanManagerService.ts`](src/services/plan/PlanManagerService.ts)**, every mutation method **MUST** set `this.isDirty = true` and invoke `this.notifyPlanChange()`.
->    - Each mutation immediately caches its serialized working copy in browser storage. Server saves remain debounced and are sent in order; only the latest snapshot can update save status or clear the dirty flag.
+>    - Edits remain in memory until the user clicks **Save .plan**. There are no debounced saves, automatic edit backups, or unload writes. During a manual save, a modal loading widget blocks the entire application, including keyboard navigation and viewport manipulation. Success unlocks the editor; failure unlocks it with unsaved edits retained for retry.
 > 3. **Working Plan vs Base Template**:
 >    - **`public/sample.plan`**: The active, editable working plan served during development and runtime.
 >    - **`sample.plan`** (root): The pristine baseline template. It is copied to `public/sample.plan` on initial launch if no working plan exists, and can be restored via the reset action.
 > 4. **No Ephemeral Edits**:
->    - Never store user modifications only in temporary Three.js mesh state or component local state without syncing them to `PlanDocument` and saving to `public/sample.plan`.
+>    - Commit user modifications to `PlanDocument`, rather than keeping them only in temporary Three.js mesh or component state. Persist them when the user explicitly saves. Unsaved changes are lost on reload or close.
 
 ---
 

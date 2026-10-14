@@ -21,6 +21,7 @@ export class ThreeSceneService implements ISceneService {
   private activeCamera: THREE.Camera;
   private controls: OrbitControls | null = null;
   private cameraNavController: CameraNavigationController | null = null;
+  private interactionEnabled = true;
 
   private wallsGroup = new THREE.Group();
   private ceilingsGroup = new THREE.Group();
@@ -163,6 +164,13 @@ export class ThreeSceneService implements ISceneService {
     this.resizeObserver.observe(container);
 
     this.startAnimationLoop();
+  }
+
+  setInteractionEnabled(enabled: boolean): void {
+    this.interactionEnabled = enabled;
+    if (this.controls) this.controls.enabled = enabled;
+    if (enabled) this.cameraNavController?.attach();
+    else this.cameraNavController?.detach();
   }
 
   dispose(): void {
@@ -1582,7 +1590,7 @@ export class ThreeSceneService implements ISceneService {
         this.cameraNavController.update(dt);
       }
 
-      if (this.controls) {
+      if (this.controls && this.interactionEnabled) {
         this.controls.update();
         if (this.settings.viewMode === 'perspective') {
           // Dynamic camera-to-orbit transparency:

@@ -39,8 +39,6 @@ export class PlanPersistenceService implements IPlanPersistenceService {
   private saveGeneration = 0;
   private planEpoch = 0;
   private serverSaveQueue: Promise<void> | null = null;
-  private cachedSnapshot: string | null = null;
-  private needsServerSync = false;
   private readonly storageKey: string;
   private readonly storageTimeKey: string;
 
@@ -52,28 +50,6 @@ export class PlanPersistenceService implements IPlanPersistenceService {
     const suffix = offline && path && path !== '/' ? `:${encodeURIComponent(path)}` : '';
     this.storageKey = STORAGE_KEY + suffix;
     this.storageTimeKey = STORAGE_TIME_KEY + suffix;
-    // Synchronous emergency persistence on window unload
-    if (typeof window !== 'undefined') {
-      window.addEventListener('beforeunload', () => {
-        if (this.latestPlanJson) {
-          // Closing a stale tab must not replace another tab's newer working copy.
-          try {
-            if (this.cachedSnapshot !== null && localStorage.getItem(this.storageKey) !== this.cachedSnapshot) return;
-          } catch {
-            // A blocked read must not prevent retrying a locally unsaved snapshot.
-          }
-          this.writeCache(this.latestPlanJson);
-          try {
-            if (!this.isOffline() && this.needsServerSync && !this.serverSaveQueue && typeof navigator !== 'undefined' && navigator.sendBeacon) {
-              const blob = new Blob([this.latestPlanJson], { type: 'application/json' });
-              navigator.sendBeacon('/api/save-plan', blob);
-            }
-          } catch {
-            // Unload cannot wait for server confirmation.
-          }
-        }
-      });
-    }
   }
 
   getSaveStatus(): PlanSaveStatus {
@@ -134,16 +110,13 @@ export class PlanPersistenceService implements IPlanPersistenceService {
     this.saveGeneration++;
     if (this.saveTimeout !== null) clearTimeout(this.saveTimeout);
     this.latestPlanJson = sanitizePlanJson(planJson);
-    this.needsServerSync = false;
-    this.writeCache(this.latestPlanJson);
     this.setStatus('idle');
   }
 
-  /** Stage every edit synchronously, before the server autosave debounce. */
+  /** Write the browser backup when explicitly asked to save. */
   cachePlan(planJson: string): boolean {
     validatePlanJson(planJson);
     this.latestPlanJson = sanitizePlanJson(planJson);
-    this.needsServerSync = true;
     this.saveGeneration++;
     if (this.saveTimeout !== null) clearTimeout(this.saveTimeout);
     this.setStatus('saving');
@@ -154,7 +127,6 @@ export class PlanPersistenceService implements IPlanPersistenceService {
     if (typeof window === 'undefined') return false;
     try {
       localStorage.setItem(this.storageKey, json);
-      this.cachedSnapshot = json;
     } catch (err) {
       console.warn('[PlanPersistenceService] Failed to cache plan:', err);
       return false;
@@ -194,7 +166,6 @@ export class PlanPersistenceService implements IPlanPersistenceService {
   }
 
   private invalidateCache(): void {
-    this.cachedSnapshot = null;
     if (typeof window === 'undefined') return;
     try {
       localStorage.removeItem(this.storageKey);
@@ -221,7 +192,6 @@ export class PlanPersistenceService implements IPlanPersistenceService {
     // Standalone HTML owns its embedded plan and browser working copy, not a
     // hosting site's /sample.plan. Do not report an unrelated host API as saved.
     if (this.isOffline()) {
-      this.needsServerSync = false;
       this.finishSave(generation, cached);
       return cached;
     }
@@ -241,7 +211,6 @@ export class PlanPersistenceService implements IPlanPersistenceService {
           return res.json();
         });
         if (result?.success !== true) throw new Error('Server did not acknowledge saving the plan');
-        if (generation === this.saveGeneration) this.needsServerSync = false;
         if (!cached && generation === this.saveGeneration) this.invalidateCache();
         return true;
       } catch (err) {
@@ -263,7 +232,6 @@ export class PlanPersistenceService implements IPlanPersistenceService {
         if (cached && cached.trim().startsWith('{')) {
           validatePlanJson(cached);
           this.latestPlanJson = sanitizePlanJson(cached);
-          this.cachedSnapshot = cached;
           return this.latestPlanJson;
         }
       } catch (err) {
@@ -313,7 +281,6 @@ export class PlanPersistenceService implements IPlanPersistenceService {
         if (!embedded) throw new Error('No embedded plan available to reset');
         if (!this.writeCache(embedded)) throw new Error('Could not store the reset plan');
         this.latestPlanJson = embedded;
-        this.needsServerSync = false;
         this.setStatus('idle');
         return embedded;
       }
@@ -332,7 +299,6 @@ export class PlanPersistenceService implements IPlanPersistenceService {
       });
       if (generation === this.saveGeneration) {
         this.latestPlanJson = planJson;
-        this.needsServerSync = false;
         if (!this.writeCache(planJson)) this.invalidateCache();
         this.setStatus('idle');
       }

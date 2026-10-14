@@ -13,7 +13,7 @@ test.afterEach(async ({ page, request }) => {
   expect((await request.post('/api/save-plan', { data: Buffer.from(original), headers: { 'Content-Type': 'application/json' } })).ok()).toBe(true);
 });
 
-test('inspector move, elevation, rotation and resize survive autosave and reload', async ({ page, request }) => {
+test('inspector move, elevation, rotation and resize survive manual save and reload', async ({ page, request }) => {
   await page.goto('/'); await expect(page.getByText('1 Objects')).toBeVisible();
   await selectSofa(page);
   await numberField(page, 'X (Horiz.)').fill('2.75');
@@ -21,6 +21,8 @@ test('inspector move, elevation, rotation and resize survive autosave and reload
   await numberField(page, 'Width (X)').fill('210');
   const rotation = page.locator('input[type="range"]').first();
   await rotation.press('Home'); await rotation.press('ArrowRight');
+  await page.getByRole('button', { name: 'Save .plan', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: 'Saving plan' })).toBeHidden();
   await expect.poll(async () => {
     const raw = await (await request.get('/sample.plan')).json();
     return raw.plan.items.sofa;
@@ -57,16 +59,20 @@ test('dragging the translation gizmo changes position and persists it', async ({
   await page.mouse.move(handle.x + 80, handle.y, { steps: 10 }); await page.mouse.up();
   await expect.poll(async () => Number(await numberField(page, 'X (Horiz.)').inputValue())).not.toBe(2);
   const x = Number(await numberField(page, 'X (Horiz.)').inputValue());
+  await page.getByRole('button', { name: 'Save .plan', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: 'Saving plan' })).toBeHidden();
   await expect.poll(async () => (await (await request.get('/sample.plan')).json()).plan.items.sofa.position.x).toBeCloseTo(x, 2);
   await page.reload(); await selectSofa(page);
   expect(Number(await numberField(page, 'X (Horiz.)').inputValue())).toBeCloseTo(x, 2);
 });
 
-test('replacement selected in the UI survives autosave and reload', async ({ page, request }) => {
+test('replacement selected in the UI survives manual save and reload', async ({ page, request }) => {
   await page.goto('/'); await expect(page.getByText('1 Objects')).toBeVisible(); await selectSofa(page);
   await page.getByRole('button', { name: /Replace Asset/ }).click();
   await page.getByPlaceholder('Search assets (e.g. towel, fan, sconce, bed, sink)...').fill('Dining Chair');
   await page.getByRole('button', { name: /Dining Chair/ }).click();
+  await page.getByRole('button', { name: 'Save .plan', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: 'Saving plan' })).toBeHidden();
   await expect.poll(async () => (await (await request.get('/sample.plan')).json()).plan.items.sofa.assetKey).toBe('chair');
   await page.reload(); await selectSofa(page);
   expect(await page.locator('h2').innerText()).toBe('Chair');
@@ -108,6 +114,8 @@ test('downloaded editor saves edits offline, reloads, and exports the updated pl
     await offline.getByRole('button', { name: /2D Plan/ }).click(); await offline.mouse.click(point.x, point.y);
     await expect(offline.getByText('ID: sofa', { exact: true })).toBeVisible();
     await numberField(offline, 'Width (X)').fill('225');
+    await offline.getByRole('button', { name: 'Save .plan', exact: true }).click();
+    await expect(offline.getByRole('dialog', { name: 'Saving plan' })).toBeHidden();
     await expect.poll(async () => offline.evaluate(() => {
       const key = `hview_current_plan:${encodeURIComponent(window.location.pathname)}`;
       return JSON.parse(localStorage.getItem(key)!).plan.items.sofa.width;

@@ -109,6 +109,8 @@ Render scheduling is a later, measured change: render during damping, movement, 
 
 ## Application, UI, and persistence classes
 
+Saving requirement, 15 October: saving is manual. Do not reintroduce debounced autosave, automatic edit backups, or unload writes during the refactor. A modal loading widget blocks all application input, including viewport navigation/manipulation, for the complete save operation. Success or failure releases the lock; failure retains dirty edits and offers retry. Persistence queues below protect explicit calls; they are not automatic save triggers.
+
 `EditorSession` owns the current immutable `PlanDocument`, command execution, and edit publication. It uses `EditHistory` for undo/redo. `SelectionModel` owns a single identity/subtarget selection; `ViewportState` owns view settings. They are not additional document models. A delete or split validates/remaps selection by ID against the committed document.
 
 `InspectorPresenter` implements the visitor and supplies the appropriate focused sections: transforms, surfaces, luminaire settings, wall structure, door settings, column faces. React components render those sections and submit commands. Local text drafts remain UI state; there is no generic `setProperty(key: string, value: any)` bypassing class invariants. Inspector metadata does not live on domain classes as React-specific widget definitions.

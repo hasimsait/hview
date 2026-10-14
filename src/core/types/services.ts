@@ -173,6 +173,7 @@ export interface ViewportSettings {
 
 export interface ISceneService {
   initialize(container: HTMLElement): void;
+  setInteractionEnabled(enabled: boolean): void;
   dispose(): void;
   renderPlan(plan: PlanDocument): void;
   updateFurnitureObject(entity: FurnitureEntity): void;
@@ -208,6 +209,7 @@ export interface ISceneService {
 
 export interface IInteractionService {
   initialize(sceneService: ISceneService, planManager: IPlanManagerService): void;
+  setEnabled(enabled: boolean): void;
   dispose(): void;
   setGizmoMode(mode: 'translate' | 'rotate'): void;
   getGizmoMode(): 'translate' | 'rotate';

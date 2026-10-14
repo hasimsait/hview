@@ -40,7 +40,7 @@ function setup(t: TestContext) {
 const saved = () => new Response('{"success":true}');
 
 for (const operation of ['save', 'reset'] as const) {
-  test(`unload retries the current snapshot after ${operation} invalidates a stale cache`, async (t) => {
+  test(`unload cannot automatically recreate the cache after ${operation} invalidates it`, async (t) => {
     const { service, stored, pending, unload, beacon } = setup(t);
     service.cachePlan('{"revision":1}');
     const setItem = localStorage.setItem.bind(localStorage);
@@ -60,8 +60,8 @@ for (const operation of ['save', 'reset'] as const) {
     }
     assert.equal(stored.has('hview_current_plan'), false);
     storageFull = false;
-    unload[0]();
-    assert.equal(stored.get('hview_current_plan'), '{"revision":2}');
+    assert.equal(unload.length, 0);
+    assert.equal(stored.has('hview_current_plan'), false);
     assert.equal(beacon.mock.callCount(), 0);
   });
 }
@@ -119,15 +119,16 @@ test('failure of the newest queued save keeps its cache and error status', async
   assert.equal(service.getSaveStatus(), 'error');
 });
 
-test('importing another plan replaces the cached snapshot used on unload', async (t) => {
+test('importing another plan does not overwrite the last manual save', async (t) => {
   const { manager, stored, unload, pending, plan } = setup(t);
   manager.loadPlan(plan('sofa'));
   const save = manager.saveCurrentPlan();
   pending[0].resolve(saved());
   await save;
   manager.loadPlan(plan('chair'));
-  unload[0]();
-  assert.equal(JSON.parse(stored.get('hview_current_plan')!).plan.items.f.name, 'chair');
+  assert.equal(unload.length, 0);
+  assert.equal(JSON.parse(stored.get('hview_current_plan')!).plan.items.f.name, 'sofa');
+  assert.equal(manager.getPlan()!.furniture[0].assetKey, 'chair');
 });
 
 test('loading another plan invalidates the previous save status', async (t) => {
@@ -247,7 +248,7 @@ test('queued writes of a previous document are skipped after importing a new one
   await first;
   assert.equal(await second, false);
   assert.equal(pending.length, 1);
-  assert.equal(JSON.parse(stored.get('hview_current_plan')!).plan.items.f.name, 'chair');
+  assert.equal(JSON.parse(stored.get('hview_current_plan')!).plan.items.f.name, 'sofa');
 });
 
 test('failed reset releases a later save and cannot overwrite its status', async (t) => {
@@ -263,7 +264,7 @@ test('failed reset releases a later save and cannot overwrite its status', async
   assert.equal(service.getSaveStatus(), 'saved');
 });
 
-test('failed reset reschedules the cancelled autosave', async (t) => {
+test('failed reset leaves edits dirty without scheduling an automatic save', async (t) => {
   const { manager, pending, plan } = setup(t);
   manager.loadPlan(plan('sofa'));
   manager.replaceFurnitureAsset('f', 'chair');
@@ -271,20 +272,26 @@ test('failed reset reschedules the cancelled autosave', async (t) => {
   const rejected = assert.rejects(reset);
   pending[0].resolve(new Response('', { status: 500 }));
   await rejected;
-  t.mock.timers.tick(600);
+  t.mock.timers.tick(10_000);
+  assert.equal(pending.length, 1);
+  assert.equal(manager.hasUnsavedChanges(), true);
+  const save = manager.saveCurrentPlan();
   assert.equal(pending[1].url, '/api/save-plan');
   assert.equal(JSON.parse(pending[1].body!).plan.items.f.assetKey, 'chair');
   pending[1].resolve(saved());
-  await new Promise<void>((resolve) => setImmediate(resolve));
+  await save;
   assert.equal(manager.hasUnsavedChanges(), false);
 });
 
 test('malformed reset data cannot replace the active plan or its cache', async (t) => {
   const { manager, pending, plan, stored } = setup(t);
   manager.loadPlan(plan('chair'));
+  const initialSave = manager.saveCurrentPlan();
+  pending[0].resolve(saved());
+  await initialSave;
   const reset = manager.resetToTemplate();
   const rejected = assert.rejects(reset);
-  pending[0].resolve(new Response('{"plan":"{broken"}'));
+  pending[1].resolve(new Response('{"plan":"{broken"}'));
   await rejected;
   assert.equal(manager.getPlan()!.furniture[0].assetKey, 'chair');
   assert.equal(JSON.parse(stored.get('hview_current_plan')!).plan.items.f.name, 'chair');
@@ -298,7 +305,7 @@ test('an imported plan during reset survives the reset response', async (t) => {
   pending[0].resolve(new Response(JSON.stringify({ plan: JSON.stringify(plan('sofa')) })));
   await reset;
   assert.equal(manager.getPlan()!.furniture[0].assetKey, 'chair');
-  assert.equal(JSON.parse(stored.get('hview_current_plan')!).plan.items.f.name, 'chair');
+  assert.equal(stored.has('hview_current_plan'), false);
 });
 
 test('a hung save times out and releases the next queued save', async (t) => {
@@ -407,7 +414,7 @@ test('closing a stale tab does not replace another tab’s newer cached snapshot
   service.cachePlan('{"revision":1}');
   const secondTab = new PlanPersistenceService();
   secondTab.cachePlan('{"revision":2}');
-  unload[0]();
+  assert.equal(unload.length, 0);
   assert.equal(stored.get('hview_current_plan'), '{"revision":2}');
   assert.equal(beacon.mock.callCount(), 0);
 });
@@ -417,7 +424,7 @@ test('closing a tab after a confirmed server save does not send a redundant writ
   const save = service.savePlan('{"revision":1}');
   pending[0].resolve(saved());
   assert.equal(await save, true);
-  unload[0]();
+  assert.equal(unload.length, 0);
   assert.equal(beacon.mock.callCount(), 0);
 });
 

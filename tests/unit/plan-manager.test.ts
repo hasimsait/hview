@@ -62,14 +62,15 @@ describe('plan manager', () => {
     expect(manager.getSelectedFurniture()).toBeNull();
     expect(JSON.parse(manager.exportPlanJson()).plan.items).not.toHaveProperty('new-sofa');
   });
-  it('debounces edits and persists the latest values only', async () => {
+  it('keeps edits unsaved until an explicit save persists the latest values', async () => {
     manager.loadPlan(rawPlan());
     manager.updateFurniture('sofa', { rotationY: 1 });
     await vi.advanceTimersByTimeAsync(500);
     manager.updateFurniture('sofa', { rotationY: 2 });
-    await vi.advanceTimersByTimeAsync(599);
+    await vi.advanceTimersByTimeAsync(10_000);
     expect(persistence.savePlan).not.toHaveBeenCalled();
-    await vi.advanceTimersByTimeAsync(1);
+    expect(manager.hasUnsavedChanges()).toBe(true);
+    await manager.saveCurrentPlan();
     expect(persistence.savePlan).toHaveBeenCalledTimes(1);
     expect(parser.parse(persistence.savePlan.mock.calls[0][0]).furniture[0].rotationY).toBe(2);
     expect(manager.hasUnsavedChanges()).toBe(false);
