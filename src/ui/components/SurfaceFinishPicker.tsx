@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { SurfaceFinishConfig, TileLayoutPattern } from '@core/types/plan';
+import { preserveSurfaceLayer } from '@core/types/surfaceLayer';
+import { SurfaceLayerControl } from './SurfaceLayerControl';
 import { Paintbrush, Layers, Grid, Sparkles, Check, RotateCcw, RotateCw, Disc, EyeOff, Palette, Pipette, Search } from 'lucide-react';
 import { useService } from '@ui/context/useService';
 import { TOKENS } from '@core/di/tokens';
@@ -618,11 +620,12 @@ const FABRIC_CATEGORIES: FabricCategory[] = [
 
 export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
   currentFinish,
-  onSelectFinish,
+  onSelectFinish: selectFinish,
   onClearFinish,
   showCeilingsTab = false,
   defaultTab,
 }) => {
+  const onSelectFinish = (finish: SurfaceFinishConfig) => selectFinish(preserveSurfaceLayer(finish, currentFinish));
   const [activeTab, setActiveTab] = useState<TabType>(
     defaultTab ||
       (currentFinish?.type === 'metal' || currentFinish?.type === 'porcelain'
@@ -728,6 +731,8 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
 
   return (
     <div className="space-y-3">
+      <SurfaceLayerControl layer={currentFinish?.layer} disabled={!currentFinish}
+        onChange={(layer) => { if (currentFinish) onSelectFinish({ ...currentFinish, layer }); }} />
       {/* Universal Invisible Option Button */}
       <div className="flex items-center justify-between gap-2 p-1.5 rounded-lg border border-slate-800 bg-slate-900/60">
         <button

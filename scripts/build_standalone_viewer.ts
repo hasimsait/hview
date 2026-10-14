@@ -1,3 +1,4 @@
+import { createExportTemplates, EXPORT_TEMPLATES_ID, escapeScriptJson, setScriptContent } from '../src/services/export/StandaloneHtml';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
@@ -194,6 +195,7 @@ ${bundledJs}
 
   // Write template for browser-side export service
   fs.writeFileSync(templateOutputPath, htmlTemplate, 'utf-8');
+  fs.writeFileSync(path.join(distDir, 'ipad_viewer_template.html'), htmlTemplate, 'utf-8');
   console.log(`✅ Template written to: ${templateOutputPath}`);
 
   // 6. Generate pre-built standalone HTML file with current sample.plan
@@ -207,7 +209,7 @@ ${bundledJs}
     samplePlanJson = fs.readFileSync(publicSamplePlanPath, 'utf-8');
   }
 
-  const standaloneHtml = htmlTemplate.replace('/* __PLAN_DATA_PLACEHOLDER__ */', samplePlanJson);
+  const standaloneHtml = setScriptContent(htmlTemplate, 'plan-data', escapeScriptJson(samplePlanJson));
   fs.writeFileSync(distOutputPath, standaloneHtml, 'utf-8');
   console.log(`🎉 Standalone iPad viewer generated: ${distOutputPath} (${(standaloneHtml.length / 1024 / 1024).toFixed(2)} MB)`);
 
@@ -239,7 +241,7 @@ ${bundledJs}
     }
   }
 
-  const fullEditorHtmlTemplate = `<!DOCTYPE html>
+  const editorShell = `<!DOCTYPE html>
 <html lang="en" class="h-full bg-slate-950 text-slate-100">
 <head>
   <meta charset="UTF-8" />
@@ -278,6 +280,8 @@ ${tilesJsonContent}
     }
   </script>
 
+  <script id="standalone-export-templates" type="application/json"></script>
+
   <!-- Bundled Full React Editor Application -->
   <script>
 ${editorBundledJs}
@@ -285,11 +289,17 @@ ${editorBundledJs}
 </body>
 </html>`;
 
+  const templates = createExportTemplates(htmlTemplate, editorShell);
+  const fullEditorHtmlTemplate = setScriptContent(
+    editorShell, EXPORT_TEMPLATES_ID, escapeScriptJson(JSON.stringify(templates)),
+  );
+
   const editorTemplateOutputPath = path.join(publicDir, 'hview_editor_template.html');
   fs.writeFileSync(editorTemplateOutputPath, fullEditorHtmlTemplate, 'utf-8');
+  fs.writeFileSync(path.join(distDir, 'hview_editor_template.html'), fullEditorHtmlTemplate, 'utf-8');
 
   const fullEditorDistPath = path.join(distDir, 'hview_editor.html');
-  const fullEditorHtml = fullEditorHtmlTemplate.replace('/* __PLAN_DATA_PLACEHOLDER__ */', samplePlanJson);
+  const fullEditorHtml = setScriptContent(fullEditorHtmlTemplate, 'plan-data', escapeScriptJson(samplePlanJson));
   fs.writeFileSync(fullEditorDistPath, fullEditorHtml, 'utf-8');
   console.log(`🎉 Standalone FULL Editor generated: ${fullEditorDistPath} (${(fullEditorHtml.length / 1024 / 1024).toFixed(2)} MB)`);
 }

@@ -43,6 +43,7 @@ export class PlanManagerService implements IPlanManagerService {
   private roomSelectionChangeListeners = new Set<RoomSelectionChangeListener>();
   private roomUpdatedListeners = new Set<RoomUpdatedListener>();
   private isDirty = false;
+  private planRevision = 0;
   private autoSaveTimer: any = null;
 
   constructor(
@@ -57,6 +58,8 @@ export class PlanManagerService implements IPlanManagerService {
 
   loadPlan(rawJson: string | object): PlanDocument {
     this.currentPlan = this.parser.parse(rawJson);
+    if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
+    this.planRevision++;
     this.selectedFurniture = null;
     this.selectedOpening = null;
     this.selectedWall = null;
@@ -90,7 +93,7 @@ export class PlanManagerService implements IPlanManagerService {
       id,
     };
     this.currentPlan.furniture.push(newEntity);
-    this.isDirty = true;
+    this.markDirty();
 
     this.notifyFurnitureUpdated(newEntity);
     this.setSelectedFurniture(newEntity);
@@ -107,7 +110,7 @@ export class PlanManagerService implements IPlanManagerService {
       ...this.currentPlan.furniture[idx],
       ...updates,
     };
-    this.isDirty = true;
+    this.markDirty();
 
     if (this.selectedFurniture && this.selectedFurniture.id === id) {
       this.selectedFurniture = this.currentPlan.furniture[idx];
@@ -132,7 +135,7 @@ export class PlanManagerService implements IPlanManagerService {
   deleteFurniture(id: string): void {
     if (!this.currentPlan) return;
     this.currentPlan.furniture = this.currentPlan.furniture.filter((f) => f.id !== id);
-    this.isDirty = true;
+    this.markDirty();
     if (this.selectedFurniture?.id === id) {
       this.selectedFurniture = null;
       this.notifySelectionChange();
@@ -150,7 +153,7 @@ export class PlanManagerService implements IPlanManagerService {
         room.rawRoom.title = newName;
         room.rawRoom.name = newName;
       }
-      this.isDirty = true;
+      this.markDirty();
       this.notifyPlanChange();
     }
   }
@@ -204,7 +207,7 @@ export class PlanManagerService implements IPlanManagerService {
           op.rawOpening.opening = `${op.swingSide}-${op.hingeSide}`;
         }
 
-        this.isDirty = true;
+        this.markDirty();
 
         // 1. Rebuild the 3D mesh first
         this.notifyOpeningUpdated(op, wall);
@@ -228,7 +231,7 @@ export class PlanManagerService implements IPlanManagerService {
       const op = wall.openings.find((o) => o.id === openingId);
       if (op) {
         op.openAngle = clampedAngle;
-        this.isDirty = true;
+        this.markDirty();
 
         if (this.selectedOpening && this.selectedOpening.opening.id === openingId) {
           this.selectedOpening = { opening: op, wall };
@@ -346,7 +349,7 @@ export class PlanManagerService implements IPlanManagerService {
       delete room.floorFinish;
     }
 
-    this.isDirty = true;
+    this.markDirty();
     this.notifyRoomUpdated(room);
     if (this.selectedRoom?.id === roomId) {
       this.selectedRoom = { ...room };
@@ -404,7 +407,7 @@ export class PlanManagerService implements IPlanManagerService {
       wall.finishEdgeTop = { ...finish };
       wall.finish = { ...finish };
     }
-    this.isDirty = true;
+    this.markDirty();
     if (this.selectedWall && this.selectedWall.id === wallId) {
       this.selectedWall = { ...wall };
       this.notifyWallSelectionChange();
@@ -424,7 +427,7 @@ export class PlanManagerService implements IPlanManagerService {
 
     wall.frameStyle = frameStyle;
     wall.frameColor = frameColor;
-    this.isDirty = true;
+    this.markDirty();
 
     if (this.selectedWall && this.selectedWall.id === wallId) {
       this.selectedWall = { ...wall };
@@ -439,7 +442,7 @@ export class PlanManagerService implements IPlanManagerService {
     if (!wall) return;
 
     wall.material = material;
-    this.isDirty = true;
+    this.markDirty();
 
     if (this.selectedWall && this.selectedWall.id === wallId) {
       this.selectedWall = { ...wall };
@@ -494,7 +497,7 @@ export class PlanManagerService implements IPlanManagerService {
       rm.wallFinish = { ...finish };
     }
 
-    this.isDirty = true;
+    this.markDirty();
     this.notifyPlanChange();
   }
 
@@ -648,7 +651,7 @@ export class PlanManagerService implements IPlanManagerService {
       this.selectedWall = wall1;
     }
 
-    this.isDirty = true;
+    this.markDirty();
     this.notifyWallsChanged(this.currentPlan);
     this.notifyWallSelectionChange();
     this.notifyPlanChange();
@@ -776,7 +779,7 @@ export class PlanManagerService implements IPlanManagerService {
       const op = wall.openings.find((o) => o.id === openingId);
       if (op) {
         op.finish = { ...finish };
-        this.isDirty = true;
+        this.markDirty();
         this.notifyOpeningUpdated(op, wall);
         this.notifyPlanChange();
         return;
@@ -794,7 +797,7 @@ export class PlanManagerService implements IPlanManagerService {
     } else {
       delete item.finish;
     }
-    this.isDirty = true;
+    this.markDirty();
     this.notifyFurnitureUpdated(item);
     if (this.selectedFurniture?.id === id) {
       this.selectedFurniture = { ...item };
@@ -816,7 +819,7 @@ export class PlanManagerService implements IPlanManagerService {
         item.sectionFinishes = Object.keys(updated).length > 0 ? updated : undefined;
       }
     }
-    this.isDirty = true;
+    this.markDirty();
     this.notifyFurnitureUpdated(item);
     if (this.selectedFurniture?.id === id) {
       this.selectedFurniture = { ...item };
@@ -833,7 +836,7 @@ export class PlanManagerService implements IPlanManagerService {
       ...(item.lightConfig || {}),
       ...config,
     };
-    this.isDirty = true;
+    this.markDirty();
     this.notifyFurnitureUpdated(item);
     if (this.selectedFurniture?.id === id) {
       this.selectedFurniture = { ...item };
@@ -849,7 +852,7 @@ export class PlanManagerService implements IPlanManagerService {
     item.hasLids = hasLids;
     if (!item.rawItem) item.rawItem = {};
     item.rawItem.hasLids = hasLids;
-    this.isDirty = true;
+    this.markDirty();
     this.notifyFurnitureUpdated(item);
     if (this.selectedFurniture?.id === id) {
       this.selectedFurniture = { ...item };
@@ -863,7 +866,7 @@ export class PlanManagerService implements IPlanManagerService {
     const room = this.currentPlan.rooms.find((r) => r.id === roomId);
     if (!room) return;
     room.ceilingType = ceilingType;
-    this.isDirty = true;
+    this.markDirty();
     this.notifyPlanChange();
   }
 
@@ -938,9 +941,10 @@ export class PlanManagerService implements IPlanManagerService {
 
   async saveCurrentPlan(): Promise<boolean> {
     if (!this.currentPlan || !this.persistence) return false;
+    const revision = this.planRevision;
     const json = this.exportPlanJson();
     const ok = await this.persistence.savePlan(json);
-    if (ok) {
+    if (ok && revision === this.planRevision) {
       this.isDirty = false;
     }
     return ok;
@@ -958,6 +962,12 @@ export class PlanManagerService implements IPlanManagerService {
 
   getSaveStatus(): PlanSaveStatus {
     return this.persistence?.getSaveStatus() || 'idle';
+  }
+
+  private markDirty(): void {
+    // Advance before notifying listeners so saves capture the edited revision.
+    this.planRevision++;
+    this.isDirty = true;
   }
 
   private triggerDebouncedSave(): void {
@@ -1019,11 +1029,12 @@ export class PlanManagerService implements IPlanManagerService {
 
   private notifyPlanChange(): void {
     if (!this.currentPlan) return;
+    if (this.isDirty && this.persistence) {
+      this.persistence.cachePlan?.(this.exportPlanJson());
+      this.triggerDebouncedSave();
+    }
     for (const listener of this.planChangeListeners) {
       listener(this.currentPlan);
-    }
-    if (this.isDirty && this.persistence) {
-      this.triggerDebouncedSave();
     }
   }
 

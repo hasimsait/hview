@@ -20,6 +20,7 @@ export type TileLayoutPattern =
   | 'vertical_stack';
 
 export interface SurfaceFinishConfig {
+  layer?: number; // Integer priority for coincident surfaces; higher values cover lower ones. Default 0.
   type: 'paint' | 'plaster' | 'lambri' | 'tile' | 'glass' | 'wood' | 'ceiling' | 'metal' | 'porcelain' | 'fabric' | 'invisible';
   variant?: string; // 'subway' | 'square' | 'marble' | 'anthracite' | 'chrome_shiny' | 'chrome_satin' | 'brass_shiny' | 'brass_brushed' | 'matte_black_powder' | 'matte_white_powder' | 'porcelain_white' | 'invisible'
   color?: string;   // hex color e.g. '#f8fafc' or 'invisible'

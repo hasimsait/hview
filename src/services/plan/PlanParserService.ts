@@ -229,12 +229,15 @@ export class PlanParserService implements IPlanParserService {
         if (!it.pc) continue;
 
         const name = it.name || 'item';
+        // Saved replacements override the original RemPlanner name. Legacy plans
+        // without an assetKey still resolve their asset from that name.
+        const assetName = it.assetKey || name;
         const assetDef = this.assetRegistry
-          ? this.assetRegistry.getAsset(this.assetRegistry.resolveAssetKey(name)) || this.assetRegistry.getAsset(name)
+          ? this.assetRegistry.getAsset(this.assetRegistry.resolveAssetKey(assetName)) || this.assetRegistry.getAsset(assetName)
           : undefined;
 
-        const category = (assetDef?.category as FurnitureCategory) || this.mapCategory(name);
-        const displayName = this.formatDisplayName(name);
+        const category = (assetDef?.category as FurnitureCategory) || this.mapCategory(assetName);
+        const displayName = this.formatDisplayName(assetName);
 
         const width = (typeof it.dimensions?.x === 'number' && it.dimensions.x > 0)
           ? it.dimensions.x
@@ -243,16 +246,16 @@ export class PlanParserService implements IPlanParserService {
           ? it.dimensions.z
           : ((it.height || (assetDef ? assetDef.defaultDimensions.z * 100 : 60)) / 100); // RemPlanner 'height' in 2D is depth in 3D floor plan
         if (
-          (name === 'wall_recess' || name === 'girinti' || it.assetKey === 'wall_recess') &&
+          (assetName === 'wall_recess' || assetName === 'girinti') &&
           depth < 0.05
         ) {
           depth = Math.max(0.10, (it.wallThickness as number) || (it.depth ? it.depth / 100 : 0) || 0.10);
         }
         let height = (typeof it.dimensions?.y === 'number' && it.dimensions.y > 0)
           ? it.dimensions.y
-          : ((it.self_height || (assetDef ? assetDef.defaultDimensions.y * 100 : this.getDefaultHeightForCategory(category, name))) / 100);
+          : ((it.self_height || (assetDef ? assetDef.defaultDimensions.y * 100 : this.getDefaultHeightForCategory(category, assetName))) / 100);
         if (typeof height !== 'number' || isNaN(height) || height <= 0) {
-          height = (assetDef ? assetDef.defaultDimensions.y * 100 : this.getDefaultHeightForCategory(category, name)) / 100;
+          height = (assetDef ? assetDef.defaultDimensions.y * 100 : this.getDefaultHeightForCategory(category, assetName)) / 100;
         }
 
         let posX: number;
@@ -283,9 +286,8 @@ export class PlanParserService implements IPlanParserService {
         }
 
         if (
-          name === 'wall_recess' ||
-          name === 'girinti' ||
-          it.assetKey === 'wall_recess'
+          assetName === 'wall_recess' ||
+          assetName === 'girinti'
         ) {
           const wallId = it.id_wall || it.wallId;
           const wallObj = wallId && plan.walls ? plan.walls[wallId] : undefined;
@@ -319,7 +321,7 @@ export class PlanParserService implements IPlanParserService {
           rotationY,
           dimensions: { x: width, y: height, z: depth },
           roomId: it.id_room,
-          assetKey: assetDef ? assetDef.key : name,
+          assetKey: it.assetKey || assetDef?.key || name,
           customModelUrl: it.customModelUrl || undefined,
           visible: true,
           finish: it.finish || undefined,

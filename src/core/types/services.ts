@@ -16,6 +16,7 @@ export type PlanSaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 export type PlanSaveStatusListener = (status: PlanSaveStatus) => void;
 
 export interface IPlanPersistenceService {
+  cachePlan?(planJson: string): boolean;
   savePlan(planJson: string): Promise<boolean>;
   loadPlan(): Promise<string>;
   resetToTemplate(): Promise<string>;
