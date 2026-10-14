@@ -11,7 +11,8 @@ export function escapeScriptJson(json: string): string {
 }
 
 export function setScriptContent(html: string, id: string, content: string): string {
-  const pattern = new RegExp(`(<script\\b[^>]*\\bid="${id}"[^>]*>)[\\s\\S]*?(</script\\s*>)`, 'i');
+  const escapedId = id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const pattern = new RegExp(`(<script\\b[^>]*\\bid="${escapedId}"[^>]*>)[\\s\\S]*?(</script\\s*>)`, 'i');
   if (!pattern.test(html)) throw new Error(`Missing standalone data block: ${id}`);
   return html.replace(pattern, (_, start, end) => `${start}\n${content}\n${end}`);
 }

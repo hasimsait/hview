@@ -13,6 +13,25 @@ function script(html: string, id: string): string {
   return match[1].trim();
 }
 
+for (const [id, otherId] of [
+  ['plan.data', 'planXdata'],
+  ['plan[data]', 'pland'],
+  ['plan.+(data)?$^|{1}\\copy', 'other'],
+]) {
+  test(`script content replacement matches the literal ID ${id}`, () => {
+    const other = `<script id="${otherId}" type="application/json">{"keep":true}</script>`;
+    const target = `<script id="${id}" type="application/json">old</script>`;
+    const content = '{"value":"$&"}';
+    assert.equal(setScriptContent(other + target, id, content),
+      other + `<script id="${id}" type="application/json">\n${content}\n</script>`);
+  });
+}
+
+test('script matching reports a missing literal ID instead of changing a similar ID', () => {
+  assert.throws(() => setScriptContent('<script id="planXdata">old</script>', 'plan.data', 'new'),
+    /Missing standalone data block: plan\.data/);
+});
+
 test('built editor re-exports editors and viewers repeatedly with network unavailable', async (t) => {
   let source = readFileSync('dist/hview_editor.html', 'utf8');
   let blob: Blob | undefined;

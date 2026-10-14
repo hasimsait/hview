@@ -5,8 +5,8 @@ Install the locked dependencies with `npm ci`. In the cloud environment, use
 
 ```bash
 npm test                 # Both Vitest unit tests and Node save/layer regression tests
-npm run test:state       # 71 Node save/export/layer regression tests (build HTML first)
-npm run test:unit        # 6.1-m Vitest suite
+npm run test:state       # 80 Node save/export/layer regression tests (build HTML first)
+npm run test:unit        # Vitest unit/service regression suite
 npm run test:watch       # Rerun affected tests while editing
 npm run test:coverage    # Coverage report and minimum coverage checks
 npm run test:types       # Type-check application, tests and runner configurations
@@ -17,11 +17,17 @@ npm run test:workflows   # Edit/reload, manipulation and offline export workflow
 Unit tests cover plan parsing, edit/export/reload round trips, manager events and
 selection, debounced autosave, local-storage backups, offline fallbacks, and save
 and reset failure handling. All timer-based checks use virtual time.
+
+Run `npm run build` before `npm test` or `npm run test:state`; the offline export
+tests read the generated HTML templates from `dist`.
+
+Save/export regressions also cover unload recovery after cache invalidation,
+superseded queued POSTs, latest-save failures, and literal script-ID matching.
 Migration regressions cover stored chimneys, repeated migration, split-wall
 preservation, and inherited face finishes when saved properties are undefined.
 
-Coverage includes all six files under `src/services/plan`, including unexecuted
-code. The minimum aggregate thresholds are 78% lines/statements, 76% functions,
+Vitest coverage includes all eight files under `src/services/plan`, including
+unexecuted code. The minimum aggregate thresholds are 78% lines/statements, 76% functions,
 and 74% branches. These percentages do not measure rendering or UI coverage.
 The HTML coverage report is generated at `coverage/index.html`.
 
@@ -57,7 +63,7 @@ assertions remain enabled, so the current test commands return a failure status.
 To run the three user-reported regressions specifically:
 
 ```bash
-npm test -- tests/unit/reported-surface-room.test.ts
+npm run test:unit -- tests/unit/reported-surface-room.test.ts
 npm run test:e2e -- tests/e2e/reported-bugs.spec.ts tests/e2e/workflows.spec.ts --grep 'paint highlight|isolating Bathroom|offline editor can re-export'
 ```
 
@@ -77,4 +83,6 @@ Playwright generates `playwright-report/index.html`, machine-readable results at
 for failed tests under `test-results`. Open the report locally with
 `npx playwright show-report`. Test reports are ignored by Git.
 
-The `work` branch is rebased onto `6.1-m`. Columns now use the wall model, including surface layers. Both test suites remain enabled; the documented bathroom-isolation failure from `6.1-m` still causes the full test command to return a nonzero status.
+Both test suites remain enabled. The documented bathroom-isolation regression
+still makes the full test command return nonzero; save/export/layer regressions
+pass. See [RESULTS.md](RESULTS.md) for current counts and browser runtime settings.

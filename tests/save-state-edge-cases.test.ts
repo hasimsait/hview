@@ -39,6 +39,86 @@ function setup(t: TestContext) {
 
 const saved = () => new Response('{"success":true}');
 
+for (const operation of ['save', 'reset'] as const) {
+  test(`unload retries the current snapshot after ${operation} invalidates a stale cache`, async (t) => {
+    const { service, stored, pending, unload, beacon } = setup(t);
+    service.cachePlan('{"revision":1}');
+    const setItem = localStorage.setItem.bind(localStorage);
+    let storageFull = true;
+    t.mock.method(localStorage, 'setItem', (key: string, value: string) => {
+      if (storageFull) throw new DOMException('Full', 'QuotaExceededError');
+      setItem(key, value);
+    });
+    if (operation === 'save') {
+      const saving = service.savePlan('{"revision":2}');
+      pending[0].resolve(saved());
+      assert.equal(await saving, true);
+    } else {
+      const resetting = service.resetToTemplate();
+      pending[0].resolve(new Response(JSON.stringify({ plan: '{"revision":2}' })));
+      assert.equal(await resetting, '{"revision":2}');
+    }
+    assert.equal(stored.has('hview_current_plan'), false);
+    storageFull = false;
+    unload[0]();
+    assert.equal(stored.get('hview_current_plan'), '{"revision":2}');
+    assert.equal(beacon.mock.callCount(), 0);
+  });
+}
+
+test('queued saves skip intermediate revisions and only post the newest snapshot', async (t) => {
+  const { service, pending, stored } = setup(t);
+  const saves = [1, 2, 3].map(revision => service.savePlan(JSON.stringify({ revision })));
+  assert.equal(pending.length, 1);
+  // Release each request and let the queue start its next operation. This also
+  // drains the pre-fix intermediate request so failures cannot hang the test.
+  for (let index = 0; index < pending.length; index++) {
+    pending[index].resolve(saved());
+    await new Promise<void>(resolve => setImmediate(resolve));
+  }
+  const outcomes = await Promise.all(saves);
+  assert.deepEqual(pending.map(request => JSON.parse(request.body!).revision), [1, 3]);
+  assert.deepEqual(outcomes, [true, false, true]);
+  assert.equal(stored.get('hview_current_plan'), '{"revision":3}');
+  assert.equal(service.getSaveStatus(), 'saved');
+});
+
+test('a newer cached edit prevents an older queued save from reaching the server', async (t) => {
+  const { service, pending, stored } = setup(t);
+  const first = service.savePlan('{"revision":1}');
+  const queued = service.savePlan('{"revision":2}');
+  service.cachePlan('{"revision":3}');
+  pending[0].resolve(saved());
+  await first;
+  await new Promise<void>(resolve => setImmediate(resolve));
+  if (pending[1]) pending[1].resolve(saved());
+  const queuedResult = await queued;
+  assert.equal(pending.length, 1);
+  assert.equal(queuedResult, false);
+  assert.equal(stored.get('hview_current_plan'), '{"revision":3}');
+  assert.equal(service.getSaveStatus(), 'saving');
+  const latest = service.savePlan('{"revision":3}');
+  assert.equal(pending[1].body, '{"revision":3}');
+  pending[1].resolve(saved());
+  assert.equal(await latest, true);
+  assert.equal(service.getSaveStatus(), 'saved');
+});
+
+test('failure of the newest queued save keeps its cache and error status', async (t) => {
+  const { service, pending, stored } = setup(t);
+  const saves = [1, 2, 3].map(revision => service.savePlan(JSON.stringify({ revision })));
+  for (let index = 0; index < pending.length; index++) {
+    const revision = JSON.parse(pending[index].body!).revision;
+    pending[index].resolve(revision === 3 ? new Response('', { status: 500 }) : saved());
+    await new Promise<void>(resolve => setImmediate(resolve));
+  }
+  const outcomes = await Promise.all(saves);
+  assert.deepEqual(pending.map(request => JSON.parse(request.body!).revision), [1, 3]);
+  assert.deepEqual(outcomes, [true, false, false]);
+  assert.equal(stored.get('hview_current_plan'), '{"revision":3}');
+  assert.equal(service.getSaveStatus(), 'error');
+});
+
 test('importing another plan replaces the cached snapshot used on unload', async (t) => {
   const { manager, stored, unload, pending, plan } = setup(t);
   manager.loadPlan(plan('sofa'));

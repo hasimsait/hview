@@ -1,107 +1,95 @@
 # Confirmed product bugs
 
-Unresolved regressions remain enabled and make the runners return a nonzero exit
-status until fixed. Resolved issues are marked below; their tests remain enabled
-to prevent regressions.
+Resolved regressions remain enabled to prevent recurrence. Bathroom isolation
+is the remaining unresolved product issue; its assertions still fail.
 
 ## 1. Fixed: Asset replacement is lost on reload
 
-Resolved on `work`: saved asset keys now override the original item name.
+Saved asset keys now override the original item name. Replacing a sofa with a
+chair survives autosave, export and reload, with the replacement's metadata.
 
-Reproduction: select a sofa, choose **Replace Asset**, select **Dining Chair**,
-wait for autosave, and reload. The sofa returns.
+Previously, saved JSON retained `name: "sofa"` alongside `assetKey: "chair"`.
+Parsing the name restored the original sofa.
 
-The saved JSON contains `assetKey: "chair"` but retains `name: "sofa"`.
-`PlanParserService` resolves the model from `name`, restoring `sofa_triple`.
-This is reproduced with the real asset registry and with browser UI actions.
-
-Tests: `known-bugs.test.ts` (replacement round trip),
-`workflows.spec.ts` (replacement through the UI).
+Tests: `asset-replacement.test.ts`, `unit/known-bugs.test.ts`,
+and `e2e/workflows.spec.ts` (replacement through the UI).
 
 ## 2. Fixed: Offline save reports success after losing the write
 
-Resolved on `work`: standalone success requires a confirmed browser write.
+Standalone save success requires a confirmed browser write. Full or blocked
+storage returns failure and an error status, preserving the previous cached
+plan. An unrelated hosting API cannot count as recovery for a standalone file.
 
-Reproduction: use the standalone editor offline with browser storage full or
-unavailable, then edit and save. Local storage throws and the server request
-fails, but `savePlan` returns `true` and the status becomes `saved`.
-The previous cached plan is unchanged, so reloading cannot restore the new edit.
+Previously, a failed storage write plus a failed network request still reported
+success, although neither destination accepted the edit.
 
-The regression injects an actual `QuotaExceededError`, fails the network request,
-verifies that the old cached plan remains, and asserts that saving must fail.
+Cache invalidation after a successful hosted save/reset also clears its snapshot
+marker, allowing unload to retry the current plan when storage becomes available.
 
-Test: `plan-persistence.test.ts`, “does not report an offline save as successful
-when storage is full”.
+Tests: `offline-save.test.ts`, `unit/plan-persistence.test.ts`,
+`persistence-lifecycle.test.ts`, and `save-state-edge-cases.test.ts`.
 
-## 3. Fixed: header controls and finish categories overflow
+## 3. Fixed: Header controls and finish categories overflow
 
-The header and its control groups now wrap onto additional lines. Its height
-grows with the controls, and the viewport and inspectors fit the remaining space.
+The header and its control groups wrap onto additional lines. Its height grows
+with the controls, and the viewport and inspectors fit the remaining space.
 Finish-picker category tabs also wrap, keeping each category label together.
 
-Tests: `workflows.spec.ts`, “export controls wrap and remain reachable at desktop
-widths” (1440px and 1024px) and “finish categories wrap within the inspector
-without horizontal scrolling”.
+Tests: `e2e/workflows.spec.ts`, “export controls wrap and remain reachable at
+desktop widths” (1440px and 1024px) and “finish categories wrap within the
+inspector without horizontal scrolling”.
 
 ## 4. Fixed: An older save clears the dirty flag for newer edits
 
-Resolved on `work`: only the saved revision can clear its dirty flag.
+Only a successful save of the current edit revision clears the manager's dirty
+flag. Persistence generations prevent older completions from replacing newer
+save statuses. Queued snapshots superseded by a newer edit or save are skipped;
+they return failure without posting outdated JSON or acknowledging a newer edit.
 
-Reproduction: start saving edit A, make edit B while A is in flight, then let A
-complete. The JSON passed to persistence contains A, but
-`hasUnsavedChanges()` returns `false` for the plan containing B.
+Previously, save A could complete after edit B and mark B clean even though the
+server only received A.
 
-The regression controls promise completion without timing guesses. A later
-debounced save may recover B if it succeeds; this test establishes incorrect
-dirty-state tracking, not that every overlapping edit is lost.
-
-Test: `known-bugs.test.ts`, “keeps later edits dirty when an earlier in-flight save
-completes”.
+Tests: `overlapping-saves.test.ts`, `persistence-lifecycle.test.ts`,
+`save-state-edge-cases.test.ts`, and `unit/known-bugs.test.ts`.
 
 ## 5. Fixed: Standalone editor cannot re-export standalone HTML offline
 
-Resolved on `work`: both reusable HTML templates are embedded in editor exports.
+Editor exports embed reusable viewer/editor templates and shared texture/catalog
+data. Both HTML export paths work without fetching external templates, including
+repeated exports. Script data escapes closing tags, preserves literal replacement
+characters, and matches script IDs literally even when they contain regex syntax.
 
-Reproduction: download **Full Editor (.html)**, open it without network access,
-then click **Full Editor (.html)** again. Instead of a download, it displays
-“Unable to load editor template. Please ensure the template file is generated.”
+Previously, an offline editor fetched external templates and displayed “Unable
+to load editor template” or “Unable to load viewer template” instead of downloading.
 
-The bundled export service still fetches `/hview_editor_template.html`; the
-template is not available inside the standalone document. The same dependency
-exists for the viewer export path. The browser regression proves the editor path
-by loading the actual downloaded bundle and blocking all service requests.
-Offline editing, reload, and `.plan` export pass independently.
+Tests: `offline-html-export.test.ts` and `e2e/workflows.spec.ts` (both offline
+HTML re-export paths).
 
-Tests: `workflows.spec.ts`, “offline editor can re-export Full Editor (.html)
-without fetching a template” and the equivalent iPad Viewer export case. Each
-requires an actual HTML download with valid embedded plan data.
+## 6. Fixed: Selected paint swatch stays stale
 
-## 6. Fixed: selected paint swatch stays stale
+Painting a selected wall immediately refreshes its highlighted swatch.
+`setWallFinish` notifies selected-wall subscribers with the updated snapshot and
+current side. Face selection also updates the selected side, preserving the face
+being edited.
 
-Previously, painting a selected wall updated the scene and saved plan but left
-its highlighted swatch unchanged until the wall was reselected.
+Previously, the highlighted swatch stayed unchanged until the wall was reselected.
 
-`setWallFinish` now emits the selected-wall notification with the updated wall
-snapshot and current side, immediately refreshing the inspector and paint picker.
-Choosing a face in the inspector also updates the selected side, so this refresh
-preserves the face being edited.
+Tests: `e2e/reported-bugs.spec.ts` (paint highlight),
+`unit/reported-surface-room.test.ts` (selected-wall notification).
 
-Tests: `reported-bugs.spec.ts` (paint highlight),
-`reported-surface-room.test.ts` (selected-wall notification).
+## 7. Unresolved: Bathroom isolation includes a hallway-to-bedroom door
 
-## 7. Bathroom isolation includes a hallway-to-bedroom door
-
-Reproduction: isolate Bathroom (4.2 m²), ID `_rscdq`, in the working plan. Door
-`_87omj` on wall `_tmb2o` remains visible, although it is outside the bathroom.
+Reproduction: isolate Bathroom (4.2 m²), ID `_rscdq`, in the working plan.
+Door `_87omj` on wall `_tmb2o` remains visible, although it is outside the bathroom.
 The bathroom's actual entry door is `_buz1m` on wall `_ojjeh`.
 
-Isolation currently filters openings by whether their entire parent wall borders
-the selected room. The long `_tmb2o` wall borders several rooms; its hallway door
-should not become visible merely because another segment borders the bathroom.
-The browser regression uses those actual wall, room, and door coordinates with
-unrelated scene elements removed. It checks the visible opening IDs, retains the
-correct bathroom entrance, and verifies that isolation does not write a new plan.
-Unit checks additionally cover retaining the correct entrance and Show All.
+Isolation filters openings by whether their entire parent wall borders the
+selected room. The long `_tmb2o` wall borders several rooms; its hallway door
+should not remain visible merely because another segment borders the bathroom.
 
-Tests: `reported-bugs.spec.ts` (Bathroom isolation),
-`reported-surface-room.test.ts` (opening visibility).
+Browser and unit checks retain the correct entrance and reject the unrelated
+hallway door. Additional assertions preserve the plan during isolation and
+restore all openings with Show All.
+
+Tests: `e2e/reported-bugs.spec.ts` (Bathroom isolation),
+`unit/reported-surface-room.test.ts` (opening visibility).

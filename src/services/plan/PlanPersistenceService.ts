@@ -194,6 +194,7 @@ export class PlanPersistenceService implements IPlanPersistenceService {
   }
 
   private invalidateCache(): void {
+    this.cachedSnapshot = null;
     if (typeof window === 'undefined') return;
     try {
       localStorage.removeItem(this.storageKey);
@@ -226,8 +227,8 @@ export class PlanPersistenceService implements IPlanPersistenceService {
     }
 
     const ok = await this.withServerLock(async () => {
-      // Imported plans invalidate queued writes of the previous document.
-      if (epoch !== this.planEpoch) return false;
+      // New documents and newer edits supersede snapshots still waiting to write.
+      if (epoch !== this.planEpoch || generation !== this.saveGeneration) return false;
       try {
         const result = await withPlanRequestTimeout(async (signal) => {
           const res = await fetch('/api/save-plan', {
