@@ -1,7 +1,15 @@
+import { isStandalonePlanSource, withPlanRequestTimeout } from './PlanRequest';
 import { IPlanPersistenceService, PlanSaveStatus, PlanSaveStatusListener } from '@core/types/services';
 
 const STORAGE_KEY = 'hview_current_plan';
 const STORAGE_TIME_KEY = 'hview_current_plan_timestamp';
+
+function validatePlanJson(json: string): void {
+  const value = JSON.parse(json);
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error('Plan JSON must be an object');
+  }
+}
 
 function sanitizePlanJson(rawJson: string): string {
   try {
@@ -27,23 +35,41 @@ export class PlanPersistenceService implements IPlanPersistenceService {
   private status: PlanSaveStatus = 'idle';
   private listeners = new Set<PlanSaveStatusListener>();
   private saveTimeout: number | null = null;
-  private lastSavedJson: string | null = null;
+  private latestPlanJson: string | null = null;
+  private saveGeneration = 0;
+  private planEpoch = 0;
+  private serverSaveQueue: Promise<void> | null = null;
+  private cachedSnapshot: string | null = null;
+  private needsServerSync = false;
+  private readonly storageKey: string;
+  private readonly storageTimeKey: string;
 
   constructor() {
+    const offline = typeof window !== 'undefined' &&
+      ((window as any).__STANDALONE_MODE__ || window.location.protocol === 'file:');
+    const path = typeof window !== 'undefined' ? window.location.pathname : undefined;
+    // Downloaded/hosted standalone documents on the same origin need separate working copies.
+    const suffix = offline && path && path !== '/' ? `:${encodeURIComponent(path)}` : '';
+    this.storageKey = STORAGE_KEY + suffix;
+    this.storageTimeKey = STORAGE_TIME_KEY + suffix;
     // Synchronous emergency persistence on window unload
     if (typeof window !== 'undefined') {
       window.addEventListener('beforeunload', () => {
-        if (this.lastSavedJson) {
+        if (this.latestPlanJson) {
+          // Closing a stale tab must not replace another tab's newer working copy.
           try {
-            localStorage.setItem(STORAGE_KEY, this.lastSavedJson);
-            localStorage.setItem(STORAGE_TIME_KEY, Date.now().toString());
-            // Attempt sendBeacon to Vite dev server
-            if (navigator.sendBeacon) {
-              const blob = new Blob([this.lastSavedJson], { type: 'application/json' });
+            if (this.cachedSnapshot !== null && localStorage.getItem(this.storageKey) !== this.cachedSnapshot) return;
+          } catch {
+            // A blocked read must not prevent retrying a locally unsaved snapshot.
+          }
+          this.writeCache(this.latestPlanJson);
+          try {
+            if (!this.isOffline() && this.needsServerSync && !this.serverSaveQueue && typeof navigator !== 'undefined' && navigator.sendBeacon) {
+              const blob = new Blob([this.latestPlanJson], { type: 'application/json' });
               navigator.sendBeacon('/api/save-plan', blob);
             }
-          } catch (e) {
-            // Ignore unload errors
+          } catch {
+            // Unload cannot wait for server confirmation.
           }
         }
       });
@@ -56,149 +82,263 @@ export class PlanPersistenceService implements IPlanPersistenceService {
 
   onSaveStatusChange(listener: PlanSaveStatusListener): () => void {
     this.listeners.add(listener);
-    listener(this.status);
+    this.notifyStatusListener(listener);
     return () => this.listeners.delete(listener);
   }
 
   private setStatus(status: PlanSaveStatus): void {
     this.status = status;
     for (const listener of this.listeners) {
-      listener(status);
+      this.notifyStatusListener(listener);
+    }
+  }
+
+  private notifyStatusListener(listener: PlanSaveStatusListener): void {
+    try {
+      listener(this.status);
+    } catch (err) {
+      console.warn('[PlanPersistenceService] Save status subscriber failed:', err);
+    }
+  }
+
+  private isOffline(): boolean {
+    return isStandalonePlanSource();
+  }
+
+  private readEmbeddedPlan(): string | null {
+    if (typeof window === 'undefined') return null;
+    const candidates: string[] = [];
+    try {
+      const raw = (window as any).__PLAN_DATA__;
+      if (raw) candidates.push(typeof raw === 'string' ? raw : JSON.stringify(raw));
+    } catch (err) {
+      console.warn('[PlanPersistenceService] Could not serialize embedded plan:', err);
+    }
+    const script = typeof document !== 'undefined' ? document.getElementById('plan-data') : null;
+    if (script?.textContent) candidates.push(script.textContent);
+    for (const embedded of candidates) {
+      try {
+        validatePlanJson(embedded);
+        return sanitizePlanJson(embedded);
+      } catch (err) {
+        console.warn('[PlanPersistenceService] Could not read embedded plan:', err);
+      }
+    }
+    return null;
+  }
+
+  /** A newly loaded/imported plan supersedes previous queued snapshots. */
+  setCurrentPlan(planJson: string): void {
+    validatePlanJson(planJson);
+    this.planEpoch++;
+    this.saveGeneration++;
+    if (this.saveTimeout !== null) clearTimeout(this.saveTimeout);
+    this.latestPlanJson = sanitizePlanJson(planJson);
+    this.needsServerSync = false;
+    this.writeCache(this.latestPlanJson);
+    this.setStatus('idle');
+  }
+
+  /** Stage every edit synchronously, before the server autosave debounce. */
+  cachePlan(planJson: string): boolean {
+    validatePlanJson(planJson);
+    this.latestPlanJson = sanitizePlanJson(planJson);
+    this.needsServerSync = true;
+    this.saveGeneration++;
+    if (this.saveTimeout !== null) clearTimeout(this.saveTimeout);
+    this.setStatus('saving');
+    return this.writeCache(this.latestPlanJson);
+  }
+
+  private writeCache(json: string): boolean {
+    if (typeof window === 'undefined') return false;
+    try {
+      localStorage.setItem(this.storageKey, json);
+      this.cachedSnapshot = json;
+    } catch (err) {
+      console.warn('[PlanPersistenceService] Failed to cache plan:', err);
+      return false;
+    }
+    try {
+      localStorage.setItem(this.storageTimeKey, Date.now().toString());
+    } catch {
+      // The plan itself was saved; timestamp metadata is optional.
+    }
+    return true;
+  }
+
+  private finishSave(generation: number, ok: boolean): void {
+    if (generation !== this.saveGeneration) return;
+    this.setStatus(ok ? 'saved' : 'error');
+    if (ok) {
+      this.saveTimeout = globalThis.setTimeout(() => {
+        if (generation === this.saveGeneration && this.status === 'saved') {
+          this.setStatus('idle');
+        }
+      }, 3000) as unknown as number;
+    }
+  }
+
+  private async withServerLock<T>(operation: () => Promise<T>): Promise<T> {
+    const previous = this.serverSaveQueue;
+    let release!: () => void;
+    const queued = new Promise<void>((resolve) => { release = resolve; });
+    this.serverSaveQueue = queued;
+    if (previous) await previous;
+    try {
+      return await operation();
+    } finally {
+      if (this.serverSaveQueue === queued) this.serverSaveQueue = null;
+      release();
+    }
+  }
+
+  private invalidateCache(): void {
+    this.cachedSnapshot = null;
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.removeItem(this.storageKey);
+      localStorage.removeItem(this.storageTimeKey);
+    } catch {
+      // Blocked storage is also handled by loadPlan's fallback path.
     }
   }
 
   async savePlan(planJson: string): Promise<boolean> {
-    const cleanJson = sanitizePlanJson(planJson);
-    this.lastSavedJson = cleanJson;
-    this.setStatus('saving');
-
-    // 1. Instant client-side backup in localStorage
+    let cached: boolean;
     try {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(STORAGE_KEY, cleanJson);
-        localStorage.setItem(STORAGE_TIME_KEY, Date.now().toString());
-      }
+      cached = this.cachePlan(planJson);
     } catch (err) {
-      console.warn('[PlanPersistenceService] Failed to cache plan in localStorage:', err);
-    }
-
-    // 2. Persist to disk via Vite dev server endpoint
-    try {
-      const res = await fetch('/api/save-plan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: cleanJson,
-      });
-
-      if (!res.ok) {
-        throw new Error(`Server returned ${res.status}: ${res.statusText}`);
-      }
-
-      this.setStatus('saved');
-
-      // Revert status to idle after 3 seconds
-      if (this.saveTimeout) {
-        clearTimeout(this.saveTimeout);
-      }
-      this.saveTimeout = window.setTimeout(() => {
-        if (this.status === 'saved') {
-          this.setStatus('idle');
-        }
-      }, 3000);
-
-      return true;
-    } catch (err) {
-      // In standalone offline mode or file:/// protocol, localStorage is primary storage
-      if (typeof window !== 'undefined' && ((window as any).__STANDALONE_MODE__ || window.location.protocol === 'file:')) {
-        this.setStatus('saved');
-        if (this.saveTimeout) clearTimeout(this.saveTimeout);
-        this.saveTimeout = window.setTimeout(() => {
-          if (this.status === 'saved') this.setStatus('idle');
-        }, 2000);
-        return true;
-      }
-      console.warn('[PlanPersistenceService] Failed to save plan to server disk:', err);
-      // Even if server failed, localStorage succeeded
+      console.warn('[PlanPersistenceService] Invalid plan JSON:', err);
+      this.saveGeneration++;
       this.setStatus('error');
       return false;
     }
+    const cleanJson = this.latestPlanJson!;
+    const generation = this.saveGeneration;
+    const epoch = this.planEpoch;
+
+    // Standalone HTML owns its embedded plan and browser working copy, not a
+    // hosting site's /sample.plan. Do not report an unrelated host API as saved.
+    if (this.isOffline()) {
+      this.needsServerSync = false;
+      this.finishSave(generation, cached);
+      return cached;
+    }
+
+    const ok = await this.withServerLock(async () => {
+      // New documents and newer edits supersede snapshots still waiting to write.
+      if (epoch !== this.planEpoch || generation !== this.saveGeneration) return false;
+      try {
+        const result = await withPlanRequestTimeout(async (signal) => {
+          const res = await fetch('/api/save-plan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: cleanJson,
+            signal,
+          });
+          if (!res.ok) throw new Error(`Server returned ${res.status}: ${res.statusText}`);
+          return res.json();
+        });
+        if (result?.success !== true) throw new Error('Server did not acknowledge saving the plan');
+        if (generation === this.saveGeneration) this.needsServerSync = false;
+        if (!cached && generation === this.saveGeneration) this.invalidateCache();
+        return true;
+      } catch (err) {
+        console.warn('[PlanPersistenceService] Failed to save plan to server:', err);
+        return false;
+      }
+    });
+    this.finishSave(generation, ok);
+    return ok;
   }
 
   async loadPlan(): Promise<string> {
-    try {
-      // 1. Fetch public/sample.plan with cache-busting to bypass browser HTTP cache
-      const res = await fetch(`/sample.plan?t=${Date.now()}`, {
-        cache: 'no-cache',
-        headers: {
-          'Pragma': 'no-cache',
-          'Cache-Control': 'no-cache',
-        },
-      });
-
-      if (res.ok) {
-        const text = await res.text();
-        if (text && text.trim().startsWith('{')) {
-          const cleanText = sanitizePlanJson(text);
-          this.lastSavedJson = cleanText;
-          if (typeof window !== 'undefined') {
-            try {
-              localStorage.setItem(STORAGE_KEY, cleanText);
-              localStorage.setItem(STORAGE_TIME_KEY, Date.now().toString());
-            } catch {}
-          }
-          return cleanText;
-        }
-      }
-    } catch (err) {
-      console.warn('[PlanPersistenceService] Could not fetch /sample.plan from server:', err);
-    }
-
-    // 2. Fallback to localStorage if server fetch failed
+    const generation = this.saveGeneration;
+    // Browser edits are the working copy. Never replace them with a stale
+    // server template when reconnecting after an offline save.
     if (typeof window !== 'undefined') {
-      const cached = localStorage.getItem(STORAGE_KEY);
-      if (cached && cached.trim().startsWith('{')) {
-        const cleanCached = sanitizePlanJson(cached);
-        this.lastSavedJson = cleanCached;
-        return cleanCached;
+      try {
+        const cached = localStorage.getItem(this.storageKey);
+        if (cached && cached.trim().startsWith('{')) {
+          validatePlanJson(cached);
+          this.latestPlanJson = sanitizePlanJson(cached);
+          this.cachedSnapshot = cached;
+          return this.latestPlanJson;
+        }
+      } catch (err) {
+        console.warn('[PlanPersistenceService] Could not read cached plan:', err);
       }
 
-      // 3. Fallback to inlined plan in document if available (standalone offline HTML mode)
-      if ((window as any).__PLAN_DATA__) {
-        const raw = (window as any).__PLAN_DATA__;
-        const text = typeof raw === 'string' ? raw : JSON.stringify(raw);
-        const cleanText = sanitizePlanJson(text);
-        this.lastSavedJson = cleanText;
-        return cleanText;
-      }
-      const embeddedScript = document.getElementById('plan-data');
-      if (embeddedScript && embeddedScript.textContent && embeddedScript.textContent.trim().startsWith('{')) {
-        const cleanText = sanitizePlanJson(embeddedScript.textContent.trim());
-        this.lastSavedJson = cleanText;
-        return cleanText;
+      // A downloaded editor can start from its embedded plan without network.
+      const embedded = this.readEmbeddedPlan();
+      if (embedded) {
+        this.latestPlanJson = embedded;
+        return embedded;
       }
     }
 
+    if (this.isOffline()) throw new Error('Unable to load an offline plan from storage or embedded data.');
+    try {
+      const text = await withPlanRequestTimeout(async (signal) => {
+        const res = await fetch(`/sample.plan?t=${Date.now()}`, {
+          cache: 'no-cache',
+          headers: { 'Pragma': 'no-cache', 'Cache-Control': 'no-cache' },
+          signal,
+        });
+        if (!res.ok) throw new Error(`Failed to load plan: HTTP ${res.status}`);
+        const text = await res.text();
+        validatePlanJson(text);
+        return text;
+      });
+      if (generation !== this.saveGeneration && this.latestPlanJson) return this.latestPlanJson;
+      this.latestPlanJson = sanitizePlanJson(text);
+      this.writeCache(this.latestPlanJson);
+      return this.latestPlanJson;
+    } catch (err) {
+      console.warn('[PlanPersistenceService] Could not fetch /sample.plan:', err);
+    }
+    if (generation !== this.saveGeneration && this.latestPlanJson) return this.latestPlanJson;
     throw new Error('Unable to load plan from disk or storage.');
   }
 
   async resetToTemplate(): Promise<string> {
+    const generation = ++this.saveGeneration;
+    const epoch = this.planEpoch;
+    if (this.saveTimeout !== null) clearTimeout(this.saveTimeout);
     this.setStatus('saving');
     try {
-      const res = await fetch('/api/reset-plan', {
-        method: 'POST',
+      if (this.isOffline()) {
+        const embedded = this.readEmbeddedPlan();
+        if (!embedded) throw new Error('No embedded plan available to reset');
+        if (!this.writeCache(embedded)) throw new Error('Could not store the reset plan');
+        this.latestPlanJson = embedded;
+        this.needsServerSync = false;
+        this.setStatus('idle');
+        return embedded;
+      }
+      // Resets and saves share one queue in both directions.
+      const planJson = await this.withServerLock(async () => {
+        if (epoch !== this.planEpoch) throw new Error('Reset superseded by a newly loaded plan');
+        const data = await withPlanRequestTimeout(async (signal) => {
+          const res = await fetch('/api/reset-plan', { method: 'POST', signal });
+          if (!res.ok) throw new Error(`Failed to reset plan: ${res.statusText}`);
+          return res.json();
+        });
+        if (data?.success === false) throw new Error('Server rejected the reset');
+        if (typeof data?.plan !== 'string') throw new Error('Reset response is missing its plan');
+        validatePlanJson(data.plan);
+        return sanitizePlanJson(data.plan);
       });
-      if (!res.ok) {
-        throw new Error(`Failed to reset plan: ${res.statusText}`);
+      if (generation === this.saveGeneration) {
+        this.latestPlanJson = planJson;
+        this.needsServerSync = false;
+        if (!this.writeCache(planJson)) this.invalidateCache();
+        this.setStatus('idle');
       }
-      const data = await res.json();
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem(STORAGE_KEY);
-        localStorage.removeItem(STORAGE_TIME_KEY);
-      }
-      this.setStatus('idle');
-      return data.plan;
+      return planJson;
     } catch (err) {
-      this.setStatus('error');
+      if (generation === this.saveGeneration) this.setStatus('error');
       throw err;
     }
   }

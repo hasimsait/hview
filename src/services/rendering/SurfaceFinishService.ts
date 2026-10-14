@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { SurfaceFinishConfig, TileLayoutPattern } from '@core/types/plan';
+import { normalizeSurfaceLayer } from '@core/types/surfaceLayer';
 import { ISurfaceFinishService } from '@core/types/services';
 import { ITileCatalogService, TileEntry } from '@services/tile-catalog/TileCatalogService';
 
@@ -221,6 +222,7 @@ const PORCELAIN_PRESETS: Record<string, { roughness: number; metalness: number; 
 };
 
 export class SurfaceFinishService implements ISurfaceFinishService {
+  private layerMaterials = new Map<THREE.Material, number>();
   ensureLocalMetricBounds(mesh: THREE.Mesh): void {
     ensureLocalMetricBounds(mesh);
   }
@@ -266,7 +268,8 @@ export class SurfaceFinishService implements ISurfaceFinishService {
     const mappingModeStr = config.mappingMode || 'def';
     const scaleStr = config.scale !== undefined ? `s${config.scale}` : 'sdef';
     const backingColorStr = config.backingColor ? `b${config.backingColor}` : 'bdef';
-    const key = `${config.type}_${config.variant || 'default'}_${config.color || 'none'}_${backingColorStr}_${roughnessStr}_${metalnessStr}_${rotation}_${pattern}_${groutWidth}_${groutColor}_${mappingModeStr}_${scaleStr}_${side}_${depthWrite}_${projection}`;
+    const layer = normalizeSurfaceLayer(config.layer);
+    const key = `${config.type}_${config.variant || 'default'}_${config.color || 'none'}_${backingColorStr}_${roughnessStr}_${metalnessStr}_${rotation}_${pattern}_${groutWidth}_${groutColor}_${mappingModeStr}_${scaleStr}_${side}_${depthWrite}_${projection}_${layer}`;
 
     if (this.materials.has(key)) {
       return this.materials.get(key)!;
@@ -462,6 +465,17 @@ export class SurfaceFinishService implements ISurfaceFinishService {
       }
     }
 
+    // Compress the layer labels into adjacent ranks. Large integer gaps must
+    // not create large depth shifts that hide physically nearer geometry.
+    this.layerMaterials.set(mat, layer);
+    const layers = [...new Set([0, ...this.layerMaterials.values()])].sort((a, b) => a - b);
+    const zero = layers.indexOf(0);
+    for (const [material, priority] of this.layerMaterials) {
+      const rank = layers.indexOf(priority) - zero;
+      material.polygonOffset = rank !== 0;
+      material.polygonOffsetFactor = -rank;
+      material.polygonOffsetUnits = -4 * rank;
+    }
     this.materials.set(key, mat);
     return mat;
   }

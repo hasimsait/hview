@@ -38,6 +38,8 @@ are documented in [tests/README.md](tests/README.md).
 | `npm run dev` | Starts the Vite development server on port 3000 with HMR and the `/api/save-plan` local persistence endpoint. |
 | `npm run build` | Runs TypeScript type checking (`tsc`), compiles the Vite production bundle, and generates both standalone offline HTML distributions in `dist/`. |
 | `npm run build:viewer` | Bundles and regenerates the standalone offline iPad HTML viewer and editor (`dist/ipad_viewer.html` and `dist/hview_editor.html`). |
+| `npm test` | Runs both the Vitest suite and 71 save/export/layer regressions after building HTML files; known unresolved tests remain enabled. |
+| `npm run test:layers:browser` | Checks surface overlap pixels and integer layer controls in headless Chromium (requires Chromium). |
 | `npm run preview` | Serves the production build locally using Vite's preview server. |
 
 ---
@@ -86,7 +88,8 @@ For job-site presentation to craftsmen where no web server can be deployed, HVie
 2. **Standalone Full Editor** (`dist/hview_editor.html`):
    - Complete React 19 editor packed into a single HTML file with all sidebars, 100 wall paint swatches, wood species, and acoustic lambri pickers.
    - Inlined base64 textures and tile catalog.
-   - Changes automatically persist across reloads in `localStorage`, and updated `.plan` or `.html` files can be exported directly from the header on the iPad.
+   - Changes automatically persist across reloads in browser storage scoped to the document path. Updated `.plan` or `.html` files can be exported directly from the header on the iPad. Standalone saves use local storage, and reset restores the file’s embedded original plan without contacting a hosting API.
+   - Editor and viewer export templates are embedded alongside shared textures, so downloaded editors can export fresh HTML files offline. Re-exported editors retain this capability without recursively duplicating templates.
 
 > **Tip for iPad Users**: Apple sandboxes Safari from opening local `file:///` URLs directly from the Files app. To open in a full browser:
 > - Long-press the file in **Files** -> **Share** -> choose **Microsoft Edge**, **Chrome**, or **Documents by Readdle**.
@@ -107,7 +110,7 @@ For job-site presentation to craftsmen where no web server can be deployed, HVie
 >    - **[`PlanParserService.ts`](src/services/plan/PlanParserService.ts)**: You **MUST** update `parse()` to restore those properties back into the strongly-typed `PlanDocument` model.
 > 2. **State & Auto-Save Trigger**:
 >    - In **[`PlanManagerService.ts`](src/services/plan/PlanManagerService.ts)**, every mutation method **MUST** set `this.isDirty = true` and invoke `this.notifyPlanChange()`.
->    - This automatically activates the debounced auto-save hook in `PlanPersistenceService` to persist changes to `public/sample.plan` and browser storage.
+>    - Each mutation immediately caches its serialized working copy in browser storage. Server saves remain debounced and are sent in order; only the latest snapshot can update save status or clear the dirty flag.
 > 3. **Working Plan vs Base Template**:
 >    - **`public/sample.plan`**: The active, editable working plan served during development and runtime.
 >    - **`sample.plan`** (root): The pristine baseline template. It is copied to `public/sample.plan` on initial launch if no working plan exists, and can be restored via the reset action.
@@ -115,6 +118,14 @@ For job-site presentation to craftsmen where no web server can be deployed, HVie
 >    - Never store user modifications only in temporary Three.js mesh state or component local state without syncing them to `PlanDocument` and saving to `public/sample.plan`.
 
 ---
+
+## Surface layers
+
+In the surface finish picker, use **Surface layer** to resolve coincident finishes. Layer 0 is the default; higher integers cover lower integers on the same plane. For example, C at 3 covers B at 2, while B covers A at 1 and D at 0 wherever they overlap. Plus/minus buttons and signed integer entry support values from -1000 to 1000.
+
+Choose a finish before adjusting its layer. Changing the finish or color preserves its layer; resetting the finish returns to the default. Layers are saved with wall faces/edges, floors, columns, and furniture finishes/sections and retained in exported standalone HTML.
+
+Layer priority uses small ranked depth offsets rather than moving geometry or disabling depth testing. Physically nearer objects still occlude the surfaces. Transparent finishes retain their intended transparency.
 
 ## Core Architecture & Patterns
 

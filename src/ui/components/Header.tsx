@@ -662,12 +662,12 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Reset to pristine template */}
         <button
           onClick={async () => {
-            if (window.confirm('Reset public/sample.plan to pristine template? All custom modifications will be reverted.')) {
+            if (window.confirm('Reset this plan to its original version? All custom modifications will be reverted.')) {
               await planManager.resetToTemplate?.();
             }
           }}
           className="p-1.5 text-xs font-medium rounded-lg border border-slate-700 bg-slate-800/60 hover:bg-slate-700/80 text-slate-400 hover:text-slate-200 transition-colors"
-          title="Reset to pristine template sample.plan"
+          title="Reset plan to its original version"
         >
           <RotateCcw className="w-3.5 h-3.5" />
         </button>

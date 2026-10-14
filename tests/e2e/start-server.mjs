@@ -8,7 +8,7 @@ import { spawn, spawnSync } from 'node:child_process';
 const root = resolve('.');
 const sandbox = mkdtempSync(join(tmpdir(), 'hview-e2e-'));
 const checkout = join(sandbox, 'app');
-const exclude = new Set(['.git', 'node_modules', 'dist', 'coverage', 'test-results', 'playwright-report', 'scratch']);
+const exclude = new Set(['.git', 'node_modules', 'dist', 'coverage', 'test-results', 'playwright-report', 'scratch', 'work']);
 cpSync(root, checkout, { recursive: true, filter: path => !exclude.has(basename(path)) });
 symlinkSync(join(root, 'node_modules'), join(checkout, 'node_modules'), 'dir');
 // Build templates from current source, never overwrite tracked public templates.

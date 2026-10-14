@@ -1,3 +1,4 @@
+import { EXPORT_TEMPLATES_ID, StandaloneTemplates, restoreExportTemplate, setScriptContent, escapeScriptJson } from './StandaloneHtml';
 import { PlanDocument } from '@core/types/plan';
 import { IPlanManagerService, IPlanExportService, IStandaloneViewerExportService } from '@core/types/services';
 
@@ -7,6 +8,22 @@ export class StandaloneViewerExportService implements IStandaloneViewerExportSer
     private planExport: IPlanExportService
   ) {}
 
+  private async loadTemplate(kind: keyof StandaloneTemplates): Promise<string> {
+    const embedded = document.getElementById(EXPORT_TEMPLATES_ID)?.textContent;
+    if (embedded?.trim()) {
+      const templates: StandaloneTemplates = JSON.parse(embedded);
+      const textures = document.getElementById('embedded-textures')?.textContent;
+      const catalog = document.getElementById('tile-catalog-data')?.textContent;
+      if (!textures || !catalog) throw new Error('Missing embedded standalone resources');
+      return restoreExportTemplate(templates, kind, textures, catalog);
+    }
+
+    const path = kind === 'viewer' ? '/ipad_viewer_template.html' : '/hview_editor_template.html';
+    const res = await fetch(path);
+    if (!res.ok) throw new Error(`Failed to load ${kind} template: HTTP ${res.status}`);
+    return res.text();
+  }
+
   public async exportStandaloneViewer(plan?: PlanDocument, fileName?: string): Promise<void> {
     const targetPlan = plan || this.planManager.getPlan();
     if (!targetPlan) {
@@ -14,14 +31,10 @@ export class StandaloneViewerExportService implements IStandaloneViewerExportSer
       return;
     }
 
-    // 1. Fetch template HTML (served from /ipad_viewer_template.html)
+    // 1. Use embedded templates offline, or load the hosted template.
     let templateHtml: string;
     try {
-      const res = await fetch('/ipad_viewer_template.html');
-      if (!res.ok) {
-        throw new Error(`Failed to load viewer template: HTTP ${res.status}`);
-      }
-      templateHtml = await res.text();
+      templateHtml = await this.loadTemplate('viewer');
     } catch (err) {
       console.error('[StandaloneViewerExportService] Error fetching template:', err);
       alert('Unable to load viewer template. Please ensure the template file is generated.');
@@ -32,7 +45,7 @@ export class StandaloneViewerExportService implements IStandaloneViewerExportSer
     const planJson = this.planExport.exportPlan(targetPlan);
 
     // 3. Inject active plan into the template
-    const finalHtml = templateHtml.replace('/* __PLAN_DATA_PLACEHOLDER__ */', planJson);
+    const finalHtml = setScriptContent(templateHtml, 'plan-data', escapeScriptJson(planJson));
 
     // 4. Trigger browser download
     const blob = new Blob([finalHtml], { type: 'text/html;charset=utf-8' });
@@ -55,14 +68,10 @@ export class StandaloneViewerExportService implements IStandaloneViewerExportSer
       return;
     }
 
-    // 1. Fetch template HTML (served from /hview_editor_template.html)
+    // 1. Use embedded templates offline, or load the hosted template.
     let templateHtml: string;
     try {
-      const res = await fetch('/hview_editor_template.html');
-      if (!res.ok) {
-        throw new Error(`Failed to load editor template: HTTP ${res.status}`);
-      }
-      templateHtml = await res.text();
+      templateHtml = await this.loadTemplate('editor');
     } catch (err) {
       console.error('[StandaloneViewerExportService] Error fetching editor template:', err);
       alert('Unable to load editor template. Please ensure the template file is generated.');
@@ -73,7 +82,7 @@ export class StandaloneViewerExportService implements IStandaloneViewerExportSer
     const planJson = this.planExport.exportPlan(targetPlan);
 
     // 3. Inject active plan into the template
-    const finalHtml = templateHtml.replace('/* __PLAN_DATA_PLACEHOLDER__ */', planJson);
+    const finalHtml = setScriptContent(templateHtml, 'plan-data', escapeScriptJson(planJson));
 
     // 4. Trigger browser download
     const blob = new Blob([finalHtml], { type: 'text/html;charset=utf-8' });

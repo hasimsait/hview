@@ -108,7 +108,10 @@ test('downloaded editor saves edits offline, reloads, and exports the updated pl
     await offline.getByRole('button', { name: /2D Plan/ }).click(); await offline.mouse.click(point.x, point.y);
     await expect(offline.getByText('ID: sofa', { exact: true })).toBeVisible();
     await numberField(offline, 'Width (X)').fill('225');
-    await expect.poll(async () => offline.evaluate(() => JSON.parse(localStorage.getItem('hview_current_plan')!).plan.items.sofa.width)).toBe(225);
+    await expect.poll(async () => offline.evaluate(() => {
+      const key = `hview_current_plan:${encodeURIComponent(window.location.pathname)}`;
+      return JSON.parse(localStorage.getItem(key)!).plan.items.sofa.width;
+    })).toBe(225);
     await offline.reload(); await expect(offline.getByText('1 Objects')).toBeVisible();
     await offline.getByRole('button', { name: /2D Plan/ }).click(); await offline.mouse.click(point.x, point.y);
     await expect(numberField(offline, 'Width (X)')).toHaveValue('225');
