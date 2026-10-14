@@ -1,21 +1,15 @@
 import { WallObject } from '../entities/WallObject';
-import { ColumnObject } from '../entities/ColumnObject';
 import { FurnitureObject } from '../entities/furniture/FurnitureObject';
 import { BasinLowerFurniture } from '../entities/furniture/BasinLowerFurniture';
 import { ShelvingFurniture } from '../entities/furniture/ShelvingFurniture';
 import { LightFixtureFurniture } from '../entities/furniture/LightFixtureFurniture';
 import { GenericFurniture } from '../entities/furniture/GenericFurniture';
-import { WallEntity, ColumnEntity, FurnitureEntity } from '../../core/types/plan';
+import { WallEntity, FurnitureEntity } from '../../core/types/plan';
 
 export class SceneObjectFactory {
   static createWall(entity: WallEntity): WallObject {
     const wall = new WallObject(entity.id);
     return wall.fromEntity(entity);
-  }
-
-  static createColumn(entity: ColumnEntity): ColumnObject {
-    const col = new ColumnObject(entity.id, entity.name, entity.type);
-    return col.fromEntity(entity);
   }
 
   static createFurniture(entity: FurnitureEntity): FurnitureObject {

@@ -79,6 +79,8 @@ export const WallInspector: React.FC<WallInspectorProps> = ({ wall, onClose }) =
 
   const handleTargetChange = (targetId: string) => {
     setActiveTarget(targetId);
+    const side = getWallTargetStrategy(targetId).wallSide;
+    if (side) planManager.setSelectedWall(wall, side);
     if (targetId === 'A' && wall.roomSideA) {
       setSelectedRoomToApply(wall.roomSideA);
     } else if (targetId === 'B' && wall.roomSideB) {
@@ -122,7 +124,7 @@ export const WallInspector: React.FC<WallInspectorProps> = ({ wall, onClose }) =
   };
 
   return (
-    <div className="absolute right-4 top-4 w-84 max-h-[calc(100vh-5.5rem)] overflow-y-auto bg-slate-900/95 backdrop-blur-md border border-slate-700 rounded-xl shadow-2xl p-4 text-xs z-30 animate-in fade-in slide-in-from-right-2 duration-200">
+    <div className="absolute right-4 top-4 w-[21rem] max-w-[calc(100%-2rem)] max-h-[calc(100%-2rem)] overflow-y-auto bg-slate-900/95 backdrop-blur-md border border-slate-700 rounded-xl shadow-2xl p-4 text-xs z-30 animate-in fade-in slide-in-from-right-2 duration-200">
       {/* Header */}
       <div className="flex items-start justify-between pb-3 border-b border-slate-800">
         <div>

@@ -30,6 +30,9 @@ When running `npm run dev`, open [http://localhost:3000](http://localhost:3000) 
 
 ## Available NPM Scripts
 
+Test commands, coverage scope, browser setup, and confirmed regression failures
+are documented in [tests/README.md](tests/README.md).
+
 | Command | Description |
 | :--- | :--- |
 | `npm run dev` | Starts the Vite development server on port 3000 with HMR and the `/api/save-plan` local persistence endpoint. |

@@ -41,7 +41,7 @@ export interface ILightEmitter {
 }
 
 export abstract class SceneObject {
-  abstract readonly objectType: 'wall' | 'column' | 'furniture' | 'room';
+  abstract readonly objectType: 'wall' | 'furniture' | 'room';
   id: string;
   name: string;
   position: Vector3D;

@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import { IInteractionService, ISceneService, IPlanManagerService } from '@core/types/services';
-import { FurnitureEntity, OpeningEntity, WallEntity, ColumnEntity, WallSide, ColumnSide, RoomEntity } from '@core/types/plan';
+import { FurnitureEntity, OpeningEntity, WallEntity, WallSide, RoomEntity } from '@core/types/plan';
+import { intersectVisibleObjects } from '@services/interaction/VisibleRaycast';
 import { ThreeSceneService } from '@services/rendering/ThreeSceneService';
 
 export class InteractionService implements IInteractionService {
@@ -103,10 +104,6 @@ export class InteractionService implements IInteractionService {
 
     this.planManager.onWallSelectionChange((selected) => {
       this.handleExternalWallSelection(selected);
-    });
-
-    this.planManager.onColumnSelectionChange((selected) => {
-      this.handleExternalColumnSelection(selected);
     });
 
     this.planManager.onRoomSelectionChange((selected) => {
@@ -246,7 +243,7 @@ export class InteractionService implements IInteractionService {
     if (wallsGroup && wallsGroup.visible) candidateRoots.push(...wallsGroup.children);
     if (floorsGroup && floorsGroup.visible) candidateRoots.push(...floorsGroup.children);
 
-    const intersects = this.raycaster.intersectObjects(candidateRoots, true);
+    const intersects = intersectVisibleObjects(this.raycaster, candidateRoots);
 
     for (const intersect of intersects) {
       // 1. Skip edge outlines (LineSegments) so they don't block clicking actual surfaces
@@ -276,7 +273,6 @@ export class InteractionService implements IInteractionService {
       if (foundDoorOpening) {
         this.planManager.setSelectedFurniture(null);
         this.planManager.setSelectedWall(null);
-        this.planManager.setSelectedColumn(null);
         this.planManager.setSelectedOpening(foundDoorOpening);
         return;
       }
@@ -301,40 +297,8 @@ export class InteractionService implements IInteractionService {
         }
         this.planManager.setSelectedOpening(null);
         this.planManager.setSelectedWall(null);
-        this.planManager.setSelectedColumn(null);
         this.planManager.setSelectedFurniture(foundEntity, clickedSection);
         return;
-      }
-
-      // Check if it's a column or chimney shaft
-      let foundColId: string | null = null;
-      curr = obj;
-      while (curr && curr !== wallsGroup && curr !== scene) {
-        if (curr.userData?.type === 'column' && curr.userData?.id) {
-          foundColId = curr.userData.id;
-          break;
-        }
-        curr = curr.parent;
-      }
-      if (foundColId) {
-        const plan = this.planManager.getPlan();
-        const col = plan?.columns?.find((c: ColumnEntity) => c.id === foundColId);
-        if (col) {
-          let clickedSide: ColumnSide = 'front';
-          const face = intersect.face;
-          if (face?.normal) {
-            const norm = face.normal;
-            if (norm.z > 0.5) clickedSide = 'front';
-            else if (norm.z < -0.5) clickedSide = 'back';
-            else if (norm.x > 0.5) clickedSide = 'right';
-            else if (norm.x < -0.5) clickedSide = 'left';
-          }
-          this.planManager.setSelectedFurniture(null);
-          this.planManager.setSelectedOpening(null);
-          this.planManager.setSelectedWall(null);
-          this.planManager.setSelectedColumn(col, clickedSide);
-          return;
-        }
       }
 
       // Check if it's a wall or opening attached to a wall (e.g. window frame/mullion)
@@ -353,7 +317,6 @@ export class InteractionService implements IInteractionService {
         if (obj.userData?.section === 'baseboard' || wallMesh.userData?.section === 'baseboard') {
           this.planManager.setSelectedFurniture(null);
           this.planManager.setSelectedOpening(null);
-          this.planManager.setSelectedColumn(null);
           this.planManager.setSelectedRoom(null);
           this.planManager.setSelectedWall(foundWall, 'baseboard');
           return;
@@ -361,10 +324,13 @@ export class InteractionService implements IInteractionService {
 
         const face = intersect.face;
         let clickedSide: WallSide = 'A';
-        if (face && (face.materialIndex === 2 || Math.abs(face.normal.z) < 0.5)) {
+        if (obj.userData?.type === 'wall_frame') {
           clickedSide = 'edges';
         } else if (face) {
-          clickedSide = face.normal.z >= 0 ? 'A' : 'B';
+          // Wall geometry groups distinguish all four vertical faces. Normal
+          // tests used to collapse both end caps into a single edges selection.
+          const surfaces: WallSide[] = ['A', 'B', 'edge_start', 'edge_end', 'edge_top', 'edges'];
+          clickedSide = surfaces[face.materialIndex ?? 0] || 'edges';
         } else {
           const localPoint = wallMesh.worldToLocal(hitPoint.clone());
           clickedSide = localPoint.z >= 0 ? 'A' : 'B';
@@ -372,7 +338,6 @@ export class InteractionService implements IInteractionService {
 
         this.planManager.setSelectedFurniture(null);
         this.planManager.setSelectedOpening(null);
-        this.planManager.setSelectedColumn(null);
         this.planManager.setSelectedRoom(null);
         this.planManager.setSelectedWall(foundWall, clickedSide);
         return;
@@ -399,7 +364,6 @@ export class InteractionService implements IInteractionService {
           this.planManager.setSelectedFurniture(null);
           this.planManager.setSelectedOpening(null);
           this.planManager.setSelectedWall(null);
-          this.planManager.setSelectedColumn(null);
           this.planManager.setSelectedRoom(room);
           return;
         }
@@ -410,7 +374,6 @@ export class InteractionService implements IInteractionService {
     this.planManager.setSelectedFurniture(null);
     this.planManager.setSelectedOpening(null);
     this.planManager.setSelectedWall(null);
-    this.planManager.setSelectedColumn(null);
     this.planManager.setSelectedRoom(null);
   }
 
@@ -478,18 +441,6 @@ export class InteractionService implements IInteractionService {
   }
 
   private handleExternalWallSelection(selected: WallEntity | null): void {
-    if (!this.sceneService || !this.transformControls) return;
-    if (selected) {
-      if (this.selectedObject) {
-        this.selectedObject = null;
-        if (this.transformControls.object) {
-          this.transformControls.detach();
-        }
-      }
-    }
-  }
-
-  private handleExternalColumnSelection(selected: ColumnEntity | null): void {
     if (!this.sceneService || !this.transformControls) return;
     if (selected) {
       if (this.selectedObject) {

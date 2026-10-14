@@ -141,7 +141,7 @@ export const Inspector: React.FC<InspectorProps> = ({
   const currentDeg = Math.round(((180 - (item.rotationY * 180) / Math.PI) % 360 + 360) % 360);
 
   return (
-    <div className="absolute right-4 top-4 w-80 max-h-[calc(100vh-5.5rem)] overflow-y-auto bg-slate-900/95 backdrop-blur-md border border-slate-800 rounded-xl shadow-2xl p-4 text-xs z-30 animate-in fade-in slide-in-from-right-2 duration-200">
+    <div className="absolute right-4 top-4 w-80 max-h-[calc(100%-2rem)] overflow-y-auto bg-slate-900/95 backdrop-blur-md border border-slate-800 rounded-xl shadow-2xl p-4 text-xs z-30 animate-in fade-in slide-in-from-right-2 duration-200">
       {/* Header */}
       <div className="flex items-start justify-between pb-3 border-b border-slate-800">
         <div>

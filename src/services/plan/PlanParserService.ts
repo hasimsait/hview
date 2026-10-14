@@ -7,9 +7,9 @@ import {
   FurnitureCategory,
   OpeningType,
   Point2D,
-  ColumnEntity,
 } from '@core/types/plan';
 import { IPlanParserService, IAssetRegistryService } from '@core/types/services';
+import { migrateColumnWalls } from './ColumnWallMigration';
 import { WallJunctionService } from '../rendering/WallJunctionService';
 
 export class PlanParserService implements IPlanParserService {
@@ -36,13 +36,18 @@ export class PlanParserService implements IPlanParserService {
         return true;
       });
       candidateDoc.walls = activeWalls;
+      candidateDoc.totalHeight ||= 2.7;
+      this.mapWallRooms(candidateDoc.walls, candidateDoc.rooms);
+      migrateColumnWalls(candidateDoc, false);
+      this.excludeTinySpaces(candidateDoc);
+      this.mapWallRooms(candidateDoc.walls, candidateDoc.rooms);
       WallJunctionService.computeJunctionOffsets(candidateDoc.walls);
       return {
         version: candidateDoc.version || 3,
         totalHeight: candidateDoc.totalHeight || 2.7,
         walls: candidateDoc.walls,
         rooms: candidateDoc.rooms,
-        columns: candidateDoc.columns || [],
+        columns: [],
         furniture: candidateDoc.furniture,
         rawPlan: raw,
       };
@@ -127,6 +132,7 @@ export class PlanParserService implements IPlanParserService {
 
         walls.push({
           id: wallId,
+          isColumn: w.isColumn || undefined,
           p1,
           p2,
           thickness,
@@ -188,7 +194,11 @@ export class PlanParserService implements IPlanParserService {
           y: pt.y / 100,
         }));
 
-        const area = r.area || 0;
+        const polygonArea = Math.abs(polygon.reduce((sum: number, pt: Point2D, i: number) => {
+          const next = polygon[(i + 1) % polygon.length];
+          return sum + pt.x * next.y - next.x * pt.y;
+        }, 0)) / 2;
+        const area = typeof r.area === 'number' && r.area > 0 ? r.area : polygonArea;
         let name = r.title;
         if (!name || name === 'none') {
           name = this.inferRoomName(roomId, plan.items, area, roomIdx);
@@ -210,16 +220,8 @@ export class PlanParserService implements IPlanParserService {
       }
     }
 
-    // Map walls to the room polygons they border and determine Side A vs Side B
-    for (const wall of walls) {
-      wall.roomIds = [];
-      for (const room of rooms) {
-        if (this.isWallOnRoomBoundary(wall, room.polygon)) {
-          wall.roomIds.push(room.id);
-        }
-      }
-      this.assignWallRoomSides(wall, rooms);
-    }
+    // Resolve original boundaries before converting columns and tiny spaces.
+    this.mapWallRooms(walls, rooms);
 
     const furniture: FurnitureEntity[] = [];
     if (plan.items && typeof plan.items === 'object') {
@@ -329,23 +331,35 @@ export class PlanParserService implements IPlanParserService {
       }
     }
 
-    const columns: ColumnEntity[] = [];
-    const rawColumns = plan.columns || raw.columns;
-    if (rawColumns && Array.isArray(rawColumns)) {
-      for (const c of rawColumns) {
-        columns.push(c as ColumnEntity);
-      }
-    }
-
-    return {
+    const document: PlanDocument = {
       version: plan.v || 3,
       totalHeight,
       walls,
       rooms,
-      columns,
+      columns: plan.columns || raw.columns || [],
       furniture,
       rawPlan: raw,
     };
+    migrateColumnWalls(document);
+    this.excludeTinySpaces(document);
+    this.mapWallRooms(document.walls, document.rooms);
+    WallJunctionService.computeJunctionOffsets(document.walls);
+    return document;
+  }
+
+  private excludeTinySpaces(plan: PlanDocument): void {
+    plan.rooms = plan.rooms.filter(room => room.area >= 0.5);
+  }
+
+  private mapWallRooms(walls: WallEntity[], rooms: RoomEntity[]): void {
+    for (const wall of walls) {
+      wall.roomSideA = undefined;
+      wall.roomSideB = undefined;
+      const midpoint = { x: (wall.p1.x + wall.p2.x) / 2, y: (wall.p1.y + wall.p2.y) / 2 };
+      wall.roomIds = rooms.filter(room => this.isWallOnRoomBoundary(wall, room.polygon)
+        || (wall.isColumn && this.isPointInPolygon(midpoint, room.polygon))).map(room => room.id);
+      this.assignWallRoomSides(wall, rooms);
+    }
   }
 
   private mapCategory(name: string): FurnitureCategory {

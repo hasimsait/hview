@@ -1,7 +1,7 @@
-import { PlanDocument, FurnitureEntity, Vector3D, OpeningEntity, WallEntity, SurfaceFinishConfig, ColumnEntity, Point2D, WallSide, ColumnSide, RoomEntity, LightFixtureConfig, WallFrameStyle } from './plan';
+import { PlanDocument, FurnitureEntity, Vector3D, OpeningEntity, WallEntity, SurfaceFinishConfig, Point2D, WallSide, RoomEntity, LightFixtureConfig, WallFrameStyle } from './plan';
 import * as THREE from 'three';
 
-export type { WallSide, ColumnSide, WallFrameStyle } from './plan';
+export type { WallSide, WallFrameStyle } from './plan';
 export type { TileEntry, ITileCatalogService } from '@services/tile-catalog/TileCatalogService';
 
 export interface IPlanParserService {
@@ -33,8 +33,6 @@ export type OpeningUpdatedListener = (opening: OpeningEntity, wall: WallEntity) 
 export type OpeningSelectionChangeListener = (selected: { opening: OpeningEntity; wall: WallEntity } | null) => void;
 export type WallUpdatedListener = (wall: WallEntity) => void;
 export type WallSelectionChangeListener = (selected: WallEntity | null, side?: WallSide) => void;
-export type ColumnUpdatedListener = (column: ColumnEntity, side?: ColumnSide) => void;
-export type ColumnSelectionChangeListener = (selected: ColumnEntity | null, side?: ColumnSide) => void;
 export type RoomSelectionChangeListener = (selected: RoomEntity | null) => void;
 export type RoomUpdatedListener = (room: RoomEntity) => void;
 
@@ -82,10 +80,6 @@ export interface IPlanManagerService {
     }
   ): FurnitureEntity | null;
   getWallRecesses(wallId: string): FurnitureEntity[];
-  getSelectedColumn(): ColumnEntity | null;
-  getSelectedColumnSide(): ColumnSide;
-  setSelectedColumn(col: ColumnEntity | null, side?: ColumnSide): void;
-  setColumnFinish(columnId: string, finish: SurfaceFinishConfig, side?: ColumnSide): void;
   getSelectedRoom(): RoomEntity | null;
   setSelectedRoom(room: RoomEntity | null): void;
   setRoomFloorFinish(roomId: string, finish?: SurfaceFinishConfig): void;
@@ -99,8 +93,6 @@ export interface IPlanManagerService {
   onOpeningSelectionChange(listener: OpeningSelectionChangeListener): () => void;
   onWallUpdated(listener: WallUpdatedListener): () => void;
   onWallSelectionChange(listener: WallSelectionChangeListener): () => void;
-  onColumnUpdated(listener: ColumnUpdatedListener): () => void;
-  onColumnSelectionChange(listener: ColumnSelectionChangeListener): () => void;
   onRoomSelectionChange(listener: RoomSelectionChangeListener): () => void;
   onRoomUpdated(listener: RoomUpdatedListener): () => void;
   exportPlanJson(): string;
@@ -190,9 +182,6 @@ export interface ISceneService {
   updateWallFinish(wall: WallEntity): void;
   setWallSelectionHighlight(wall: WallEntity | null): void;
   focusOnWall(wall: WallEntity): void;
-  updateColumnFinish(columnId: string, finish: SurfaceFinishConfig, side?: ColumnSide): void;
-  setColumnSelectionHighlight(column: ColumnEntity | null, side?: ColumnSide): void;
-  focusOnColumn(column: ColumnEntity): void;
   updateRoomFloorFinish(room: RoomEntity): void;
   setFloorSelectionHighlight(room: RoomEntity | null): void;
   showWallSplitPreview(wall: WallEntity, splitDistance: number): void;

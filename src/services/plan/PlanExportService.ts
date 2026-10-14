@@ -134,6 +134,15 @@ export class PlanExportService implements IPlanExportService {
         planObj.walls[wall.id] = rawWall;
       }
 
+      if (wall.isColumn) {
+        rawWall.isColumn = true;
+        // Preserve the exact solid footprint rather than rounding to centimeters.
+        rawWall.depth = wall.thickness * 100;
+        rawWall.height = wall.height * 100;
+        rawWall.p1 = { x: wall.p1.x * 100, y: wall.p1.y * 100 };
+        rawWall.p2 = { x: wall.p2.x * 100, y: wall.p2.y * 100 };
+      }
+
       // Wall finishes (all sides and individual sides A/B/edges)
       if (wall.material) rawWall.material = wall.material;
       if (wall.frameStyle) rawWall.frameStyle = wall.frameStyle; else delete rawWall.frameStyle;
@@ -202,29 +211,9 @@ export class PlanExportService implements IPlanExportService {
       }
     }
 
-    // 4. Update persistent columns
-    if (plan.columns && plan.columns.length > 0) {
-      planObj.columns = plan.columns.map((c) => ({
-        id: c.id,
-        name: c.name,
-        type: c.type,
-        width: c.width,
-        depth: c.depth,
-        height: c.height,
-        area: c.area,
-        worldPos: c.worldPos,
-        rotationY: c.rotationY,
-        stubIds: c.stubIds,
-        roomId: c.roomId,
-        roomIds: c.roomIds,
-        roomName: c.roomName,
-        finish: c.finish,
-        finishFront: c.finishFront,
-        finishBack: c.finishBack,
-        finishLeft: c.finishLeft,
-        finishRight: c.finishRight,
-      }));
-    }
+    // Columns have been migrated to thick walls; do not resurrect legacy boxes.
+    delete planObj.columns;
+    if (exported !== planObj) delete exported.columns;
 
     return JSON.stringify(exported, null, 2);
   }
