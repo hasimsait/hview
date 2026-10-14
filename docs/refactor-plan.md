@@ -1,16 +1,170 @@
-# HView refactor implementation plan
+# HView object-oriented refactor plan
 
-Prepared 14 October 2026 against commit `76e318ef7e0c65ee696be764cce4791e8817b8cd`; branch `refactor`.
+Revised 15 October 2026 on branch `refactor`. Source audit: commit `76e318ef7e0c65ee696be764cce4791e8817b8cd`, performed 14 October.
 
-## Recommendation
+## Objective
 
-Fix persistence and round-trip correctness first, then migrate one authoritative document model through the editor and viewer. Keep the existing geometry algorithms until characterization tests cover them. Extract renderer ownership and reconciliation before changing wall construction or procedural textures.
+Make the repository readable as a coherent object-oriented program. A reader should find an architectural object's rules on its class, follow an edit through a named command, and find the corresponding rendering behavior through explicit polymorphic dispatch. Fixing bugs and splitting large services into files is insufficient.
 
-The supplied review correctly identifies duplicated models, large services, weak boundaries, and data-loss risks. Its proposed five-step replacement is too broad for this repository's current verification coverage. It also replaces existing layers with another large set of mandatory classes. Use typed data, pure operations, explicit adapters, and polymorphism where implementations actually vary. Each change below has a working intermediate state and a removal gate for its predecessor.
+The earlier plan made immutable records and procedural operations the target. That does not meet the user's requirement for classes, behavioral ownership, and established patterns. This revision replaces that target. The verified audit findings below remain valid; the proposed implementation changes substantially.
 
-This document is a plan, not an implementation of the refactor.
+## The domain class model
 
-## What was verified
+```text
+PlanDocument                         aggregate; owns element identity and relationships
+  PlanElement                        abstract identity + polymorphic visitation
+    Wall                             segment, hosted-feature constraints, finishable faces
+    Column                           footprint, vertical extent, face finishes, source references
+    Room                             boundary, floor/ceiling surfaces, room relationships
+    Opening                          abstract wall-hosted location and aperture
+      Door                           hinge, swing, opening angle
+      SlidingDoor                    sliding configuration
+      Window                         sill/glazing; preserves standard/French variants
+    Furniture                        abstract placement, dimensions, finishable parts
+      BasinCabinet                   basin/carcass constraints and named surfaces
+      Luminaire                      validated emission configuration and placement
+      Shelving                       shelf configuration and enclosure constraints
+      StandardFurniture              catalog-backed ordinary furniture/model assets
+```
+
+`PlanElement` does not force walls, rooms, and hosted openings to pretend they have the same transform. Shared base members are identity, display name, and `accept(visitor)`. Concrete classes own their actual geometry semantics.
+
+`PlanDocument` owns an indexed collection of these objects and enforces relationships. Openings have one authoritative representation: an indexed `Opening` object with a `WallLocation`; wall-to-opening lookup is a derived index, not another editable copy. Walls, rooms, columns, and furniture are likewise stored once. A `WallTopology` object provides derived adjacency and room-side queries for a particular document snapshot.
+
+Classes encapsulate state. Constructors validate inputs; collections and value objects cannot expose mutable internals. Entities and the aggregate are immutable: methods return validated replacements. Examples of behavior belong on classes:
+
+- `Luminaire.withIntensity(value)` validates the supported intensity range and returns a luminaire.
+- `Shelving.withShelfConfiguration(config)` checks tier count/spacing and cabinet constraints.
+- `Door.withOpenAngle(angle)` owns angle limits and hinge/swing behavior.
+- `Wall.withFinish(surface, finish)` accepts the wall's actual surface identities.
+- `Wall.validateHostedFeature(aperture)` checks aperture bounds against wall extent.
+- `PlanDocument.replaceFurniture(id, replacement)` preserves identity/placement and validates replacement relationships.
+- `PlanDocument.splitWall(id, distance)` checks hosted-feature intersections and updates wall, opening, room, and column references atomically.
+
+Cross-object consistency belongs to the aggregate, not to a React handler, renderer, or furniture subclass. Focused collaborators can perform topology calculations without becoming independent owners of document state.
+
+Use small domain value objects where validation is repeated: `Dimensions`, `Transform`, `WallLocation`, and typed `SurfaceFinish` variants. Units and entity IDs are explicit types. All internal lengths use meters, rotations radians; catalog centimeters, grout millimeters, and UI degrees have named conversions. Value objects must justify themselves through invariants, not merely wrap every primitive.
+
+Furniture subclasses represent different behavior. Individual sofa/chair models remain catalog entries instantiated as `StandardFurniture`; they do not require empty subclasses. Lighting classification comes from canonical asset metadata, never from broad `category === 'fixture'` checks that would treat sockets as lights.
+
+The existing domain classes are not activated unchanged: they combine public mutable DTO fields, Three.js construction, and UI property metadata. Recover their useful behavior and surface definitions into the class model above, retain exactly one geometry implementation, and remove the obsolete wrappers/factory after migration.
+
+## Patterns and their actual jobs
+
+| Pattern | Concrete participants | Responsibility |
+| --- | --- | --- |
+| Aggregate and value objects | `PlanDocument`, `Wall`, `Opening`, `Dimensions`, `SurfaceFinish` | Keep object rules and cross-object invariants enforceable through class APIs. |
+| Factory | `PlanElementFactory`, `AssetCatalog` | Construct the correct concrete entity from validated canonical input. Catalog aliases are resolved once at import. |
+| Visitor | `PlanElementVisitor<R>`; `SceneNodeFactory`, `InspectorPresenter`, `PlanEncoder` | Dispatch external rendering, inspection, and encoding to concrete element behavior without repeated name/type heuristics. |
+| Command | `EditorCommand`; `ReplaceFurniture`, `SetLightIntensity`, `SplitWall`, `ApplyRoomFinish` | Represent a meaningful user action and invoke domain behavior in one atomic edit. |
+| Memento | `EditHistory`, immutable `PlanDocument` snapshots | Undo/redo restores complete consistent document snapshots, with bounded history. |
+| Observer | `EditorSession.subscribe`, stable snapshots consumed with React hooks | Publish one completed edit with affected IDs, separate from selection/view notifications. |
+| Strategy | `PatternTextureGenerator` implementations; `FurnitureGeometryBuilder<T>` implementations | Select interchangeable rendering algorithms through typed construction. |
+| Adapter | `LegacyPlanReader`, `BrowserPlanStorage`, `HttpPlanStorage`, `EmbeddedPlanSource` | Keep legacy format and platform behavior outside domain classes. |
+| Facade | `SceneEngine`, `EditorSession` | Offer concise application entry points while each collaborator retains a specific responsibility. |
+
+No generic command bus, global service locator, or framework for registering every class is required. The command receiver is `EditorSession`; constructors wire concrete collaborators. Visitor interfaces are a deliberate closed contract for domain behavior families, while asset catalog entries can grow without changing that contract.
+
+Domain objects do not create Three.js meshes or React controls. Visitor implementations live in the consuming layer. This preserves class-based polymorphism without giving every entity three unrelated implementation dependencies.
+
+## Readable collaborations
+
+The public editing code should express a user's action:
+
+```ts
+editor.execute(new SetLightIntensity(selectedLightId, 1.4));
+editor.execute(new ApplyRoomFinish(selectedRoomId, finish));
+editor.execute(new SplitWall(selectedWallId, distance));
+```
+
+`SetLightIntensity` resolves the required `Luminaire`, calls its validated behavior, and returns a replacement document plus the changed IDs. `EditorSession` publishes that result once and records its previous/next snapshots in `EditHistory`. It does not implement lighting rules, mesh updates, JSON conversion, or HTTP calls.
+
+`ApplyRoomFinish` resolves interior wall faces and column faces through `WallTopology` and surface capabilities, invokes the corresponding objects' finish methods, and produces one document. The opposite face of a neighboring room stays unchanged. The operation cannot partially commit.
+
+`SplitWall` asks the aggregate to perform a structural operation. Initially reject splitting through an opening/cavity footprint. Preserve world placement, side orientation, trims, source column references, and room relationships. One command produces one history entry and one dependency change set.
+
+On loading, `PlanCodec` validates and normalizes the external file, then `PlanElementFactory` constructs domain objects. On rendering, `element.accept(sceneNodeFactory)` produces the correct node. On selection, `element.accept(inspectorPresenter)` selects focused React sections. On export, `element.accept(planEncoder)` produces canonical serialized data. There is no parallel DTO model being edited alongside the domain objects.
+
+Each collaboration has one entry point, one owner, and typed return values. No caller has to know which callbacks to fire after changing a field.
+
+## Renderer class model
+
+`SceneEngine` coordinates canvas attachment, document reconciliation, and view changes. It delegates camera/navigation, picking, and overlays to focused classes. A `SceneNode<T>` owns the stable Three.js root, resource leases, pick registrations, and reconciliation of one domain element.
+
+Concrete node families are `WallSceneNode`, `OpeningSceneNode`, `FurnitureSceneNode`, `RoomSceneNode`, and `ColumnSceneNode`. `SceneNodeFactory` is a visitor; it binds typed domain classes to their node/builders in one place. `FurnitureSceneNode<Luminaire>` receives a luminaire geometry builder; it does not inspect asset-name substrings or choose a domain class again. There is no need for a second parallel taxonomy of three factories and fallback string checks.
+
+`WallMeshBuilder` owns a readable construction sequence: outline/junctions, hosted voids/recesses, face classification/UVs, then trim attachments. Extract and test the existing algorithms behind those stages. General CSG is not required for the class design and should be introduced only for an identified unsupported shape.
+
+`MaterialPool` owns reference-counted leases of materials/textures. `PatternTextureGenerator` strategies own each supported procedural pattern and use shared canvas drawing helpers. Drawing algorithms can contain ordinary functions; they belong behind a clear class contract. Normalize cache keys with all finish/render options and catalog revision. Seed procedural variation for visual regression tests.
+
+Node reconciliation distinguishes changes: transforms retain geometry/root identity, finish edits update leases, dimensions/hosted features rebuild geometry, topology updates rebuild affected neighboring nodes. Include dependency closure: wall junction neighbors, openings, room surfaces, trim/recess attachments, and column cutouts. Stable roots let gizmos remain attached while children are replaced.
+
+Dispose owned geometry once; release shared materials/textures rather than disposing another node's resources. Include model assets, lines, labels, environment render targets, and all lifetime registrations. Pool retention for zero-reference resources is bounded.
+
+`PickRegistry` maps leaf meshes to typed element/subsurface targets and owns candidate registration. `PickingController` applies the shared hit-visibility policy. Layers handle whole-object exclusions; a visibility predicate handles shader-clipped parts, cutaway height, ancestor visibility, isolation, and invisible finishes. A WeakMap does not enumerate candidates or free GPU resources. Both shells use the same controller.
+
+Render scheduling is a later, measured change: render during damping, movement, dragging, animation, and async asset completion; invalidate on resize/selection/settings changes; stop GPU renders when fully idle. These rules remain the scheduler's responsibility.
+
+## Application, UI, and persistence classes
+
+`EditorSession` owns the current immutable `PlanDocument`, command execution, and edit publication. It uses `EditHistory` for undo/redo. `SelectionModel` owns a single identity/subtarget selection; `ViewportState` owns view settings. They are not additional document models. A delete or split validates/remaps selection by ID against the committed document.
+
+`InspectorPresenter` implements the visitor and supplies the appropriate focused sections: transforms, surfaces, luminaire settings, wall structure, door settings, column faces. React components render those sections and submit commands. Local text drafts remain UI state; there is no generic `setProperty(key: string, value: any)` bypassing class invariants. Inspector metadata does not live on domain classes as React-specific widget definitions.
+
+`PlanCodec` performs symmetric canonical encoding/decoding. `LegacyPlanReader` handles dictionary/array shapes, upstream units and aliases; migrations preserve unknown source metadata in immutable codec-owned extensions. HView schema versions are independent from upstream `v`. The factory receives validated input and constructs real classes; deserialization cannot produce unvalidated plain objects cast as instances. Decoding must not mutate or alias its input.
+
+Move column inference from `ThreeSceneService` to a deterministic legacy normalization collaborator, run once before publication. Preserve authored columns, finishes, stable identities, chimneys and source wall links. Structural commands update affected topology afterward. Ambiguous tiny wall clusters produce diagnostics; canonical documents do not run legacy guesses. The renderer never writes `plan.columns`.
+
+`PersistenceController` takes a captured session/content identity and serialized payload, queues writes through a `PlanStorage` adapter, and acknowledges that exact snapshot only when the required target confirms it. Browser backup and HTTP success are distinct outcomes. Dirty state compares current document content identity with confirmed saved content identity; monotonic event revisions alone mishandle undo back to a saved document.
+
+Tests cover edits during save, ordered queued writes, undo/redo, document reset/replacement during save, quota failures, static hosting without development endpoints, and document-scoped recovery. A stale save acknowledgment cannot clear a newer edit, and an older payload cannot overwrite a newer queued save. Standalone embedded input takes precedence over unrelated cached plans. Failed unload beacons do not establish save success.
+
+`ApplicationRuntime` constructs and owns the session, renderer, presenters, and adapters through explicit constructors. React accesses a typed runtime context. The readonly viewer uses the same document, codec, engine, picking, and presentation logic, with no editor mutation capability. Runtime disposal tears down subscriptions, timers, DOM listeners, frame callbacks, and GPU resources.
+
+## Implementation sequence
+
+| Delivery | Build and replace | Proof required |
+| --- | --- | --- |
+| 1. Tests and immediate integrity repairs | Introduce pinned test/build dependencies and baseline fixtures. Repair asset-key precedence, save acknowledgment/failure behavior, empty-column export, unsafe HTML injection, and duplicate interaction subscriptions. | The existing reproduced defects pass expected-behavior tests; builds succeed from a locked install; repeated mounting leaves one interaction subscription. |
+| 2. Implement one class-based vertical slice | Build the domain base, `Luminaire`, factory/codec path, `SetLightIntensity`, session/history, scene factory/node, and inspector presentation for a fixture. Keep the prototype independent of production state until its lifecycle is complete. | Follow one light from file to actual domain instance, edit, render, undo, save, and reload. Domain validation is exercised through public APIs; UI/engine do not mutate fields. |
+| 3. Complete the domain and switch document ownership | Implement remaining concrete classes and aggregate/topology rules. Migrate codec and every manager mutation to commands/domain methods. Switch the running editor's authority to `EditorSession`. Extract column normalization. | All supported entity types/features round-trip; aggregate references stay valid; rendering a frozen document makes no writes; room finish/split/deletion/history gates pass. |
+| 4. Complete renderer ownership | Replace each active builder/rebuild path with node reconciliation and material leases; extract wall pipeline and texture strategies without altering calculations. Replace editor/viewer picking. | Stable roots for transforms; geometry/UV/material group fixtures; seeded browser image checks; shared resources survive another node's removal; removed nodes cannot be picked; memory plateaus after warmup. |
+| 5. Complete presentation/composition/export | Route all inspectors through presenters and commands, replace global DI, use one runtime in both shells, and make standalone packaging deterministic. | Both standalone products work offline; readonly viewer rejects mutation; subpath hosting works; lifecycle cleanup is complete; generated artifacts do not change tracked inputs. |
+| 6. Readability and measured optimization | Enforce domain/UI/engine import boundaries; remove obsolete public APIs, DTO projections, factories, listener channels, unused domain classes, and generated templates. Profile render scheduling/material work. | Every pattern has one identifiable dispatch/construction site; no old imports remain; an edit is traceable without name heuristics, direct DTO mutation, or manually firing callbacks. Browser behavior and builds remain covered. |
+
+Delivery 2 demonstrates the architecture; it is not a second editable production model. Delivery 3 requires a cohesive ownership switch. During renderer/presentation migration, any temporary legacy DTO projection is a read-only, on-demand projection from domain objects, never a mutable store, and is deleted with its last consumer.
+
+## Concrete replacement list
+
+| Existing responsibility | Target classes | What must disappear |
+| --- | --- | --- |
+| Mutable domain wrappers plus active DTOs | `PlanDocument` aggregate and behavioral `PlanElement` subclasses | Wrapper `fromEntity` copies, public mutable entity fields, and competing editable DTO state. |
+| Repeated asset/domain classification | `AssetCatalog`, `PlanElementFactory`, `SceneNodeFactory` visitor | Duplicate alias maps, broad fixture-as-light inference, name-based reload selection, factory chains. |
+| Manager mutations/listeners/selection/save | `EditorSession`, commands, `EditHistory`, `SelectionModel`, `PersistenceController` | Raw setter mutations, overlapping callback protocols, dirty boolean, save/reset implementation inside plan manager. |
+| Domain rendering methods and scene monolith | Nodes, typed geometry builders, `SceneEngine` | Domain Three.js imports, renderer writes to document, category-wide rebuilding for ordinary edits, undocumented userData ownership. |
+| Material/canvas monolith | `MaterialPool`, texture strategies | Inline unmanaged materials, unbounded unreleased caches, copied canvas initialization, patterns buried in scene mutation. |
+| Inspector-specific business rules | Domain class methods, commands, `InspectorPresenter` | UI topology math, multiple ways to edit the same object, string-keyed generic property mutation. |
+| Token-based service lookup and viewer wiring | `ApplicationRuntime`, platform adapters | Global container/tokens/useService, separate viewer interaction/domain behavior, discarded unsubscribe callbacks. |
+
+The original implementations remain available in Git; they do not remain as permanent runtime alternatives. The final design must make construction, editing, inspection, rendering, encoding, and disposal traceable through named classes. A new class must own behavior, an invariant, an algorithm, or a resource lifetime; a forwarding class with no responsibility is not progress.
+
+## Compatibility and verification constraints
+
+Preserve sliding doors, French windows, chimneys, all wall edge/baseboard finishes, named furniture parts, invisible materials, authored columns, wall-native cavities and legacy recess furniture, light configurations, and asset replacement transforms/dimensions. File length is a review signal, not an arbitrary splitting rule.
+
+Characterize legacy round trips with documented numeric tolerances and explicit extension-field assertions. Test removals and empty collections. Reject unsupported future HView versions clearly. Legacy split cleanup must verify lineage rather than deleting any parent with a suffixed child. Keep explicit legacy export available until supported formats are covered.
+
+The root sample is the baseline template and public sample the current development working file; preserve those roles until adapters move user data out of distributable assets. Make standalone build input explicit.
+
+Standalone packaging uses a stable shell and separately compiled JS/CSS/data/assets. Escape `<` and Unicode line separators in plan, catalog, and asset JSON; avoid replacement-string token interpretation. Validate a unique injection location. Do not import generated full-editor HTML into the editor entry that generated it: that creates recursive bundling. Supply artifact data through a host adapter and reconstruct standalone exports from packaged payload. Two consecutive builds/exports must have stable size and require no runtime template fetch, fonts, texture, or model download.
+
+Introduce actual unit and Playwright suites: the supplied review cites tests absent from this checkout. Cover domain constructors/behavior, factory/visitor dispatch, command atomicity/history, controlled-promise save races, scene ownership/visibility, browser workflows, and offline artifacts. Use browser measurements for GPU memory and actual target iPad behavior. Do not claim the source audit's build checks prove browser parity.
+
+## Verified source audit
+
+The following findings were verified before this revision. They establish regressions and compatibility requirements; they are not a substitute for the class-based architecture above.
+
+### Repository findings
 
 The checkout contains 107 tracked files and no `tests/` directory, test runner, Playwright configuration, or lint configuration. TypeScript is strict. The review's cited unit and E2E suites cannot serve as existing gates; they must be introduced.
 
@@ -34,7 +188,7 @@ The checkout contains 107 tracked files and no `tests/` directory, test runner, 
 
 Actual sizes: plan manager 1,267 lines; scene service 2,186; wall geometry 1,197; surface finishes 1,744; viewer entry 642. File length indicates responsibilities to examine, not a correctness rule.
 
-### Baseline checks performed
+### Checks performed on 14 October
 
 - `./node_modules/.bin/tsc --noEmit`: passed.
 - Vite production build to a scratch output directory: passed; main JS is 1,261.65 kB minified / 328.56 kB gzip and triggers a chunk-size warning.
@@ -43,142 +197,3 @@ Actual sizes: plan manager 1,267 lines; scene service 2,186; wall geometry 1,197
 - Root sample parses to 60 walls, 12 rooms, 119 furniture items, and zero explicit columns before renderer detection. This is a fixture baseline, not a target column count.
 
 No browser behavior, GPU memory benchmark, screenshots, or E2E tests were run. The standalone build check is not proof that a clean `npm ci && npm run build` is reproducible: tsx is not declared in this project's dependencies, and the build script imports transitive esbuild.
-
-## Design decisions
-
-### 1. A serializable domain model, with rendering outside it
-
-Use immutable, discriminated TypeScript records for walls, rooms, columns, hosted openings, and furniture variants. Keep domain rules as pure functions. Keep builders behind typed renderer interfaces or a registry. A mandatory `PlanElement` inheritance tree and double-dispatch visitors are unnecessary for ordinary transforms, serialization, or field editing.
-
-Domain code must not import Three.js, React, DOM APIs, rendering services, or UI descriptors. Inspector sections belong to the UI; declarative surface capabilities may belong to catalog/domain metadata. World bounds should distinguish geometric bounds from renderer-specific/model bounds instead of promising an exact box from incomplete metadata.
-
-Retain every currently supported variant, including sliding doors, French windows, chimneys, named furniture finish sections, invisible surfaces, wall edge/baseboard finishes, and both wall-native cavities and legacy recess furniture. The review's example union omits several of these.
-
-Introduce branded entity IDs and explicit unit conversions at boundaries. Internal lengths are meters and orientation is radians; display conversions use named helpers. Specify the plan XY to world XZ mapping and wall A/B convention using asymmetric fixtures. Grout millimeters and catalog centimeters remain explicit boundary units. Do not globally rewrite all numeric types before correctness tests exist.
-
-The catalog has one source for canonical asset keys, import aliases, default dimensions, placement, and capabilities. Resolve explicit `assetKey` before a legacy name; labels never choose geometry. Retain unknown keys and render a documented fallback without changing identity. Capability changes on replacement must remove incompatible subtype settings in one transaction while preserving valid user transforms and size overrides.
-
-### 2. A symmetric codec, preserving legacy information
-
-Introduce `PlanCodec.decode(unknown)` and `encode(document, format)` with separate canonical HView and legacy RemPlanner adapters. Validate shape, finite numbers, IDs, references, and hosted-feature bounds. Return path-specific diagnostics. Unsupported future HView schema versions must fail clearly rather than entering a legacy heuristic parser.
-
-Use an application-owned schema discriminator/version independent of existing upstream `v` or in-memory `version`. Decode existing dictionary-based centimeter files, existing array-based meter files, and the new format through explicit adapters. Legacy import retains unknown metadata in a codec-owned, immutable extension sidecar; known edited fields always win on export. Do not serialize the live document plus a stale duplicate `rawPlan` as competing authorities.
-
-The codec must handle both present and removed values, empty collections, and all supported finishes/lighting/geometry fields. Test semantic round trips with documented numeric tolerance; existing export rounding means byte-for-byte equality is not a reasonable gate. Keep legacy export available explicitly while canonical saves become the default after migration coverage passes.
-
-Extract column detection and legacy split cleanup into deterministic, idempotent normalization. Preserve authored columns and their finishes, stable IDs, source wall references, and chimney behavior. Report ambiguous tiny wall clusters instead of silently converting arbitrary short walls. Persist accepted imported columns once. Recompute affected topology through document operations after wall edits; the renderer consumes the result and never discovers persistent data.
-
-Do not delete a parent solely because a string-suffixed child exists. Validate split lineage and references, and preserve uncertain imported data with diagnostics.
-
-### 3. One document store and atomic operations
-
-Use normalized entity records and derived indexes for wall-hosted openings, adjacency, room sides, and column sources. Maintain one authority for an opening; do not keep editable copies in both a global opening map and wall arrays. During transition, an adapter can expose the old array/nested shapes.
-
-`DocumentStore` owns a stable immutable snapshot and a typed `dispatch(command)` / `transaction(commands)` API. Operations return the new document, affected IDs/dependencies, and history information. Stateless geometry and topology functions remain functions. A separate generic command-bus framework is optional; dispatch does not require one class per setter.
-
-Use typed operations for transform, replacement, deletion, door configuration, wall splitting, recess edits, and finish application. Validate the entire batch before publishing; errors leave state untouched. Emit one change set and create one undo entry. No-op edits create no history or dirty state. Start history with structurally shared before/after snapshots bounded by an explicit limit, excluding raw duplicate documents and GPU resources; introduce inverse patches only if measured memory warrants them.
-
-Separate `SelectionStore` and `ViewportStore`. Selection is one union of `{ kind, id, subtarget }` or null, resolved against the current document. Deletion clears invalid selection; splits explicitly remap selected walls and hosted openings. UI/renderer code receives readonly snapshots, not references it can mutate.
-
-`subscribe` and `getSnapshot` support `useSyncExternalStore`; repeated reads return the same reference until the relevant state changes. Keep document, selection, and save subscriptions separate so selecting an object does not serialize or rebuild geometry. A failing subscriber must not suppress later listeners; report errors rather than swallowing them silently.
-
-### 4. Persistence acknowledges a specific snapshot and target
-
-Separate local backup, server persistence, file export, and reset capabilities. Default deployment adapters: development HTTP storage for the existing middleware, browser-local storage for a static editor, and embedded input plus explicit browser backup/download for a standalone editor. The read-only viewer exposes no mutation/save capability. Future production server persistence needs a real backend, not the Vite development plugin.
-
-Capture `{ documentSessionId, contentToken, encodedPayload }` before awaiting a write. A success acknowledges only that payload on the required target. Serialize/coalesce writes per document so an older request cannot overwrite a newer saved document. Changing or resetting the document invalidates old acknowledgments. Handle quota errors, unavailable storage, malformed server results, and missing endpoints explicitly.
-
-Distinguish a monotonic change revision from document content identity. `dirty` compares the current immutable content token with the last confirmed token, so undo back to the saved state can become clean. A simple increasing revision inequality would avoid the observed race but mishandle that case. In-flight saves, undo/redo, failed saves, reload/reset, and queued autosaves all need controlled-promise tests.
-
-Loading must not overwrite a valid unsaved local recovery candidate before comparing it with the server/template. Standalone startup should use its embedded document before unrelated cached plans; cache keys need document/artifact identity. Failed unload beacons never establish success. Reset changes state only after a validated template is available.
-
-### 5. An incremental renderer with explicit resource ownership
-
-Keep Three.js in `src/engine`. Split canvas/camera/lighting lifecycle from document scene reconciliation, picking, selection overlays, cutaway policy, and assets/materials. A retained map of element IDs to scene nodes is useful; nodes may be small objects implementing an interface rather than compulsory subclasses.
-
-Reconciliation distinguishes transform, geometry, material, topology, and view changes. A furniture transform preserves its meshes. A wall edit invalidates its hosted openings, attached recesses/trim, and adjacent junctions; room boundaries may affect floors/ceilings; column source changes may affect wall cutouts. The change set must include this dependency closure, not just the directly edited ID.
-
-Each node owns its geometries and registrations and leases pooled materials/textures. Keep stable root groups so TransformControls can remain attached through child mesh replacement. Dispose owned resources exactly once; shared assets are reference counted and disposed only after the last lease. Account for texture sharing, material arrays, edges/labels, loaded models, environment render targets, and scene-wide helpers. Global material/texture pools use normalized semantic keys including rendering options and catalog revision, with bounded retention for zero-reference entries.
-
-Picking uses a typed mesh registry (`WeakMap<Object3D, PickTarget>`) plus a managed candidate collection. Register leaf meshes, resolve material-group/face subtargets, and unregister removed candidates. A WeakMap alone neither enumerates candidates nor releases GPU resources.
-
-Layers are useful for whole-object pickability, but they do not reproduce visibility of shader-clipped wall fragments. Preserve an explicit hit-visibility predicate for foreground clipping, cutaway height, invisible materials, ancestor visibility, room isolation, and excluded ceilings. Verify layer settings on descendant meshes and test clipped and visible parts of the same wall. Editor and viewer must call the same picker.
-
-Add render invalidation after correctness and lifecycle work. Render while orbit damping, keyboard movement, gizmo dragging, or animation is active; also invalidate on resize, selection, async asset completion, material updates, and settings changes. Stop GPU rendering when idle or hidden without freezing navigation or missing async updates.
-
-### 6. Preserve geometry; extract by stage
-
-Extract current wall outline/junction calculations, opening and recess interval subdivision, face classification/UV projection, and trim builders into separately tested modules. Share opening placement inputs with both wall cuts and opening meshes. Share room shape/UV helpers between floors and ceilings.
-
-The existing wall box/interval subdivision can remain the implementation. Introducing general CSG is not a prerequisite and could change winding, precision, material groups, UVs, and bundle size. Consider it only for a documented feature that current geometry cannot support.
-
-Keep material visual behavior while extracting texture drawing and shader/material assembly. Not every pattern needs a strategy class. Reuse setup/drawing helpers and introduce a `CanvasFactory` adapter so tests do not require a WebGL context. Browser image comparisons remain necessary for actual canvas/shader output. Seed procedural randomness for deterministic fixtures.
-
-Workers/OffscreenCanvas, instancing, and shared primitive geometry follow measured hotspots. Shared geometry must not be mutated for per-mesh UV projection; clone or use shader/instance attributes when required. Do not impose a 150-line strategy or 350-line file cap that would fragment coherent algorithms.
-
-### 7. Typed composition and shared application behavior
-
-Keep dependency injection through explicit constructor parameters and a `createRuntime({ mode, persistence, assets, ... })` composition root. Replace global token/service lookup with a typed React runtime context as callers migrate. Runtime construction creates no canvas; viewport mount attaches browser resources; `dispose()` owns every subscription, listener, timer, frame callback, and GPU lifetime.
-
-Share codec, catalog, stores, scene engine, picking, view policy, and display formatters across editor and viewer. An editor shell supplies mutation controls; a viewer shell supplies readonly inspection. Sharing React controls is useful where it reduces duplication, but a lightweight DOM viewer is acceptable if its domain/engine behavior is shared and tested. Rewriting it merely to hit a line count is not a goal.
-
-The inspector router resolves the selection union. Reuse transform, numeric, finish-slot, lighting, opening, wall-structure, and column-face sections. Keep complex sections as focused React components instead of encoding all interactions into a universal schema. Input drafts remain local until valid commit; drag gestures are previewed and committed/coalesced as one history operation.
-
-## Staged delivery and gates
-
-Each row is a bounded delivery step; split renderer/material work further if its diff cannot be reviewed independently. All steps retain a working editor and both standalone products. Steps 1–4 are the first milestone.
-
-| Step | Concrete implementation | Required gate | Retirement condition |
-| --- | --- | --- | --- |
-| 0. Establish tests/build baseline | Add pinned Vitest and Playwright tooling; declare tsx/esbuild directly; add typecheck/test/build scripts and CI. Capture legacy/canonical sample fixtures and asymmetric geometry/view screenshots. Choose explicit template vs working-plan build input. | Clean locked install; web and both standalone builds; smoke load/pick/edit/export workflows. Existing defects are tracked by repro tests and fixed in step 1, not accepted as desired behavior. | No cited nonexistent test suite remains in project documentation; build requires no implicit tool download. |
-| 1. Repair current data integrity | Prioritize explicit asset keys; correct standalone failure status; guard saves with captured document identity; serialize saves; export empty columns. Fix duplicate interaction subscriptions and cancel deferred reattachment frames. Add one shared safe embedded-JSON serializer. | Reproduced defects now pass expected-behavior tests; failed saves stay dirty; no stale writes; repeated mount/unmount leaves one active interaction subscriber. Strings containing `</script>`, `<`, U+2028/U+2029, and replacement-string characters survive standalone injection. | Temporary fixes remain the sole current path until codec/store replacement passes the same regressions. |
-| 2. Introduce codec and catalog authority | Add `domain/model`, `domain/catalog`, `domain/codec` canonical schema and explicit legacy adapters; preserve extensions and units. Extract column normalization from renderer, with dependency-aware topology refresh. Parser/exporter temporarily delegate to codec. | Semantic decode/encode/decode equality across fixture formats and every editable field; deletions/empty lists; unknown assets/metadata; no input mutation; migration idempotence; unsupported-version diagnostics. Deep-freeze a document and render/rebuild it without writes. | Old parser/export implementations and duplicate alias dispatch disappear only after both shells use the codec. |
-| 3. Introduce document operations/stores | Add document/selection/view stores, pure topology operations, atomic batches, dependency change sets, bounded undo/redo, and readonly legacy adapter. Move `WallTargetStrategy` rules and recess presets out of UI after preserving behavior. | Stable snapshots, one event/history entry per batch, invalid-batch rollback, no-op behavior, delete/split selection remapping, opening/cavity bounds and source-column references. Room finish changes preserve the neighboring room's opposite face. | Every existing manager mutation delegates to dispatch; the adapter owns no independent editable document. |
-| 4. Move persistence into a controller | Add target-specific adapters, save queue, snapshot acknowledgments, recovery policy, and document-scoped cache. Move dirty/save/reset out of plan manager. Separate runtime user data from `public/sample.plan` while preserving explicit development reset. | Controlled promise tests: edit during save; saves queued in order; document replacement/reset during save; undo to saved state; quota/server failure; static build without HTTP endpoints; recovery and isolated standalone cache. | Old persistence orchestration/timers removed once all save/reset UI calls use the controller. |
-| 5. Cut over React/runtime composition | Add typed runtime/context and store hooks. Migrate App/Header/Viewport and specialized inspector sections. Route selection via one union; keep validated local input drafts. Remove unreferenced domain/factory/universal-inspector paths after import audit. | Representative edit workflows and subscriptions pass; importing domain works without DOM/Three; two runtimes remain isolated; lifecycle survives repeated mounting. All supported opening/column/finish controls remain reachable. | Delete container/tokens/bootstrap/useService and split old service contracts only after imports are zero. Delete manager facade after its last caller migrates. |
-| 6. Extract engine lifecycle/resources/picking | Introduce headless scene assembly, SceneEngine facade, resource leases/pools, typed pick registry, visibility predicate, overlays, and shared interaction controller. Migrate furniture first, then walls/openings/rooms/columns. | Node scene assembly without WebGL; transform retains root/geometry identity; removal disposes owned geometry once; shared material survives removal of one user; removed meshes cannot be picked; editor/viewer visibility parity. Browser GPU counts plateau after warmup during repeated edits. | Remove old userData identity paths and monolithic ownership sections when corresponding node tests pass; diagnostic labels may remain. |
-| 7. Extract geometry/material stages | Move existing wall subdivision/UV/trim and room shape helpers; split procedural drawing from material/shader assembly; normalize keys and add bounded zero-reference retention. Preserve current calculations before optimizations. | Golden geometry fixtures for L/T junctions, short walls, multiple openings, split boundaries, columns, cavities, UV orientation and material groups; seeded browser images for supported patterns; shared texture release and catalog-change invalidation. | Delete old service implementations after staged modules are active; adapt old entry points temporarily without duplicate algorithms. |
-| 8. Unify viewer and artifact packaging | Move viewer onto shared runtime/picker/formatters. Generate standalone HTML from a stable shell, compiled entries/CSS, and an explicit asset/plan manifest. Add artifact-provider adapters for exports and eliminate runtime template fetch. Generate templates only into build output. | Open both exports with networking disabled; import/edit/save/export in standalone editor; readonly viewer rejects mutations; subpath hosting; dangerous labels embedded safely; root/working plan selection documented; two builds have stable size and do not edit tracked files. | Remove generated templates from source control, template fetch/string stitching paths, and duplicated viewer picking only when offline and parity gates pass. |
-| 9. Measured performance and boundaries | Add on-demand rendering; profile input-to-frame and textures; optimize the measured bottleneck. Enforce imports with ESLint restrictions/dependency rules and CI, with temporary exceptions removed at cutover. | Static idle scene stops rendering; damping/walkthrough/drag/async textures keep working. Record reference desktop and actual iPad measurements; no regression in correctness or browser snapshots. | Remove old animation/rebuild fallback paths after parity; prohibit new legacy service imports. |
-
-Order: `0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9`. Build and export safety work from steps 0–1 should not wait for architecture work. Extract pure geometry helpers earlier only when independently covered; do not combine behavior changes with extraction.
-
-## Important implementation contracts
-
-- **Save success:** the required persistence adapter confirms the captured payload; a best-effort backup has its own outcome. Persisted schema version and save revision/content token have different purposes.
-- **Wall split:** reject a split through a hosted opening/cavity footprint initially rather than silently assigning it by center. Preserve world location, wall-side orientation, finishes, room adjacency, and column-source references. Support undo as one operation. Remove obsolete opening records during export as well as obsolete walls.
-- **Reconciliation:** material edits do not rebuild geometry; transforms do not replace furniture root groups. Topology changes rebuild the affected dependency neighborhood, falling back to a full rebuild only through an explicit, measured compatibility path.
-- **Column conversion:** authored geometry and source references are authoritative; importing/rendering repeatedly cannot generate new column IDs or overwrite user finishes. Do not automatically convert native canonical documents with legacy heuristics.
-- **HTML packaging:** escape `<` and line separators in every embedded JSON payload, including plan, catalog, and asset manifest. Validate a unique insertion location and use a callback for string replacement or a structured assembler; raw replacement strings also interpret dollar-prefixed replacement tokens. Test by parsing and opening the artifact.
-- **No recursive templates:** importing the generated full-editor HTML with `?raw` directly into the editor that generates it creates an entry/template dependency cycle. Compile entry bundles first, assemble artifacts second, and supply artifact data through a host adapter. Standalone export must reconstruct from its packaged payload rather than embed a template that embeds another template. Repeated builds/exports must have stable size. Base URLs and offline texture/model assets belong to the asset adapter.
-- **Resource safety:** resource sharing and disposal must land together. A mesh-removal traversal must never dispose pooled material/texture references that remain in use elsewhere.
-- **Single authority during transition:** facades translate requests and snapshots; they cannot maintain another store. No dual writes, hidden sync effect, or permanent old/new renderer path.
-
-## Intended module boundaries
-
-```text
-src/domain/           model, units, catalog metadata, codec, migrations, operations
-src/application/      document/selection/view stores, history, persistence controller
-src/engine/           Three scene nodes, geometry, materials, picking, camera/render loop
-src/adapters/         browser/HTTP/embedded storage, assets, artifact export
-src/ui/               React shells, store hooks, inspector sections and controls
-src/viewer/           readonly shell using shared application/engine behavior
-src/runtime/          explicit composition and lifetime ownership
-scripts/              deterministic artifact builds
-tests/                domain, store, scene, browser and offline artifact fixtures
-```
-
-Domain has no outbound dependency on these other layers. Application depends on domain and narrow persistence ports. Engine consumes readonly domain data/change sets and emits typed hits; it does not mutate stores or save documents. Adapters implement ports. UI/shells call application operations and manage local presentation. Runtime wires the graph explicitly. Enforce these rules progressively on migrated directories, then remove exceptions.
-
-## Completion criteria and risk controls
-
-1. Every supported format and editable feature passes semantic round-trip tests; no deleted entity reappears. Legacy metadata preservation has explicit fixture assertions.
-2. Successful saves acknowledge the right content and target; edit/save/reset/undo races cannot lose dirty state or overwrite newer data. Recovery is document scoped.
-3. Rendering and picking do not mutate the document. One change set drives reconciliation; only affected dependencies rebuild. All resource owners and unsubscribe paths have lifecycle checks.
-4. Editor, readonly viewer, and standalone editor share domain/engine behavior and pass representative browser and offline export tests, including touch input, both wall sides, openings, finishes, and room isolation.
-5. Clean installation/build is reproducible, generated artifacts do not modify tracked inputs, and the dependency graph rejects forbidden imports. Removed layers have no callers.
-6. Performance changes report measurements on a specified scene/device. Initial targets are behavioral: stable resource counts after warmup, preserved transform mesh identity, and no GPU renders while fully idle. Numeric latency/memory budgets should be set from the captured baseline and actual target iPad, not invented here.
-
-The largest risks are undocumented legacy metadata, heuristic column classification, wall orientation/UV changes, shared GPU ownership, and standalone packaging. Isolate each behind fixtures and an adapter before deleting its old path. Keep each step independently revertible in Git; preserve original input fixtures and explicit legacy export until migration tests cover the supported formats. Avoid a long-lived alternate architecture or runtime feature switch as a substitute for finishing a cutover.
-
-The next implementation change should be step 0 plus the narrow step 1 correctness repairs. Do not begin by deleting `PlanManagerService`, rewriting wall geometry, or creating a visitor class for every element.
