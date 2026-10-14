@@ -10,7 +10,7 @@
     "build:viewer": "npx tsx scripts/build_standalone_viewer.ts",
     "build": "tsc && vite build && npx tsx scripts/build_standalone_viewer.ts",
     "preview": "vite preview",
-    "test": "npm run test:unit && npm run test:state",
+    "test": "node scripts/test_all.mjs",
     "test:unit": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",

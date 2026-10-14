@@ -82,7 +82,7 @@ test('plan injection targets the data block and preserves literal replacement ch
 test('hosted exports load generated templates that carry offline re-export data', async (t) => {
   const downloads: Blob[] = [];
   const fetched: string[] = [];
-  t.mock.method(globalThis, 'fetch', async (path) => {
+  t.mock.method(globalThis, 'fetch', async (path: RequestInfo | URL) => {
     fetched.push(String(path));
     return new Response(readFileSync(`dist${path}`, 'utf8'));
   });

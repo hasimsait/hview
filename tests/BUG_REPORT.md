@@ -51,11 +51,17 @@ The shared surface finish editor now exposes a signed integer layer with increas
 
 Browser validation passed with actual paint and tile materials: 270 overlap pixels across three camera angles and two insertion orders, plus a physically nearer object, integer buttons, negative input, and rejection of fractional input. Run `npm run test:layers:browser` with Chromium installed. Browser results and screenshot are in `work/surface-layer-browser-results.json` and `work/surface-layers.png`.
 
+## Rebase onto 6.1-m
+
+`work` now includes the `6.1-m` column-to-wall migration and test infrastructure. Layer persistence for legacy columns is verified through their migrated wall faces. Vitest save mocks were aligned with positive server acknowledgements, current-copy cache precedence, and reset snapshot behavior. Build and strict test TypeScript checks pass. Browser workflows passed after updating the offline cache-key assertion, except for a full-plan controls smoke-test timeout; see `tests/RESULTS.md` for the exact outcomes.
+
+The existing bathroom-isolation regression remains enabled and unresolved. No visibility assertion was weakened to make the rebased suite pass. Plan-service coverage thresholds are met (85.9% lines/statements, 77.2% branches, 86.44% functions).
+
 ## Validation
 
 Run `npm test` after rebuilding HTML distributions. The runner bundles all TypeScript tests using the project's installed esbuild and executes them with Node; it does not require the environment-specific tsx path.
 
-Latest result: **71 tests passed, zero failures, zero TODOs**. Raw results are saved in `work/test-results.txt`. TypeScript checking and production/standalone builds are also verified.
+Save/export/layer regression suite: **71 tests passed, zero failures, zero TODOs**. After rebasing onto `6.1-m`, its Vitest suite reports **91 passing and 1 failing** (92 total): the documented pre-existing bathroom-isolation bug. The combined `npm test` runs both suites and retains that failure; it is not a fully green suite. Raw results are saved in `work/test-results.txt`. TypeScript checking and production/standalone builds are also verified.
 
 Coverage uses controlled browser/storage/network substitutes and generated HTML. The targeted layer test also uses real Chromium rendering and DOM controls; this does not establish full application UI or exhaustive application coverage. Stale-tab closing is covered; simultaneous user edits from separate tabs/devices still have no conflict resolution or server revision checks. These tests do not prove that all possible failures are absent.
 

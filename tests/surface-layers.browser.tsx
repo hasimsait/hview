@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { flushSync } from 'react-dom';
 import { SurfaceFinishService } from '../src/services/rendering/SurfaceFinishService';

@@ -64,3 +64,11 @@ HTML document from its bytes and block every service/asset HTTP request in a
 fresh browser context; they do not establish native file or Safari compatibility.
 
 See [KNOWN_BUGS.md](KNOWN_BUGS.md) for reproduction steps and scope of each finding.
+
+## Work rebased onto 6.1-m
+
+The work branch includes 6.1-m's column-wall migration and both regression suites. Build and strict application/test type checks pass. The 71 Node save/export/layer tests all pass. Vitest reports 91 passing and one failing test: the documented, unchanged bathroom-isolation issue. Coverage thresholds remain satisfied (85.9% lines/statements, 77.2% branches, 86.44% functions).
+
+Browser validation excluded only the already documented bathroom-isolation case from execution; its source assertion remains enabled. Of the other 15 cases, 13 passed on the full run. The offline edit case initially read the obsolete shared storage key; after aligning it with document-scoped storage, its targeted recheck passed. The full-plan controls smoke test exceeded its 120-second time limit. No assertion or time limit was relaxed to suppress that timeout.
+
+Verified browser workflows include column-wall controls, real save/reset endpoints, paint-highlight refresh, manipulation and gizmo persistence, replacement/reload, network-blocked viewer loading, offline edit/reload/plan export, both offline HTML re-exports, and control/category wrapping. Raw rebase logs are stored under work/ and ignored by Git.

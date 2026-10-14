@@ -4,7 +4,9 @@ Unresolved regressions remain enabled and make the runners return a nonzero exit
 status until fixed. Resolved issues are marked below; their tests remain enabled
 to prevent regressions.
 
-## 1. Asset replacement is lost on reload
+## 1. Fixed: Asset replacement is lost on reload
+
+Resolved on `work`: saved asset keys now override the original item name.
 
 Reproduction: select a sofa, choose **Replace Asset**, select **Dining Chair**,
 wait for autosave, and reload. The sofa returns.
@@ -16,7 +18,9 @@ This is reproduced with the real asset registry and with browser UI actions.
 Tests: `known-bugs.test.ts` (replacement round trip),
 `workflows.spec.ts` (replacement through the UI).
 
-## 2. Offline save reports success after losing the write
+## 2. Fixed: Offline save reports success after losing the write
+
+Resolved on `work`: standalone success requires a confirmed browser write.
 
 Reproduction: use the standalone editor offline with browser storage full or
 unavailable, then edit and save. Local storage throws and the server request
@@ -39,7 +43,9 @@ Tests: `workflows.spec.ts`, “export controls wrap and remain reachable at desk
 widths” (1440px and 1024px) and “finish categories wrap within the inspector
 without horizontal scrolling”.
 
-## 4. An older save clears the dirty flag for newer edits
+## 4. Fixed: An older save clears the dirty flag for newer edits
+
+Resolved on `work`: only the saved revision can clear its dirty flag.
 
 Reproduction: start saving edit A, make edit B while A is in flight, then let A
 complete. The JSON passed to persistence contains A, but
@@ -52,7 +58,9 @@ dirty-state tracking, not that every overlapping edit is lost.
 Test: `known-bugs.test.ts`, “keeps later edits dirty when an earlier in-flight save
 completes”.
 
-## 5. Standalone editor cannot re-export standalone HTML offline
+## 5. Fixed: Standalone editor cannot re-export standalone HTML offline
+
+Resolved on `work`: both reusable HTML templates are embedded in editor exports.
 
 Reproduction: download **Full Editor (.html)**, open it without network access,
 then click **Full Editor (.html)** again. Instead of a download, it displays

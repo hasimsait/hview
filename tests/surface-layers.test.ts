@@ -73,7 +73,7 @@ test('layers on wall faces, edges, floors, columns and furniture survive export/
   manager.setWallFinish('w', { ...finish, layer: -1 }, 'B');
   manager.setWallFinish('w', { ...finish, layer: 3 }, 'edge_top');
   manager.setRoomFloorFinish('r', { ...finish, layer: 4 });
-  manager.setColumnFinish('c', { ...finish, layer: 5 }, 'front');
+  manager.setWallFinish('c', { ...finish, layer: 5 }, 'A');
   manager.setFurnitureFinish('f', { ...finish, layer: 6 });
   manager.setFurnitureSectionFinish('f', 'wood', { ...finish, layer: 7 });
   const loaded = parser.parse(manager.exportPlanJson());
@@ -81,7 +81,8 @@ test('layers on wall faces, edges, floors, columns and furniture survive export/
   assert.equal(loaded.walls[0].finishSideB?.layer, -1);
   assert.equal(loaded.walls[0].finishEdgeTop?.layer, 3);
   assert.equal(loaded.rooms[0].floorFinish?.layer, 4);
-  assert.equal(loaded.columns![0].finishFront?.layer, 5);
+  assert.equal(loaded.columns?.length, 0);
+  assert.equal(loaded.walls.find(w => w.id === 'c')?.finishSideA?.layer, 5);
   assert.equal(loaded.furniture[0].finish?.layer, 6);
   assert.equal(loaded.furniture[0].sectionFinishes?.wood.layer, 7);
   assert.equal(manager.hasUnsavedChanges(), true);

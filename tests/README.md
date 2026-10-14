@@ -4,7 +4,9 @@ Install the locked dependencies with `npm ci`. In the cloud environment, use
 `npm ci --cache /workspace/.npm-cache` because the default home cache is unwritable.
 
 ```bash
-npm test                 # Fast unit and service integration tests
+npm test                 # Both Vitest unit tests and Node save/layer regression tests
+npm run test:state       # 71 Node save/export/layer regression tests (build HTML first)
+npm run test:unit        # 6.1-m Vitest suite
 npm run test:watch       # Rerun affected tests while editing
 npm run test:coverage    # Coverage report and minimum coverage checks
 npm run test:types       # Type-check application, tests and runner configurations
@@ -74,3 +76,5 @@ Playwright generates `playwright-report/index.html`, machine-readable results at
 `test-results/results.json`, and saves traces/screenshots
 for failed tests under `test-results`. Open the report locally with
 `npx playwright show-report`. Test reports are ignored by Git.
+
+The `work` branch is rebased onto `6.1-m`. Columns now use the wall model, including surface layers. Both test suites remain enabled; the documented bathroom-isolation failure from `6.1-m` still causes the full test command to return a nonzero status.

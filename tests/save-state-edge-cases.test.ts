@@ -28,7 +28,7 @@ function setup(t: TestContext) {
     else delete (globalThis as any)[key];
   }));
   t.mock.method(console, 'warn', () => {});
-  t.mock.method(globalThis, 'fetch', (url, options) => new Promise<Response>((resolve, reject) => {
+  t.mock.method(globalThis, 'fetch', (url: RequestInfo | URL, options?: RequestInit) => new Promise<Response>((resolve, reject) => {
     pending.push({ url: String(url), body: options?.body as string | undefined, resolve, reject });
   }));
   const service = new PlanPersistenceService();

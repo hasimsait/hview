@@ -38,7 +38,7 @@ are documented in [tests/README.md](tests/README.md).
 | `npm run dev` | Starts the Vite development server on port 3000 with HMR and the `/api/save-plan` local persistence endpoint. |
 | `npm run build` | Runs TypeScript type checking (`tsc`), compiles the Vite production bundle, and generates both standalone offline HTML distributions in `dist/`. |
 | `npm run build:viewer` | Bundles and regenerates the standalone offline iPad HTML viewer and editor (`dist/ipad_viewer.html` and `dist/hview_editor.html`). |
-| `npm test` | Runs the 71 regression tests after building the standalone HTML files. |
+| `npm test` | Runs both the Vitest suite and 71 save/export/layer regressions after building HTML files; known unresolved tests remain enabled. |
 | `npm run test:layers:browser` | Checks surface overlap pixels and integer layer controls in headless Chromium (requires Chromium). |
 | `npm run preview` | Serves the production build locally using Vite's preview server. |
 
