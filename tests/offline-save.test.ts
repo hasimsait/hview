@@ -35,7 +35,7 @@ function setup(t: TestContext, protocol = 'file:', standalone = false) {
   t.mock.method(console, 'warn', () => {});
   t.mock.method(globalThis, 'fetch', async () => {
     if (!serverAvailable) throw new Error('Network unavailable');
-    return new Response('{}');
+    return new Response('{"success":true}');
   });
   const persistence = new PlanPersistenceService();
   const statuses: PlanSaveStatus[] = [];
@@ -85,7 +85,7 @@ test('offline save succeeds when the plan is stored locally', async (t) => {
 });
 
 test('server save succeeds even when local storage is full', async (t) => {
-  const { persistence, fillStorage, enableServer } = setup(t);
+  const { persistence, fillStorage, enableServer } = setup(t, 'https:', false);
   fillStorage();
   enableServer();
   assert.equal(await persistence.savePlan('{}'), true);

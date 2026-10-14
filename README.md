@@ -38,7 +38,7 @@ are documented in [tests/README.md](tests/README.md).
 | `npm run dev` | Starts the Vite development server on port 3000 with HMR and the `/api/save-plan` local persistence endpoint. |
 | `npm run build` | Runs TypeScript type checking (`tsc`), compiles the Vite production bundle, and generates both standalone offline HTML distributions in `dist/`. |
 | `npm run build:viewer` | Bundles and regenerates the standalone offline iPad HTML viewer and editor (`dist/ipad_viewer.html` and `dist/hview_editor.html`). |
-| `npm test` | Runs the 37 regression tests after building the standalone HTML files. |
+| `npm test` | Runs the 71 regression tests after building the standalone HTML files. |
 | `npm run test:layers:browser` | Checks surface overlap pixels and integer layer controls in headless Chromium (requires Chromium). |
 | `npm run preview` | Serves the production build locally using Vite's preview server. |
 
@@ -88,7 +88,7 @@ For job-site presentation to craftsmen where no web server can be deployed, HVie
 2. **Standalone Full Editor** (`dist/hview_editor.html`):
    - Complete React 19 editor packed into a single HTML file with all sidebars, 100 wall paint swatches, wood species, and acoustic lambri pickers.
    - Inlined base64 textures and tile catalog.
-   - Changes automatically persist across reloads in `localStorage`, and updated `.plan` or `.html` files can be exported directly from the header on the iPad.
+   - Changes automatically persist across reloads in browser storage scoped to the document path. Updated `.plan` or `.html` files can be exported directly from the header on the iPad. Standalone saves use local storage, and reset restores the file’s embedded original plan without contacting a hosting API.
    - Editor and viewer export templates are embedded alongside shared textures, so downloaded editors can export fresh HTML files offline. Re-exported editors retain this capability without recursively duplicating templates.
 
 > **Tip for iPad Users**: Apple sandboxes Safari from opening local `file:///` URLs directly from the Files app. To open in a full browser:

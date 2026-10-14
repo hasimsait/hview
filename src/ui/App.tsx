@@ -11,6 +11,7 @@ import { WallInspector } from '@ui/components/WallInspector';
 import { FloorInspector } from '@ui/components/FloorInspector';
 import { AssetReplacementModal } from '@ui/components/AssetReplacementModal';
 import { ErrorBoundary } from '@ui/components/ErrorBoundary';
+import { restoreInitialPlan } from '@services/plan/PlanBootstrap';
 
 export const App: React.FC = () => {
   const planManager = useService<IPlanManagerService>(TOKENS.PlanManagerService);
@@ -38,15 +39,9 @@ export const App: React.FC = () => {
   useEffect(() => {
     async function loadInitialPlan() {
       try {
-        const text = await persistenceService.loadPlan();
-        planManager.loadPlan(text);
+        await restoreInitialPlan(planManager, persistenceService);
       } catch (err) {
-        console.error('Failed to load initial plan from persistence, falling back to /sample.plan:', err);
-        try {
-          await planManager.loadPlanFromUrl(`/sample.plan?t=${Date.now()}`);
-        } catch (e) {
-          console.error('Failed to load initial sample.plan:', e);
-        }
+        console.error('Failed to load initial plan:', err);
       } finally {
         setLoading(false);
       }

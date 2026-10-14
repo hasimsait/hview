@@ -18,7 +18,7 @@ function setup(t: TestContext) {
     removeItem: (key: string) => { stored.delete(key); },
   };
   Object.defineProperty(globalThis, 'window', { configurable: true, value: {
-    __STANDALONE_MODE__: true, __PLAN_DATA__: { embedded: true },
+    __STANDALONE_MODE__: false, __PLAN_DATA__: { embedded: true },
     location: { protocol: 'https:' }, setTimeout: globalThis.setTimeout,
     addEventListener: (_event: string, handler: () => void) => unload.push(handler),
   } });
@@ -52,10 +52,10 @@ test('older save completion cannot change the status of a newer pending save', a
   const { service, pending } = setup(t);
   const first = service.savePlan('{"revision":1}');
   const second = service.savePlan('{"revision":2}');
-  pending[0](new Response('{}'));
+  pending[0](new Response('{"success":true}'));
   await first;
   const status = service.getSaveStatus();
-  pending[1](new Response('{}'));
+  pending[1](new Response('{"success":true}'));
   await second;
   assert.equal(status, 'saving');
 });
@@ -65,10 +65,10 @@ test('overlapping saves cannot send an older write concurrently with a newer wri
   const first = service.savePlan('{"revision":1}');
   const second = service.savePlan('{"revision":2}');
   const concurrent = pending.length;
-  pending[0](new Response('{}'));
+  pending[0](new Response('{"success":true}'));
   await first;
   await Promise.resolve();
-  pending[1](new Response('{}'));
+  pending[1](new Response('{"success":true}'));
   await second;
   assert.equal(concurrent, 1);
 });
@@ -78,7 +78,7 @@ test('reloading before the autosave debounce expires persists the latest edit', 
   const manager = new PlanManagerService(new PlanParserService(), new PlanExportService(), service);
   manager.loadPlan({ plan: { items: { item_1: { name: 'sofa', pc: { x: 0, y: 0 } } } } });
   const save = manager.saveCurrentPlan();
-  pending[0](new Response('{}'));
+  pending[0](new Response('{"success":true}'));
   await save;
   manager.replaceFurnitureAsset('item_1', 'chair');
   unload[0]();
@@ -93,7 +93,7 @@ test('a failed older write releases the queue and cannot mark a newer save faile
   await first;
   assert.equal(service.getSaveStatus(), 'saving');
   assert.equal(pending.length, 2);
-  pending[1](new Response('{}'));
+  pending[1](new Response('{"success":true}'));
   assert.equal(await second, true);
   assert.equal(service.getSaveStatus(), 'saved');
 });
@@ -102,7 +102,7 @@ test('an edit during a save invalidates its completion and idle timer', async (t
   const { service, pending, stored } = setup(t);
   const save = service.savePlan('{"revision":1}');
   service.cachePlan('{"revision":2}');
-  pending[0](new Response('{}'));
+  pending[0](new Response('{"success":true}'));
   await save;
   assert.equal(service.getSaveStatus(), 'saving');
   t.mock.timers.tick(5000);
@@ -115,7 +115,7 @@ test('reset waits for earlier writes and replaces the snapshot used on unload', 
   const save = service.savePlan('{"old":true}');
   const reset = service.resetToTemplate();
   assert.equal(pending.length, 1);
-  pending[0](new Response('{}'));
+  pending[0](new Response('{"success":true}'));
   await save;
   assert.equal(pending.length, 2);
   pending[1](new Response(JSON.stringify({ plan: '{"template":true}' })));
@@ -139,7 +139,7 @@ test('unload cannot bypass queued writes with a competing beacon', async (t) => 
   unload[0]();
   assert.equal(beacon.mock.callCount(), 0);
   assert.equal(stored.get('hview_current_plan'), '{"revision":2}');
-  pending[0](new Response('{}'));
+  pending[0](new Response('{"success":true}'));
   await save;
 });
 
@@ -157,7 +157,7 @@ test('server success after a quota error invalidates a stale local snapshot', as
   stored.set('hview_current_plan', '{"revision":1}');
   t.mock.method(storage, 'setItem', () => { throw new DOMException('Full', 'QuotaExceededError'); });
   const save = service.savePlan('{"revision":2}');
-  pending[0](new Response('{}'));
+  pending[0](new Response('{"success":true}'));
   assert.equal(await save, true);
   assert.equal(stored.has('hview_current_plan'), false);
   delete (globalThis as any).window.__PLAN_DATA__;
