@@ -2,6 +2,8 @@
 
 Revised 15 October 2026 on branch `refactor`. Source audit: commit `76e318ef7e0c65ee696be764cce4791e8817b8cd`, performed 14 October.
 
+Publication note, 15 October: fetching the remote revealed that `main` is now at `808356368beb927f7523ff1fb7ce1d151df0b5f9`, with column/picking/test changes (#1) and persistence/offline export/surface-layer changes (#2) absent from the supplied workspace. The source audit at the end of this document describes `76e318e`, not current `main`. Current `main` includes tests, column migration modules, and persistence/export repairs. Before implementation, reassess the initial repair tasks against those commits and reuse their regression coverage. The class-based target remains the proposal; findings from the older snapshot must not be treated as newly reproduced defects on current `main`.
+
 ## Objective
 
 Make the repository readable as a coherent object-oriented program. A reader should find an architectural object's rules on its class, follow an edit through a named command, and find the corresponding rendering behavior through explicit polymorphic dispatch. Fixing bugs and splitting large services into files is insufficient.
@@ -125,7 +127,7 @@ Tests cover edits during save, ordered queued writes, undo/redo, document reset/
 
 | Delivery | Build and replace | Proof required |
 | --- | --- | --- |
-| 1. Tests and immediate integrity repairs | Introduce pinned test/build dependencies and baseline fixtures. Repair asset-key precedence, save acknowledgment/failure behavior, empty-column export, unsafe HTML injection, and duplicate interaction subscriptions. | The existing reproduced defects pass expected-behavior tests; builds succeed from a locked install; repeated mounting leaves one interaction subscription. |
+| 1. Confirm current baseline and remaining integrity repairs | Start from current `main`; reuse the tests and fixes in #1/#2. Verify pinned test/build dependencies and baseline fixtures. Recheck asset-key precedence, save acknowledgment/failure behavior, empty-column export, HTML injection, and interaction subscriptions; repair only remaining defects. | Existing fixes remain covered, remaining reproductions pass expected-behavior tests, builds succeed from a locked install, and repeated mounting leaves one interaction subscription. |
 | 2. Implement one class-based vertical slice | Build the domain base, `Luminaire`, factory/codec path, `SetLightIntensity`, session/history, scene factory/node, and inspector presentation for a fixture. Keep the prototype independent of production state until its lifecycle is complete. | Follow one light from file to actual domain instance, edit, render, undo, save, and reload. Domain validation is exercised through public APIs; UI/engine do not mutate fields. |
 | 3. Complete the domain and switch document ownership | Implement remaining concrete classes and aggregate/topology rules. Migrate codec and every manager mutation to commands/domain methods. Switch the running editor's authority to `EditorSession`. Extract column normalization. | All supported entity types/features round-trip; aggregate references stay valid; rendering a frozen document makes no writes; room finish/split/deletion/history gates pass. |
 | 4. Complete renderer ownership | Replace each active builder/rebuild path with node reconciliation and material leases; extract wall pipeline and texture strategies without altering calculations. Replace editor/viewer picking. | Stable roots for transforms; geometry/UV/material group fixtures; seeded browser image checks; shared resources survive another node's removal; removed nodes cannot be picked; memory plateaus after warmup. |
@@ -158,7 +160,7 @@ The root sample is the baseline template and public sample the current developme
 
 Standalone packaging uses a stable shell and separately compiled JS/CSS/data/assets. Escape `<` and Unicode line separators in plan, catalog, and asset JSON; avoid replacement-string token interpretation. Validate a unique injection location. Do not import generated full-editor HTML into the editor entry that generated it: that creates recursive bundling. Supply artifact data through a host adapter and reconstruct standalone exports from packaged payload. Two consecutive builds/exports must have stable size and require no runtime template fetch, fonts, texture, or model download.
 
-Introduce actual unit and Playwright suites: the supplied review cites tests absent from this checkout. Cover domain constructors/behavior, factory/visitor dispatch, command atomicity/history, controlled-promise save races, scene ownership/visibility, browser workflows, and offline artifacts. Use browser measurements for GPU memory and actual target iPad behavior. Do not claim the source audit's build checks prove browser parity.
+Reuse current `main`'s unit and Playwright suites; they were absent from the older supplied checkout used for the source audit. Extend coverage for domain constructors/behavior, factory/visitor dispatch, command atomicity/history, controlled-promise save races, scene ownership/visibility, browser workflows, and offline artifacts. Use browser measurements for GPU memory and actual target iPad behavior. Do not claim the source audit's build checks prove browser parity.
 
 ## Verified source audit
 
