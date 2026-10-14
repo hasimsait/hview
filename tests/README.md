@@ -15,8 +15,10 @@ npm run test:workflows   # Edit/reload, manipulation and offline export workflow
 Unit tests cover plan parsing, edit/export/reload round trips, manager events and
 selection, debounced autosave, local-storage backups, offline fallbacks, and save
 and reset failure handling. All timer-based checks use virtual time.
+Migration regressions cover stored chimneys, repeated migration, split-wall
+preservation, and inherited face finishes when saved properties are undefined.
 
-Coverage includes all four files under `src/services/plan`, including unexecuted
+Coverage includes all six files under `src/services/plan`, including unexecuted
 code. The minimum aggregate thresholds are 78% lines/statements, 76% functions,
 and 74% branches. These percentages do not measure rendering or UI coverage.
 The HTML coverage report is generated at `coverage/index.html`.
@@ -57,8 +59,8 @@ npm test -- tests/unit/reported-surface-room.test.ts
 npm run test:e2e -- tests/e2e/reported-bugs.spec.ts tests/e2e/workflows.spec.ts --grep 'paint highlight|isolating Bathroom|offline editor can re-export'
 ```
 
-The paint test verifies both the stale highlight and the unfocus/refocus
-workaround. The bathroom tests use actual opening IDs and preserve the legitimate
+The paint test verifies immediate highlight updates and checks reselection as
+well. The bathroom tests use actual opening IDs and preserve the legitimate
 entrance while rejecting the unrelated hallway door. HTML re-export checks cover
 both editor and viewer downloads from inside the downloaded editor.
 

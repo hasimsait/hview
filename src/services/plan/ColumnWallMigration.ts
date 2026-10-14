@@ -20,7 +20,13 @@ export function migrateColumnWalls(plan: PlanDocument, inferColumns = true): voi
     if (column.type === 'chimney') continue;
     const sourceIds = new Set(column.stubIds || []);
     const source = plan.walls.filter(w => sourceIds.has(w.id));
-    const wall = columnToWall({ ...surfaceFinishes(source, column), ...column }, plan.totalHeight);
+    const inherited = surfaceFinishes(source, column);
+    const wall = columnToWall({ ...column,
+      finishFront: column.finishFront ?? inherited.finishFront,
+      finishBack: column.finishBack ?? inherited.finishBack,
+      finishLeft: column.finishLeft ?? inherited.finishLeft,
+      finishRight: column.finishRight ?? inherited.finishRight,
+    }, plan.totalHeight);
     if (!wall) continue;
     if (source.some(w => w.openings.length)) continue;
     plan.walls = plan.walls.filter(w => !sourceIds.has(w.id));
@@ -83,16 +89,16 @@ function fillTinySpaces(plan: PlanDocument, stored: Map<string, ColumnEntity>): 
     };
     const inherited = surfaceFinishes(source, shape);
     const wall = columnToWall({ ...shape,
-      finish: previous?.finish || room.wallFinish,
-      finishFront: previous?.finishFront || inherited.finishFront,
-      finishBack: previous?.finishBack || inherited.finishBack,
-      finishLeft: previous?.finishLeft || inherited.finishLeft,
-      finishRight: previous?.finishRight || inherited.finishRight,
+      finish: previous?.finish ?? room.wallFinish,
+      finishFront: previous?.finishFront ?? inherited.finishFront,
+      finishBack: previous?.finishBack ?? inherited.finishBack,
+      finishLeft: previous?.finishLeft ?? inherited.finishLeft,
+      finishRight: previous?.finishRight ?? inherited.finishRight,
     }, plan.totalHeight);
     if (!wall) continue;
     const sourceIds = new Set(source.map(w => w.id));
     plan.walls = plan.walls.filter(w => !sourceIds.has(w.id));
-    plan.walls.push(wall);
+    if (!plan.walls.some(w => w.id === wall.id)) plan.walls.push(wall);
   }
 }
 
