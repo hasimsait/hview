@@ -2,6 +2,8 @@
 
 A 3D interior viewer and editor built with TypeScript, React, and Three.js. Edit walls, columns, doors, furniture, lighting, and surface finishes; save a plan or export a self-contained HTML viewer/editor.
 
+For a ready-to-open copy, download [hview_editor.html](hview_editor.html) using GitHub's **Download raw file** action and open it in your browser. It embeds the working `public/sample.plan` used for the bathroom regression, the current editor, textures, and offline export templates. Regenerate this portable snapshot with `npm ci && npm run build:sample-editor`. Browser storage preserves prior saves for the same file path; **Reset** restores the embedded working plan.
+
 ## Run
 
 Use Node.js 20.19+ or 22.12+ and npm. Install the locked dependencies, then start Vite:

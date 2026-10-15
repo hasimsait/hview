@@ -8,6 +8,7 @@
     "test:layers:browser": "node scripts/check_surface_layers.mjs",
     "dev": "vite",
     "build:viewer": "npx tsx scripts/build_standalone_viewer.ts",
+    "build:sample-editor": "tsx scripts/build_sample_editor.ts",
     "build": "tsc && vite build && npx tsx scripts/build_standalone_viewer.ts",
     "preview": "vite preview",
     "test": "node scripts/test_all.mjs",
