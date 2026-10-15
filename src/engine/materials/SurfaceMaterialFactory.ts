@@ -10,6 +10,18 @@ import { WoodTextureStrategy } from './strategies/WoodTextureStrategy';
 import { TextureSource } from './TextureSource';
 export { ensureLocalMetricBounds,ensureStretchedUvs } from '../geometry/UVProjector';
 
+export function isFabricStretched(config?: Pick<SurfaceFinishConfig, 'variant' | 'mappingMode'>): boolean {
+  if (!config) return true;
+  if (config.mappingMode === 'stretched') return true;
+  if (config.mappingMode === 'tiled') return false;
+  return !config.variant?.includes('linen');
+}
+
+export function getFabricScale(config?: Pick<SurfaceFinishConfig, 'variant' | 'scale'>): number {
+  if (config?.scale && config.scale > 0) return config.scale;
+  return config?.variant?.includes('linen') ? 3.5 : 2.0;
+}
+
 import { SurfaceFinishConfig,TileLayoutPattern } from '@core/types/plan';
 import { ISurfaceFinishService } from '@core/types/services';
 import { normalizeSurfaceLayer } from '@core/types/surfaceLayer';
@@ -122,6 +134,8 @@ export class SurfaceMaterialFactory implements ISurfaceFinishService {
   private readonly glassTextureStrategy: GlassTextureStrategy;
 
   private readonly shader = new OcclusionShader();
+  private unsubscribeCatalog?: () => void;
+
   constructor(private readonly tileCatalog?: ITileCatalogService, canvas: CanvasFactory = new BrowserCanvasFactory(), readonly textures = new TextureSource()) {
     this.tileTextureStrategy = new TileTextureStrategy(canvas, tileCatalog, textures);
     this.slatTextureStrategy = new SlatTextureStrategy(canvas);
@@ -129,6 +143,17 @@ export class SurfaceMaterialFactory implements ISurfaceFinishService {
     this.coatingTextureStrategy = new CoatingTextureStrategy(canvas);
     this.fabricTextureStrategy = new FabricTextureStrategy(canvas, textures);
     this.glassTextureStrategy = new GlassTextureStrategy(canvas);
+    this.unsubscribeCatalog = this.tileCatalog?.onCatalogLoaded(() => {
+      let evicted = false;
+      for (const [key, mat] of [...this.materials.entries()]) {
+        if (key.startsWith('tile_')) {
+          this.materials.delete(key);
+          this.layerMaterials.delete(mat);
+          evicted = true;
+        }
+      }
+      if (evicted) this.textures.notify();
+    });
   }
 
   getTileTexture(variant: string = 'subway'): THREE.Texture { return this.tileTextureStrategy.getTileTexture(variant); }
@@ -145,6 +170,7 @@ export class SurfaceMaterialFactory implements ISurfaceFinishService {
   setForegroundMode(mode: 'off' | 'transparent' | 'clip'): void { this.shader.setForegroundMode(mode); }
   setForegroundOpacity(value: number): void { this.shader.setForegroundOpacity(value); }
   dispose(): void {
+    this.unsubscribeCatalog?.();
     for (const material of this.materials.values()) material.dispose();
     this.materials.clear(); this.layerMaterials.clear();
     this.tileTextureStrategy.dispose();
@@ -282,11 +308,10 @@ export class SurfaceMaterialFactory implements ISurfaceFinishService {
           roughness = 0.9;
           break;
         case 'fabric': {
-          const photoInfo = this.resolveFabricPhotoInfo(config.variant, config.color);
           texture = this.getFabricTexture(config.variant, config.color);
           roughness = config.roughness ?? 0.82;
           metalness = config.metalness ?? 0.02;
-          defaultColor = photoInfo.isPreColored ? 0xffffff : 0xffffff;
+          defaultColor = 0xffffff;
           break;
         }
         case 'ceiling':
@@ -321,14 +346,7 @@ export class SurfaceMaterialFactory implements ISurfaceFinishService {
         const photoInfo = this.resolveFabricPhotoInfo(config.variant, config.color);
         const isLinen = config.variant?.includes('linen');
         const isVelvet = !config.variant || !isLinen;
-
-        // 1. Explicit config.mappingMode takes highest priority
-        // 2. Default: Natural Woven Linen defaults to tiled ('tiled'), Velvet defaults to stretched ('stretched')
-        const isStretched = config.mappingMode === 'stretched'
-          ? true
-          : config.mappingMode === 'tiled'
-            ? false
-            : !isLinen;
+        const isStretched = isFabricStretched(config);
 
         // When pre-colored (e.g. ruby red, emerald green), use pure white so the photograph's rich saturated colors & baked reflections are uncrushed.
         // Otherwise, tint with the requested color.
@@ -426,20 +444,10 @@ export class SurfaceMaterialFactory implements ISurfaceFinishService {
         // 4 x 60cm clip-in ceiling tiles per 2.4m
         return new THREE.Vector2(1.0 / 2.4, 1.0 / 2.4); // 60x60cm panels
       case 'fabric': {
-        const isLinen = config.variant?.includes('linen');
-        const isStretched = config.mappingMode === 'stretched'
-          ? true
-          : config.mappingMode === 'tiled'
-            ? false
-            : !isLinen;
-
-        if (isStretched) {
+        if (isFabricStretched(config)) {
           return new THREE.Vector2(1.0, 1.0);
         }
-        // Tiled mode: Linen defaults to 3.5 repeats/m (~28cm repeat for fine organic weave)
-        // User config.scale overrides default repeat if provided
-        const defaultRepeat = isLinen ? 3.5 : 2.0;
-        const rep = (config.scale && config.scale > 0) ? config.scale : defaultRepeat;
+        const rep = getFabricScale(config);
         return new THREE.Vector2(rep, rep);
       }
       case 'wood':

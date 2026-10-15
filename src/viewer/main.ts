@@ -7,8 +7,10 @@ import { Furniture } from '../domain/elements/Furniture';
 import { Opening } from '../domain/elements/Opening';
 import { Room } from '../domain/elements/Room';
 import { Wall } from '../domain/elements/Wall';
+import { calculatePolygonArea,isPointInPolygon } from '../domain/model/WallTopology';
 import { FurnitureMeshBuilder } from "../engine/assets/FurnitureMeshBuilder";
 import { SurfaceMaterialFactory } from "../engine/materials/SurfaceMaterialFactory";
+import { installEmbeddedTextureUrlModifier } from '../engine/materials/TextureSource';
 import { SceneEngine } from '../engine/SceneEngine';
 
 export class StandaloneViewerApp {
@@ -55,26 +57,7 @@ export class StandaloneViewerApp {
   }
 
   public init(): void {
-    // Intercept texture URLs with offline embedded base64 textures
-    THREE.DefaultLoadingManager.setURLModifier((url: string) => {
-      if (typeof window !== 'undefined' && (window as any).__EMBEDDED_TEXTURES__) {
-        const map = (window as any).__EMBEDDED_TEXTURES__ as Record<string, string>;
-        if (map[url]) return map[url];
-        // Also normalize /textures/... prefix if leading slash differed
-        const normUrl = url.startsWith('/') ? url : `/${url}`;
-        if (map[normUrl]) return map[normUrl];
-        const filename = url.split('/').pop()?.split('?')[0];
-        if (filename) {
-          for (const key in map) {
-            if (key.endsWith('/' + filename) || key === filename) {
-              return map[key];
-            }
-          }
-        }
-      }
-      return url;
-    });
-
+    installEmbeddedTextureUrlModifier();
     this.cacheDomElements();
     this.setupUIListeners();
     this.initScene();
@@ -141,8 +124,8 @@ export class StandaloneViewerApp {
     let rawData: any = null;
 
     // 1. Check window.__PLAN_DATA__
-    if ((window as any).__PLAN_DATA__) {
-      rawData = (window as any).__PLAN_DATA__;
+    if (window.__PLAN_DATA__) {
+      rawData = window.__PLAN_DATA__;
     } else {
       // 2. Check <script id="plan-data" type="application/json">
       const scriptEl = document.getElementById('plan-data');
@@ -428,7 +411,7 @@ export class StandaloneViewerApp {
       finishName = `Engineered Hardwood Parquet (${finish.variant || 'Oak'})`;
     }
 
-    const area = this.calculatePolygonArea(room.polygon);
+    const area = calculatePolygonArea(room.polygon);
 
     this.renderDrawer({
       category: 'Flooring Specification',
@@ -459,32 +442,11 @@ export class StandaloneViewerApp {
   private findEnclosingRoomName(x: number, z: number): string {
     if (!this.currentPlan?.rooms) return 'Interior';
     for (const room of this.currentPlan.rooms) {
-      if (room.polygon && this.isPointInPolygon({ x, y: z }, room.polygon)) {
+      if (room.polygon && isPointInPolygon({ x, y: z }, room.polygon)) {
         return room.name || `Room ${room.id}`;
       }
     }
     return 'Main Living Area';
-  }
-
-  private isPointInPolygon(point: { x: number; y: number }, vs: readonly { x: number; y: number }[]): boolean {
-    let inside = false;
-    for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
-      const xi = vs[i].x, yi = vs[i].y;
-      const xj = vs[j].x, yj = vs[j].y;
-      const intersect = ((yi > point.y) !== (yj > point.y))
-        && (point.x < ((xj - xi) * (point.y - yi)) / (yj - yi) + xi);
-      if (intersect) inside = !inside;
-    }
-    return inside;
-  }
-
-  private calculatePolygonArea(polygon: readonly { x: number; y: number }[]): number {
-    if (!polygon || polygon.length < 3) return 0;
-    let area = 0;
-    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-      area += (polygon[j].x + polygon[i].x) * (polygon[j].y - polygon[i].y);
-    }
-    return Math.abs(area / 2);
   }
 
   private renderDrawer(spec: {
@@ -501,11 +463,14 @@ export class StandaloneViewerApp {
     this.drawerDimensionsEl.textContent = spec.dimensions;
     this.drawerRoomEl.textContent = spec.room;
 
+    this.drawerFinishEl.textContent = '';
     if (spec.color) {
-      this.drawerFinishEl.innerHTML = `<span class="spec-color-swatch" style="background:${spec.color}"></span>${spec.finish}`;
-    } else {
-      this.drawerFinishEl.textContent = spec.finish;
+      const swatch = document.createElement('span');
+      swatch.className = 'spec-color-swatch';
+      swatch.style.background = spec.color;
+      this.drawerFinishEl.appendChild(swatch);
     }
+    this.drawerFinishEl.appendChild(document.createTextNode(spec.finish));
 
     this.drawerDetailsEl.textContent = spec.details;
     this.specDrawerEl.classList.add('open');
@@ -521,6 +486,6 @@ if (typeof window !== 'undefined') {
   window.addEventListener('DOMContentLoaded', () => {
     const app = new StandaloneViewerApp();
     app.init();
-    (window as any).__viewerApp = app;
+    window.__viewerApp = app;
   });
 }

@@ -20,11 +20,20 @@ function planPersistencePlugin(): Plugin {
       // Endpoint to save working plan to public/sample.plan
       server.middlewares.use('/api/save-plan', (req, res, next) => {
         if (req.method === 'POST') {
+          const MAX_BODY_BYTES = 50 * 1024 * 1024;
           let body = '';
+          let aborted = false;
           req.on('data', (chunk) => {
+            if (aborted) return;
             body += chunk;
+            if (Buffer.byteLength(body, 'utf8') > MAX_BODY_BYTES) {
+              aborted = true;
+              res.writeHead(413, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'Plan payload exceeds maximum allowed size' }));
+            }
           });
           req.on('end', () => {
+            if (aborted) return;
             try {
               // Validate JSON payload
               JSON.parse(body);

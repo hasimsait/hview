@@ -24,6 +24,25 @@ async function viewportState(page: Page) {
   });
 }
 
+test('keyboard shortcuts undo, redo, and save a focused field', async ({ page, request }) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto('/'); await expect(page.getByText('1 Objects')).toBeVisible();
+  await selectSofa(page);
+  const width = numberField(page, 'Width (X)');
+  await width.fill('225');
+  await width.blur();
+  await page.keyboard.press('Control+z');
+  await expect(width).toHaveValue('160');
+  await page.keyboard.press('Control+Shift+z');
+  await expect(width).toHaveValue('225');
+  await width.fill('230');
+  await page.keyboard.press('Control+s');
+  await expect(page.getByRole('button', { name: 'Saved', exact: true })).toBeVisible();
+  expect(legacyData(await (await request.get('/sample.plan')).text()).plan.items.sofa.width).toBe(230);
+  expect(errors).toEqual([]);
+});
+
 test('edits wait for Save and the saving dialog blocks clicks, Escape, and navigation', async ({ page, request }) => {
   const saves: string[] = [];
   let release!: () => void;

@@ -290,7 +290,7 @@ export const DoorInspector: React.FC<DoorInspectorProps> = ({ selected, onClose 
             editor.execute(new FinishOpening(opening.id, finish));
           }}
           onClearFinish={() => {
-            editor.execute(new FinishOpening(opening.id, undefined as any));
+            editor.execute(new FinishOpening(opening.id));
           }}
         />
       </div>

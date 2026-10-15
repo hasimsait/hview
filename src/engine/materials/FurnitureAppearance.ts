@@ -4,7 +4,7 @@ import { WallRecess, type RecessHost } from '../../domain/elements/WallRecess';
 import type { ViewportSettings } from '../../core/types/services';
 import { surfaceSection } from '../../domain/model/SurfaceSections';
 import type { ResourcePool } from '../resources/ResourcePool';
-import type { SurfaceMaterialFactory } from './SurfaceMaterialFactory';
+import { isFabricStretched,type SurfaceMaterialFactory } from './SurfaceMaterialFactory';
 export class FurnitureAppearance {
   private readonly glowMaterials = new WeakSet<THREE.Mesh>();
   constructor(private readonly finishService: SurfaceMaterialFactory, private readonly resources: ResourcePool, private readonly settings: () => ViewportSettings, private readonly recessHost: (item: WallRecess) => RecessHost | undefined) { }
@@ -36,55 +36,24 @@ export class FurnitureAppearance {
         let secFinish: SurfaceFinishConfig | undefined = section ? entity.sectionFinishes?.[section] : undefined;
         if (!secFinish && isRecess && section) secFinish = entity.inheritedFinish(section, this.recessHost(entity));
 
-        if (secFinish) {
-          if (secFinish.type === 'fabric') {
-            const isLinen = secFinish.variant?.includes('linen');
-            const isStretched = secFinish.mappingMode === 'stretched'
-              ? true
-              : secFinish.mappingMode === 'tiled'
-                ? false
-                : !isLinen;
+        const activeFinish = secFinish ?? (
+          child.userData.isLightEmissive || sec === 'Diffuser' || sec === 'Lens' || sec === 'Bulb'
+            ? undefined
+            : entity.finish
+        );
 
-            if (isStretched) {
-              this.finishService!.ensureStretchedUvs?.(child);
-            } else {
-              this.finishService!.ensureLocalMetricBounds?.(child);
-            }
+        if (activeFinish) {
+          if (activeFinish.type === 'fabric' && isFabricStretched(activeFinish)) {
+            this.finishService.ensureStretchedUvs?.(child);
           } else {
-            this.finishService!.ensureLocalMetricBounds?.(child);
+            this.finishService.ensureLocalMetricBounds?.(child);
           }
-          const mat = this.finishService!.getMaterial(secFinish, {
+          const mat = this.finishService.getMaterial(activeFinish, {
             projection: 'local',
             side: isRecess ? THREE.DoubleSide : undefined,
           });
           child.material = mat;
-          child.visible = !(mat as any).isInvisible && (mat as any).visible !== false;
-        } else if (entity.finish) {
-          if (child.userData.isLightEmissive || sec === 'Diffuser' || sec === 'Lens' || sec === 'Bulb') {
-            return;
-          }
-          if (entity.finish.type === 'fabric') {
-            const isLinen = entity.finish.variant?.includes('linen');
-            const isStretched = entity.finish.mappingMode === 'stretched'
-              ? true
-              : entity.finish.mappingMode === 'tiled'
-                ? false
-                : !isLinen;
-
-            if (isStretched) {
-              this.finishService!.ensureStretchedUvs?.(child);
-            } else {
-              this.finishService!.ensureLocalMetricBounds?.(child);
-            }
-          } else {
-            this.finishService!.ensureLocalMetricBounds?.(child);
-          }
-          const mat = this.finishService!.getMaterial(entity.finish, {
-            projection: 'local',
-            side: isRecess ? THREE.DoubleSide : undefined,
-          });
-          child.material = mat;
-          child.visible = !(mat as any).isInvisible && (mat as any).visible !== false;
+          child.visible = !(mat as any).isInvisible && mat.visible !== false;
         } else if (this.resources.original(child)) {
           child.material = this.resources.original(child)!;
           child.visible = true;

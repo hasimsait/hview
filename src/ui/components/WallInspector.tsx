@@ -25,9 +25,13 @@ export const WallInspector: React.FC<WallInspectorProps> = ({ wall, onClose }) =
   const selection = useSelection();
   const activeTarget = selection?.kind === 'wall' && selection.id === wall?.id ? selection.subtarget ?? 'A' : 'A';
   const [selectedRoomToApply, setSelectedRoomToApply] = useState<string>('');
+  const [selectedRecessId, setSelectedRecessId] = useState<string | undefined>(undefined);
 
   const wallRecesses = wall ? queryRecesses(editor.getSnapshot(), wall.id) || [] : [];
-  const primaryRecess = wallRecesses[0] || null;
+  const primaryRecess =
+    (selectedRecessId ? wallRecesses.find((r) => r.id === selectedRecessId) : undefined) ||
+    wallRecesses[0] ||
+    null;
 
   useEffect(() => {
     if (!wall) return;
@@ -69,7 +73,8 @@ export const WallInspector: React.FC<WallInspectorProps> = ({ wall, onClose }) =
   const currentStrategy = getWallTargetStrategy(activeTarget);
   const currentFinishForSide = currentStrategy.getFinish(wall, primaryRecess);
 
-  const handleTargetChange = (targetId: string) => {
+  const handleTargetChange = (targetId: string, recessId?: string) => {
+    if (recessId) setSelectedRecessId(recessId);
     editor.selection.select('wall', wall, targetId);
     if (targetId === 'A' && wall.roomSideA) {
       setSelectedRoomToApply(wall.roomSideA);
@@ -168,6 +173,7 @@ export const WallInspector: React.FC<WallInspectorProps> = ({ wall, onClose }) =
         wall={wall}
         wallLength={wallLength}
         wallRecesses={wallRecesses}
+        selectedRecessId={primaryRecess?.id}
         activeTarget={activeTarget}
         editor={editor}
         sceneService={sceneService}

@@ -176,10 +176,16 @@ export class PlanDocument {
       if (wall.roomSideA === roomId) next = next.withFinish('A', finish);
       if (wall.roomSideB === roomId) next = next.withFinish('B', finish);
       if (!wall.roomSideA && !wall.roomSideB) next = next.withFinish('both', finish);
-      document = document.replace(next.withFinish('edges', finish));
+      const isSharedWithOtherRoom =
+        (wall.roomSideA && wall.roomSideA !== roomId) ||
+        (wall.roomSideB && wall.roomSideB !== roomId);
+      if (!isSharedWithOtherRoom) next = next.withFinish('edges', finish);
+      document = document.replace(next);
     }
     for (const column of this.columns) {
-      if (column.roomId === roomId) document = document.replace(column.withFinish('all', finish));
+      if (column.roomId === roomId || column.roomIds?.includes(roomId)) {
+        document = document.replace(column.withFinish('all', finish));
+      }
     }
     return document.replace(room.withWallFinish(finish));
   }
@@ -213,13 +219,10 @@ export class PlanDocument {
     const topology = new WallTopology();
     const wall1 = new Wall({
       ...data, id: firstId, p2: point, endOffset: 0,
-      cavities: data.cavities?.filter(cavity => cavity.distanceAlongWall <= distance)
     }, firstOpenings);
     const first = wall1.withRoomRelationship(topology.roomsFor(wall1, this.rooms));
     const wall2 = new Wall({
       ...data, id: secondId, p1: point, startOffset: 0,
-      cavities: data.cavities?.filter(cavity => cavity.distanceAlongWall > distance)
-        .map(cavity => ({ ...cavity, distanceAlongWall: cavity.distanceAlongWall - distance }))
     }, secondOpenings);
     const second = wall2.withRoomRelationship(topology.roomsFor(wall2, this.rooms));
     const elements = this.elements.flatMap(element => element.id === id ? [first, second] : [element]);

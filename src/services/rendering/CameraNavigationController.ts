@@ -27,6 +27,9 @@ export class CameraNavigationController {
   private forwardVector = new THREE.Vector3();
   private rightVector = new THREE.Vector3();
   private tempOffset = new THREE.Vector3();
+  private camRight = new THREE.Vector3();
+  private moveDelta = new THREE.Vector3();
+  private panDelta = new THREE.Vector3();
   private worldUp = new THREE.Vector3(0, 1, 0);
 
   constructor(
@@ -181,7 +184,7 @@ export class CameraNavigationController {
       const lookDown = this.keys['ArrowDown'];
       if (lookUp || lookDown) {
         // Calculate camera's horizontal right axis
-        const camRight = new THREE.Vector3().crossVectors(offset, this.worldUp).normalize();
+        const camRight = this.camRight.crossVectors(offset, this.worldUp).normalize();
         if (camRight.lengthSq() > 0.001) {
           const currentPitch = Math.asin(THREE.MathUtils.clamp(offset.y / distance, -0.999, 0.999));
           const pitchDelta = (lookUp ? 1 : -1) * currentRotSpeed;
@@ -211,7 +214,7 @@ export class CameraNavigationController {
 
     this.rightVector.set(-this.forwardVector.z, 0, this.forwardVector.x);
 
-    const moveDelta = new THREE.Vector3(0, 0, 0);
+    const moveDelta = this.moveDelta.set(0, 0, 0);
 
     // Forward / Backward
     if (this.keys['KeyW'] || (isCtrl && this.keys['ArrowUp'])) {
@@ -257,7 +260,7 @@ export class CameraNavigationController {
     // Speed scaled inversely by zoom so pan feels natural at any zoom level
     const panSpeed = ((isShift ? 30 : 12) / zoom) * 50 * dt;
 
-    const panDelta = new THREE.Vector3(0, 0, 0);
+    const panDelta = this.panDelta.set(0, 0, 0);
 
     if (this.keys['KeyW'] || this.keys['ArrowUp']) {
       panDelta.z -= panSpeed;

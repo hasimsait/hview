@@ -1,5 +1,6 @@
 import { OpeningEntity,WallEntity } from '@core/types/plan';
 import * as THREE from 'three';
+import { applyBasicOcclusionShader,createOcclusionUniforms } from '../materials/OcclusionShader';
 import { SurfaceMaterialFactory } from "../materials/SurfaceMaterialFactory";
 
 export class OpeningMeshBuilder {
@@ -9,12 +10,7 @@ export class OpeningMeshBuilder {
   interactionTarget(root: THREE.Object3D): THREE.Object3D | undefined { return this.pivots.get(root); }
 
   // Shared occlusion uniforms — driven each frame via updateOrbitPlane()
-  private occlusionUniforms = {
-    uOrbitCenter: { value: new THREE.Vector3(0, 0, 0) },
-    uCameraDir: { value: new THREE.Vector3(0, 0, 1) },
-    uForegroundMode: { value: 1 },
-    uForegroundOpacity: { value: 0.15 },
-  };
+  private occlusionUniforms = createOcclusionUniforms();
 
   private frameMaterial: THREE.MeshStandardMaterial;
   private doorMaterial: THREE.MeshStandardMaterial;
@@ -64,58 +60,8 @@ export class OpeningMeshBuilder {
 
     // Apply orbit-fade shader to all opaque standard materials (glass excluded)
     for (const mat of [this.frameMaterial, this.doorMaterial, this.handleMaterial, this.sillMaterial]) {
-      this.applyOcclusionShader(mat);
+      applyBasicOcclusionShader(mat, this.occlusionUniforms, 0.6);
     }
-  }
-
-  /** Inject orbit-occlusion GLSL (same pattern as WallMeshBuilder). */
-  private applyOcclusionShader(mat: THREE.MeshStandardMaterial): void {
-    const u = this.occlusionUniforms;
-    mat.onBeforeCompile = (shader) => {
-      shader.uniforms.uOrbitCenter = u.uOrbitCenter;
-      shader.uniforms.uCameraDir = u.uCameraDir;
-      shader.uniforms.uForegroundMode = u.uForegroundMode;
-      shader.uniforms.uForegroundOpacity = u.uForegroundOpacity;
-
-      shader.vertexShader = shader.vertexShader.replace(
-        '#include <common>',
-        `#include <common>\nvarying vec3 vCustomWorldPos;`
-      );
-      shader.vertexShader = shader.vertexShader.replace(
-        '#include <worldpos_vertex>',
-        `#include <worldpos_vertex>
-        vec4 _cwp = vec4(transformed, 1.0);
-        #ifdef USE_INSTANCING
-          _cwp = instanceMatrix * _cwp;
-        #endif
-        vCustomWorldPos = (modelMatrix * _cwp).xyz;`
-      );
-
-      shader.fragmentShader = shader.fragmentShader.replace(
-        '#include <common>',
-        `#include <common>
-        uniform vec3  uOrbitCenter;
-        uniform vec3  uCameraDir;
-        uniform int   uForegroundMode;
-        uniform float uForegroundOpacity;
-        varying vec3  vCustomWorldPos;`
-      );
-      shader.fragmentShader = shader.fragmentShader.replace(
-        '#include <dithering_fragment>',
-        `#include <dithering_fragment>
-        if (uForegroundMode > 0) {
-          float dist = dot(vCustomWorldPos - uOrbitCenter, uCameraDir);
-          if (dist > 0.0) {
-            if (uForegroundMode == 1) {
-              float fade = smoothstep(0.0, 0.6, dist);
-              gl_FragColor.a *= mix(1.0, uForegroundOpacity, fade);
-            } else if (uForegroundMode == 2) {
-              if (dist > 0.1) discard;
-            }
-          }
-        }`
-      );
-    };
   }
 
   updateOrbitPlane(orbitCenter: THREE.Vector3, cameraDir: THREE.Vector3): void {

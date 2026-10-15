@@ -5,7 +5,7 @@ export class BrowserSnapshotStore {
   private readonly timeKey: string;
   constructor() {
     const offline = typeof window !== 'undefined' &&
-      ((window as any).__STANDALONE_MODE__ || window.location.protocol === 'file:');
+      (Boolean(window.__STANDALONE_MODE__) || window.location.protocol === 'file:');
     const path = typeof window !== 'undefined' ? window.location.pathname : undefined;
     // Downloaded/hosted standalone documents on the same origin need separate working copies.
     const suffix = offline && path && path !== '/' ? `:${encodeURIComponent(path)}` : '';

@@ -298,23 +298,18 @@ export class SceneEngine implements ISceneService {
   }
 
   private getRecessHolesForWall(wall: WallEntity) {
-    const native = (wall.cavities ?? []).map(cavity => ({
-      start: cavity.distanceAlongWall - cavity.width / 2,
-      end: cavity.distanceAlongWall + cavity.width / 2,
-      floorHeight: cavity.floorElevation,
-      topHeight: cavity.floorElevation + cavity.height,
-    }));
     const recesses = this.currentPlan?.recessesFor(wall.id) ?? [];
-    return [...native, ...recesses.flatMap(recess => {
+    return recesses.flatMap(recess => {
       const cut = recess.cutFor(wall);
       return cut ? [cut] : [];
-    })];
+    });
   }
 
   setSelectionHighlight(entity: FurnitureEntity | null): void {
     this.invalidate();
     if (this.selectionHelper) {
       this.helpersGroup.remove(this.selectionHelper);
+      this.selectionHelper.dispose();
       this.selectionHelper = null;
     }
 
@@ -332,6 +327,7 @@ export class SceneEngine implements ISceneService {
     this.invalidate();
     if (this.openingSelectionHelper) {
       this.helpersGroup.remove(this.openingSelectionHelper);
+      this.openingSelectionHelper.dispose();
       this.openingSelectionHelper = null;
     }
 
@@ -774,9 +770,14 @@ export class SceneEngine implements ISceneService {
     this.renderer.setSize(width, height);
   }
 
+  private readonly tempDir = new THREE.Vector3();
+  private readonly tempDelta = new THREE.Vector3();
+
   private renderFrame(dt: number): void {
-    this.selectionHelper?.update(); this.wallSelectionHelper?.update(); this.openingSelectionHelper?.update();
-    const tempDir = new THREE.Vector3();
+    this.selectionHelper?.update();
+    this.wallSelectionHelper?.update();
+    this.openingSelectionHelper?.update();
+    const tempDir = this.tempDir;
     if (this.cameraNavController) {
       this.cameraNavController.update(dt);
     }
@@ -837,15 +838,14 @@ export class SceneEngine implements ISceneService {
     }
     if (!this.controls) return false;
     const orbitCenter = this.controls.target;
-    const cameraToOrbitDir = new THREE.Vector3()
-      .subVectors(this.perspectiveCamera.position, orbitCenter);
+    const cameraToOrbitDir = this.tempDir.subVectors(this.perspectiveCamera.position, orbitCenter);
     cameraToOrbitDir.y = 0;
     if (cameraToOrbitDir.lengthSq() > 0.0001) {
       cameraToOrbitDir.normalize();
     } else {
       cameraToOrbitDir.set(0, 0, 1);
     }
-    const delta = worldPoint.clone().sub(orbitCenter);
+    const delta = this.tempDelta.subVectors(worldPoint, orbitCenter);
     delta.y = 0;
     const dotDist = delta.dot(cameraToOrbitDir);
     return dotDist > (this.settings.foregroundOcclusionMode === 'clip' ? 0.1 : 0.35);

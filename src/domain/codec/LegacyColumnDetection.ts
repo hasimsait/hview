@@ -15,17 +15,17 @@ export function detectLegacyColumns(plan: PlanData): DetectedColumn[] {
   const columns: DetectedColumn[] = [];
 
   const getWallCorners = (w: WallData) => {
-    const p1 = new PlanVector2(w.p1.x, w.p1.y);
-    const p2 = new PlanVector2(w.p2.x, w.p2.y);
+    const p1 = PlanVector2.from(w.p1);
+    const p2 = PlanVector2.from(w.p2);
     const len = p1.distanceTo(p2);
-    const dir = len > 0.001 ? new PlanVector2().subVectors(p2, p1).normalize() : new PlanVector2(1, 0);
+    const dir = len > 0.001 ? PlanVector2.sub(p2, p1).normalize() : new PlanVector2(1, 0);
     const norm = new PlanVector2(-dir.y, dir.x);
     const halfT = (w.thickness || 0.1) / 2;
     return [
-      new PlanVector2().copy(p1).addScaledVector(norm, halfT),
-      new PlanVector2().copy(p1).addScaledVector(norm, -halfT),
-      new PlanVector2().copy(p2).addScaledVector(norm, halfT),
-      new PlanVector2().copy(p2).addScaledVector(norm, -halfT),
+      p1.addScaledVector(norm, halfT),
+      p1.addScaledVector(norm, -halfT),
+      p2.addScaledVector(norm, halfT),
+      p2.addScaledVector(norm, -halfT),
     ];
   };
 
@@ -146,9 +146,9 @@ export function detectLegacyColumns(plan: PlanData): DetectedColumn[] {
     }
     if (!parentWall) continue;
 
-    const p1 = new PlanVector2(parentWall.p1.x, parentWall.p1.y);
-    const p2 = new PlanVector2(parentWall.p2.x, parentWall.p2.y);
-    const dir = new PlanVector2().subVectors(p2, p1).normalize();
+    const p1 = PlanVector2.from(parentWall.p1);
+    const p2 = PlanVector2.from(parentWall.p2);
+    const dir = PlanVector2.sub(p2, p1).normalize();
     const norm = new PlanVector2(-dir.y, dir.x);
     const parentThick = parentWall.thickness || 0.1;
     const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
@@ -158,8 +158,8 @@ export function detectLegacyColumns(plan: PlanData): DetectedColumn[] {
       stubCorners.push(...getWallCorners(sw));
     }
 
-    const alongDists = stubCorners.map((c) => new PlanVector2().subVectors(c, p1).dot(dir));
-    const normDists = stubCorners.map((c) => new PlanVector2().subVectors(c, p1).dot(norm));
+    const alongDists = stubCorners.map((c) => PlanVector2.sub(c, p1).dot(dir));
+    const normDists = stubCorners.map((c) => PlanVector2.sub(c, p1).dot(norm));
 
     const minA = Math.min(...alongDists), maxA = Math.max(...alongDists);
     const avgN = normDists.reduce((a, b) => a + b, 0) / normDists.length;

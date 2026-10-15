@@ -58,17 +58,6 @@ export interface OpeningData {
 export type WallSide = 'A' | 'B' | 'edges' | 'edge_start' | 'edge_end' | 'edge_top' | 'baseboard' | 'edge_bottom' | 'both';
 export type ColumnSide = 'all' | 'front' | 'back' | 'left' | 'right';
 
-export interface CavityModifier {
-  id: string;
-  distanceAlongWall: number; // meters from p1
-  floorElevation: number;    // meters from floor
-  width: number;             // meters
-  height: number;            // meters
-  depth: number;             // meters into wall
-  finishBack?: SurfaceFinishConfig;
-  finishReturns?: SurfaceFinishConfig;
-}
-
 export interface ColumnData {
   id: string;
   name: string;
@@ -112,7 +101,6 @@ export interface WallData {
   roomSideA?: string;                // Room ID bordering Side A
   roomSideB?: string;                // Room ID bordering Side B
   openings: OpeningData[];
-  cavities?: CavityModifier[];       // Pinned recesses (wall-native features)
   startOffset?: number;              // meters to extend (+) or cut short (-) at p1
   endOffset?: number;                // meters to extend (+) or cut short (-) at p2
   roomIds?: string[];   // IDs of rooms this wall encloses/borders

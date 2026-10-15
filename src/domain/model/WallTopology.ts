@@ -32,15 +32,7 @@ export class WallTopology {
   }
 
   private isPointInPolygon(pt: Point2D, poly: readonly Point2D[]): boolean {
-    let inside = false;
-    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-      const xi = poly[i].x, yi = poly[i].y;
-      const xj = poly[j].x, yj = poly[j].y;
-      const intersect = ((yi > pt.y) !== (yj > pt.y))
-        && (pt.x < (xj - xi) * (pt.y - yi) / (yj - yi) + xi);
-      if (intersect) inside = !inside;
-    }
-    return inside;
+    return isPointInPolygon(pt, poly);
   }
 
   private assignWallRoomSides(wall: DerivedWall, rooms: readonly RoomShape[]): void {
@@ -86,4 +78,25 @@ export class WallTopology {
       }
     }
   }
+}
+
+export function isPointInPolygon(pt: Point2D, poly: readonly Point2D[]): boolean {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const xi = poly[i].x, yi = poly[i].y;
+    const xj = poly[j].x, yj = poly[j].y;
+    const intersect = ((yi > pt.y) !== (yj > pt.y))
+      && (pt.x < (xj - xi) * (pt.y - yi) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+export function calculatePolygonArea(polygon: readonly Point2D[]): number {
+  if (!polygon || polygon.length < 3) return 0;
+  let area = 0;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    area += (polygon[j].x + polygon[i].x) * (polygon[j].y - polygon[i].y);
+  }
+  return Math.abs(area / 2);
 }

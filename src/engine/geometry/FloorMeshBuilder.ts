@@ -1,6 +1,7 @@
 import { RoomEntity } from '@core/types/plan';
 import { ISurfaceFinishService } from '@core/types/services';
 import * as THREE from 'three';
+import { BrowserCanvasFactory,type CanvasFactory } from '../materials/CanvasFactory';
 
 export class FloorMeshBuilder {
   private readonly surfaces = new WeakSet<THREE.Mesh>();
@@ -10,7 +11,10 @@ export class FloorMeshBuilder {
 
   get palette(): readonly THREE.Material[] { return [this.getMaterial('parquet'), this.getMaterial('tile')]; }
 
-  constructor(private finishService?: ISurfaceFinishService) {
+  constructor(
+    private finishService?: ISurfaceFinishService,
+    private readonly canvas: CanvasFactory = new BrowserCanvasFactory()
+  ) {
     this.parquetTexture = this.generateParquetTexture();
     this.tileTexture = this.generateTileTexture();
   }
@@ -114,7 +118,7 @@ export class FloorMeshBuilder {
   }
 
   private generateParquetTexture(): THREE.CanvasTexture {
-    const canvas = document.createElement('canvas');
+    const canvas = this.canvas.create();
     canvas.width = 512;
     canvas.height = 512;
     const ctx = canvas.getContext('2d')!;
@@ -159,7 +163,7 @@ export class FloorMeshBuilder {
   }
 
   private generateTileTexture(): THREE.CanvasTexture {
-    const canvas = document.createElement('canvas');
+    const canvas = this.canvas.create();
     canvas.width = 512;
     canvas.height = 512;
     const ctx = canvas.getContext('2d')!;
@@ -194,7 +198,7 @@ export class FloorMeshBuilder {
   }
 
   private createRoomBadge(name: string, area: number): THREE.Sprite {
-    const canvas = document.createElement('canvas');
+    const canvas = this.canvas.create();
     canvas.width = 256;
     canvas.height = 128;
     const ctx = canvas.getContext('2d')!;

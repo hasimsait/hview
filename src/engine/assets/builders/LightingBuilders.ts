@@ -29,7 +29,7 @@ export function buildChandelier(context: AssetBuildContext): void {
   const globeCount = 4;
   for (let i = 0; i < globeCount; i++) {
     const ang = (i * Math.PI * 2) / globeCount;
-    const globeMat = materials.warmLightGlow.clone();
+    const globeMat = materials.warmLightGlow;
     const globe = new THREE.Mesh(new THREE.SphereGeometry(0.045, 16, 16), globeMat);
     globe.userData.isLightEmissive = true;
     globe.position.set(Math.cos(ang) * radius, 0, Math.sin(ang) * radius);
@@ -79,7 +79,7 @@ export function buildCascadingChandelier(context: AssetBuildContext): void {
     ring.position.set(0, tier.y, 0);
     parent.add(ring);
 
-    const glowMat = materials.warmLightGlow.clone();
+    const glowMat = materials.warmLightGlow;
     const glow = new THREE.Mesh(
       new THREE.TorusGeometry(tier.r * 0.96, tier.thick * 0.8, 12, 36),
       glowMat
@@ -138,7 +138,7 @@ export function buildCylinderSpotlight(context: AssetBuildContext): void {
 
   // 4. Recessed glowing LED diffuser lens
   const lensRadius = radius * 0.64;
-  const lensMat = materials.warmLightGlow.clone();
+  const lensMat = materials.warmLightGlow;
   const lens = new THREE.Mesh(
     new THREE.CylinderGeometry(lensRadius, lensRadius, 0.006, 24),
     lensMat
@@ -174,7 +174,7 @@ export function buildSpotlight(context: AssetBuildContext): void {
   bezel.position.set(0, 0, 0);
 
   // Glowing diffuser disc
-  const lensMat = materials.warmLightGlow.clone();
+  const lensMat = materials.warmLightGlow;
   const lens = new THREE.Mesh(
     new THREE.CylinderGeometry(radius * 0.72, radius * 0.72, 0.016, 24),
     lensMat
@@ -229,7 +229,7 @@ export function buildWallSpot(context: AssetBuildContext): void {
   head.position.set(0, -0.01, 0.06);
 
   // Glowing bulb
-  const bulbMat = materials.warmLightGlow.clone();
+  const bulbMat = materials.warmLightGlow;
   const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.02, 16, 16), bulbMat);
   bulb.userData.section = 'Bulb';
   bulb.userData.isLightEmissive = true;
@@ -353,7 +353,7 @@ export function buildVanitySconce80(context: AssetBuildContext): void {
   // 4. Downward Recessed Full-Length Frosted LED Diffuser (Section: 'Diffuser')
   const diffuserW = sconceW - 0.016;
   const diffuserD = chassisD - 0.006;
-  const diffuserMat = materials.warmLightGlow.clone();
+  const diffuserMat = materials.warmLightGlow;
   const diffuser = new THREE.Mesh(
     new THREE.BoxGeometry(diffuserW, 0.004, diffuserD),
     diffuserMat

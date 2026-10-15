@@ -175,7 +175,7 @@ export class LegacyPlanWriter {
       if (wall.finishEdgeTop) rawWall.finishEdgeTop = wall.finishEdgeTop; else delete rawWall.finishEdgeTop;
       if (wall.finishBaseboard) rawWall.finishBaseboard = wall.finishBaseboard; else delete rawWall.finishBaseboard;
       if (wall.finishEdges) rawWall.finishEdges = wall.finishEdges; else delete rawWall.finishEdges;
-      if (wall.cavities && wall.cavities.length > 0) rawWall.cavities = wall.cavities; else delete rawWall.cavities;
+      delete rawWall.cavities;
       if (wall.startOffset !== undefined) rawWall.startOffset = wall.startOffset; else delete rawWall.startOffset;
       if (wall.endOffset !== undefined) rawWall.endOffset = wall.endOffset; else delete rawWall.endOffset;
       if (wall.color) rawWall.color = wall.color;

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { AssetCatalog } from "../../domain/catalog/AssetCatalog";
 import type { Furniture } from '../../domain/elements/Furniture';
+import { applyBasicOcclusionShader,createOcclusionUniforms } from '../materials/OcclusionShader';
 import { ensureLocalMetricBounds,ensureStretchedUvs } from "../materials/SurfaceMaterialFactory";
 import { TextureSource } from '../materials/TextureSource';
 import { AssetBuildContext,ProceduralMaterials } from "./builders/AssetBuildContext";
@@ -9,12 +10,7 @@ import { FURNITURE_GEOMETRY } from "./FurnitureGeometryLibrary";
 export class FurnitureMeshBuilder {
   // Shared occlusion uniforms — same pattern as WallMeshBuilder.
   // Driven each frame by SceneEngine via updateOrbitPlane().
-  private occlusionUniforms = {
-    uOrbitCenter: { value: new THREE.Vector3(0, 0, 0) },
-    uCameraDir: { value: new THREE.Vector3(0, 0, 1) },
-    uForegroundMode: { value: 1 }, // 0=solid, 1=transparent, 2=clip
-    uForegroundOpacity: { value: 0.15 },
-  };
+  private occlusionUniforms = createOcclusionUniforms();
 
   // Shared materials for architectural rendering
   private materials: ProceduralMaterials = {
@@ -64,7 +60,7 @@ export class FurnitureMeshBuilder {
     ];
     for (const mat of opaqueMats) {
       mat.transparent = true;
-      this.applyOcclusionShader(mat);
+      applyBasicOcclusionShader(mat, this.occlusionUniforms, 0.6);
     }
 
     // Load photographic wood veneers for default architectural furniture
@@ -110,55 +106,7 @@ export class FurnitureMeshBuilder {
   }
 
 
-  /** Inject the same orbit-occlusion GLSL used by walls into a material. */
-  private applyOcclusionShader(mat: THREE.MeshStandardMaterial): void {
-    const u = this.occlusionUniforms;
-    mat.onBeforeCompile = (shader) => {
-      shader.uniforms.uOrbitCenter = u.uOrbitCenter;
-      shader.uniforms.uCameraDir = u.uCameraDir;
-      shader.uniforms.uForegroundMode = u.uForegroundMode;
-      shader.uniforms.uForegroundOpacity = u.uForegroundOpacity;
 
-      shader.vertexShader = shader.vertexShader.replace(
-        '#include <common>',
-        `#include <common>\nvarying vec3 vCustomWorldPos;`
-      );
-      shader.vertexShader = shader.vertexShader.replace(
-        '#include <worldpos_vertex>',
-        `#include <worldpos_vertex>
-        vec4 _cwp = vec4(transformed, 1.0);
-        #ifdef USE_INSTANCING
-          _cwp = instanceMatrix * _cwp;
-        #endif
-        vCustomWorldPos = (modelMatrix * _cwp).xyz;`
-      );
-
-      shader.fragmentShader = shader.fragmentShader.replace(
-        '#include <common>',
-        `#include <common>
-        uniform vec3  uOrbitCenter;
-        uniform vec3  uCameraDir;
-        uniform int   uForegroundMode;
-        uniform float uForegroundOpacity;
-        varying vec3  vCustomWorldPos;`
-      );
-      shader.fragmentShader = shader.fragmentShader.replace(
-        '#include <dithering_fragment>',
-        `#include <dithering_fragment>
-        if (uForegroundMode > 0) {
-          float dist = dot(vCustomWorldPos - uOrbitCenter, uCameraDir);
-          if (dist > 0.0) {
-            if (uForegroundMode == 1) {
-              float fade = smoothstep(0.0, 0.6, dist);
-              gl_FragColor.a *= mix(1.0, uForegroundOpacity, fade);
-            } else if (uForegroundMode == 2) {
-              if (dist > 0.1) discard;
-            }
-          }
-        }`
-      );
-    };
-  }
 
   updateOrbitPlane(orbitCenter: THREE.Vector3, cameraDir: THREE.Vector3): void {
     this.occlusionUniforms.uOrbitCenter.value.copy(orbitCenter);

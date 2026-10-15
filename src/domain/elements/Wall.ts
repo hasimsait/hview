@@ -1,5 +1,5 @@
 import { finite,immutable,positive } from '../model/Immutable';
-import type { CavityModifier,SurfaceFinishConfig,WallData,WallFrameStyle,WallSide } from '../model/PlanData';
+import type { SurfaceFinishConfig,WallData,WallFrameStyle,WallSide } from '../model/PlanData';
 import { SurfaceFinish } from '../model/SurfaceFinish';
 import type { Opening } from './Opening';
 import { PlanElement,type PlanElementVisitor } from './PlanElement';
@@ -34,7 +34,6 @@ export class Wall extends PlanElement {
   get finishEdgeEnd() { return this.state.finishEdgeEnd; }
   get finishEdgeTop() { return this.state.finishEdgeTop; }
   get finishBaseboard() { return this.state.finishBaseboard; }
-  get cavities(): readonly Readonly<NonNullable<WallData['cavities']>[number]>[] | undefined { return this.state.cavities; }
   get roomIds(): readonly string[] | undefined { return this.state.roomIds; }
   get roomSideA() { return this.state.roomSideA; }
   get roomSideB() { return this.state.roomSideB; }
@@ -87,17 +86,11 @@ export class Wall extends PlanElement {
     return startOffset === this.startOffset && endOffset === this.endOffset ? this
       : new Wall({ ...this.state, startOffset, endOffset, openings: [] }, this.openings);
   }
-  withCavities(cavities: readonly CavityModifier[]): Wall {
-    for (const cavity of cavities) this.validateHostedFeature(cavity.distanceAlongWall, cavity.width);
-    return new Wall({ ...this.state, cavities: [...cavities], openings: [] }, this.openings);
-  }
-  validateHostedFeature(center: number, width: number): void {
-    if (center - width / 2 < -0.001 || center + width / 2 > this.length + 0.001) throw new Error('Hosted feature extends beyond the wall');
-  }
   assertSplittable(distance: number): void {
     if (distance <= 0.05 || distance >= this.length - 0.05) throw new Error('Split must leave two usable wall segments');
-    const features = [...this.openings, ...(this.cavities ?? [])];
-    if (features.some(feature => Math.abs(feature.distanceAlongWall - distance) < feature.width / 2 - 0.001)) throw new Error('Cannot split through a hosted opening or recess');
+    if (this.openings.some(opening => Math.abs(opening.distanceAlongWall - distance) < opening.width / 2 - 0.001)) {
+      throw new Error('Cannot split through a hosted opening or recess');
+    }
   }
   toData(): WallData { return { ...structuredClone(this.state), openings: this.openings.map(opening => opening.toData()) }; }
   accept<R>(visitor: PlanElementVisitor<R>): R { return visitor.visitWall(this); }

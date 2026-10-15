@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type { WallEntity } from '../../core/types/plan';
+import { applyBasicOcclusionShader,createOcclusionUniforms } from './OcclusionShader';
 import { SurfaceMaterialFactory } from './SurfaceMaterialFactory';
 export class WallSurfacePalette {
   register(mesh: THREE.Mesh, surface: 'body' | 'frame' | 'baseboard'): void { this.surfaces.set(mesh, surface); }
@@ -12,12 +13,7 @@ export class WallSurfacePalette {
 
   private finishService: SurfaceMaterialFactory;
 
-  private wallUniforms = {
-    uOrbitCenter: { value: new THREE.Vector3(0, 0, 0) },
-    uCameraDir: { value: new THREE.Vector3(0, 0, 1) },
-    uForegroundMode: { value: 1 }, // 0 = solid, 1 = transparent foreground, 2 = clip section
-    uForegroundOpacity: { value: 0.15 },
-  };
+  private wallUniforms = createOcclusionUniforms();
 
   constructor(finishService: SurfaceMaterialFactory) {
     this.finishService = finishService;
@@ -40,57 +36,7 @@ export class WallSurfacePalette {
       depthWrite: true,
     });
 
-    // Custom shader hook for dynamic foreground transparency relative to orbit center
-    this.wallMaterial.onBeforeCompile = (shader) => {
-      shader.uniforms.uOrbitCenter = this.wallUniforms.uOrbitCenter;
-      shader.uniforms.uCameraDir = this.wallUniforms.uCameraDir;
-      shader.uniforms.uForegroundMode = this.wallUniforms.uForegroundMode;
-      shader.uniforms.uForegroundOpacity = this.wallUniforms.uForegroundOpacity;
-
-      // Vertex shader: pass world position
-      shader.vertexShader = shader.vertexShader.replace(
-        '#include <common>',
-        `#include <common>
-        varying vec3 vCustomWorldPos;`
-      );
-      shader.vertexShader = shader.vertexShader.replace(
-        '#include <worldpos_vertex>',
-        `#include <worldpos_vertex>
-        vec4 customWPos = vec4(transformed, 1.0);
-        #ifdef USE_INSTANCING
-          customWPos = instanceMatrix * customWPos;
-        #endif
-        vCustomWorldPos = (modelMatrix * customWPos).xyz;`
-      );
-
-      // Fragment shader: fade or clip fragments on the closer-to-camera side of orbit center
-      shader.fragmentShader = shader.fragmentShader.replace(
-        '#include <common>',
-        `#include <common>
-        uniform vec3 uOrbitCenter;
-        uniform vec3 uCameraDir;
-        uniform int uForegroundMode;
-        uniform float uForegroundOpacity;
-        varying vec3 vCustomWorldPos;`
-      );
-
-      shader.fragmentShader = shader.fragmentShader.replace(
-        '#include <dithering_fragment>',
-        `#include <dithering_fragment>
-        if (uForegroundMode > 0) {
-          float dist = dot(vCustomWorldPos - uOrbitCenter, uCameraDir);
-          if (dist > 0.0) {
-            if (uForegroundMode == 1) {
-              // Smoothly fade walls on the closer-to-camera side of orbit:
-              float fade = smoothstep(0.0, 0.5, dist);
-              gl_FragColor.a *= mix(1.0, uForegroundOpacity, fade);
-            } else if (uForegroundMode == 2) {
-              if (dist > 0.1) discard;
-            }
-          }
-        }`
-      );
-    };
+    applyBasicOcclusionShader(this.wallMaterial, this.wallUniforms, 0.5);
   }
 
   getMaterial(): THREE.MeshStandardMaterial {

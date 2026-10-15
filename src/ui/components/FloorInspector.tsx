@@ -65,28 +65,17 @@ export const FloorInspector: React.FC<FloorInspectorProps> = ({ room, onClose })
     if (!finish) {
       return isWetZone ? 'Default Wet-Zone Ceramic Tile' : 'Default Scandinavian Oak Parquet';
     }
+    if (finish.variant) {
+      const catalogTile = runtime.tiles.getById(finish.variant);
+      if (catalogTile) return catalogTile.name;
+    }
     const names: Record<string, string> = {
-      calacatta_shiny_60x60: '60x60 Calacatta Polished Tile',
-      cenova_matte_beige_60x60: '60x60 Cenova Matte Beige Porcelain',
-      canakkale_diadem_bej_59x59: '59x59 Diadem Beige Matte Porcelain',
-      canakkale_wabi_maburu_bej_34x111: '34x111 Wabi Maburu Beige Rectified (6939R)',
-      kale_parlak_sage_10x30: '10x30 Kale Glossy Sage Decor Tile',
-      graniser_orea_bone_40x80: '40x80 Orea Bone Matte Tile',
-      graniser_orea_bone_60x60: '60x60 Orea Bone Matte Tile',
-      antarctica_parlak_60x60: '60x60 Antarctica Polished White Tile',
-      sense_fildisi_mat_40x40: '40x40 Sense Ivory Matte Tile',
-      sense_fildisi_parlak_30x60: '30x60 Sense Ivory Polished Tile',
-      asel_beyaz_30x60: '30x60 Asel White Rectified Tile',
       parquet_oak: 'Scandinavian Oak Parquet',
       parquet_walnut: 'Dark Walnut Plank Parquet',
       parquet_light: 'Bleached Ash / Light Parquet',
       parquet_herringbone: 'Herringbone Oak Parquet',
       natural_oak: 'Natural Solid Oak',
       dark_walnut: 'Solid Dark Walnut',
-      marble: 'Calacatta Marble',
-      anthracite: 'Anthracite Slate (30x60)',
-      square: 'Square Grid Tile',
-      subway: 'Subway Tile',
     };
     if (finish.variant && names[finish.variant]) return names[finish.variant];
     const typeFormatters: Record<string, (f: SurfaceFinishConfig) => string> = {

@@ -2,7 +2,7 @@ const REQUEST_TIMEOUT_MS = 15000;
 
 export function isStandalonePlanSource(): boolean {
   return typeof window !== 'undefined' &&
-    (!!(window as any).__STANDALONE_MODE__ || window.location.protocol === 'file:');
+    (Boolean(window.__STANDALONE_MODE__) || window.location.protocol === 'file:');
 }
 
 /** Bound both the request and its response body, even if a transport ignores abort. */

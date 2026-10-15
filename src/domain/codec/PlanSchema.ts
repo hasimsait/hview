@@ -30,10 +30,6 @@ export const wallSchema = z.object({
   finish, finishSideA: finish, finishSideB: finish, finishEdges: finish, finishEdgeStart: finish, finishEdgeEnd: finish,
   finishEdgeTop: finish, finishBaseboard: finish, frameColor: z.string().optional(),
   frameStyle: z.enum(['none', 'perimeter', 'grid_3', 'grid_4', 'grid_2x3']).optional(),
-  cavities: z.array(z.object({
-    id, distanceAlongWall: number, floorElevation: number,
-    width: positive, height: positive, depth: positive, finishBack: finish, finishReturns: finish
-  })).optional(),
   rawWall: z.unknown().optional(),
 }).passthrough();
 export const roomSchema = z.object({

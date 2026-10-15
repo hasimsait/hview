@@ -148,7 +148,6 @@ export class LegacyPlanReader {
           finishEdgeTop: w.finishEdgeTop || undefined,
           finishBaseboard: w.finishBaseboard || undefined,
           finishEdges: w.finishEdges || undefined,
-          cavities: w.cavities ? w.cavities.map((c: any) => ({ ...c })) : undefined,
           startOffset: w.startOffset,
           endOffset: w.endOffset,
           frameStyle: w.frameStyle || undefined,

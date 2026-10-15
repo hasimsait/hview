@@ -12,16 +12,18 @@ interface WallRecessSectionProps {
   wall: WallEntity;
   wallLength: number;
   wallRecesses: readonly FurnitureEntity[];
+  selectedRecessId?: string;
   activeTarget: string;
   editor: EditorSession;
   sceneService: ISceneService;
-  onSelectTarget: (target: string) => void;
+  onSelectTarget: (target: string, recessId?: string) => void;
 }
 
 export const WallRecessSection: React.FC<WallRecessSectionProps> = ({
   wall,
   wallLength,
   wallRecesses,
+  selectedRecessId,
   activeTarget,
   editor,
   sceneService,
@@ -61,7 +63,7 @@ export const WallRecessSection: React.FC<WallRecessSectionProps> = ({
       ]));
       sceneService.focusOnObject(id);
       setShowAdder(false);
-      onSelectTarget('recess_wall');
+      onSelectTarget('recess_wall', id);
       setError('');
     } catch (error) {
       setError(error instanceof Error ? error.message : String(error));
@@ -240,21 +242,23 @@ export const WallRecessSection: React.FC<WallRecessSectionProps> = ({
               <div className="flex gap-1.5">
                 <button
                   type="button"
-                  onClick={() => onSelectTarget('recess_wall')}
-                  className={`flex-1 py-1 rounded text-[10px] font-medium transition-colors border ${activeTarget === 'recess_wall'
-                    ? 'bg-amber-600 text-white border-amber-500 shadow-sm'
-                    : 'bg-slate-900 text-amber-300 border-amber-500/30 hover:bg-amber-500/20'
-                    }`}
+                  onClick={() => onSelectTarget('recess_wall', rec.id)}
+                  className={`flex-1 py-1 rounded text-[10px] font-medium transition-colors border ${
+                    activeTarget === 'recess_wall' && (!selectedRecessId || selectedRecessId === rec.id)
+                      ? 'bg-amber-600 text-white border-amber-500 shadow-sm'
+                      : 'bg-slate-900 text-amber-300 border-amber-500/30 hover:bg-amber-500/20'
+                  }`}
                 >
                   Tile Recess Wall
                 </button>
                 <button
                   type="button"
-                  onClick={() => onSelectTarget('corners')}
-                  className={`flex-1 py-1 rounded text-[10px] font-medium transition-colors border ${activeTarget === 'corners' || activeTarget === 'sides'
-                    ? 'bg-amber-600 text-white border-amber-500 shadow-sm'
-                    : 'bg-slate-900 text-amber-300 border-amber-500/30 hover:bg-amber-500/20'
-                    }`}
+                  onClick={() => onSelectTarget('corners', rec.id)}
+                  className={`flex-1 py-1 rounded text-[10px] font-medium transition-colors border ${
+                    (activeTarget === 'corners' || activeTarget === 'sides') && (!selectedRecessId || selectedRecessId === rec.id)
+                      ? 'bg-amber-600 text-white border-amber-500 shadow-sm'
+                      : 'bg-slate-900 text-amber-300 border-amber-500/30 hover:bg-amber-500/20'
+                  }`}
                 >
                   Tile Recess Sides
                 </button>

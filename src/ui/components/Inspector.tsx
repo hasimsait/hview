@@ -15,7 +15,7 @@ X,
 } from 'lucide-react';
 import React,{ useCallback,useState } from 'react';
 import { ConfigureLuminaire,ConfigureShelving,FinishFurniture,RemoveElement,TransformFurniture } from '../../application/commands/FurnitureCommands';
-import { Furniture } from '../../domain/elements/Furniture';
+import { Furniture,Shelving } from '../../domain/elements/Furniture';
 import { InspectorPresenter } from '../inspection/InspectorPresenter';
 import { SurfaceFinishPicker } from './SurfaceFinishPicker';
 
@@ -260,9 +260,34 @@ export const Inspector: React.FC<InspectorProps> = ({
         <p className="text-[10px] text-slate-500 mt-1.5">Editing rebuilds the 3D mesh at new size.</p>
       </div>
 
-      {/* Shelving Front Lids / Cabinet Doors */}
-      {isShelving && (
-        <div className="pt-3 border-t border-slate-800 space-y-2">
+      {/* Shelving Tiers & Front Lids / Cabinet Doors */}
+      {isShelving && item instanceof Shelving && (
+        <div className="pt-3 border-t border-slate-800 space-y-2.5">
+          <div className="flex items-center justify-between">
+            <label className="text-[10px] uppercase font-semibold text-slate-400 flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-sky-400" />
+              Shelf Tiers ({Shelving.minShelves}–{Shelving.maxShelves})
+            </label>
+            <input
+              type="number"
+              aria-label="Shelf count"
+              min={Shelving.minShelves}
+              max={Shelving.maxShelves}
+              step={1}
+              value={item.shelfCount}
+              onChange={(e) => {
+                const nextCount = parseInt(e.target.value, 10);
+                if (
+                  Number.isInteger(nextCount) &&
+                  nextCount >= Shelving.minShelves &&
+                  nextCount <= Shelving.maxShelves
+                ) {
+                  editor.execute(new ConfigureShelving(item.id, !!item.hasLids, nextCount));
+                }
+              }}
+              className="w-16 bg-slate-800 border border-slate-700 rounded px-2 py-0.5 text-right text-slate-100 font-mono focus:outline-none focus:border-sky-500"
+            />
+          </div>
           <div className="flex items-center justify-between">
             <label className="text-[10px] uppercase font-semibold text-slate-400 flex items-center gap-1.5">
               <Layers className="w-3.5 h-3.5 text-sky-400" />
@@ -272,7 +297,7 @@ export const Inspector: React.FC<InspectorProps> = ({
               type="button"
               onClick={() => {
                 const currentLids = !!item.hasLids;
-                editor.execute(new ConfigureShelving(item.id, !currentLids));
+                editor.execute(new ConfigureShelving(item.id, !currentLids, item.shelfCount));
               }}
               className={`px-2.5 py-0.5 rounded text-[11px] font-semibold border transition-all ${item.hasLids
                 ? 'bg-sky-500/20 border-sky-500/50 text-sky-300 shadow-sm'
@@ -451,48 +476,7 @@ export const Inspector: React.FC<InspectorProps> = ({
           currentFinish={currentFinishForSection}
           onSelectFinish={handleApplyFinish}
           onClearFinish={handleClearFinish}
-          defaultTab={
-            currentFinishForSection?.type === 'metal' ||
-              currentFinishForSection?.type === 'porcelain' ||
-              activeSection.toLowerCase() === 'metal' ||
-              activeSection.toLowerCase() === 'ceramic' ||
-              activeSection.toLowerCase() === 'faucet' ||
-              activeSection.toLowerCase() === 'handle' ||
-              activeSection.toLowerCase() === 'holder' ||
-              activeSection.toLowerCase() === 'cistern' ||
-              activeSection.toLowerCase() === 'lid' ||
-              activeSection.toLowerCase() === 'bowl' ||
-              activeSection.toLowerCase() === 'seat' ||
-              activeSection.toLowerCase() === 'basin' ||
-              activeSection.toLowerCase() === 'flush button' ||
-              activeSection.toLowerCase() === 'hooks' ||
-              activeSection.toLowerCase() === 'hook' ||
-              activeSection.toLowerCase() === 'rail' ||
-              activeSection.toLowerCase() === 'bar' ||
-              activeSection.toLowerCase() === 'mounts' ||
-              activeSection.toLowerCase() === 'mount' ||
-              activeSection.toLowerCase() === 'arms' ||
-              activeSection.toLowerCase() === 'light bar' ||
-              activeSection.toLowerCase() === 'bezel' ||
-              activeSection.toLowerCase() === 'grille' ||
-              activeSection.toLowerCase() === 'fan blades' ||
-              activeSection.toLowerCase() === 'fan hub' ||
-              activeSection.toLowerCase() === 'housing'
-              ? 'metal'
-              : currentFinishForSection?.type === 'fabric' ||
-                activeSection.toLowerCase() === 'fabric' ||
-                activeSection.toLowerCase() === 'cushion' ||
-                activeSection.toLowerCase() === 'upholstery' ||
-                activeSection.toLowerCase() === 'seat' ||
-                activeSection.toLowerCase() === 'backrest' ||
-                activeSection.toLowerCase() === 'duvet' ||
-                activeSection.toLowerCase() === 'pillow' ||
-                activeSection.toLowerCase() === 'headboard' ||
-                item.category === 'seating' ||
-                item.category === 'bed'
-                ? 'fabric'
-                : undefined
-          }
+          defaultTab={InspectorPresenter.defaultFinishTabFor(item, activeSection, currentFinishForSection)}
         />
       </div>
 

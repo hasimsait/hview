@@ -154,6 +154,24 @@ describe('class-based document and editing', () => {
     expect(codec.decode(codec.encode(document)).require('column')).toBeInstanceOf(Column);
     expect(codec.decode(codec.encode(document.remove('column'))).columns).toHaveLength(0);
   });
+  it('applyRoomFinish preserves shared wall edges and finishes columns matching roomIds', () => {
+    const factory = new PlanElementFactory();
+    const roomA = factory.room({ id: 'roomA', name: 'Room A', area: 10, height: 2.7, polygon: [{ x: 0, y: 0 }, { x: 4, y: 0 }, { x: 4, y: 3 }] });
+    const roomB = factory.room({ id: 'roomB', name: 'Room B', area: 10, height: 2.7, polygon: [{ x: 0, y: 0 }, { x: 4, y: 0 }, { x: 4, y: -3 }] });
+    const sharedWall = factory.wall({
+      id: 'shared', p1: { x: 0, y: 0 }, p2: { x: 4, y: 0 }, thickness: 0.15, height: 2.7, material: 'a_block', openings: [],
+      roomIds: ['roomA', 'roomB'], roomSideA: 'roomA', roomSideB: 'roomB',
+      finishEdges: { type: 'paint', color: '#111111' },
+    });
+    const column = factory.column({
+      id: 'col1', name: 'Column', type: 'column', width: 0.3, depth: 0.3,
+      worldPos: { x: 1, y: 0, z: 0 }, rotationY: 0, roomId: 'roomB', roomIds: ['roomA', 'roomB'],
+    });
+    const doc = new PlanDocument([roomA, roomB, sharedWall, column]).applyRoomFinish('roomA', { type: 'paint', color: '#abcdef' });
+    expect(doc.requireWall('shared').finishSideA?.color).toBe('#abcdef');
+    expect(doc.requireWall('shared').finishEdges?.color).toBe('#111111');
+    expect(doc.columns[0].finish?.color).toBe('#abcdef');
+  });
 });
 
 describe('column topology', () => {

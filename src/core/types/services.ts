@@ -1,8 +1,19 @@
 import * as THREE from 'three';
 import { OpeningEntity,PlanDocument,RoomEntity,SurfaceFinishConfig,WallEntity } from './plan';
 
+import type { TileEntry } from '@services/tile-catalog/TileCatalogService';
 export type { ITileCatalogService,TileEntry } from '@services/tile-catalog/TileCatalogService';
 export type { WallFrameStyle,WallSide } from './plan';
+
+declare global {
+  interface Window {
+    __EMBEDDED_TEXTURES__?: Record<string, string>;
+    __TILE_CATALOG__?: TileEntry[];
+    __PLAN_DATA__?: unknown;
+    __STANDALONE_MODE__?: boolean;
+    __viewerApp?: unknown;
+  }
+}
 
 export type PlanSaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 export type PlanSaveStatusListener = (status: PlanSaveStatus) => void;

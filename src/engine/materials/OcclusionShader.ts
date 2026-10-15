@@ -8,13 +8,77 @@ const TILE_PATTERN_ENUM: Record<TileLayoutPattern, number> = {
   french_pattern: 4,
   vertical_stack: 5,
 };
-export class OcclusionShader {
-  private occlusionUniforms = {
+export interface OcclusionUniforms {
+  uOrbitCenter: { value: THREE.Vector3 };
+  uCameraDir: { value: THREE.Vector3 };
+  uForegroundMode: { value: number };
+  uForegroundOpacity: { value: number };
+}
+
+export function createOcclusionUniforms(): OcclusionUniforms {
+  return {
     uOrbitCenter: { value: new THREE.Vector3(0, 0, 0) },
     uCameraDir: { value: new THREE.Vector3(0, 0, 1) },
     uForegroundMode: { value: 1 }, // 0 = off, 1 = transparent, 2 = clip
     uForegroundOpacity: { value: 0.15 },
   };
+}
+
+export function applyBasicOcclusionShader(
+  mat: THREE.MeshStandardMaterial | THREE.MeshPhysicalMaterial,
+  uniforms: OcclusionUniforms,
+  fadeDistance = 0.5
+): void {
+  const fadeEdge = fadeDistance.toFixed(2);
+  mat.onBeforeCompile = (shader) => {
+    shader.uniforms.uOrbitCenter = uniforms.uOrbitCenter;
+    shader.uniforms.uCameraDir = uniforms.uCameraDir;
+    shader.uniforms.uForegroundMode = uniforms.uForegroundMode;
+    shader.uniforms.uForegroundOpacity = uniforms.uForegroundOpacity;
+
+    shader.vertexShader = shader.vertexShader.replace(
+      '#include <common>',
+      `#include <common>\nvarying vec3 vCustomWorldPos;`
+    );
+    shader.vertexShader = shader.vertexShader.replace(
+      '#include <worldpos_vertex>',
+      `#include <worldpos_vertex>
+      vec4 customWPos = vec4(transformed, 1.0);
+      #ifdef USE_INSTANCING
+        customWPos = instanceMatrix * customWPos;
+      #endif
+      vCustomWorldPos = (modelMatrix * customWPos).xyz;`
+    );
+
+    shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <common>',
+      `#include <common>
+      uniform vec3  uOrbitCenter;
+      uniform vec3  uCameraDir;
+      uniform int   uForegroundMode;
+      uniform float uForegroundOpacity;
+      varying vec3  vCustomWorldPos;`
+    );
+    shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <dithering_fragment>',
+      `#include <dithering_fragment>
+      if (uForegroundMode > 0) {
+        float dist = dot(vCustomWorldPos - uOrbitCenter, uCameraDir);
+        if (dist > 0.0) {
+          if (uForegroundMode == 1) {
+            float fade = smoothstep(0.0, ${fadeEdge}, dist);
+            gl_FragColor.a *= mix(1.0, uForegroundOpacity, fade);
+          } else if (uForegroundMode == 2) {
+            if (dist > 0.1) discard;
+          }
+        }
+      }`
+    );
+  };
+}
+
+export class OcclusionShader {
+  private occlusionUniforms = createOcclusionUniforms();
   updateOrbitPlane(orbitCenter: THREE.Vector3, cameraDir: THREE.Vector3): void {
     this.occlusionUniforms.uOrbitCenter.value.copy(orbitCenter);
     this.occlusionUniforms.uCameraDir.value.copy(cameraDir);

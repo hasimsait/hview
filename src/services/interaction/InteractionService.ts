@@ -14,6 +14,7 @@ export class InteractionService implements IInteractionService {
   private transformControls: TransformControls | null = null;
   private mouse = new THREE.Vector2();
   private selectedObject: THREE.Object3D | null = null;
+  private selectedTarget: { kind: 'furniture' | 'opening'; id: string } | null = null;
   private gizmoMode: 'translate' | 'rotate' = 'translate';
   private gizmoShowY = false;
   private enabled = true;
@@ -51,21 +52,17 @@ export class InteractionService implements IInteractionService {
       if (controls) {
         controls.enabled = this.enabled && !event.value;
       }
-      // When dragging finishes, ensure final coordinates are committed
+      // When dragging finishes, ensure final coordinates are committed via SelectionModel / selectedTarget
       if (this.enabled && !event.value && this.selectedObject && this.editor) {
-        const entity = this.selectedObject.userData.entity as FurnitureEntity | undefined;
-        if (entity) {
-          this.editor.execute(new TransformFurniture(entity.id, {
+        if (this.selectedTarget?.kind === 'furniture') {
+          this.editor.execute(new TransformFurniture(this.selectedTarget.id, {
             x: this.selectedObject.position.x,
             y: this.selectedObject.position.y,
             z: this.selectedObject.position.z,
           }, this.selectedObject.rotation.y, undefined));
-        } else if (this.selectedObject.name.startsWith('doorPivot_') || this.selectedObject.userData?.isDoor) {
-          const selectedOp = selectedOpening(this.editor);
-          if (selectedOp) {
-            const deg = Math.round((Math.abs(this.selectedObject.rotation.y) * 180) / Math.PI);
-            this.editor.execute(new OpenDoor(selectedOp.opening.id, deg));
-          }
+        } else if (this.selectedTarget?.kind === 'opening') {
+          const deg = Math.round((Math.abs(this.selectedObject.rotation.y) * 180) / Math.PI);
+          this.editor.execute(new OpenDoor(this.selectedTarget.id, deg));
         }
       }
     });
@@ -117,7 +114,7 @@ export class InteractionService implements IInteractionService {
   setGizmoMode(mode: 'translate' | 'rotate'): void {
     this.gizmoMode = mode;
     if (this.transformControls) {
-      if (this.selectedObject && (this.selectedObject.name.startsWith('doorPivot_') || this.selectedObject.userData?.isDoor)) {
+      if (this.selectedTarget?.kind === 'opening') {
         this.transformControls.setMode('rotate');
         this.transformControls.space = 'local';
         this.transformControls.showX = false;
@@ -147,8 +144,7 @@ export class InteractionService implements IInteractionService {
   setGizmoShowY(enabled: boolean): void {
     this.gizmoShowY = enabled;
     if (this.transformControls && this.gizmoMode === 'translate') {
-      // Don't override door pivot Y handle
-      if (this.selectedObject && (this.selectedObject.name.startsWith('doorPivot_') || this.selectedObject.userData?.isDoor)) {
+      if (this.selectedTarget?.kind === 'opening') {
         return;
       }
       this.transformControls.showY = enabled;
@@ -187,13 +183,20 @@ export class InteractionService implements IInteractionService {
     this.editor.selection.set(picked?.target ?? null);
   }
 
+  private clearGizmoAttachment(): void {
+    this.selectedObject = null;
+    this.selectedTarget = null;
+    if (this.transformControls?.object) {
+      this.transformControls.detach();
+    }
+  }
+
   private handleExternalSelection(selected: FurnitureEntity | null): void {
     if (!this.sceneService || !this.transformControls) return;
 
     if (!selected) {
-      this.selectedObject = null;
-      if (this.transformControls.object) {
-        this.transformControls.detach();
+      if (this.selectedTarget?.kind === 'furniture') {
+        this.clearGizmoAttachment();
       }
       this.sceneService.setSelectionHighlight(null);
       return;
@@ -202,14 +205,12 @@ export class InteractionService implements IInteractionService {
     const target = this.sceneService.getTransformTarget(selected.id);
     if (target && target.parent) {
       this.selectedObject = target;
+      this.selectedTarget = { kind: 'furniture', id: selected.id };
       this.transformControls.attach(target);
       this.setGizmoMode(this.gizmoMode);
       this.sceneService.setSelectionHighlight(selected);
     } else {
-      this.selectedObject = null;
-      if (this.transformControls.object) {
-        this.transformControls.detach();
-      }
+      this.clearGizmoAttachment();
       this.sceneService.setSelectionHighlight(null);
     }
   }
@@ -218,11 +219,8 @@ export class InteractionService implements IInteractionService {
     if (!this.sceneService || !this.transformControls) return;
 
     if (!selected) {
-      if (this.selectedObject && (this.selectedObject.name.startsWith('doorPivot_') || this.selectedObject.userData?.isDoor)) {
-        this.selectedObject = null;
-        if (this.transformControls.object) {
-          this.transformControls.detach();
-        }
+      if (this.selectedTarget?.kind === 'opening') {
+        this.clearGizmoAttachment();
       }
       return;
     }
@@ -230,6 +228,7 @@ export class InteractionService implements IInteractionService {
     const pivot = this.sceneService.getTransformTarget(selected.opening.id);
     if (pivot?.parent) {
       this.selectedObject = pivot;
+      this.selectedTarget = { kind: 'opening', id: selected.opening.id };
       this.transformControls.attach(pivot);
       this.transformControls.setMode('rotate');
       this.transformControls.space = 'local';
@@ -242,24 +241,14 @@ export class InteractionService implements IInteractionService {
   private handleExternalWallSelection(selected: WallEntity | null): void {
     if (!this.sceneService || !this.transformControls) return;
     if (selected) {
-      if (this.selectedObject) {
-        this.selectedObject = null;
-        if (this.transformControls.object) {
-          this.transformControls.detach();
-        }
-      }
+      this.clearGizmoAttachment();
     }
   }
 
   private handleExternalRoomSelection(selected: RoomEntity | null): void {
     if (!this.sceneService || !this.transformControls) return;
     if (selected) {
-      if (this.selectedObject) {
-        this.selectedObject = null;
-        if (this.transformControls.object) {
-          this.transformControls.detach();
-        }
-      }
+      this.clearGizmoAttachment();
     }
   }
 }

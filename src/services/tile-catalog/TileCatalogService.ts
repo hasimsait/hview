@@ -131,8 +131,8 @@ export class TileCatalogService implements ITileCatalogService {
 
   private async load(): Promise<void> {
     try {
-      if (typeof window !== 'undefined' && (window as any).__TILE_CATALOG__) {
-        this.entries = (window as any).__TILE_CATALOG__;
+      if (typeof window !== 'undefined' && window.__TILE_CATALOG__) {
+        this.entries = window.__TILE_CATALOG__;
         return;
       }
       const res = await fetch('/textures/tiles/tiles.json');
@@ -140,8 +140,8 @@ export class TileCatalogService implements ITileCatalogService {
       const raw: TileEntry[] = await res.json();
       this.entries = raw;
     } catch (err) {
-      if (typeof window !== 'undefined' && (window as any).__TILE_CATALOG__) {
-        this.entries = (window as any).__TILE_CATALOG__;
+      if (typeof window !== 'undefined' && window.__TILE_CATALOG__) {
+        this.entries = window.__TILE_CATALOG__;
       } else {
         console.warn('[TileCatalogService] Failed to load tiles.json (running offline):', err);
         this.entries = [];

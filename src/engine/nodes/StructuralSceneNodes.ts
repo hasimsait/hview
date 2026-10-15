@@ -20,7 +20,7 @@ export class WallSceneNode extends SceneNode<Wall> {
   reconcile(element: Wall): void {
     const previous = this.element;
     const geometryChanged = previous.p1 !== element.p1 || previous.p2 !== element.p2 || previous.thickness !== element.thickness
-      || previous.height !== element.height || openingCutSignature(previous) !== openingCutSignature(element) || previous.cavities !== element.cavities
+      || previous.height !== element.height || openingCutSignature(previous) !== openingCutSignature(element)
       || previous.startOffset !== element.startOffset || previous.endOffset !== element.endOffset || previous.frameStyle !== element.frameStyle;
     if (geometryChanged) this.replaceGeometry(this.builder.build(element));
     else { this.builder.applyMaterials(this.group, element); this.refreshMaterials(); }
