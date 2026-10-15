@@ -1,6 +1,8 @@
-import { test, expect, type Download, type Dialog } from '@playwright/test';
+import { expect, test, type Dialog, type Download } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-import { workflowPlan, selectSofa, numberField, objectPoint, offlineDocument } from './workflow-helpers';
+import { legacyData } from '../support/editor';
+import { standaloneBlockText } from '../../src/services/export/StandaloneHtml';
+import { numberField, objectPoint, offlineDocument, selectSofa, workflowPlan } from './workflow-helpers';
 
 test.use({ viewport: { width: 2300, height: 900 } });
 let original: string;
@@ -13,7 +15,7 @@ test.afterEach(async ({ page, request }) => {
   expect((await request.post('/api/save-plan', { data: Buffer.from(original), headers: { 'Content-Type': 'application/json' } })).ok()).toBe(true);
 });
 
-test('inspector move, elevation, rotation and resize survive autosave and reload', async ({ page, request }) => {
+test('inspector move, elevation, rotation and resize survive manual save and reload', async ({ page, request }) => {
   await page.goto('/'); await expect(page.getByText('1 Objects')).toBeVisible();
   await selectSofa(page);
   await numberField(page, 'X (Horiz.)').fill('2.75');
@@ -21,8 +23,10 @@ test('inspector move, elevation, rotation and resize survive autosave and reload
   await numberField(page, 'Width (X)').fill('210');
   const rotation = page.locator('input[type="range"]').first();
   await rotation.press('Home'); await rotation.press('ArrowRight');
+  await page.getByRole('button', { name: 'Save .plan', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: 'Saving plan' })).toBeHidden();
   await expect.poll(async () => {
-    const raw = await (await request.get('/sample.plan')).json();
+    const raw = legacyData(await (await request.get('/sample.plan')).text());
     return raw.plan.items.sofa;
   }).toMatchObject({ position: { x: 2.75, y: 0.4, z: 2 }, dimensions: { x: 2.1, y: 0.75, z: 0.8 }, angle: 5 });
   await page.reload(); await selectSofa(page);
@@ -33,7 +37,7 @@ test('inspector move, elevation, rotation and resize survive autosave and reload
   const downloading = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export .plan', exact: true }).click();
   const download = await downloading;
-  const exported = JSON.parse(readFileSync((await download.path())!, 'utf8'));
+  const exported = legacyData(readFileSync((await download.path())!, 'utf8'));
   expect(exported.plan.items.sofa.position).toEqual({ x: 2.75, y: 0.4, z: 2 });
 });
 
@@ -41,10 +45,10 @@ test('dragging the translation gizmo changes position and persists it', async ({
   await page.goto('/'); await expect(page.getByText('1 Objects')).toBeVisible();
   await selectSofa(page);
   const handle = await page.evaluate(async () => {
-    const containerPath = '/src/core/di/container.ts', tokensPath = '/src/core/di/tokens.ts';
-    const { defaultContainer } = await import(containerPath); const { TOKENS } = await import(tokensPath);
-    const scene = defaultContainer.resolve(TOKENS.SceneService);
-    const controls = defaultContainer.resolve(TOKENS.InteractionService).transformControls;
+    const runtimePath = '/src/main.tsx';
+    const { runtime } = await import(runtimePath);
+    const scene = runtime.scene;
+    const controls = runtime.interaction.transformControls;
     const handles = controls._gizmo.gizmo.translate.children.filter((o: any) => o.name === 'X' && o.isMesh && o.visible);
     const arrow = handles.find((o: any) => o.geometry.type === 'CylinderGeometry') || handles[0];
     if (!arrow) throw new Error('X translation handle missing');
@@ -57,17 +61,21 @@ test('dragging the translation gizmo changes position and persists it', async ({
   await page.mouse.move(handle.x + 80, handle.y, { steps: 10 }); await page.mouse.up();
   await expect.poll(async () => Number(await numberField(page, 'X (Horiz.)').inputValue())).not.toBe(2);
   const x = Number(await numberField(page, 'X (Horiz.)').inputValue());
-  await expect.poll(async () => (await (await request.get('/sample.plan')).json()).plan.items.sofa.position.x).toBeCloseTo(x, 2);
+  await page.getByRole('button', { name: 'Save .plan', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: 'Saving plan' })).toBeHidden();
+  await expect.poll(async () => (legacyData(await (await request.get('/sample.plan')).text())).plan.items.sofa.position.x).toBeCloseTo(x, 2);
   await page.reload(); await selectSofa(page);
   expect(Number(await numberField(page, 'X (Horiz.)').inputValue())).toBeCloseTo(x, 2);
 });
 
-test('replacement selected in the UI survives autosave and reload', async ({ page, request }) => {
+test('replacement selected in the UI survives manual save and reload', async ({ page, request }) => {
   await page.goto('/'); await expect(page.getByText('1 Objects')).toBeVisible(); await selectSofa(page);
   await page.getByRole('button', { name: /Replace Asset/ }).click();
   await page.getByPlaceholder('Search assets (e.g. towel, fan, sconce, bed, sink)...').fill('Dining Chair');
   await page.getByRole('button', { name: /Dining Chair/ }).click();
-  await expect.poll(async () => (await (await request.get('/sample.plan')).json()).plan.items.sofa.assetKey).toBe('chair');
+  await page.getByRole('button', { name: 'Save .plan', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: 'Saving plan' })).toBeHidden();
+  await expect.poll(async () => (legacyData(await (await request.get('/sample.plan')).text())).plan.items.sofa.assetKey).toBe('chair');
   await page.reload(); await selectSofa(page);
   expect(await page.locator('h2').innerText()).toBe('Chair');
 });
@@ -86,7 +94,7 @@ test('downloaded viewer runs with every HTTP request blocked', async ({ page, br
     await offline.goto(offlineUrl);
     await expect(offline.locator('canvas')).toBeVisible();
     await expect(offline.locator('#room-bar')).toContainText('Living room');
-    expect(await offline.evaluate(() => JSON.parse(document.getElementById('plan-data')!.textContent!).plan.items.sofa.pc)).toEqual({ x: 200, y: 200 });
+    expect(await offline.evaluate(() => JSON.parse(window.__HVIEW_RESOURCES__!.readText('plan-data')!).document.elements.find((entry: any) => entry.data.id === 'sofa').data.position)).toEqual({ x: 2, y: 0, z: 2 });
     await offline.locator('#btn-topdown').click();
     await expect(offline.locator('#btn-topdown')).toHaveClass(/active/);
     expect(errors).toEqual([]);
@@ -103,55 +111,69 @@ test('downloaded editor saves edits offline, reloads, and exports the updated pl
   const context = await browser.newContext({ viewport: { width: 2300, height: 900 } });
   const offlineUrl = await offlineDocument(context, path, 'editor');
   const offline = await context.newPage();
+  const externalRequests: string[] = [];
+  offline.on('request', request => {
+    if (/^https?:/.test(request.url()) && !request.isNavigationRequest()) externalRequests.push(request.url());
+  });
   try {
     await offline.goto(offlineUrl); await expect(offline.getByText('1 Objects')).toBeVisible();
     await offline.getByRole('button', { name: /2D Plan/ }).click(); await offline.mouse.click(point.x, point.y);
     await expect(offline.getByText('ID: sofa', { exact: true })).toBeVisible();
+    await offline.getByRole('button', { name: 'Wood & Parquet', exact: true }).click();
+    const woodPreview = offline.getByRole('button', { name: /Natural Scandinavian Oak/ }).locator('[style*="background-image"]');
+    await expect(woodPreview).toHaveCSS('background-image', /^url\("?blob:/);
+    await offline.getByRole('button', { name: 'Velvet & Fabric', exact: true }).click();
+    const fabricPreviews = offline.locator('main .bg-cover[style*="background-image"]').filter({ visible: true });
+    expect(await fabricPreviews.count()).toBeGreaterThan(0);
+    for (const preview of await fabricPreviews.all()) {
+      await expect(preview).toHaveCSS('background-image', /^url\("?blob:/);
+    }
     await numberField(offline, 'Width (X)').fill('225');
+    await offline.getByRole('button', { name: 'Save .plan', exact: true }).click();
+    await expect(offline.getByRole('dialog', { name: 'Saving plan' })).toBeHidden();
     await expect.poll(async () => offline.evaluate(() => {
       const key = `hview_current_plan:${encodeURIComponent(window.location.pathname)}`;
-      return JSON.parse(localStorage.getItem(key)!).plan.items.sofa.width;
+      return JSON.parse(localStorage.getItem(key)!).document.elements.find((entry: any) => entry.data.id === 'sofa').data.dimensions.x * 100;
     })).toBe(225);
     await offline.reload(); await expect(offline.getByText('1 Objects')).toBeVisible();
     await offline.getByRole('button', { name: /2D Plan/ }).click(); await offline.mouse.click(point.x, point.y);
     await expect(numberField(offline, 'Width (X)')).toHaveValue('225');
     const downloadingPlan = offline.waitForEvent('download');
     await offline.getByRole('button', { name: 'Export .plan', exact: true }).click();
-    const plan = JSON.parse(readFileSync((await (await downloadingPlan).path())!, 'utf8'));
+    const plan = legacyData(readFileSync((await (await downloadingPlan).path())!, 'utf8'));
     expect(plan.plan.items.sofa.width).toBe(225);
+    expect(externalRequests).toEqual([]);
   } finally { await context.close(); }
 });
 
 for (const exportButton of ['Full Editor (.html)', 'iPad Viewer (.html)']) {
-test(`offline editor can re-export ${exportButton} without fetching a template`, async ({ page, browser }, testInfo) => {
-  await page.goto('/'); await expect(page.getByText('1 Objects')).toBeVisible();
-  const downloading = page.waitForEvent('download');
-  await page.getByRole('button', { name: 'Full Editor (.html)', exact: true }).click();
-  const path = testInfo.outputPath('editor-reexport.html'); await (await downloading).saveAs(path);
-  const context = await browser.newContext({ viewport: { width: 2300, height: 900 } });
-  const offlineUrl = await offlineDocument(context, path, 'editor-reexport');
-  const offline = await context.newPage();
-  try {
-    await offline.goto(offlineUrl); await expect(offline.getByText('1 Objects')).toBeVisible();
-    const outcome = new Promise<{ download?: Download; error?: string }>((resolve, reject) => {
-      const cleanup = () => { offline.off('download', onDownload); offline.off('dialog', onDialog); };
-      const onDownload = (download: Download) => { cleanup(); resolve({ download }); };
-      const onDialog = async (dialog: Dialog) => {
-        cleanup(); const error = dialog.message();
-        try { await dialog.dismiss(); resolve({ error }); } catch (failure) { reject(failure); }
-      };
-      offline.once('download', onDownload); offline.once('dialog', onDialog);
-    });
-    await offline.getByRole('button', { name: exportButton, exact: true }).click();
-    const result = await outcome;
-    expect(result.error, 'exporting from the downloaded editor must not require an external template').toBeUndefined();
-    expect(result.download).toBeDefined();
-    const exported = readFileSync((await result.download!.path())!, 'utf8');
-    const planData = exported.match(/<script id="plan-data" type="application\/json">([\s\S]*?)<\/script>/);
-    expect(planData).not.toBeNull();
-    expect(JSON.parse(planData![1]).plan.items.sofa.pc).toEqual({ x: 200, y: 200 });
-  } finally { await context.close(); }
-});
+  test(`offline editor can re-export ${exportButton} without fetching a template`, async ({ page, browser }, testInfo) => {
+    await page.goto('/'); await expect(page.getByText('1 Objects')).toBeVisible();
+    const downloading = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Full Editor (.html)', exact: true }).click();
+    const path = testInfo.outputPath('editor-reexport.html'); await (await downloading).saveAs(path);
+    const context = await browser.newContext({ viewport: { width: 2300, height: 900 } });
+    const offlineUrl = await offlineDocument(context, path, 'editor-reexport');
+    const offline = await context.newPage();
+    try {
+      await offline.goto(offlineUrl); await expect(offline.getByText('1 Objects')).toBeVisible();
+      const outcome = new Promise<{ download?: Download; error?: string }>((resolve, reject) => {
+        const cleanup = () => { offline.off('download', onDownload); offline.off('dialog', onDialog); };
+        const onDownload = (download: Download) => { cleanup(); resolve({ download }); };
+        const onDialog = async (dialog: Dialog) => {
+          cleanup(); const error = dialog.message();
+          try { await dialog.dismiss(); resolve({ error }); } catch (failure) { reject(failure); }
+        };
+        offline.once('download', onDownload); offline.once('dialog', onDialog);
+      });
+      await offline.getByRole('button', { name: exportButton, exact: true }).click();
+      const result = await outcome;
+      expect(result.error, 'exporting from the downloaded editor must not require an external template').toBeUndefined();
+      expect(result.download).toBeDefined();
+      const exported = readFileSync((await result.download!.path())!, 'utf8');
+      expect(legacyData(standaloneBlockText(exported, 'plan-data')).plan.items.sofa.pc).toEqual({ x: 200, y: 200 });
+    } finally { await context.close(); }
+  });
 }
 
 test('export controls wrap and remain reachable at desktop widths', async ({ page }) => {

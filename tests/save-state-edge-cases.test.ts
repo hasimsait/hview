@@ -1,10 +1,9 @@
 import assert from 'node:assert/strict';
 import { test, TestContext } from 'node:test';
-import { PlanPersistenceService } from '../src/services/plan/PlanPersistenceService';
-import { PlanManagerService } from '../src/services/plan/PlanManagerService';
-import { PlanParserService } from '../src/services/plan/PlanParserService';
-import { PlanExportService } from '../src/services/plan/PlanExportService';
-import { restoreInitialPlan } from '../src/services/plan/PlanBootstrap';
+import { ReplaceFurniture } from '../src/application/commands/FurnitureCommands';
+import { PlanCodec } from '../src/domain/codec/PlanCodec';
+import { DocumentStorage } from '../src/platform/persistence/DocumentStorage';
+import { createEditor, legacyData } from './support/editor';
 
 function setup(t: TestContext) {
   t.mock.timers.enable({ apis: ['setTimeout'] });
@@ -13,8 +12,10 @@ function setup(t: TestContext) {
   const pending: { url: string; body?: string; resolve: (response: Response) => void; reject: (reason: Error) => void }[] = [];
   const globals = ['window', 'localStorage', 'document', 'navigator'] as const;
   const originals = globals.map((key) => Object.getOwnPropertyDescriptor(globalThis, key));
-  const browser = { location: { protocol: 'https:', pathname: '/' }, __STANDALONE_MODE__: false,
-    __PLAN_DATA__: undefined as unknown, addEventListener: (_event: string, cb: () => void) => unload.push(cb) };
+  const browser = {
+    location: { protocol: 'https:', pathname: '/' }, __STANDALONE_MODE__: false,
+    __PLAN_DATA__: undefined as unknown, addEventListener: (_event: string, cb: () => void) => unload.push(cb)
+  };
   let embedded = '';
   const beacon = t.mock.fn(() => true);
   for (const [key, value] of Object.entries({
@@ -27,12 +28,12 @@ function setup(t: TestContext) {
     if (originals[index]) Object.defineProperty(globalThis, key, originals[index]!);
     else delete (globalThis as any)[key];
   }));
-  t.mock.method(console, 'warn', () => {});
+  t.mock.method(console, 'warn', () => { });
   t.mock.method(globalThis, 'fetch', (url: RequestInfo | URL, options?: RequestInit) => new Promise<Response>((resolve, reject) => {
     pending.push({ url: String(url), body: options?.body as string | undefined, resolve, reject });
   }));
-  const service = new PlanPersistenceService();
-  const manager = new PlanManagerService(new PlanParserService(), new PlanExportService(), service);
+  const service = new DocumentStorage();
+  const manager = createEditor(service, new PlanCodec());
   const plan = (name: string) => ({ plan: { items: { f: { name, pc: { x: 0, y: 0 } } } } });
   return { service, manager, stored, pending, browser, unload, beacon, plan, embed: (json: string) => { embedded = json; } };
 }
@@ -40,9 +41,9 @@ function setup(t: TestContext) {
 const saved = () => new Response('{"success":true}');
 
 for (const operation of ['save', 'reset'] as const) {
-  test(`unload retries the current snapshot after ${operation} invalidates a stale cache`, async (t) => {
+  test(`unload cannot automatically recreate the cache after ${operation} invalidates it`, async (t) => {
     const { service, stored, pending, unload, beacon } = setup(t);
-    service.cachePlan('{"revision":1}');
+    stored.set('hview_current_plan', '{"revision":1}');
     const setItem = localStorage.setItem.bind(localStorage);
     let storageFull = true;
     t.mock.method(localStorage, 'setItem', (key: string, value: string) => {
@@ -60,8 +61,8 @@ for (const operation of ['save', 'reset'] as const) {
     }
     assert.equal(stored.has('hview_current_plan'), false);
     storageFull = false;
-    unload[0]();
-    assert.equal(stored.get('hview_current_plan'), '{"revision":2}');
+    assert.equal(unload.length, 0);
+    assert.equal(stored.has('hview_current_plan'), false);
     assert.equal(beacon.mock.callCount(), 0);
   });
 }
@@ -77,27 +78,24 @@ test('queued saves skip intermediate revisions and only post the newest snapshot
     await new Promise<void>(resolve => setImmediate(resolve));
   }
   const outcomes = await Promise.all(saves);
-  assert.deepEqual(pending.map(request => JSON.parse(request.body!).revision), [1, 3]);
+  assert.deepEqual(pending.map(request => legacyData(request.body!).revision), [1, 3]);
   assert.deepEqual(outcomes, [true, false, true]);
   assert.equal(stored.get('hview_current_plan'), '{"revision":3}');
   assert.equal(service.getSaveStatus(), 'saved');
 });
 
-test('a newer cached edit prevents an older queued save from reaching the server', async (t) => {
+test('a newer explicit save supersedes an intermediate queued snapshot', async (t) => {
   const { service, pending, stored } = setup(t);
   const first = service.savePlan('{"revision":1}');
   const queued = service.savePlan('{"revision":2}');
-  service.cachePlan('{"revision":3}');
+  const latest = service.savePlan('{"revision":3}');
   pending[0].resolve(saved());
   await first;
+  assert.equal(await queued, false);
   await new Promise<void>(resolve => setImmediate(resolve));
-  if (pending[1]) pending[1].resolve(saved());
-  const queuedResult = await queued;
-  assert.equal(pending.length, 1);
-  assert.equal(queuedResult, false);
+  assert.equal(pending.length, 2);
   assert.equal(stored.get('hview_current_plan'), '{"revision":3}');
   assert.equal(service.getSaveStatus(), 'saving');
-  const latest = service.savePlan('{"revision":3}');
   assert.equal(pending[1].body, '{"revision":3}');
   pending[1].resolve(saved());
   assert.equal(await latest, true);
@@ -108,46 +106,49 @@ test('failure of the newest queued save keeps its cache and error status', async
   const { service, pending, stored } = setup(t);
   const saves = [1, 2, 3].map(revision => service.savePlan(JSON.stringify({ revision })));
   for (let index = 0; index < pending.length; index++) {
-    const revision = JSON.parse(pending[index].body!).revision;
+    const revision = legacyData(pending[index].body!).revision;
     pending[index].resolve(revision === 3 ? new Response('', { status: 500 }) : saved());
     await new Promise<void>(resolve => setImmediate(resolve));
   }
   const outcomes = await Promise.all(saves);
-  assert.deepEqual(pending.map(request => JSON.parse(request.body!).revision), [1, 3]);
+  assert.deepEqual(pending.map(request => legacyData(request.body!).revision), [1, 3]);
   assert.deepEqual(outcomes, [true, false, false]);
   assert.equal(stored.get('hview_current_plan'), '{"revision":3}');
   assert.equal(service.getSaveStatus(), 'error');
 });
 
-test('importing another plan replaces the cached snapshot used on unload', async (t) => {
+test('importing another plan does not overwrite the last manual save', async (t) => {
   const { manager, stored, unload, pending, plan } = setup(t);
-  manager.loadPlan(plan('sofa'));
-  const save = manager.saveCurrentPlan();
+  manager.documents.load(plan('sofa'));
+  const save = manager.documents.save();
   pending[0].resolve(saved());
   await save;
-  manager.loadPlan(plan('chair'));
-  unload[0]();
-  assert.equal(JSON.parse(stored.get('hview_current_plan')!).plan.items.f.name, 'chair');
+  manager.documents.load(plan('chair'));
+  assert.equal(unload.length, 0);
+  assert.equal(legacyData(stored.get('hview_current_plan')!).plan.items.f.name, 'sofa');
+  assert.equal(manager.getSnapshot()!.furniture[0].assetKey, 'chair');
 });
 
 test('loading another plan invalidates the previous save status', async (t) => {
   const { manager, service, pending, plan } = setup(t);
-  manager.loadPlan(plan('sofa'));
-  const save = manager.saveCurrentPlan();
-  manager.loadPlan(plan('chair'));
+  manager.documents.load(plan('sofa'));
+  const save = manager.documents.save();
+  manager.documents.load(plan('chair'));
   pending[0].resolve(saved());
   await save;
   assert.equal(service.getSaveStatus(), 'idle');
-  assert.equal(manager.hasUnsavedChanges(), false);
+  assert.equal(manager.isDirty, false);
 });
 
-test('a delayed server load cannot replace an edit staged while it was loading', async (t) => {
+test('a delayed server load cannot replace an explicit save made while it was loading', async (t) => {
   const { service, pending, stored } = setup(t);
   const load = service.loadPlan();
-  service.cachePlan('{"new":true}');
+  const save = service.savePlan('{"new":true}');
   pending[0].resolve(new Response('{"new":false}'));
   assert.equal(await load, '{"new":true}');
   assert.equal(stored.get('hview_current_plan'), '{"new":true}');
+  pending[1].resolve(saved());
+  assert.equal(await save, true);
 });
 
 test('invalid embedded global data falls back to a valid embedded script', async (t) => {
@@ -201,19 +202,19 @@ test('reset and a later save use the same server write queue', async (t) => {
 
 test('an edit made during reset survives the reset response', async (t) => {
   const { manager, pending, plan } = setup(t);
-  manager.loadPlan(plan('sofa'));
-  const reset = manager.resetToTemplate();
-  manager.replaceFurnitureAsset('f', 'chair');
+  manager.documents.load(plan('sofa'));
+  const reset = manager.documents.reset();
+  manager.execute(new ReplaceFurniture('f', 'chair'));
   pending[0].resolve(new Response(JSON.stringify({ plan: JSON.stringify(plan('sofa')) })));
   await reset;
-  assert.equal(manager.getPlan()!.furniture[0].assetKey, 'chair');
-  assert.equal(manager.hasUnsavedChanges(), true);
+  assert.equal(manager.getSnapshot()!.furniture[0].assetKey, 'chair');
+  assert.equal(manager.isDirty, true);
 });
 
 test('malformed save JSON cannot replace a valid offline snapshot', async (t) => {
   const { service, browser, stored, pending } = setup(t);
   browser.__STANDALONE_MODE__ = true;
-  service.cachePlan('{"good":true}');
+  await service.savePlan('{"good":true}');
   const save = service.savePlan('{broken');
   if (pending.length) pending[0].reject(new Error('offline'));
   assert.equal(await save, false);
@@ -222,11 +223,11 @@ test('malformed save JSON cannot replace a valid offline snapshot', async (t) =>
 
 test('a rejected persistence promise leaves dirty state and returns failure', async (t) => {
   const { manager, service, plan } = setup(t);
-  manager.loadPlan(plan('sofa'));
-  manager.replaceFurnitureAsset('f', 'chair');
+  manager.documents.load(plan('sofa'));
+  manager.execute(new ReplaceFurniture('f', 'chair'));
   t.mock.method(service, 'savePlan', async () => { throw new Error('Storage failure'); });
-  assert.equal(await manager.saveCurrentPlan(), false);
-  assert.equal(manager.hasUnsavedChanges(), true);
+  assert.equal(await manager.documents.save(), false);
+  assert.equal(manager.isDirty, true);
 });
 
 test('corrupt local storage falls back to the embedded plan without network', async (t) => {
@@ -237,17 +238,19 @@ test('corrupt local storage falls back to the embedded plan without network', as
   assert.equal(pending.length, 0);
 });
 
-test('queued writes of a previous document are skipped after importing a new one', async (t) => {
+test('repeated save requests share the operation and cannot acknowledge an imported document', async (t) => {
   const { manager, pending, plan, stored } = setup(t);
-  manager.loadPlan(plan('sofa'));
-  const first = manager.saveCurrentPlan();
-  const second = manager.saveCurrentPlan();
-  manager.loadPlan(plan('chair'));
+  manager.documents.load(plan('sofa'));
+  const first = manager.documents.save();
+  const second = manager.documents.save();
+  manager.documents.load(plan('chair'));
   pending[0].resolve(saved());
   await first;
-  assert.equal(await second, false);
+  assert.equal(first, second);
+  assert.equal(await second, true);
+  assert.equal(manager.isDirty, false);
   assert.equal(pending.length, 1);
-  assert.equal(JSON.parse(stored.get('hview_current_plan')!).plan.items.f.name, 'chair');
+  assert.equal(legacyData(stored.get('hview_current_plan')!).plan.items.f.name, 'sofa');
 });
 
 test('failed reset releases a later save and cannot overwrite its status', async (t) => {
@@ -263,42 +266,48 @@ test('failed reset releases a later save and cannot overwrite its status', async
   assert.equal(service.getSaveStatus(), 'saved');
 });
 
-test('failed reset reschedules the cancelled autosave', async (t) => {
+test('failed reset leaves edits dirty without scheduling an automatic save', async (t) => {
   const { manager, pending, plan } = setup(t);
-  manager.loadPlan(plan('sofa'));
-  manager.replaceFurnitureAsset('f', 'chair');
-  const reset = manager.resetToTemplate();
+  manager.documents.load(plan('sofa'));
+  manager.execute(new ReplaceFurniture('f', 'chair'));
+  const reset = manager.documents.reset();
   const rejected = assert.rejects(reset);
   pending[0].resolve(new Response('', { status: 500 }));
   await rejected;
-  t.mock.timers.tick(600);
+  t.mock.timers.tick(10_000);
+  assert.equal(pending.length, 1);
+  assert.equal(manager.isDirty, true);
+  const save = manager.documents.save();
   assert.equal(pending[1].url, '/api/save-plan');
-  assert.equal(JSON.parse(pending[1].body!).plan.items.f.assetKey, 'chair');
+  assert.equal(legacyData(pending[1].body!).plan.items.f.assetKey, 'chair');
   pending[1].resolve(saved());
-  await new Promise<void>((resolve) => setImmediate(resolve));
-  assert.equal(manager.hasUnsavedChanges(), false);
+  await save;
+  assert.equal(manager.isDirty, false);
 });
 
 test('malformed reset data cannot replace the active plan or its cache', async (t) => {
   const { manager, pending, plan, stored } = setup(t);
-  manager.loadPlan(plan('chair'));
-  const reset = manager.resetToTemplate();
+  manager.documents.load(plan('chair'));
+  const initialSave = manager.documents.save();
+  pending[0].resolve(saved());
+  await initialSave;
+  const reset = manager.documents.reset();
   const rejected = assert.rejects(reset);
-  pending[0].resolve(new Response('{"plan":"{broken"}'));
+  pending[1].resolve(new Response('{"plan":"{broken"}'));
   await rejected;
-  assert.equal(manager.getPlan()!.furniture[0].assetKey, 'chair');
-  assert.equal(JSON.parse(stored.get('hview_current_plan')!).plan.items.f.name, 'chair');
+  assert.equal(manager.getSnapshot()!.furniture[0].assetKey, 'chair');
+  assert.equal(legacyData(stored.get('hview_current_plan')!).plan.items.f.name, 'chair');
 });
 
 test('an imported plan during reset survives the reset response', async (t) => {
   const { manager, pending, plan, stored } = setup(t);
-  manager.loadPlan(plan('sofa'));
-  const reset = manager.resetToTemplate();
-  manager.loadPlan(plan('chair'));
+  manager.documents.load(plan('sofa'));
+  const reset = manager.documents.reset();
+  manager.documents.load(plan('chair'));
   pending[0].resolve(new Response(JSON.stringify({ plan: JSON.stringify(plan('sofa')) })));
   await reset;
-  assert.equal(manager.getPlan()!.furniture[0].assetKey, 'chair');
-  assert.equal(JSON.parse(stored.get('hview_current_plan')!).plan.items.f.name, 'chair');
+  assert.equal(manager.getSnapshot()!.furniture[0].assetKey, 'chair');
+  assert.equal(stored.has('hview_current_plan'), false);
 });
 
 test('a hung save times out and releases the next queued save', async (t) => {
@@ -318,7 +327,7 @@ test('a hanging response body also times out instead of blocking saves forever',
   const { service, pending } = setup(t);
   const save = service.savePlan('{"new":true}');
   const response = saved();
-  t.mock.method(response, 'json', () => new Promise(() => {}));
+  t.mock.method(response, 'json', () => new Promise(() => { }));
   pending[0].resolve(response);
   await Promise.resolve();
   t.mock.timers.tick(15000);
@@ -330,15 +339,15 @@ test('standalone documents on different paths have separate cached working copie
   const { browser } = setup(t);
   browser.__STANDALONE_MODE__ = true;
   browser.location.pathname = '/editor-a.html';
-  const first = new PlanPersistenceService();
-  first.cachePlan('{"document":"a"}');
+  const first = new DocumentStorage();
+  await first.savePlan('{"document":"a"}');
   browser.location.pathname = '/editor-b.html';
   browser.__PLAN_DATA__ = { document: 'b' };
-  const second = new PlanPersistenceService();
+  const second = new DocumentStorage();
   assert.equal(await second.loadPlan(), '{"document":"b"}');
-  second.cachePlan('{"document":"b-edited"}');
+  await second.savePlan('{"document":"b-edited"}');
   browser.location.pathname = '/editor-a.html';
-  assert.equal(await new PlanPersistenceService().loadPlan(), '{"document":"a"}');
+  assert.equal(await new DocumentStorage().loadPlan(), '{"document":"a"}');
 });
 
 test('a circular embedded global cannot prevent valid script fallback', async (t) => {
@@ -360,54 +369,55 @@ test('a throwing initial status subscriber is isolated', (t) => {
 
 test('a delayed URL load cannot replace edits made while it was loading', async (t) => {
   const { manager, plan, pending } = setup(t);
-  manager.loadPlan(plan('sofa'));
-  const load = manager.loadPlanFromUrl('/other.plan');
-  manager.replaceFurnitureAsset('f', 'chair');
+  manager.documents.load(plan('sofa'));
+  const load = manager.documents.loadUrl('/other.plan');
+  manager.execute(new ReplaceFurniture('f', 'chair'));
   pending[0].resolve(new Response(JSON.stringify(plan('sofa'))));
   await load;
-  assert.equal(manager.getPlan()!.furniture[0].assetKey, 'chair');
-  assert.equal(manager.hasUnsavedChanges(), true);
+  assert.equal(manager.getSnapshot()!.furniture[0].assetKey, 'chair');
+  assert.equal(manager.isDirty, true);
 });
 
 test('the most recently requested URL load wins even if an older request finishes first', async (t) => {
   const { manager, plan, pending } = setup(t);
-  manager.loadPlan(plan('sofa'));
-  const first = manager.loadPlanFromUrl('/older.plan');
-  const second = manager.loadPlanFromUrl('/newer.plan');
+  manager.documents.load(plan('sofa'));
+  const first = manager.documents.loadUrl('/older.plan');
+  const second = manager.documents.loadUrl('/newer.plan');
   pending[0].resolve(new Response(JSON.stringify(plan('bed'))));
   await first;
-  assert.equal(manager.getPlan()!.furniture[0].name, 'sofa');
+  assert.equal(manager.getSnapshot()!.furniture[0].name, 'sofa');
   pending[1].resolve(new Response(JSON.stringify(plan('chair'))));
   await second;
-  assert.equal(manager.getPlan()!.furniture[0].name, 'chair');
+  assert.equal(manager.getSnapshot()!.furniture[0].name, 'chair');
 });
 
 test('a hung URL load times out and preserves the active plan', async (t) => {
   const { manager, plan } = setup(t);
-  manager.loadPlan(plan('chair'));
-  const load = manager.loadPlanFromUrl('/hung.plan');
+  manager.documents.load(plan('chair'));
+  const load = manager.documents.loadUrl('/hung.plan');
   const rejected = assert.rejects(load, /timed out/);
   t.mock.timers.tick(15000);
   await rejected;
-  assert.equal(manager.getPlan()!.furniture[0].name, 'chair');
+  assert.equal(manager.getSnapshot()!.furniture[0].name, 'chair');
 });
 
 test('negative reset acknowledgement preserves the active plan', async (t) => {
   const { manager, plan, pending } = setup(t);
-  manager.loadPlan(plan('chair'));
-  const reset = manager.resetToTemplate();
+  manager.documents.load(plan('chair'));
+  const reset = manager.documents.reset();
   const rejected = assert.rejects(reset, /rejected/);
   pending[0].resolve(new Response(JSON.stringify({ success: false, plan: JSON.stringify(plan('sofa')) })));
   await rejected;
-  assert.equal(manager.getPlan()!.furniture[0].name, 'chair');
+  assert.equal(manager.getSnapshot()!.furniture[0].name, 'chair');
 });
 
-test('closing a stale tab does not replace another tab’s newer cached snapshot', (t) => {
-  const { service, stored, unload, beacon } = setup(t);
-  service.cachePlan('{"revision":1}');
-  const secondTab = new PlanPersistenceService();
-  secondTab.cachePlan('{"revision":2}');
-  unload[0]();
+test('closing a stale tab does not replace another tab’s newer saved snapshot', async (t) => {
+  const { service, stored, unload, beacon, browser } = setup(t);
+  browser.__STANDALONE_MODE__ = true;
+  await service.savePlan('{"revision":1}');
+  const secondTab = new DocumentStorage();
+  await secondTab.savePlan('{"revision":2}');
+  assert.equal(unload.length, 0);
   assert.equal(stored.get('hview_current_plan'), '{"revision":2}');
   assert.equal(beacon.mock.callCount(), 0);
 });
@@ -417,7 +427,7 @@ test('closing a tab after a confirmed server save does not send a redundant writ
   const save = service.savePlan('{"revision":1}');
   pending[0].resolve(saved());
   assert.equal(await save, true);
-  unload[0]();
+  assert.equal(unload.length, 0);
   assert.equal(beacon.mock.callCount(), 0);
 });
 
@@ -442,7 +452,7 @@ test('standalone reset restores its embedded baseline without touching the host'
   const { service, browser, pending, stored } = setup(t);
   browser.__STANDALONE_MODE__ = true;
   browser.__PLAN_DATA__ = { original: true };
-  service.cachePlan('{"edited":true}');
+  await service.savePlan('{"edited":true}');
   assert.equal(await service.resetToTemplate(), '{"original":true}');
   assert.equal(stored.get('hview_current_plan'), '{"original":true}');
   assert.equal(pending.length, 0);
@@ -456,20 +466,20 @@ test('a standalone file with no valid data fails rather than loading an unrelate
 });
 
 test('the application bootstrap does not bypass standalone source isolation on failure', async (t) => {
-  const { service, manager, browser, pending } = setup(t);
+  const { manager, browser, pending } = setup(t);
   browser.__STANDALONE_MODE__ = true;
-  await assert.rejects(restoreInitialPlan(manager, service), /offline plan/);
+  await assert.rejects(manager.documents.restore(), /offline plan/);
   assert.equal(pending.length, 0);
-  assert.equal(manager.getPlan(), null);
+  assert.equal(manager.getSnapshot(), null);
 });
 
 test('an import completed during initial loading is preserved by the application bootstrap', async (t) => {
-  const { service, manager, pending, plan } = setup(t);
-  const restore = restoreInitialPlan(manager, service);
-  manager.loadPlan(plan('chair'));
-  manager.replaceFurnitureAsset('f', 'bed');
+  const { manager, pending, plan } = setup(t);
+  const restore = manager.documents.restore();
+  manager.documents.load(plan('chair'));
+  manager.execute(new ReplaceFurniture('f', 'bed'));
   pending[0].resolve(new Response(JSON.stringify(plan('sofa'))));
   await restore;
-  assert.equal(manager.getPlan()!.furniture[0].assetKey, 'bed');
-  assert.equal(manager.hasUnsavedChanges(), true);
+  assert.equal(manager.getSnapshot()!.furniture[0].assetKey, 'bed_double');
+  assert.equal(manager.isDirty, true);
 });

@@ -1,8 +1,17 @@
 const REQUEST_TIMEOUT_MS = 15000;
 
+/** Opaque Shortcut documents cannot use origin-based browser persistence. */
+export function isOpaquePlanSource(): boolean {
+  if (typeof window === 'undefined') return false;
+  const protocol = window.location.protocol;
+  return protocol === 'data:' ||
+    ((protocol === 'blob:' || protocol === 'about:') &&
+      (window.origin === 'null' || window.location.origin === 'null'));
+}
+
 export function isStandalonePlanSource(): boolean {
   return typeof window !== 'undefined' &&
-    (!!(window as any).__STANDALONE_MODE__ || window.location.protocol === 'file:');
+    (Boolean(window.__STANDALONE_MODE__) || window.location.protocol === 'file:' || isOpaquePlanSource());
 }
 
 /** Bound both the request and its response body, even if a transport ignores abort. */

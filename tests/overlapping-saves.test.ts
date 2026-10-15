@@ -1,109 +1,53 @@
 import assert from 'node:assert/strict';
-import { test, TestContext } from 'node:test';
-import { PlanManagerService } from '../src/services/plan/PlanManagerService';
-import { PlanParserService } from '../src/services/plan/PlanParserService';
-import { PlanExportService } from '../src/services/plan/PlanExportService';
-import { IPlanPersistenceService } from '../src/core/types/services';
+import { test } from 'node:test';
+import { ReplaceFurniture } from '../src/application/commands/FurnitureCommands';
+import type { IDocumentStorage } from '../src/core/types/services';
+import { createEditor } from './support/editor';
 
-function setup(t: TestContext) {
-  t.mock.timers.enable({ apis: ['setTimeout'] });
-  const saves: { json: string; resolve: (ok: boolean) => void }[] = [];
-  const persistence: IPlanPersistenceService = {
-    savePlan: (json) => new Promise<boolean>((resolve) => saves.push({ json, resolve })),
-    loadPlan: async () => '',
-    resetToTemplate: async () => '',
-    getSaveStatus: () => 'idle',
-    onSaveStatusChange: () => () => {},
-  };
-  const manager = new PlanManagerService(
-    new PlanParserService(), new PlanExportService(), persistence,
-  );
-  const raw = { plan: { items: { item_1: { name: 'sofa', pc: { x: 100, y: 200 } } } } };
-  manager.loadPlan(raw);
-  const edit = (key: string) => manager.replaceFurnitureAsset('item_1', key);
-  return { manager, saves, edit, raw };
+function setup() {
+  const saves: { json: string; resolve: (saved: boolean) => void }[] = [];
+  const storage: IDocumentStorage = { savePlan: json => new Promise(resolve => saves.push({ json, resolve })), loadPlan: async () => '{}', resetToTemplate: async () => '{}', getSaveStatus: () => 'idle', onSaveStatusChange: () => () => { } };
+  const editor = createEditor(storage);
+  const raw = { plan: { items: { item: { name: 'sofa', pc: { x: 100, y: 200 } } } } };
+  editor.documents.load(raw);
+  const edit = (asset: string) => editor.execute(new ReplaceFurniture('item', asset));
+  return { editor, saves, edit, raw };
 }
-
-test('older save cannot clear edits made while it was in flight', async (t) => {
-  const { manager, saves, edit } = setup(t);
-  edit('chair');
-  const older = manager.saveCurrentPlan();
-  edit('bed');
-  saves[0].resolve(true);
-  assert.equal(await older, true);
-  assert.equal(manager.hasUnsavedChanges(), true);
-  const latest = manager.saveCurrentPlan();
-  assert.equal(JSON.parse(saves[1].json).plan.items.item_1.assetKey, 'bed');
-  saves[1].resolve(true);
-  assert.equal(await latest, true);
-  assert.equal(manager.hasUnsavedChanges(), false);
+test('saving captures a snapshot and cannot acknowledge a later edit', async () => {
+  const { editor, saves, edit } = setup(); edit('chair');
+  const saved = editor.documents.save(); edit('bed');
+  assert.equal(editor.codec.decode(saves[0].json).requireFurniture('item').assetKey, 'chair');
+  saves[0].resolve(true); assert.equal(await saved, true); assert.equal(editor.isDirty, true);
+  const retry = editor.documents.save();
+  assert.equal(editor.codec.decode(saves[1].json).requireFurniture('item').assetKey, 'bed_double');
+  saves[1].resolve(true); await retry; assert.equal(editor.isDirty, false);
 });
-
-test('older success cannot clear dirty state when the newer save fails', async (t) => {
-  const { manager, saves, edit } = setup(t);
-  edit('chair');
-  const older = manager.saveCurrentPlan();
-  edit('bed');
-  const newer = manager.saveCurrentPlan();
-  saves[1].resolve(false);
-  assert.equal(await newer, false);
-  saves[0].resolve(true);
-  await older;
-  assert.equal(manager.hasUnsavedChanges(), true);
+test('repeat save requests share the active operation and do not post another write', async () => {
+  const { editor, saves, edit } = setup(); edit('chair');
+  const first = editor.documents.save(); edit('bed'); const second = editor.documents.save();
+  assert.equal(first, second); assert.equal(saves.length, 1);
+  saves[0].resolve(true); await second; assert.equal(editor.isDirty, true);
 });
-
-test('out-of-order save completions cannot clear a third unsaved edit', async (t) => {
-  const { manager, saves, edit } = setup(t);
-  edit('chair');
-  const older = manager.saveCurrentPlan();
-  edit('bed');
-  const newer = manager.saveCurrentPlan();
-  edit('table');
-  saves[1].resolve(true);
-  await newer;
-  assert.equal(manager.hasUnsavedChanges(), true);
-  saves[0].resolve(true);
-  await older;
-  assert.equal(manager.hasUnsavedChanges(), true);
+test('failed saves preserve history and dirty state for explicit retry', async () => {
+  const { editor, saves, edit } = setup(); edit('chair');
+  const first = editor.documents.save(); saves[0].resolve(false);
+  assert.equal(await first, false); assert.equal(editor.isDirty, true); assert.equal(editor.history.canUndo, true);
+  const second = editor.documents.save(); saves[1].resolve(true); await second; assert.equal(editor.isDirty, false);
 });
-
-test('a successful save of the current revision clears dirty state', async (t) => {
-  const { manager, saves, edit } = setup(t);
-  edit('chair');
-  const older = manager.saveCurrentPlan();
-  edit('bed');
-  const newer = manager.saveCurrentPlan();
-  saves[1].resolve(true);
-  await newer;
-  assert.equal(manager.hasUnsavedChanges(), false);
-  saves[0].resolve(true);
-  await older;
-  assert.equal(manager.hasUnsavedChanges(), false);
+test('a previous document save never changes the imported document baseline', async () => {
+  const { editor, saves, edit, raw } = setup(); edit('chair');
+  const first = editor.documents.save(); editor.documents.load(raw); edit('table');
+  saves[0].resolve(true); await first; assert.equal(editor.isDirty, true);
+  editor.undo(); assert.equal(editor.isDirty, false);
 });
-
-test('loading another plan invalidates saves of the previous plan', async (t) => {
-  const { manager, saves, edit, raw } = setup(t);
-  edit('chair');
-  const older = manager.saveCurrentPlan();
-  manager.loadPlan(raw);
-  edit('bed');
-  saves[0].resolve(true);
-  await older;
-  assert.equal(manager.hasUnsavedChanges(), true);
+test('undo back to the saved snapshot is clean and redo restores dirty state', async () => {
+  const { editor, saves, edit } = setup(); edit('chair');
+  const first = editor.documents.save(); saves[0].resolve(true); await first;
+  edit('bed'); editor.undo(); assert.equal(editor.isDirty, false);
+  editor.redo(); assert.equal(editor.isDirty, true);
 });
-
-test('autosave remains scheduled for edits made during an older save', async (t) => {
-  const { manager, saves, edit } = setup(t);
-  edit('chair');
-  t.mock.timers.tick(600);
-  assert.equal(saves.length, 1);
-  edit('bed');
-  saves[0].resolve(true);
-  await Promise.resolve();
-  assert.equal(manager.hasUnsavedChanges(), true);
-  t.mock.timers.tick(600);
-  assert.equal(saves.length, 2);
-  saves[1].resolve(true);
-  await Promise.resolve();
-  assert.equal(manager.hasUnsavedChanges(), false);
+test('edits never schedule a persistence write', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const { editor, saves, edit } = setup(); edit('chair'); t.mock.timers.tick(60_000);
+  assert.equal(saves.length, 0); assert.equal(editor.isDirty, true);
 });

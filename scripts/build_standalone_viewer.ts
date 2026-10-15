@@ -1,13 +1,18 @@
-import { createExportTemplates, EXPORT_TEMPLATES_ID, escapeScriptJson, setScriptContent } from '../src/services/export/StandaloneHtml';
+import postcss from 'postcss';
+import tailwindcss from 'tailwindcss';
+import autoprefixer from 'autoprefixer';
+import { createExportTemplates, EXPORT_TEMPLATES_ID, escapeScriptJson, packStandaloneHtml, setScriptContent } from '../src/services/export/StandaloneHtml';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import * as esbuild from 'esbuild';
+import { gzipSync } from 'node:zlib';
+import { embeddedAssets } from './embedded_assets';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-async function buildStandaloneViewer() {
+export async function buildStandaloneArtifacts() {
   console.log('🚀 Building standalone iPad 3D viewer...');
 
   const rootDir = path.resolve(__dirname, '..');
@@ -16,8 +21,14 @@ async function buildStandaloneViewer() {
   const tilesJsonPath = path.join(rootDir, 'public', 'textures', 'tiles', 'tiles.json');
   const publicDir = path.join(rootDir, 'public');
   const distDir = path.join(rootDir, 'dist');
-  const templateOutputPath = path.join(publicDir, 'ipad_viewer_template.html');
+  const templateOutputPath = path.join(distDir, 'ipad_viewer_template.html');
   const distOutputPath = path.join(distDir, 'ipad_viewer.html');
+  const bootstrap = await esbuild.build({
+    entryPoints: [path.join(rootDir, 'src/platform/standalone/bootstrap.ts')], bundle: true,
+    format: 'iife', minify: true, write: false, target: ['safari15', 'chrome100', 'firefox100'],
+  });
+  const portableBootstrap = bootstrap.outputFiles[0].text;
+  const portableStatus = '<div id="portable-status" role="status" style="position:fixed;inset:0;z-index:9999;display:grid;place-content:center;gap:16px;background:#0f172a;color:#e2e8f0;text-align:center;padding:24px;font:15px system-ui">Opening your plan…</div>';
 
   if (!fs.existsSync(distDir)) {
     fs.mkdirSync(distDir, { recursive: true });
@@ -50,33 +61,14 @@ async function buildStandaloneViewer() {
     tilesJsonContent = fs.readFileSync(tilesJsonPath, 'utf-8');
   }
 
-  // 4. Encode textures to base64
-  console.log('🖼️ Inlining textures to base64 for 100% offline support...');
-  const texturesMap: Record<string, string> = {};
-  const texturesBaseDir = path.join(rootDir, 'public', 'textures');
-
-  function scanTextures(dir: string) {
-    if (!fs.existsSync(dir)) return;
-    const items = fs.readdirSync(dir);
-    for (const item of items) {
-      const fullPath = path.join(dir, item);
-      const stat = fs.statSync(fullPath);
-      if (stat.isDirectory()) {
-        scanTextures(fullPath);
-      } else if (/\.(jpg|jpeg|png)$/i.test(item)) {
-        const mime = item.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
-        const b64 = fs.readFileSync(fullPath).toString('base64');
-        const dataUri = `data:${mime};base64,${b64}`;
-
-        // Relative path from /public, e.g. /textures/wood/wood_natural_oak.jpg
-        const relPath = fullPath.replace(publicDir, '');
-        texturesMap[relPath] = dataUri;
-      }
-    }
-  }
-
-  scanTextures(texturesBaseDir);
+  // 4. Optimize all finishes, including ones not currently used in the plan.
+  console.log('🖼️ Optimizing and embedding textures for 100% offline support...');
+  const texturesMap = await embeddedAssets(publicDir);
   console.log(`✅ Inlined ${Object.keys(texturesMap).length} texture files.`);
+  // Identical catalog variants do not need a duplicate atlas cell.
+  const catalog = JSON.parse(tilesJsonContent) as { textures: string[] }[];
+  for (const entry of catalog) entry.textures = [...new Map(entry.textures.map(url => [texturesMap[url]?.startsWith('@') ? texturesMap[url].slice(1) : url, url])).values()];
+  tilesJsonContent = JSON.stringify(catalog);
 
   // 5. Construct HTML Template
   const htmlTemplate = `<!DOCTYPE html>
@@ -92,6 +84,7 @@ ${cssContent}
   </style>
 </head>
 <body>
+  ${portableStatus}
   <div id="canvas-container"></div>
   <div id="tap-indicator" class="tap-indicator"></div>
 
@@ -179,7 +172,6 @@ ${tilesJsonContent}
   </script>
   <script>
     try {
-      window.__EMBEDDED_TEXTURES__ = JSON.parse(document.getElementById('embedded-textures').textContent);
       window.__TILE_CATALOG__ = JSON.parse(document.getElementById('tile-catalog-data').textContent);
     } catch (e) {
       console.warn('Failed to parse embedded data:', e);
@@ -187,15 +179,15 @@ ${tilesJsonContent}
   </script>
 
   <!-- Bundled Viewer Logic -->
-  <script>
+  <script id="viewer-runtime" type="application/x-hview-runtime">
 ${bundledJs}
   </script>
+  <script id="portable-bootstrap">${portableBootstrap}</script>
 </body>
 </html>`;
 
   // Write template for browser-side export service
   fs.writeFileSync(templateOutputPath, htmlTemplate, 'utf-8');
-  fs.writeFileSync(path.join(distDir, 'ipad_viewer_template.html'), htmlTemplate, 'utf-8');
   console.log(`✅ Template written to: ${templateOutputPath}`);
 
   // 6. Generate pre-built standalone HTML file with current sample.plan
@@ -208,10 +200,12 @@ ${bundledJs}
   } else if (fs.existsSync(publicSamplePlanPath)) {
     samplePlanJson = fs.readFileSync(publicSamplePlanPath, 'utf-8');
   }
+  samplePlanJson = JSON.stringify(JSON.parse(samplePlanJson));
 
   const standaloneHtml = setScriptContent(htmlTemplate, 'plan-data', escapeScriptJson(samplePlanJson));
-  fs.writeFileSync(distOutputPath, standaloneHtml, 'utf-8');
-  console.log(`🎉 Standalone iPad viewer generated: ${distOutputPath} (${(standaloneHtml.length / 1024 / 1024).toFixed(2)} MB)`);
+  const packedViewer = packStandaloneHtml(standaloneHtml);
+  fs.writeFileSync(distOutputPath, packedViewer, 'utf-8');
+  console.log(`🎉 Standalone iPad viewer generated: ${distOutputPath} (${(Buffer.byteLength(packedViewer) / 1024 / 1024).toFixed(2)} MiB)`);
 
   // 7. Bundle FULL React Editor into standalone HTML file
   console.log('📦 Bundling FULL React Editor into standalone HTML file...');
@@ -231,15 +225,11 @@ ${bundledJs}
   const editorBundledJs = editorBuildResult.outputFiles[0].text;
   console.log(`✅ Full Editor JS bundled: ${(editorBundledJs.length / 1024).toFixed(1)} KB`);
 
-  // Find compiled Tailwind CSS from dist/assets
-  let tailwindCss = '';
-  const assetsDir = path.join(distDir, 'assets');
-  if (fs.existsSync(assetsDir)) {
-    const cssFiles = fs.readdirSync(assetsDir).filter((f) => f.endsWith('.css'));
-    if (cssFiles.length > 0) {
-      tailwindCss = fs.readFileSync(path.join(assetsDir, cssFiles[0]), 'utf-8');
-    }
-  }
+  // Compile the editor's styles from source for both hosted and offline exports.
+  const cssSource = path.join(rootDir, 'src/ui/styles/index.css');
+  const styles = await postcss([tailwindcss({ config: path.join(rootDir, 'tailwind.config.js') }), autoprefixer()])
+    .process(fs.readFileSync(cssSource, 'utf8'), { from: cssSource });
+  const tailwindCss = styles.css;
 
   const editorShell = `<!DOCTYPE html>
 <html lang="en" class="h-full bg-slate-950 text-slate-100">
@@ -249,14 +239,12 @@ ${bundledJs}
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>HView - 3D House Planner & Editor (Standalone)</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
 ${tailwindCss}
   </style>
 </head>
 <body class="h-full w-full overflow-hidden select-none font-['Inter',sans-serif]">
+  ${portableStatus}
   <div id="root" class="h-full w-full"></div>
 
   <!-- Embedded Data for 100% Offline Standalone Operation -->
@@ -272,9 +260,7 @@ ${tilesJsonContent}
   <script>
     window.__STANDALONE_MODE__ = true;
     try {
-      window.__EMBEDDED_TEXTURES__ = JSON.parse(document.getElementById('embedded-textures').textContent);
       window.__TILE_CATALOG__ = JSON.parse(document.getElementById('tile-catalog-data').textContent);
-      window.__PLAN_DATA__ = JSON.parse(document.getElementById('plan-data').textContent);
     } catch (e) {
       console.warn('Failed parsing embedded data:', e);
     }
@@ -283,28 +269,32 @@ ${tilesJsonContent}
   <script id="standalone-export-templates" type="application/json"></script>
 
   <!-- Bundled Full React Editor Application -->
-  <script>
+  <script id="editor-runtime" type="application/x-hview-runtime">
 ${editorBundledJs}
   </script>
+  <script id="portable-bootstrap">${portableBootstrap}</script>
 </body>
 </html>`;
 
   const templates = createExportTemplates(htmlTemplate, editorShell);
+  // The editor reuses its own runtime when re-exporting. The viewer is only
+  // decompressed on demand, with a bundled decoder for older mobile browsers.
+  templates.viewer = 'gzip-base64:' + gzipSync(templates.viewer, { level: 9 }).toString('base64');
   const fullEditorHtmlTemplate = setScriptContent(
     editorShell, EXPORT_TEMPLATES_ID, escapeScriptJson(JSON.stringify(templates)),
   );
 
-  const editorTemplateOutputPath = path.join(publicDir, 'hview_editor_template.html');
+  const editorTemplateOutputPath = path.join(distDir, 'hview_editor_template.html');
   fs.writeFileSync(editorTemplateOutputPath, fullEditorHtmlTemplate, 'utf-8');
-  fs.writeFileSync(path.join(distDir, 'hview_editor_template.html'), fullEditorHtmlTemplate, 'utf-8');
 
   const fullEditorDistPath = path.join(distDir, 'hview_editor.html');
   const fullEditorHtml = setScriptContent(fullEditorHtmlTemplate, 'plan-data', escapeScriptJson(samplePlanJson));
-  fs.writeFileSync(fullEditorDistPath, fullEditorHtml, 'utf-8');
-  console.log(`🎉 Standalone FULL Editor generated: ${fullEditorDistPath} (${(fullEditorHtml.length / 1024 / 1024).toFixed(2)} MB)`);
+  const packedEditor = packStandaloneHtml(fullEditorHtml);
+  fs.writeFileSync(fullEditorDistPath, packedEditor, 'utf-8');
+  console.log(`🎉 Standalone FULL Editor generated: ${fullEditorDistPath} (${(Buffer.byteLength(packedEditor) / 1024 / 1024).toFixed(2)} MiB)`);
 }
 
-buildStandaloneViewer().catch((err) => {
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) buildStandaloneArtifacts().catch((err) => {
   console.error('❌ Build failed:', err);
   process.exit(1);
 });

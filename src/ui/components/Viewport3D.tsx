@@ -1,14 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useService } from '@ui/context/DIContext';
-import { TOKENS } from '@core/di/tokens';
-import { ISceneService, IInteractionService, IPlanManagerService } from '@core/types/services';
-import { Move, RotateCw, Compass } from 'lucide-react';
+import { useRuntime } from '@ui/context/RuntimeContext';
+import { Compass,Move,RotateCw } from 'lucide-react';
+import React,{ useEffect,useLayoutEffect,useRef,useState,useSyncExternalStore } from 'react';
+import { selectedOpening,selectedRoom,selectedWall } from '../../application/queries/SelectionQueries';
 
-export const Viewport3D: React.FC = () => {
+export const Viewport3D: React.FC<{ disabled?: boolean }> = ({ disabled = false }) => {
+  const runtime = useRuntime();
   const containerRef = useRef<HTMLDivElement>(null);
-  const sceneService = useService<ISceneService>(TOKENS.SceneService);
-  const interactionService = useService<IInteractionService>(TOKENS.InteractionService);
-  const planManager = useService<IPlanManagerService>(TOKENS.PlanManagerService);
+  const sceneService = runtime.scene;
+  const interactionService = runtime.interaction;
+  const editor = runtime.editor;
+  const status = useSyncExternalStore(sceneService.subscribeStatus, sceneService.getStatus);
 
   const [gizmoMode, setGizmoMode] = useState<'translate' | 'rotate'>('translate');
   const [hasPlan, setHasPlan] = useState<boolean>(false);
@@ -17,82 +18,45 @@ export const Viewport3D: React.FC = () => {
     if (!containerRef.current) return;
 
     // Initialize 3D Scene and Interaction Services
-    sceneService.initialize(containerRef.current);
-    interactionService.initialize(sceneService, planManager);
+    try {
+      sceneService.initialize(containerRef.current);
+      interactionService.initialize(sceneService, editor);
+    } catch (error) {
+      sceneService.reportError(error);
+      return () => sceneService.dispose();
+    }
 
     // Initial plan render if already available
-    const initialPlan = planManager.getPlan();
+    const initialPlan = editor.getSnapshot();
     if (initialPlan) {
       sceneService.renderPlan(initialPlan);
       setHasPlan(true);
     }
 
-    // Subscribe to Plan Loads (initial load or new file upload)
-    const unsubscribeLoaded = planManager.onPlanLoaded((plan) => {
-      sceneService.renderPlan(plan);
-      setHasPlan(true);
+    const unsubscribeDocument = editor.subscribe(change => {
+      try {
+        sceneService.applyDocumentChange(change);
+        setHasPlan(true);
+      } catch (error) { sceneService.reportError(error); }
     });
-
-    // Subscribe to individual furniture updates (moving, rotating, replacing)
-    const unsubscribeUpdated = planManager.onFurnitureUpdated((entity) => {
-      sceneService.updateFurnitureObject(entity);
-    });
-
-    // Subscribe to furniture deletions
-    const unsubscribeDeleted = planManager.onFurnitureDeleted((id) => {
-      sceneService.removeFurnitureObject(id);
-    });
-
-    // Subscribe to opening updates (e.g. flipping doors)
-    const unsubscribeOpeningUpdated = planManager.onOpeningUpdated((opening, wall) => {
-      sceneService.updateOpening(opening, wall);
-    });
-
-    // Subscribe to opening selection changes
-    const unsubscribeOpeningSelected = planManager.onOpeningSelectionChange((selected) => {
-      sceneService.setOpeningSelectionHighlight(selected);
-    });
-
-    // Subscribe to wall updates (finishes, colors, textures)
-    const unsubscribeWallUpdated = planManager.onWallUpdated((wall) => {
-      sceneService.updateWallFinish(wall);
-    });
-
-    // Subscribe to wall selection changes
-    const unsubscribeWallSelected = planManager.onWallSelectionChange((selected) => {
-      sceneService.setWallSelectionHighlight(selected);
-    });
-
-    // Subscribe to wall structural changes (e.g. wall splitting)
-    const unsubscribeWallsChanged = planManager.onWallsChanged?.((plan) => {
-      sceneService.rebuildWalls?.(plan);
-    });
-
-    // Subscribe to room floor finish updates
-    const unsubscribeRoomUpdated = planManager.onRoomUpdated?.((room) => {
-      sceneService.updateRoomFloorFinish(room);
-    });
-
-    // Subscribe to room selection changes
-    const unsubscribeRoomSelected = planManager.onRoomSelectionChange?.((selected) => {
-      sceneService.setFloorSelectionHighlight(selected);
+    const unsubscribeSelection = editor.selection.subscribe(() => {
+      sceneService.setOpeningSelectionHighlight(selectedOpening(editor));
+      sceneService.setWallSelectionHighlight(selectedWall(editor));
+      sceneService.setFloorSelectionHighlight(selectedRoom(editor));
     });
 
     return () => {
-      unsubscribeLoaded();
-      unsubscribeWallsChanged?.();
-      unsubscribeUpdated();
-      unsubscribeDeleted();
-      unsubscribeOpeningUpdated();
-      unsubscribeOpeningSelected();
-      unsubscribeWallUpdated();
-      unsubscribeWallSelected();
-      unsubscribeRoomUpdated?.();
-      unsubscribeRoomSelected?.();
+      unsubscribeDocument();
+      unsubscribeSelection();
       interactionService.dispose();
       sceneService.dispose();
     };
-  }, [sceneService, interactionService, planManager]);
+  }, [sceneService, interactionService, editor]);
+
+  useLayoutEffect(() => {
+    sceneService.setInteractionEnabled(!disabled);
+    interactionService.setEnabled(!disabled);
+  }, [disabled, sceneService, interactionService]);
 
   const handleGizmoModeChange = (mode: 'translate' | 'rotate') => {
     setGizmoMode(mode);
@@ -103,17 +67,23 @@ export const Viewport3D: React.FC = () => {
     <div className="relative w-full h-full overflow-hidden bg-slate-950">
       {/* Three.js Canvas Container */}
       <div ref={containerRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
+      {status.state !== 'ready' && (
+        <div role={status.state === 'error' ? 'alert' : 'status'} className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-slate-950/90 p-6 text-center text-sm text-slate-200">
+          {status.state !== 'error' && <div className="h-8 w-8 animate-spin rounded-full border-4 border-sky-500/20 border-t-sky-500" />}
+          <p>{status.message}</p>
+          {status.state === 'error' && <button onClick={() => window.location.reload()} className="rounded-lg bg-sky-600 px-4 py-2 text-white">Reload</button>}
+        </div>
+      )}
 
       {/* Floating Gizmo Tool Toolbar */}
       {hasPlan && (
         <div className="absolute top-4 left-4 flex bg-slate-900/90 backdrop-blur-md border border-slate-800 p-1 rounded-xl shadow-xl z-10 gap-1">
           <button
             onClick={() => handleGizmoModeChange('translate')}
-            className={`p-2 rounded-lg transition-all flex items-center gap-1.5 text-xs font-medium ${
-              gizmoMode === 'translate'
-                ? 'bg-sky-500 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-            }`}
+            className={`p-2 rounded-lg transition-all flex items-center gap-1.5 text-xs font-medium ${gizmoMode === 'translate'
+              ? 'bg-sky-500 text-white shadow-sm'
+              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+              }`}
             title="Move objects along floor plane (Translation)"
           >
             <Move className="w-4 h-4" />
@@ -122,11 +92,10 @@ export const Viewport3D: React.FC = () => {
 
           <button
             onClick={() => handleGizmoModeChange('rotate')}
-            className={`p-2 rounded-lg transition-all flex items-center gap-1.5 text-xs font-medium ${
-              gizmoMode === 'rotate'
-                ? 'bg-sky-500 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-            }`}
+            className={`p-2 rounded-lg transition-all flex items-center gap-1.5 text-xs font-medium ${gizmoMode === 'rotate'
+              ? 'bg-sky-500 text-white shadow-sm'
+              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+              }`}
             title="Rotate objects around vertical axis"
           >
             <RotateCw className="w-4 h-4" />

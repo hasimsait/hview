@@ -1,8 +1,9 @@
+import { ViewMode } from '@core/types/services';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { ViewMode } from '@core/types/services';
 
 export interface CameraNavigationOptions {
+  onInput?: () => void;
   moveSpeed?: number;      // Walking speed in meters/second (default: 2.8)
   boostMultiplier?: number;// Speed multiplier when Shift is held (default: 2.5)
   rotateSpeed?: number;    // Rotation speed in radians/second (default: 1.6)
@@ -10,6 +11,8 @@ export interface CameraNavigationOptions {
 }
 
 export class CameraNavigationController {
+  private readonly onInput: () => void;
+  get hasActiveInput(): boolean { return this.active && Object.values(this.keys).some(Boolean); }
   private keys: Record<string, boolean> = {};
   private active = false;
   private moveSpeed: number;
@@ -24,6 +27,9 @@ export class CameraNavigationController {
   private forwardVector = new THREE.Vector3();
   private rightVector = new THREE.Vector3();
   private tempOffset = new THREE.Vector3();
+  private camRight = new THREE.Vector3();
+  private moveDelta = new THREE.Vector3();
+  private panDelta = new THREE.Vector3();
   private worldUp = new THREE.Vector3(0, 1, 0);
 
   constructor(
@@ -33,6 +39,7 @@ export class CameraNavigationController {
     private getViewMode: () => ViewMode,
     options: CameraNavigationOptions = {}
   ) {
+    this.onInput = options.onInput ?? (() => { });
     this.moveSpeed = options.moveSpeed ?? 2.8;
     this.boostMultiplier = options.boostMultiplier ?? 2.5;
     this.rotateSpeed = options.rotateSpeed ?? 1.6;
@@ -97,6 +104,7 @@ export class CameraNavigationController {
     if (isNavKey) {
       this.keys[code] = true;
       this.keys[key] = true;
+      this.onInput();
 
       // Prevent default page scroll on Arrow keys and Space
       if (
@@ -176,7 +184,7 @@ export class CameraNavigationController {
       const lookDown = this.keys['ArrowDown'];
       if (lookUp || lookDown) {
         // Calculate camera's horizontal right axis
-        const camRight = new THREE.Vector3().crossVectors(offset, this.worldUp).normalize();
+        const camRight = this.camRight.crossVectors(offset, this.worldUp).normalize();
         if (camRight.lengthSq() > 0.001) {
           const currentPitch = Math.asin(THREE.MathUtils.clamp(offset.y / distance, -0.999, 0.999));
           const pitchDelta = (lookUp ? 1 : -1) * currentRotSpeed;
@@ -206,7 +214,7 @@ export class CameraNavigationController {
 
     this.rightVector.set(-this.forwardVector.z, 0, this.forwardVector.x);
 
-    const moveDelta = new THREE.Vector3(0, 0, 0);
+    const moveDelta = this.moveDelta.set(0, 0, 0);
 
     // Forward / Backward
     if (this.keys['KeyW'] || (isCtrl && this.keys['ArrowUp'])) {
@@ -252,7 +260,7 @@ export class CameraNavigationController {
     // Speed scaled inversely by zoom so pan feels natural at any zoom level
     const panSpeed = ((isShift ? 30 : 12) / zoom) * 50 * dt;
 
-    const panDelta = new THREE.Vector3(0, 0, 0);
+    const panDelta = this.panDelta.set(0, 0, 0);
 
     if (this.keys['KeyW'] || this.keys['ArrowUp']) {
       panDelta.z -= panSpeed;

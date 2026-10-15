@@ -1,5 +1,6 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { readFileSync } from 'node:fs';
+import { legacyData } from '../support/editor';
 
 test('renders the real plan and switches views and visibility controls', async ({ page }) => {
   const errors: string[] = [];
@@ -9,7 +10,7 @@ test('renders the real plan and switches views and visibility controls', async (
     for (const context of [WebGLRenderingContext, WebGL2RenderingContext]) {
       for (const method of ['drawElements', 'drawArrays'] as const) {
         const original = context.prototype[method];
-        (context.prototype as any)[method] = function (...args: any[]) {
+        (context.prototype as any)[method] = function(...args: any[]) {
           (window as any).__drawCalls++;
           return original.apply(this, args as any);
         };
@@ -18,7 +19,7 @@ test('renders the real plan and switches views and visibility controls', async (
   });
   const response = await page.goto('/');
   expect(response!.status()).toBe(200);
-  await expect(page.getByText('50 Walls')).toBeVisible();
+  await expect(page.getByText('42 Walls · 8 Columns')).toBeVisible();
   await expect(page.getByText('10 Rooms')).toBeVisible();
   await expect(page.getByText('119 Objects')).toBeVisible();
   await expect(page.locator('canvas').first()).toBeVisible();
@@ -61,11 +62,11 @@ test('real save endpoint persists JSON and rejects invalid payloads without data
     const save = await request.post('/api/save-plan', { data: edited });
     expect(save.status()).toBe(200);
     expect((await save.json()).success).toBe(true);
-    expect(await (await request.get('/sample.plan')).json()).toEqual(edited);
+    expect(legacyData(await (await request.get('/sample.plan')).text())).toEqual(edited);
 
     const invalid = await request.post('/api/save-plan', { data: Buffer.from('{invalid'), headers: { 'Content-Type': 'application/json' } });
     expect(invalid.status()).toBe(500);
-    expect(await (await request.get('/sample.plan')).json()).toEqual(edited);
+    expect(legacyData(await (await request.get('/sample.plan')).text())).toEqual(edited);
   } finally {
     expect((await request.post('/api/save-plan', { data: Buffer.from(original), headers: { 'Content-Type': 'application/json' } })).status()).toBe(200);
     expect(await (await request.get('/sample.plan')).text()).toBe(original);

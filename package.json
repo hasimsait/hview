@@ -8,6 +8,7 @@
     "test:layers:browser": "node scripts/check_surface_layers.mjs",
     "dev": "vite",
     "build:viewer": "npx tsx scripts/build_standalone_viewer.ts",
+    "build:sample-editor": "tsx scripts/build_sample_editor.ts",
     "build": "tsc && vite build && npx tsx scripts/build_standalone_viewer.ts",
     "preview": "vite preview",
     "test": "node scripts/test_all.mjs",
@@ -20,11 +21,13 @@
   },
   "dependencies": {
     "clsx": "^2.1.1",
+    "fflate": "^0.8.3",
     "lucide-react": "^1.16.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^3.0.2",
-    "three": "^0.186.1"
+    "three": "^0.186.1",
+    "zod": "3.25.76"
   },
   "devDependencies": {
     "@playwright/test": "1.56.1",
@@ -37,6 +40,7 @@
     "autoprefixer": "^10.4.20",
     "jsdom": "26.1.0",
     "postcss": "^8.5.3",
+    "sharp": "^0.35.5",
     "tailwindcss": "^3.4.17",
     "tsx": "4.20.6",
     "typescript": "^5.8.2",

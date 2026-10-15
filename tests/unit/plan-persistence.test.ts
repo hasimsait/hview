@@ -1,17 +1,17 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { PlanPersistenceService } from '../../src/services/plan/PlanPersistenceService';
+import { DocumentStorage } from '../../src/platform/persistence/DocumentStorage';
 
 const json = JSON.stringify({ plan: { walls: {}, items: {} } });
 
 describe('plan persistence', () => {
-  let service: PlanPersistenceService;
+  let service: DocumentStorage;
   const fetchMock = vi.fn();
   beforeEach(() => {
     vi.useFakeTimers(); localStorage.clear();
     vi.stubGlobal('fetch', fetchMock); fetchMock.mockReset();
-    vi.spyOn(console, 'warn').mockImplementation(() => {});
-    service = new PlanPersistenceService();
+    vi.spyOn(console, 'warn').mockImplementation(() => { });
+    service = new DocumentStorage();
   });
   afterEach(() => {
     vi.clearAllTimers(); vi.useRealTimers(); vi.unstubAllGlobals(); vi.restoreAllMocks();
@@ -28,11 +28,11 @@ describe('plan persistence', () => {
     await vi.advanceTimersByTimeAsync(3000);
     expect(service.getSaveStatus()).toBe('idle');
   });
-  it('sanitizes superseded walls before saving to disk and local storage', async () => {
+  it('stores serialized bytes without applying a second topology normalization', async () => {
     fetchMock.mockResolvedValue(Response.json({ success: true }));
     await service.savePlan(JSON.stringify({ plan: { walls: { w: {}, w_a: {}, w_b: {} } } }));
     const saved = JSON.parse(fetchMock.mock.calls[0][1].body);
-    expect(Object.keys(saved.plan.walls)).toEqual(['w_a', 'w_b']);
+    expect(Object.keys(saved.plan.walls)).toEqual(['w', 'w_a', 'w_b']);
     expect(JSON.parse(localStorage.getItem('hview_current_plan')!)).toEqual(saved);
   });
   it('keeps the local backup and reports failure on HTTP errors', async () => {

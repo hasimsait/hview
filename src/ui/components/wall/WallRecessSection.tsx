@@ -1,29 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import { WallEntity, FurnitureEntity } from '@core/types/plan';
-import { IPlanManagerService, ISceneService } from '@core/types/services';
-import { LayoutGrid, Plus, Move, Trash2, Check } from 'lucide-react';
-import { RECESS_PRESETS, CORNER_DEFAULT_FINISH } from './RecessPresetRegistry';
+import { FurnitureEntity,WallEntity } from '@core/types/plan';
+import { createElementId } from '../../../platform/ElementId';
+import { ISceneService } from '@core/types/services';
+import { Check,LayoutGrid,Move,Plus,Trash2 } from 'lucide-react';
+import React,{ useEffect,useState } from 'react';
+import { AddWallRecess } from '../../../application/commands/AddWallRecess';
+import { CommandBatch } from '../../../application/commands/EditorCommand';
+import { FinishFurniture,RemoveElement } from '../../../application/commands/FurnitureCommands';
+import type { EditorSession } from '../../../application/EditorSession';
+import { CORNER_DEFAULT_FINISH,RECESS_PRESETS } from './RecessPresetRegistry';
 
 interface WallRecessSectionProps {
   wall: WallEntity;
   wallLength: number;
-  wallRecesses: FurnitureEntity[];
+  wallRecesses: readonly FurnitureEntity[];
+  selectedRecessId?: string;
   activeTarget: string;
-  planManager: IPlanManagerService;
+  editor: EditorSession;
   sceneService: ISceneService;
-  onSelectTarget: (target: string) => void;
+  onSelectTarget: (target: string, recessId?: string) => void;
 }
 
 export const WallRecessSection: React.FC<WallRecessSectionProps> = ({
   wall,
   wallLength,
   wallRecesses,
+  selectedRecessId,
   activeTarget,
-  planManager,
+  editor,
   sceneService,
   onSelectTarget,
 }) => {
   const [showAdder, setShowAdder] = useState(false);
+  const [error, setError] = useState('');
   const [widthCm, setWidthCm] = useState(120);
   const [heightCm, setHeightCm] = useState(170);
   const [elevationCm, setElevationCm] = useState(70);
@@ -33,34 +41,39 @@ export const WallRecessSection: React.FC<WallRecessSectionProps> = ({
 
   useEffect(() => {
     setDepthCm(Math.round((wall.thickness || 0.12) * 100));
+    const width = Math.min(120, Math.max(1, Math.round((wallLength - 0.1) * 100)));
+    setWidthCm(width);
+    setDistCm(Math.min(25, Math.max(0, Math.round((wallLength * 100 - width) / 2))));
     setShowAdder(false);
-  }, [wall.id, wall.thickness]);
+    setError('');
+  }, [wall.id, wall.thickness, wallLength]);
 
   const handleCreateRecess = () => {
     const preset = RECESS_PRESETS[selectedPreset] || RECESS_PRESETS.kale_sage;
     const backFinish = preset.resolveFinish(wall);
 
-    const rec = planManager.addWallRecess(wall.id, {
-      width: widthCm / 100,
-      height: heightCm / 100,
-      elevation: elevationCm / 100,
-      depth: depthCm / 100,
-      distanceAlongWall: (distCm + widthCm / 2) / 100,
-    });
-
-    if (rec) {
-      planManager.setFurnitureSectionFinish(rec.id, 'recess_wall', backFinish);
-      planManager.setFurnitureSectionFinish(rec.id, 'girinti_wall', backFinish);
-      planManager.setFurnitureSectionFinish(rec.id, 'sides', CORNER_DEFAULT_FINISH);
-      planManager.setFurnitureSectionFinish(rec.id, 'corners', CORNER_DEFAULT_FINISH);
-      sceneService.focusOnObject?.(rec.id);
+    const id = createElementId();
+    try {
+      editor.execute(new CommandBatch('Add finished recess', [
+        new AddWallRecess(id, wall.id, {
+          width: widthCm / 100, height: heightCm / 100, elevation: elevationCm / 100,
+          depth: depthCm / 100, distanceAlongWall: (distCm + widthCm / 2) / 100,
+        }),
+        new FinishFurniture(id, backFinish, 'recess_wall'),
+        new FinishFurniture(id, CORNER_DEFAULT_FINISH, 'sides'),
+      ]));
+      sceneService.focusOnObject(id);
       setShowAdder(false);
-      onSelectTarget('recess_wall');
+      onSelectTarget('recess_wall', id);
+      setError('');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : String(error));
     }
   };
 
   return (
     <div className="py-2.5 border-b border-slate-800 space-y-2">
+      {error && <p role="alert" className="text-xs text-red-300">{error}</p>}
       {/* Header & Toggle */}
       <div className="text-[10px] uppercase font-semibold text-slate-400 flex items-center justify-between">
         <span className="flex items-center gap-1.5 text-amber-300">
@@ -159,11 +172,10 @@ export const WallRecessSection: React.FC<WallRecessSectionProps> = ({
                   key={p.id}
                   type="button"
                   onClick={() => setSelectedPreset(p.id)}
-                  className={`px-2 py-1 rounded text-[10px] text-left border transition-all ${
-                    selectedPreset === p.id
-                      ? 'bg-amber-600/40 border-amber-400 text-amber-200 font-medium'
-                      : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200'
-                  }`}
+                  className={`px-2 py-1 rounded text-[10px] text-left border transition-all ${selectedPreset === p.id
+                    ? 'bg-amber-600/40 border-amber-400 text-amber-200 font-medium'
+                    : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200'
+                    }`}
                 >
                   <div className="truncate font-semibold">{p.title}</div>
                   <div className="text-[8px] text-slate-500">{p.subtitle}</div>
@@ -209,7 +221,7 @@ export const WallRecessSection: React.FC<WallRecessSectionProps> = ({
                   <button
                     type="button"
                     onClick={() => {
-                      planManager.setSelectedFurniture(rec);
+                      editor.selection.select('furniture', rec);
                       sceneService.focusOnObject?.(rec.id);
                     }}
                     className="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-sky-600 text-slate-300 hover:text-white text-[10px] transition-colors flex items-center gap-1"
@@ -220,7 +232,7 @@ export const WallRecessSection: React.FC<WallRecessSectionProps> = ({
                   </button>
                   <button
                     type="button"
-                    onClick={() => planManager.deleteFurniture(rec.id)}
+                    onClick={() => editor.execute(new RemoveElement(rec.id))}
                     className="p-1 rounded hover:bg-rose-900/40 text-slate-400 hover:text-rose-400 transition-colors"
                     title="Remove recess"
                   >
@@ -231,9 +243,9 @@ export const WallRecessSection: React.FC<WallRecessSectionProps> = ({
               <div className="flex gap-1.5">
                 <button
                   type="button"
-                  onClick={() => onSelectTarget('recess_wall')}
+                  onClick={() => onSelectTarget('recess_wall', rec.id)}
                   className={`flex-1 py-1 rounded text-[10px] font-medium transition-colors border ${
-                    activeTarget === 'recess_wall'
+                    activeTarget === 'recess_wall' && (!selectedRecessId || selectedRecessId === rec.id)
                       ? 'bg-amber-600 text-white border-amber-500 shadow-sm'
                       : 'bg-slate-900 text-amber-300 border-amber-500/30 hover:bg-amber-500/20'
                   }`}
@@ -242,9 +254,9 @@ export const WallRecessSection: React.FC<WallRecessSectionProps> = ({
                 </button>
                 <button
                   type="button"
-                  onClick={() => onSelectTarget('corners')}
+                  onClick={() => onSelectTarget('corners', rec.id)}
                   className={`flex-1 py-1 rounded text-[10px] font-medium transition-colors border ${
-                    activeTarget === 'corners' || activeTarget === 'sides'
+                    (activeTarget === 'corners' || activeTarget === 'sides') && (!selectedRecessId || selectedRecessId === rec.id)
                       ? 'bg-amber-600 text-white border-amber-500 shadow-sm'
                       : 'bg-slate-900 text-amber-300 border-amber-500/30 hover:bg-amber-500/20'
                   }`}

@@ -1,3 +1,4 @@
+import { buildStandaloneArtifacts } from './scripts/build_standalone_viewer';
 import { defineConfig, Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
@@ -19,11 +20,20 @@ function planPersistencePlugin(): Plugin {
       // Endpoint to save working plan to public/sample.plan
       server.middlewares.use('/api/save-plan', (req, res, next) => {
         if (req.method === 'POST') {
+          const MAX_BODY_BYTES = 50 * 1024 * 1024;
           let body = '';
+          let aborted = false;
           req.on('data', (chunk) => {
+            if (aborted) return;
             body += chunk;
+            if (Buffer.byteLength(body, 'utf8') > MAX_BODY_BYTES) {
+              aborted = true;
+              res.writeHead(413, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'Plan payload exceeds maximum allowed size' }));
+            }
           });
           req.on('end', () => {
+            if (aborted) return;
             try {
               // Validate JSON payload
               JSON.parse(body);
@@ -75,8 +85,34 @@ function planPersistencePlugin(): Plugin {
   };
 }
 
+function standaloneTemplatesPlugin(): Plugin {
+  return {
+    name: 'standalone-templates',
+    configureServer(server) {
+      let build: Promise<void> | null = null;
+      server.watcher.on('change', filename => {
+        if (filename.includes('/src/') || filename.includes('/scripts/') || filename.endsWith('tailwind.config.js')) build = null;
+      });
+      server.middlewares.use(async (req, res, next) => {
+        const filename = req.url?.split('?')[0]?.slice(1);
+        if (filename !== 'hview_editor_template.html' && filename !== 'ipad_viewer_template.html') { next(); return; }
+        try {
+          build ??= buildStandaloneArtifacts();
+          await build;
+          res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+          res.end(fs.readFileSync(path.resolve(__dirname, 'dist', filename), 'utf8'));
+        } catch (error) {
+          build = null;
+          res.writeHead(500, { 'Content-Type': 'text/plain' });
+          res.end(`Could not build standalone template: ${String(error)}`);
+        }
+      });
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [react(), planPersistencePlugin()],
+  plugins: [react(), planPersistencePlugin(), standaloneTemplatesPlugin()],
   resolve: {
     alias: {
       '@core': path.resolve(__dirname, './src/core'),

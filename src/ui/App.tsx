@@ -1,26 +1,40 @@
-import React, { useEffect, useState } from 'react';
-import { useService } from '@ui/context/DIContext';
-import { TOKENS } from '@core/di/tokens';
-import { IPlanManagerService, ISceneService, ViewMode, ViewportSettings, IPlanPersistenceService, AssetDefinition } from '@core/types/services';
-import { FurnitureEntity, OpeningEntity, WallEntity, RoomEntity } from '@core/types/plan';
-import { Header } from '@ui/components/Header';
-import { Viewport3D } from '@ui/components/Viewport3D';
-import { Inspector } from '@ui/components/Inspector';
-import { DoorInspector } from '@ui/components/DoorInspector';
-import { WallInspector } from '@ui/components/WallInspector';
-import { FloorInspector } from '@ui/components/FloorInspector';
+import { AssetDefinition,PlanSaveStatus,ViewMode,ViewportSettings } from '@core/types/services';
 import { AssetReplacementModal } from '@ui/components/AssetReplacementModal';
+import { DoorInspector } from '@ui/components/DoorInspector';
 import { ErrorBoundary } from '@ui/components/ErrorBoundary';
-import { restoreInitialPlan } from '@services/plan/PlanBootstrap';
+import { FloorInspector } from '@ui/components/FloorInspector';
+import { Header } from '@ui/components/Header';
+import { Inspector } from '@ui/components/Inspector';
+import { SavingOverlay } from '@ui/components/SavingOverlay';
+import { Viewport3D } from '@ui/components/Viewport3D';
+import { WallInspector } from '@ui/components/WallInspector';
+import { useDocument,useRuntime,useSelection } from '@ui/context/RuntimeContext';
+import React,{ useEffect,useRef,useState } from 'react';
+import { AddFurniture } from '../application/commands/FurnitureCommands';
+import { Column } from '../domain/elements/Column';
+import { Furniture } from '../domain/elements/Furniture';
+import { Opening,WindowOpening } from '../domain/elements/Opening';
+import { Room } from '../domain/elements/Room';
+import { Wall } from '../domain/elements/Wall';
+import type { FurnitureCategory } from '../domain/model/PlanData';
+import { isPointInPolygon } from '../domain/model/WallTopology';
+import { isOpaquePlanSource } from '../services/plan/PlanRequest';
+import { createElementId } from '../platform/ElementId';
+import { ColumnInspector } from './components/ColumnInspector';
+import { WindowInspector } from './components/WindowInspector';
 
 export const App: React.FC = () => {
-  const planManager = useService<IPlanManagerService>(TOKENS.PlanManagerService);
-  const sceneService = useService<ISceneService>(TOKENS.SceneService);
+  const runtime = useRuntime();
+  const editor = runtime.editor;
+  const sceneService = runtime.scene;
 
-  const [selectedItem, setSelectedItem] = useState<FurnitureEntity | null>(null);
-  const [selectedOpening, setSelectedOpening] = useState<{ opening: OpeningEntity; wall: WallEntity } | null>(null);
-  const [selectedWall, setSelectedWall] = useState<WallEntity | null>(null);
-  const [selectedRoom, setSelectedRoom] = useState<RoomEntity | null>(null);
+  const document = useDocument();
+  const selection = useSelection();
+  const selected = selection && document ? document.get(selection.id) : null;
+  const selectedItem = selected instanceof Furniture ? selected : null;
+  const selectedWall = selected instanceof Wall ? selected : null;
+  const selectedRoom = selected instanceof Room ? selected : null;
+  const selectedOpening = selected instanceof Opening && document ? { opening: selected, wall: document.requireWall(selected.wallId) } : null;
   const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false);
   const [isAddAssetModalOpen, setIsAddAssetModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('perspective');
@@ -33,44 +47,102 @@ export const App: React.FC = () => {
   const [spotLightIntensity, setSpotLightIntensity] = useState<number>(1.0);
   const [chandelierIntensity, setChandelierIntensity] = useState<number>(1.0);
   const [loading, setLoading] = useState<boolean>(true);
-  const persistenceService = useService<IPlanPersistenceService>(TOKENS.PlanPersistenceService);
+  const [loadError, setLoadError] = useState(false);
+  const [saveError, setSaveError] = useState(false);
+  const downloadOnly = isOpaquePlanSource();
+  const [saveRequested, setSaveRequested] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<PlanSaveStatus>(runtime.storage.getSaveStatus());
+  const saveInProgress = useRef(false);
+  const isSaving = saveRequested || saveStatus === 'saving';
+
+  useEffect(() => {
+    if (!document) return;
+    const validIds = isolatedRoomIds.filter(id => document.get(id) instanceof Room);
+    if (validIds.length !== isolatedRoomIds.length) {
+      setIsolatedRoomIds(validIds);
+      sceneService.isolateRooms(validIds);
+    }
+  }, [document, isolatedRoomIds, sceneService]);
+
+  useEffect(() => runtime.storage.onSaveStatusChange(setSaveStatus), [editor]);
+
+  const handleSave = async () => {
+    if (saveInProgress.current || isSaving) return;
+    saveInProgress.current = true;
+    setSaveRequested(true);
+    setSaveError(false);
+    try {
+      // Paint the lock before serialization or synchronous offline storage.
+      await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+      if (downloadOnly) await runtime.exports.exportStandaloneEditor();
+      else await runtime.documents.save();
+    } catch (error) {
+      console.error('Could not prepare saved copy', error);
+      setSaveError(true);
+    } finally {
+      saveInProgress.current = false;
+      setSaveRequested(false);
+    }
+  };
+
+  // Global keyboard shortcuts for Undo, Redo, and Save
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (isSaving) return;
+      const mod = event.metaKey || event.ctrlKey;
+      if (!mod) return;
+      const key = event.key.toLowerCase();
+      if (key === 's') {
+        event.preventDefault();
+        if (window.document.activeElement instanceof HTMLElement) {
+          window.document.activeElement.blur();
+        }
+        void handleSave();
+        return;
+      }
+      const target = event.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT' ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      if (key === 'z' && !event.shiftKey) {
+        if (editor.history.canUndo) {
+          event.preventDefault();
+          editor.undo();
+        }
+      } else if ((key === 'z' && event.shiftKey) || key === 'y') {
+        if (editor.history.canRedo) {
+          event.preventDefault();
+          editor.redo();
+        }
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [editor, isSaving]);
 
   // Load plan automatically on initial launch
   useEffect(() => {
     async function loadInitialPlan() {
       try {
-        await restoreInitialPlan(planManager, persistenceService);
+        // Show the loading UI before decoding and constructing the scene.
+        await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+        await runtime.documents.restore();
       } catch (err) {
         console.error('Failed to load initial plan:', err);
+        setLoadError(true);
       } finally {
         setLoading(false);
       }
     }
     loadInitialPlan();
 
-    const unsubscribeSelection = planManager.onSelectionChange((item) => {
-      setSelectedItem(item);
-    });
-
-    const unsubscribeOpeningSelection = planManager.onOpeningSelectionChange((selected) => {
-      setSelectedOpening(selected);
-    });
-
-    const unsubscribeWallSelection = planManager.onWallSelectionChange((wall) => {
-      setSelectedWall(wall);
-    });
-
-    const unsubscribeRoomSelection = planManager.onRoomSelectionChange?.((room) => {
-      setSelectedRoom(room);
-    });
-
-    return () => {
-      unsubscribeSelection();
-      unsubscribeOpeningSelection();
-      unsubscribeWallSelection();
-      unsubscribeRoomSelection?.();
-    };
-  }, [planManager]);
+  }, [editor]);
 
   const handleViewModeChange = (mode: ViewMode) => {
     setViewMode(mode);
@@ -108,71 +180,85 @@ export const App: React.FC = () => {
   };
 
   const handleAddAsset = (asset: AssetDefinition) => {
+    const dims = asset.defaultDimensions || { x: 0.6, y: 0.6, z: 0.6 };
+    const mount = asset.placement?.mount ?? (asset.category === 'decor' ? 'wall' : 'floor');
     const wallHit = sceneService.getWallInCameraView();
-    if (!wallHit) {
-      console.warn('No wall in camera view to place asset');
+
+    if (!wallHit && mount === 'wall') {
+      console.warn('No wall in camera view to place wall-mounted asset');
       return;
     }
 
-    const { wall, point, normal } = wallHit;
-    const dims = asset.defaultDimensions || { x: 0.6, y: 0.6, z: 0.6 };
+    const planSnapshot = editor.getSnapshot();
+    const planTotalH = planSnapshot?.totalHeight || 2.7;
+    let position: { x: number; y: number; z: number };
+    let rotationY = 0;
+    let roomId: string | undefined;
+    const viewDirection = wallHit?.normal;
 
-    // Determine functional placement based on asset placement metadata
-    let elevation = point.y;
-    let offsetDist = asset.placement?.wallOffset ?? 0.01;
+    if (wallHit) {
+      const { wall, point, normal } = wallHit;
+      let elevation = point.y;
+      let offsetDist = asset.placement?.wallOffset ?? 0.01;
 
-    const mount = asset.placement?.mount ?? (asset.category === 'decor' ? 'wall' : 'floor');
-
-    if (mount === 'ceiling') {
-      const planTotalH = planManager.getPlan()?.totalHeight || 2.7;
-      const offset = asset.placement?.ceilingOffset ?? (dims.y + 0.05);
-      elevation = Math.max(2.1, planTotalH - offset);
-      offsetDist = Math.max(0.15, dims.z / 2);
-    } else if (mount === 'floor') {
-      elevation = 0.0;
-      offsetDist = dims.z / 2 + 0.04;
-    } else {
-      // Wall-mounted items: respect configured architectural elevation range
-      if (asset.placement?.elevationRange) {
+      if (mount === 'ceiling') {
+        const offset = asset.placement?.ceilingOffset ?? (dims.y + 0.05);
+        elevation = Math.max(2.1, planTotalH - offset);
+        offsetDist = Math.max(0.15, dims.z / 2);
+      } else if (mount === 'floor') {
+        elevation = 0.0;
+        offsetDist = dims.z / 2 + 0.04;
+      } else if (asset.placement?.elevationRange) {
         const [minEl, maxEl] = asset.placement.elevationRange;
-        elevation = elevation >= minEl && elevation <= maxEl
-          ? elevation
-          : (asset.placement.defaultElevation ?? 1.30);
+        elevation =
+          elevation >= minEl && elevation <= maxEl
+            ? elevation
+            : (asset.placement.defaultElevation ?? 1.30);
       } else if (asset.placement?.defaultElevation !== undefined) {
         elevation = asset.placement.defaultElevation;
       } else {
         elevation = Math.max(0.3, Math.min(elevation, 2.2));
       }
+
+      position = {
+        x: point.x + normal.x * offsetDist,
+        y: elevation,
+        z: point.z + normal.z * offsetDist,
+      };
+      rotationY = Math.atan2(normal.x, normal.z);
+      roomId = wall.roomSideA || wall.roomSideB || wall.roomIds?.[0];
+    } else {
+      const target = sceneService.getControls()?.target;
+      const x = target?.x ?? 0;
+      const z = target?.z ?? 0;
+      const elevation =
+        mount === 'ceiling'
+          ? Math.max(2.1, planTotalH - (asset.placement?.ceilingOffset ?? dims.y + 0.05))
+          : 0.0;
+      position = { x, y: elevation, z };
+      roomId = planSnapshot?.rooms.find((r) => isPointInPolygon({ x, y: z }, r.polygon))?.id;
     }
 
-    const position = {
-      x: point.x + normal.x * offsetDist,
-      y: elevation,
-      z: point.z + normal.z * offsetDist,
-    };
-
-    // Orient object so its front (+Z) faces into the room along the wall normal
-    const rotationY = Math.atan2(normal.x, normal.z);
-
-    // Associated room
-    const roomId = wall.roomSideA || wall.roomSideB || wall.roomIds?.[0];
-
-    const newEntity = planManager.addFurniture({
+    const id = createElementId();
+    editor.execute(new AddFurniture({
+      id,
       name: asset.key,
       displayName: asset.name,
-      category: asset.category as any,
+      category: asset.category as FurnitureCategory,
       position,
       rotationY,
       dimensions: { ...dims },
       assetKey: asset.key,
       roomId,
       visible: true,
-    });
+    }));
+
+    editor.selection.set({ kind: 'furniture', id });
 
     // Seamlessly focus camera directly onto the newly added object so the user doesn't end up looking for it
-    sceneService.focusOnObject(newEntity.id, {
+    sceneService.focusOnObject(id, {
       frameDistance: 1.9,
-      viewDirection: normal,
+      viewDirection,
     });
   };
 
@@ -180,6 +266,8 @@ export const App: React.FC = () => {
     <div className="flex flex-col h-screen w-screen overflow-hidden bg-slate-950 text-slate-100">
       {/* Top Header */}
       <Header
+        onSave={handleSave}
+        isSaving={isSaving}
         viewMode={viewMode}
         onViewModeChange={handleViewModeChange}
         wallCutaway={wallCutaway}
@@ -197,10 +285,12 @@ export const App: React.FC = () => {
         onUpdateLighting={handleUpdateLighting}
         onOpenAddAssetModal={() => setIsAddAssetModalOpen(true)}
       />
+      {downloadOnly && <p className="bg-slate-900 px-4 py-1 text-xs text-amber-200">Changes stay in this tab. Use Save HTML to keep a copy.</p>}
+      {saveError && <p role="alert" className="bg-red-950 px-4 py-2 text-sm text-red-200">The saved copy could not be prepared. Please try Save again.</p>}
 
       {/* Main 3D Canvas Area */}
       <main className="flex-1 min-h-0 relative w-full">
-        <Viewport3D />
+        <Viewport3D disabled={isSaving} />
 
         {/* Inspector Drawers wrapped in ErrorBoundary */}
         <ErrorBoundary>
@@ -209,23 +299,26 @@ export const App: React.FC = () => {
             <Inspector
               item={selectedItem}
               onOpenReplaceModal={() => setIsReplaceModalOpen(true)}
-              onClose={() => planManager.setSelectedFurniture(null)}
+              onClose={() => editor.selection.select('furniture', null)}
             />
           )}
 
           {/* Selected Door Inspector with Flip Controls */}
-          {selectedOpening && (
+          {selected instanceof WindowOpening && <WindowInspector window={selected} onClose={() => editor.selection.set(null)} />}
+          {selectedOpening && !(selected instanceof WindowOpening) && (
             <DoorInspector
               selected={selectedOpening}
-              onClose={() => planManager.setSelectedOpening(null)}
+              onClose={() => editor.selection.select('opening', null)}
             />
           )}
+
+          {selected instanceof Column && <ColumnInspector column={selected} onClose={() => editor.selection.set(null)} />}
 
           {/* Selected Wall Inspector with Finishes, Wood Paneling, Tiles & Glass */}
           {selectedWall && (
             <WallInspector
               wall={selectedWall}
-              onClose={() => planManager.setSelectedWall(null)}
+              onClose={() => editor.selection.select('wall', null)}
             />
           )}
 
@@ -233,17 +326,18 @@ export const App: React.FC = () => {
           {selectedRoom && (
             <FloorInspector
               room={selectedRoom}
-              onClose={() => planManager.setSelectedRoom(null)}
+              onClose={() => editor.selection.select('room', null)}
             />
           )}
         </ErrorBoundary>
 
         {/* Loading Overlay */}
-        {loading && (
+        {(loading || loadError) && (
           <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-30">
             <div className="flex flex-col items-center gap-3">
-              <div className="w-10 h-10 border-4 border-sky-500/20 border-t-sky-500 rounded-full animate-spin" />
-              <p className="text-sm font-medium text-slate-300">Loading house plan...</p>
+              {!loadError && <div className="w-10 h-10 border-4 border-sky-500/20 border-t-sky-500 rounded-full animate-spin" />}
+              <p role={loadError ? 'alert' : 'status'} className="text-sm font-medium text-slate-300">{loadError ? 'The house plan could not be loaded.' : 'Loading house plan...'}</p>
+              {loadError && <button onClick={() => window.location.reload()} className="rounded-lg bg-sky-600 px-4 py-2 text-white">Reload</button>}
             </div>
           </div>
         )}
@@ -265,6 +359,7 @@ export const App: React.FC = () => {
         mode="add"
         onSelectAsset={handleAddAsset}
       />
+      {isSaving && <SavingOverlay />}
     </div>
   );
 };

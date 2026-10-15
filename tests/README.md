@@ -1,88 +1,32 @@
 # Tests
 
-Install the locked dependencies with `npm ci`. In the cloud environment, use
-`npm ci --cache /workspace/.npm-cache` because the default home cache is unwritable.
+Install with `npm ci` (in the managed workspace, `npm ci --cache /workspace/.npm-cache`).
 
-```bash
-npm test                 # Both Vitest unit tests and Node save/layer regression tests
-npm run test:state       # 80 Node save/export/layer regression tests (build HTML first)
-npm run test:unit        # Vitest unit/service regression suite
-npm run test:watch       # Rerun affected tests while editing
-npm run test:coverage    # Coverage report and minimum coverage checks
-npm run test:types       # Type-check application, tests and runner configurations
-npm run test:e2e         # Real Chromium UI and HTTP persistence tests
-npm run test:workflows   # Edit/reload, manipulation and offline export workflows
+```sh
+npm run build                 # Build current editor and standalone HTML first
+npm test                      # Vitest plus Node save/export/layer regressions
+npm run test:types            # Strict application/test TypeScript checks
+npm run test:coverage         # Coverage with retained thresholds
+npm run test:e2e              # Chromium integration workflows
+npm run test:workflows        # Editing, manipulation, replacement, offline exports
+npm run test:layers:browser   # Actual GPU overlap pixels and layer controls
+npm run test:watch            # Unit tests while editing
 ```
 
-Unit tests cover plan parsing, edit/export/reload round trips, manager events and
-selection, debounced autosave, local-storage backups, offline fallbacks, and save
-and reset failure handling. All timer-based checks use virtual time.
+Vitest covers the behavioral domain, codec boundaries, session commands/history/selection, explicit-save races, storage failures, retained nodes, resources, picking, and render scheduling. `recess-ownership.test.ts` covers one-host cuts, legacy migration, split rejection/rehosting, deletion, subtype replacement, and undo/redo. `scene-graph.test.ts` checks host dependencies and retained geometry during finish updates.
 
-Run `npm run build` before `npm test` or `npm run test:state`; the offline export
-tests read the generated HTML templates from `dist`.
+The Node suite covers save queues, stale completions, load/import/reset races, manual-save isolation, offline storage, asset replacement, HTML exports, and surface layers. Tests exercise the public save operation; there is no separate cache-only persistence entry point. Editing and closing tabs do not write automatically.
 
-Save/export regressions also cover unload recovery after cache invalidation,
-superseded queued POSTs, latest-save failures, and literal script-ID matching.
-Migration regressions cover stored chimneys, repeated migration, split-wall
-preservation, and inherited face finishes when saved properties are undefined.
+Coverage includes `src/domain`, `src/application`, `src/platform/persistence`, scene nodes, resources, picking, and `RenderScheduler`, including unexecuted files. Minimum aggregate thresholds are 78% lines/statements, 76% functions, and 74% branches. This does not measure full UI or geometry coverage. The HTML report is generated at `coverage/index.html`.
 
-Vitest coverage includes all eight files under `src/services/plan`, including
-unexecuted code. The minimum aggregate thresholds are 78% lines/statements, 76% functions,
-and 74% branches. These percentages do not measure rendering or UI coverage.
-The HTML coverage report is generated at `coverage/index.html`.
+Browser tests build current standalone templates and run the actual Vite save/reset endpoints in a disposable copy. All plan writes occur there. A single worker prevents scenarios from racing over the working plan. Scenarios cover production-plan rendering, camera/visibility controls, inspector/gizmo edits, typed luminaire behavior, column/recess creation and validation, undo/redo, explicit save and input locking, failure/retry, replacement, paint selection, room isolation, import while isolated, room-name drafts/undo/save, layouts, and offline save/reload/re-export.
 
-Browser tests start their own Vite server on port 3100 in a temporary copy of the
-checkout. The real save/reset endpoints write only in that copy, which is removed
-when the server exits. The existing development server and working plan are not
-used or changed. A single worker prevents tests from racing over the plan file.
+The runner uses system Chromium when available. Otherwise run `npx playwright install chromium` or set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`. Software WebGL is enabled. The per-test limit is 120 seconds with no retries. Reports are written to `playwright-report/` and `test-results/` (both ignored by Git).
 
-The browser suite checks sample-plan counts, real WebGL draw calls, view switching,
-ceiling/cutaway toggles, asset search, JSON disk persistence, invalid saves, and
-template reset. These are behavioral smoke tests, not visual regression tests.
-Legacy column outlines and spaces below 0.5 m² import as solid, thick walls.
-The root template has 47 walls; the working public plan has 50. Both have 10 usable
-rooms and 119 furniture objects. Columns and chimneys use ordinary wall selection,
-finishes, end caps, and recess controls.
+Offline checks fulfill downloaded HTML from its bytes in a fresh browser context and block every other HTTP request. They verify the offline runtime; native file navigation and Safari/iPad still require device checks.
 
-The workflow suite additionally selects a real mesh through raycasting, drags the
-translation gizmo, edits position/elevation/rotation/dimensions in the inspector,
-and verifies autosave, reload, and downloaded plan data. It uses a small plan in
-the disposable checkout so pointer tests are faster and deterministic.
+`mobile-performance.spec.ts` opens the self-contained editor in a touch/mobile viewport, checks framebuffer and lighting budgets, toggles deferred ceilings, forces GPU loss/restoration, and opens both HTML formats re-exported without network access. It verifies consumed data nodes are removed while Reset still works, and checks readable startup failure/retry for unavailable WebGL or damaged compressed data. `shader-reuse.test.ts` verifies shared program sources keep independent surface uniforms. Texture tests cover image readiness, binary aliases/object URLs, and shared decoded sources with independent samplers. Build-asset coverage checks the 512-pixel limit, alpha preservation, deduplication, and unchanged originals; portable HTML coverage checks binary/Unicode round trips and repeated packaging without growth.
 
-Standalone templates are built from current source inside that copy before the
-server starts; tracked templates remain unchanged. Downloaded viewer/editor HTML
-is tested in a fresh browser context. Managed Chromium blocks `file://`, so tests
-fulfill only the downloaded document bytes in memory and abort all other HTTP
-requests. Reload uses those same document bytes and the real browser storage.
-This validates offline bundle behavior; native file navigation and Safari/iPad
-still need separate device checks.
+`data-url-startup.test.ts` fails if a Shortcut document's pathname is read or percent-encoded, checks bounded keys and unchanged ordinary saved-copy keys, and verifies reset/load without storage or network. `opaque-origin.spec.ts` uses an actual sandboxed opaque origin to exercise import → edit → Save HTML → reopen with `localStorage` throwing `SecurityError` and all HTTP requests blocked. Managed Chromium blocks top-level `data:` navigation, so native iPhone Shortcut navigation and its memory ceiling remain device checks.
 
-See [KNOWN_BUGS.md](KNOWN_BUGS.md) for confirmed failures. The new regression
-assertions remain enabled, so the current test commands return a failure status.
-
-To run the three user-reported regressions specifically:
-
-```bash
-npm run test:unit -- tests/unit/reported-surface-room.test.ts
-npm run test:e2e -- tests/e2e/reported-bugs.spec.ts tests/e2e/workflows.spec.ts --grep 'paint highlight|isolating Bathroom|offline editor can re-export'
-```
-
-The paint test verifies immediate highlight updates and checks reselection as
-well. The bathroom tests use actual opening IDs and preserve the legitimate
-entrance while rejecting the unrelated hallway door. HTML re-export checks cover
-both editor and viewer downloads from inside the downloaded editor.
-
-On this cloud machine the runner uses system Chromium. Elsewhere, install the
-Playwright browser with `npx playwright install chromium`, or set
-`PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` to a Chromium executable. Software WebGL is
-enabled so CI does not require a physical GPU. Rendering can be slow; browser
-tests allow 120 seconds per case and run without retries.
-
-Playwright generates `playwright-report/index.html`, machine-readable results at
-`test-results/results.json`, and saves traces/screenshots
-for failed tests under `test-results`. Open the report locally with
-`npx playwright show-report`. Test reports are ignored by Git.
-
-Both test suites remain enabled. The documented bathroom-isolation regression
-still makes the full test command return nonzero; save/export/layer regressions
-pass. See [RESULTS.md](RESULTS.md) for current counts and browser runtime settings.
+[RESULTS.md](RESULTS.md) records validation results. [KNOWN_BUGS.md](KNOWN_BUGS.md) maps resolved defects to retained regression coverage.

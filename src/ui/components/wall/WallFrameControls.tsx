@@ -1,6 +1,6 @@
+import { WallEntity,WallFrameStyle } from '@core/types/plan';
+import { Layers,LayoutGrid } from 'lucide-react';
 import React from 'react';
-import { WallEntity, WallFrameStyle } from '@core/types/plan';
-import { Layers, LayoutGrid } from 'lucide-react';
 
 const FRAME_STYLES: { id: WallFrameStyle; name: string; desc: string }[] = [
   { id: 'none', name: 'None', desc: 'No frame profile' },
@@ -45,11 +45,10 @@ export const WallFrameControls: React.FC<WallFrameControlsProps> = ({
         <button
           type="button"
           onClick={onToggleGlassWall}
-          className={`px-2 py-0.5 rounded text-[10px] font-medium border transition-colors flex items-center gap-1 ${
-            isGlassWall
-              ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 hover:bg-cyan-500/30'
-              : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
-          }`}
+          className={`px-2 py-0.5 rounded text-[10px] font-medium border transition-colors flex items-center gap-1 ${isGlassWall
+            ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 hover:bg-cyan-500/30'
+            : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
+            }`}
           title="Toggle between solid wall and glass divider"
         >
           <span>{isGlassWall ? 'Glass Partition / Shower Screen' : 'Solid Partition Wall'}</span>
@@ -75,11 +74,10 @@ export const WallFrameControls: React.FC<WallFrameControlsProps> = ({
               key={st.id}
               type="button"
               onClick={() => onFrameStyleChange(st.id)}
-              className={`px-1 py-1 rounded text-[10px] font-medium transition-all text-center truncate ${
-                currentFrameStyle === st.id
-                  ? 'bg-sky-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-              }`}
+              className={`px-1 py-1 rounded text-[10px] font-medium transition-all text-center truncate ${currentFrameStyle === st.id
+                ? 'bg-sky-600 text-white shadow-sm'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                }`}
               title={st.desc}
             >
               {st.name}
@@ -99,11 +97,10 @@ export const WallFrameControls: React.FC<WallFrameControlsProps> = ({
                     key={col.id}
                     type="button"
                     onClick={() => onFrameColorChange(col.hex)}
-                    className={`w-5 h-5 rounded-full border transition-transform ${
-                      isSelected
-                        ? 'border-sky-400 scale-110 shadow-sm ring-1 ring-sky-400'
-                        : 'border-slate-700 hover:scale-105'
-                    }`}
+                    className={`w-5 h-5 rounded-full border transition-transform ${isSelected
+                      ? 'border-sky-400 scale-110 shadow-sm ring-1 ring-sky-400'
+                      : 'border-slate-700 hover:scale-105'
+                      }`}
                     style={{ backgroundColor: col.hex }}
                     title={col.name}
                   />
