@@ -9,7 +9,6 @@ export type PlanSaveStatusListener = (status: PlanSaveStatus) => void;
 
 export interface IDocumentStorage {
   setCurrentPlan?(planJson: string): void;
-  cachePlan?(planJson: string): boolean;
   savePlan(planJson: string): Promise<boolean>;
   loadPlan(): Promise<string>;
   resetToTemplate(): Promise<string>;

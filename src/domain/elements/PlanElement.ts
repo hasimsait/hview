@@ -1,3 +1,4 @@
+import type { WallRecess } from './WallRecess';
 import { identifier } from '../model/Immutable';
 import type { Column } from './Column';
 import type { BasinCabinet,Luminaire,Shelving,StandardFurniture } from './Furniture';
@@ -6,6 +7,7 @@ import type { Room } from './Room';
 import type { Wall } from './Wall';
 
 export interface PlanElementVisitor<R> {
+  visitRecess(element: WallRecess): R;
   visitWall(element: Wall): R;
   visitColumn(element: Column): R;
   visitRoom(element: Room): R;

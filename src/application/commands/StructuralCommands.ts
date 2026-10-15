@@ -60,7 +60,7 @@ export class OpenDoor implements EditorCommand {
   execute(document: PlanDocument): PlanDocument {
     const door = document.require(this.id);
     if (!(door instanceof Door || door instanceof SlidingDoor)) throw new Error('Expected a door');
-    return document.replace(door.withOpenAngle(Math.max(0, Math.min(180, Math.round(this.degrees)))));
+    return document.replace(door.withOpenAngle(this.degrees));
   }
 }
 export class FlipDoor implements EditorCommand {
@@ -88,7 +88,7 @@ export class RotateDoor implements EditorCommand {
   execute(document: PlanDocument): PlanDocument {
     const door = document.require(this.id);
     if (!(door instanceof Door)) return document;
-    return document.replace(this.delta === 180 ? door.flipped('swing') : door.withOpenAngle(Math.max(0, Math.min(180, (door.openAngle ?? 40) + this.delta))));
+    return document.replace(door.rotatedBy(this.delta));
   }
 }
 

@@ -43,7 +43,7 @@ const saved = () => new Response('{"success":true}');
 for (const operation of ['save', 'reset'] as const) {
   test(`unload cannot automatically recreate the cache after ${operation} invalidates it`, async (t) => {
     const { service, stored, pending, unload, beacon } = setup(t);
-    service.cachePlan('{"revision":1}');
+    stored.set('hview_current_plan', '{"revision":1}');
     const setItem = localStorage.setItem.bind(localStorage);
     let storageFull = true;
     t.mock.method(localStorage, 'setItem', (key: string, value: string) => {
@@ -84,21 +84,18 @@ test('queued saves skip intermediate revisions and only post the newest snapshot
   assert.equal(service.getSaveStatus(), 'saved');
 });
 
-test('a newer cached edit prevents an older queued save from reaching the server', async (t) => {
+test('a newer explicit save supersedes an intermediate queued snapshot', async (t) => {
   const { service, pending, stored } = setup(t);
   const first = service.savePlan('{"revision":1}');
   const queued = service.savePlan('{"revision":2}');
-  service.cachePlan('{"revision":3}');
+  const latest = service.savePlan('{"revision":3}');
   pending[0].resolve(saved());
   await first;
+  assert.equal(await queued, false);
   await new Promise<void>(resolve => setImmediate(resolve));
-  if (pending[1]) pending[1].resolve(saved());
-  const queuedResult = await queued;
-  assert.equal(pending.length, 1);
-  assert.equal(queuedResult, false);
+  assert.equal(pending.length, 2);
   assert.equal(stored.get('hview_current_plan'), '{"revision":3}');
   assert.equal(service.getSaveStatus(), 'saving');
-  const latest = service.savePlan('{"revision":3}');
   assert.equal(pending[1].body, '{"revision":3}');
   pending[1].resolve(saved());
   assert.equal(await latest, true);
@@ -143,13 +140,15 @@ test('loading another plan invalidates the previous save status', async (t) => {
   assert.equal(manager.isDirty, false);
 });
 
-test('a delayed server load cannot replace an edit staged while it was loading', async (t) => {
+test('a delayed server load cannot replace an explicit save made while it was loading', async (t) => {
   const { service, pending, stored } = setup(t);
   const load = service.loadPlan();
-  service.cachePlan('{"new":true}');
+  const save = service.savePlan('{"new":true}');
   pending[0].resolve(new Response('{"new":false}'));
   assert.equal(await load, '{"new":true}');
   assert.equal(stored.get('hview_current_plan'), '{"new":true}');
+  pending[1].resolve(saved());
+  assert.equal(await save, true);
 });
 
 test('invalid embedded global data falls back to a valid embedded script', async (t) => {
@@ -215,7 +214,7 @@ test('an edit made during reset survives the reset response', async (t) => {
 test('malformed save JSON cannot replace a valid offline snapshot', async (t) => {
   const { service, browser, stored, pending } = setup(t);
   browser.__STANDALONE_MODE__ = true;
-  service.cachePlan('{"good":true}');
+  await service.savePlan('{"good":true}');
   const save = service.savePlan('{broken');
   if (pending.length) pending[0].reject(new Error('offline'));
   assert.equal(await save, false);
@@ -341,12 +340,12 @@ test('standalone documents on different paths have separate cached working copie
   browser.__STANDALONE_MODE__ = true;
   browser.location.pathname = '/editor-a.html';
   const first = new DocumentStorage();
-  first.cachePlan('{"document":"a"}');
+  await first.savePlan('{"document":"a"}');
   browser.location.pathname = '/editor-b.html';
   browser.__PLAN_DATA__ = { document: 'b' };
   const second = new DocumentStorage();
   assert.equal(await second.loadPlan(), '{"document":"b"}');
-  second.cachePlan('{"document":"b-edited"}');
+  await second.savePlan('{"document":"b-edited"}');
   browser.location.pathname = '/editor-a.html';
   assert.equal(await new DocumentStorage().loadPlan(), '{"document":"a"}');
 });
@@ -412,11 +411,12 @@ test('negative reset acknowledgement preserves the active plan', async (t) => {
   assert.equal(manager.getSnapshot()!.furniture[0].name, 'chair');
 });
 
-test('closing a stale tab does not replace another tab’s newer cached snapshot', (t) => {
-  const { service, stored, unload, beacon } = setup(t);
-  service.cachePlan('{"revision":1}');
+test('closing a stale tab does not replace another tab’s newer saved snapshot', async (t) => {
+  const { service, stored, unload, beacon, browser } = setup(t);
+  browser.__STANDALONE_MODE__ = true;
+  await service.savePlan('{"revision":1}');
   const secondTab = new DocumentStorage();
-  secondTab.cachePlan('{"revision":2}');
+  await secondTab.savePlan('{"revision":2}');
   assert.equal(unload.length, 0);
   assert.equal(stored.get('hview_current_plan'), '{"revision":2}');
   assert.equal(beacon.mock.callCount(), 0);
@@ -452,7 +452,7 @@ test('standalone reset restores its embedded baseline without touching the host'
   const { service, browser, pending, stored } = setup(t);
   browser.__STANDALONE_MODE__ = true;
   browser.__PLAN_DATA__ = { original: true };
-  service.cachePlan('{"edited":true}');
+  await service.savePlan('{"edited":true}');
   assert.equal(await service.resetToTemplate(), '{"original":true}');
   assert.equal(stored.get('hview_current_plan'), '{"original":true}');
   assert.equal(pending.length, 0);

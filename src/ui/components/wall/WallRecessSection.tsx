@@ -28,6 +28,7 @@ export const WallRecessSection: React.FC<WallRecessSectionProps> = ({
   onSelectTarget,
 }) => {
   const [showAdder, setShowAdder] = useState(false);
+  const [error, setError] = useState('');
   const [widthCm, setWidthCm] = useState(120);
   const [heightCm, setHeightCm] = useState(170);
   const [elevationCm, setElevationCm] = useState(70);
@@ -37,29 +38,39 @@ export const WallRecessSection: React.FC<WallRecessSectionProps> = ({
 
   useEffect(() => {
     setDepthCm(Math.round((wall.thickness || 0.12) * 100));
+    const width = Math.min(120, Math.max(1, Math.round((wallLength - 0.1) * 100)));
+    setWidthCm(width);
+    setDistCm(Math.min(25, Math.max(0, Math.round((wallLength * 100 - width) / 2))));
     setShowAdder(false);
-  }, [wall.id, wall.thickness]);
+    setError('');
+  }, [wall.id, wall.thickness, wallLength]);
 
   const handleCreateRecess = () => {
     const preset = RECESS_PRESETS[selectedPreset] || RECESS_PRESETS.kale_sage;
     const backFinish = preset.resolveFinish(wall);
 
     const id = crypto.randomUUID();
-    editor.execute(new CommandBatch('Add finished recess', [
-      new AddWallRecess(id, wall.id, {
-        width: widthCm / 100, height: heightCm / 100, elevation: elevationCm / 100,
-        depth: depthCm / 100, distanceAlongWall: (distCm + widthCm / 2) / 100,
-      }),
-      new FinishFurniture(id, backFinish, 'recess_wall'),
-      new FinishFurniture(id, CORNER_DEFAULT_FINISH, 'sides'),
-    ]));
-    sceneService.focusOnObject(id);
-    setShowAdder(false);
-    onSelectTarget('recess_wall');
+    try {
+      editor.execute(new CommandBatch('Add finished recess', [
+        new AddWallRecess(id, wall.id, {
+          width: widthCm / 100, height: heightCm / 100, elevation: elevationCm / 100,
+          depth: depthCm / 100, distanceAlongWall: (distCm + widthCm / 2) / 100,
+        }),
+        new FinishFurniture(id, backFinish, 'recess_wall'),
+        new FinishFurniture(id, CORNER_DEFAULT_FINISH, 'sides'),
+      ]));
+      sceneService.focusOnObject(id);
+      setShowAdder(false);
+      onSelectTarget('recess_wall');
+      setError('');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : String(error));
+    }
   };
 
   return (
     <div className="py-2.5 border-b border-slate-800 space-y-2">
+      {error && <p role="alert" className="text-xs text-red-300">{error}</p>}
       {/* Header & Toggle */}
       <div className="text-[10px] uppercase font-semibold text-slate-400 flex items-center justify-between">
         <span className="flex items-center gap-1.5 text-amber-300">

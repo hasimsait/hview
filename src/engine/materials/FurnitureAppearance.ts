@@ -1,12 +1,13 @@
 import * as THREE from 'three';
-import type { FurnitureEntity,SurfaceFinishConfig,WallEntity } from '../../core/types/plan';
+import type { FurnitureEntity,SurfaceFinishConfig } from '../../core/types/plan';
+import { WallRecess, type RecessHost } from '../../domain/elements/WallRecess';
 import type { ViewportSettings } from '../../core/types/services';
 import { surfaceSection } from '../../domain/model/SurfaceSections';
 import type { ResourcePool } from '../resources/ResourcePool';
 import type { SurfaceMaterialFactory } from './SurfaceMaterialFactory';
 export class FurnitureAppearance {
   private readonly glowMaterials = new WeakSet<THREE.Mesh>();
-  constructor(private readonly finishService: SurfaceMaterialFactory, private readonly resources: ResourcePool, private readonly settings: () => ViewportSettings, private readonly findWallForRecess: (item: FurnitureEntity) => WallEntity | null) { }
+  constructor(private readonly finishService: SurfaceMaterialFactory, private readonly resources: ResourcePool, private readonly settings: () => ViewportSettings, private readonly recessHost: (item: WallRecess) => RecessHost | undefined) { }
   apply(root: THREE.Object3D, entity: FurnitureEntity): void { this.applyFinishes(root, entity); this.applyLighting(root, entity); }
   applyFinishes(mesh: THREE.Object3D, entity: FurnitureEntity): void {
     if (!this.finishService) return;
@@ -30,27 +31,10 @@ export class FurnitureAppearance {
         const sec = child.userData.section as string | undefined;
         if (sec === 'Screen') return;
 
-        const isRecess =
-          entity.assetKey === 'wall_recess' ||
-          entity.assetKey === 'recess' ||
-          entity.assetKey === 'girinti';
-
-        // Check for section finish override (case-insensitive)
-        let secFinish: SurfaceFinishConfig | undefined;
-        if (sec) secFinish = entity.sectionFinishes?.[surfaceSection(sec, entity.assetKey)];
-
-        if (!secFinish && isRecess) {
-          const wall = this.findWallForRecess(entity);
-          if (wall) {
-            if (sec === 'Back' || sec === 'back') {
-              secFinish = wall.finishSideB || wall.finish;
-            } else if (sec === 'Sides' || sec === 'Corners' || sec === 'sides' || sec === 'corners') {
-              secFinish = wall.finishEdges || wall.finishSideA || wall.finish;
-            } else if (sec === 'Recess Wall' || sec === 'recess_wall') {
-              secFinish = wall.finishSideA || wall.finish;
-            }
-          }
-        }
+        const isRecess = entity instanceof WallRecess;
+        const section = sec ? surfaceSection(sec, entity.assetKey) : undefined;
+        let secFinish: SurfaceFinishConfig | undefined = section ? entity.sectionFinishes?.[section] : undefined;
+        if (!secFinish && isRecess && section) secFinish = entity.inheritedFinish(section, this.recessHost(entity));
 
         if (secFinish) {
           if (secFinish.type === 'fabric') {

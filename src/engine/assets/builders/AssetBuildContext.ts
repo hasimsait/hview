@@ -29,6 +29,7 @@ export interface AssetBuildContext {
   h: number;
   d: number;
   materials: ProceduralMaterials;
+  recessHostThickness?: number;
 }
 
 export type AssetBuilderFn = (context: AssetBuildContext) => void;

@@ -286,28 +286,6 @@ export class LegacyPlanReader {
           }
         }
 
-        if (
-          assetName === 'wall_recess' ||
-          assetName === 'girinti'
-        ) {
-          const wallId = it.id_wall || it.wallId;
-          const wallObj = wallId && plan.walls ? plan.walls[wallId] : undefined;
-          if (wallObj && wallObj.p1 && wallObj.p2) {
-            const p1x = (wallObj.p1.x || 0) / 100;
-            const p1z = (wallObj.p1.y || 0) / 100;
-            const p2x = (wallObj.p2.x || 0) / 100;
-            const p2z = (wallObj.p2.y || 0) / 100;
-            const dx = p2x - p1x;
-            const dz = p2z - p1z;
-            const lenSq = dx * dx + dz * dz;
-            if (lenSq > 0.001) {
-              const t = Math.max(0.02, Math.min(0.98, ((posX - p1x) * dx + (posZ - p1z) * dz) / lenSq));
-              posX = p1x + t * dx;
-              posZ = p1z + t * dz;
-            }
-          }
-        }
-
         // Angle in degrees to radians. RemPlanner angle 0 faces -Y (into room with back against north wall):
         const rotationY = it.rotationY !== undefined
           ? it.rotationY
@@ -321,14 +299,16 @@ export class LegacyPlanReader {
           position: { x: posX, y: posY, z: posZ },
           rotationY,
           dimensions: { x: width, y: height, z: depth },
-          roomId: it.id_room,
+          roomId: it.roomId ?? it.id_room,
           assetKey: it.assetKey || assetDef?.key || name,
           customModelUrl: it.customModelUrl || undefined,
-          visible: true,
+          visible: typeof it.visible === 'boolean' ? it.visible : true,
           finish: it.finish || undefined,
           sectionFinishes: it.sectionFinishes || undefined,
           lightConfig: it.lightConfig || undefined,
           hasLids: it.hasLids !== undefined ? !!it.hasLids : undefined,
+          shelfCount: it.shelfCount,
+          recessHostId: it.recessHostId,
           rawItem: it,
         });
       }

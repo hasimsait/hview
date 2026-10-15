@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { Shelving } from '../elements/Furniture';
 
 const number = z.number().finite();
 const positive = number.positive();
@@ -49,7 +50,7 @@ export const columnSchema = z.object({
 export const furnitureSchema = z.object({
   id, name: z.string(), displayName: z.string(), category: z.enum(['bed', 'seating', 'table', 'storage', 'kitchen', 'bathroom', 'decor', 'appliance', 'fixture']),
   assetKey: id, position: vector, rotationY: number, dimensions, roomId: id.optional(), customModelUrl: z.string().optional(),
-  visible: z.boolean().optional(), hasLids: z.boolean().optional(), shelfCount: number.int().min(2).max(8).optional(),
+  visible: z.boolean().optional(), hasLids: z.boolean().optional(), shelfCount: number.int().min(Shelving.minShelves).max(Shelving.maxShelves).optional(), recessHostId: id.optional(),
   finish, sectionFinishes: z.record(finishSchema).optional(),
   lightConfig: z.object({ enabled: z.boolean().optional(), intensity: number.min(0).max(3).optional(), color: z.string().optional() }).optional(),
   rawItem: z.unknown().optional(),
@@ -67,7 +68,7 @@ export const envelopeSchema = z.object({
     elements: z.array(z.discriminatedUnion('kind', [
       element('wall', wallSchema), element('column', columnSchema), element('room', roomSchema),
       element('furniture.standard', furnitureSchema), element('furniture.luminaire', furnitureSchema),
-      element('furniture.shelving', furnitureSchema), element('furniture.basin', furnitureSchema),
+      element('furniture.shelving', furnitureSchema), element('furniture.basin', furnitureSchema), element('furniture.recess', furnitureSchema),
     ])),
   }),
 });
@@ -76,4 +77,4 @@ export type SerializedElement =
   | { kind: 'wall'; data: import('../model/PlanData').WallData }
   | { kind: 'room'; data: import('../model/PlanData').RoomData }
   | { kind: 'column'; data: import('../model/PlanData').ColumnData }
-  | { kind: 'furniture.standard' | 'furniture.luminaire' | 'furniture.shelving' | 'furniture.basin'; data: import('../model/PlanData').FurnitureData };
+  | { kind: 'furniture.standard' | 'furniture.luminaire' | 'furniture.shelving' | 'furniture.basin' | 'furniture.recess'; data: import('../model/PlanData').FurnitureData };

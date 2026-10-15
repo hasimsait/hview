@@ -29,7 +29,9 @@ flowchart LR
 
 ## Domain behavior and dispatch
 
-`Luminaire` validates emission settings. `Shelving` owns shelf count and lids; its geometry consumes those values. `BasinCabinet` owns basin/carcass proportions. `Door` owns its angle and hinge/swing behavior. `SlidingDoor` retains sliding configuration, and `WindowOpening` owns sill/top semantics. Ordinary furniture models remain catalog entries represented by `StandardFurniture`.
+`WallRecess` owns niche creation, alignment, cut bounds, split constraints, and inherited surface choices. Its `recessHostId` is the one persisted host relationship. `PlanDocument` validates that host, rehosts clear splits, rejects intersecting splits, and removes dependent recesses when their host is deleted. Recess indexes contain the same immutable instances; rendering and inspectors never infer host ownership from proximity. Legacy raw host aliases are consumed and removed on import.
+
+`Luminaire` validates emission settings. `Shelving` owns shelf count and lids, including the limits used by the schema; its geometry consumes those values. `BasinCabinet` owns basin/carcass proportions. `Door` owns angle clamping/rounding, incremental rotation, and hinge/swing behavior. `SlidingDoor` retains sliding configuration, and `WindowOpening` owns sill/top semantics. Ordinary furniture models remain catalog entries represented by `StandardFurniture`.
 
 `PlanElementFactory` constructs the appropriate class from canonical catalog behavior. `PlanElementVisitor` provides explicit dispatch for serialization, scene-node creation, and inspector presentation. Asset aliases and legacy fuzzy names are resolved at import. Rendering uses canonical recipe identities from one catalog and one geometry dispatch table.
 
@@ -57,7 +59,7 @@ React and gizmos execute commands such as `TransformFurniture`, `ConfigureLumina
 
 ## Save and formats
 
-Save is manual. `DocumentController` captures an immutable document and its load generation, deduplicates repeated requests while a save is pending, and acknowledges only that snapshot. A newer edit remains dirty; an imported document cannot be acknowledged by an earlier save. `DocumentStorage` serializes writes and isolates browser, embedded-file, and HTTP adapters. Storage does not reinterpret topology. There are no edit timers or unload writes.
+Save is manual. `DocumentController` captures an immutable document and its load generation, deduplicates repeated requests while a save is pending, and acknowledges only that snapshot. A newer edit remains dirty; an imported document cannot be acknowledged by an earlier save. `DocumentStorage` serializes writes and isolates browser, embedded-file, and HTTP adapters. Storage does not reinterpret topology. Its public write operation is `savePlan`; there is no cache-only staging API. There are no edit timers or unload writes.
 
 The saving dialog locks the application before serialization. Viewport controls, navigation listeners, and transform controls are disabled until completion. Failure unlocks the UI and retains dirty state for manual retry.
 
@@ -67,15 +69,8 @@ Standalone templates are build artifacts in `dist/`, not checked-in application 
 
 ## Removed predecessors
 
-The mutable `PlanManagerService`, old parser/exporter, DI container/tokens, rendering-coupled domain hierarchy, universal object inspector, second asset-builder registry, per-entity update channels, and ancestry-based picking helper have been removed. No compatibility manager or synchronization bridge remains in the application.
+The old recess snapping helper and renderer proximity searches, the public cache-only save API, the mutable `PlanManagerService`, old parser/exporter, DI container/tokens, rendering-coupled domain hierarchy, universal object inspector, second asset-builder registry, per-entity update channels, and ancestry-based picking helper have been removed. No compatibility manager or synchronization bridge remains in the application.
 
-## Verification of this cutover
+## Verification
 
-- Production editor build and both standalone HTML builds pass.
-- Strict source/test TypeScript checks pass.
-- 125 unit tests pass; the configured domain/application/persistence/node/resource/picking coverage is 89.36% of lines and 81.99% of branches, above the retained thresholds.
-- 80 Node state, save-race, storage, format, and offline-export tests pass.
-- The GPU surface-layer check passes 270 overlap pixel checks across three camera angles and two insertion orders, including layer-control input validation.
-- All 19 Playwright scenarios pass, covering the production sample, view/cutaway controls, column inspection, the luminaire command/geometry/undo/save path, save locking and retry, paint selection, bathroom isolation, gizmo movement, replacement, offline save/reload/re-export, and layouts.
-
-The branch is based on `main` at `808356368beb927f7523ff1fb7ce1d151df0b5f9`, verified against the remote before publication. It adds no merge commits above that base.
+See [../tests/README.md](../tests/README.md) for commands and coverage scope, and [../tests/RESULTS.md](../tests/RESULTS.md) for validation results. Regression checks cover command atomicity, topology, subtype/format round trips, save races, retained geometry/resource ownership, and real browser editing/offline export workflows.

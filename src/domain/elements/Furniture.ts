@@ -92,19 +92,20 @@ export class Luminaire extends Furniture {
 }
 
 export class Shelving extends Furniture {
+  static readonly minShelves = 2;
+  static readonly maxShelves = 10;
   readonly kind = 'furniture.shelving';
-  readonly shelfCount: number;
-  constructor(data: FurnitureData & { shelfCount?: number }) {
-    super(data);
-    this.shelfCount = data.shelfCount ?? Math.max(2, Math.min(10, Math.round(data.dimensions.y / 0.38) + 1));
-    if (!Number.isInteger(this.shelfCount) || this.shelfCount < 2 || this.shelfCount > 10) throw new Error('Shelving needs 2–10 shelves');
+  constructor(data: FurnitureData) {
+    const shelfCount = data.shelfCount ?? Math.max(Shelving.minShelves, Math.min(Shelving.maxShelves, Math.round(data.dimensions.y / 0.38) + 1));
+    if (!Number.isInteger(shelfCount) || shelfCount < Shelving.minShelves || shelfCount > Shelving.maxShelves) throw new Error('Shelving needs 2–10 shelves');
+    super({ ...data, shelfCount });
     Object.freeze(this);
   }
+  get shelfCount(): number { return this.state.shelfCount!; }
   withShelfConfiguration(shelfCount: number, hasLids = this.hasLids ?? false): Shelving {
     return new Shelving({ ...this.state, shelfCount, hasLids });
   }
-  protected recreate(data: FurnitureData) { return new Shelving({ ...data, shelfCount: this.shelfCount }); }
-  override toData(): FurnitureData & { shelfCount: number } { return { ...super.toData(), shelfCount: this.shelfCount }; }
+  protected recreate(data: FurnitureData) { return new Shelving(data); }
   accept<R>(visitor: PlanElementVisitor<R>): R { return visitor.visitShelving(this); }
 }
 

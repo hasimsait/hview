@@ -7,23 +7,62 @@ import { PlanSceneGraph } from '../../src/engine/nodes/PlanSceneGraph';
 import { SceneNodeFactory } from '../../src/engine/nodes/SceneNodeFactory';
 import { PickRegistry } from '../../src/engine/picking/PickRegistry';
 import { ResourcePool } from '../../src/engine/resources/ResourcePool';
+import { AddWallRecess } from '../../src/application/commands/AddWallRecess';
+import { FinishWall } from '../../src/application/commands/StructuralCommands';
+import { Wall } from '../../src/domain/elements/Wall';
+import { PlanDocument } from '../../src/domain/model/PlanDocument';
 
 function fixture() {
   const resources = new ResourcePool(), picking = new PickRegistry();
   const base = new THREE.MeshBasicMaterial(), finish = new THREE.MeshBasicMaterial({ color: '#ff0000' });
   const palette = resources.ownTree(Object.assign(new THREE.Object3D(), { material: base }));
   const geometry = vi.fn(() => new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), base));
+  const appearance = vi.fn((root: THREE.Object3D, element: { finish?: unknown }) => { root.traverse(object => { if (object instanceof THREE.Mesh) object.material = element.finish ? finish : base; }); });
+  const walls = vi.fn(geometry);
   const factory = new SceneNodeFactory({
-    furniture: { build: geometry }, appearance: { apply(root, element) { root.traverse(object => { if (object instanceof THREE.Mesh) object.material = element.finish ? finish : base; }); } },
-    wall: { build: geometry, applyMaterials: () => { } }, column: { build: geometry, applyMaterials: () => { } }, room: { build: geometry, applyMaterials: () => { } }, opening: { build: geometry, update: () => { } }
+    furniture: { build: geometry }, appearance: { apply: appearance },
+    wall: { build: walls, applyMaterials: () => { } }, column: { build: geometry, applyMaterials: () => { } }, room: { build: geometry, applyMaterials: () => { } }, opening: { build: geometry, update: () => { } }
   }, resources, picking);
   const graph = new PlanSceneGraph(factory, { walls: new THREE.Group(), openings: new THREE.Group(), floors: new THREE.Group(), furniture: new THREE.Group(), fixtures: new THREE.Group() });
   const codec = new PlanCodec(), editor = new EditorSession(codec.factory);
   editor.load(codec.decode({ plan: { items: { a: { name: 'chair', pc: { x: 0, y: 0 } }, b: { name: 'chair', pc: { x: 0, y: 0 } } } } }));
   graph.reconcile(editor.getDocument()); editor.subscribe(change => graph.reconcile(change.document));
-  return { resources, picking, base, finish, palette, geometry, graph, editor };
+  return { resources, picking, base, finish, palette, geometry, graph, editor, appearance, walls };
 }
 describe('retained scene node ownership', () => {
+  it('refreshes recess inheritance on a host finish while retaining its geometry', () => {
+    const { graph, editor, appearance, palette } = fixture();
+    const wall = new Wall({ id: 'wall', p1: { x: 0, y: 0 }, p2: { x: 4, y: 0 }, thickness: 0.1, height: 2.7, material: 'a_block', openings: [] }, []);
+    editor.load(new PlanDocument([wall]));
+    editor.execute(new AddWallRecess('niche', wall.id));
+    const root = graph.get('niche')!.group, content = root.children[0];
+    appearance.mockClear();
+    editor.execute(new FinishWall(wall.id, { type: 'paint', color: '#abcdef' }));
+    expect(graph.get('niche')!.group).toBe(root);
+    expect(root.children[0]).toBe(content);
+    expect(appearance).toHaveBeenCalledOnce();
+    editor.undo();
+    expect(root.children[0]).toBe(content);
+    expect(appearance).toHaveBeenCalledTimes(2);
+    graph.dispose(); palette.dispose();
+  });
+  it('rebuilds only the owned host cut when a recess is removed or replaced', async () => {
+    const { graph, editor, walls, palette } = fixture();
+    const makeWall = (id: string, z: number) => new Wall({ id, p1: { x: 0, y: z }, p2: { x: 4, y: z }, thickness: 0.1, height: 2.7, material: 'a_block', openings: [] }, []);
+    editor.load(new PlanDocument([makeWall('wall', 0), makeWall('neighbor', 0.2)]));
+    editor.execute(new AddWallRecess('niche', 'wall'));
+    walls.mockClear();
+    const neighbor = graph.get('neighbor')!.group.children[0];
+    const { ReplaceFurniture } = await import('../../src/application/commands/FurnitureCommands');
+    editor.execute(new ReplaceFurniture('niche', 'chair'));
+    expect(walls).toHaveBeenCalledOnce();
+    expect(graph.get('neighbor')!.group.children[0]).toBe(neighbor);
+    editor.undo(); walls.mockClear();
+    editor.execute(new RemoveElement('niche'));
+    expect(walls).toHaveBeenCalledOnce();
+    expect(graph.get('neighbor')!.group.children[0]).toBe(neighbor);
+    graph.dispose(); palette.dispose();
+  });
   it('keeps root and geometry identities across transform and finish commands', () => {
     const { graph, editor, geometry } = fixture(); const root = graph.get('a')!.group, mesh = root.children[0] as THREE.Mesh;
     editor.execute(new TransformFurniture('a', { x: 2, y: 1, z: 3 }, 0.5));

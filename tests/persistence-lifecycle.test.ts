@@ -103,16 +103,22 @@ test('a failed older write releases the queue and cannot mark a newer save faile
   assert.equal(service.getSaveStatus(), 'saved');
 });
 
-test('an edit during a save invalidates its completion and idle timer', async (t) => {
+test('edits during an explicit save stay dirty without staging another backup or write', async (t) => {
   const { service, pending, stored } = setup(t);
-  const save = service.savePlan('{"revision":1}');
-  service.cachePlan('{"revision":2}');
+  const editor = createEditor(service);
+  editor.documents.load({ plan: { items: { f: { name: 'sofa', pc: { x: 0, y: 0 } } } } });
+  const save = editor.documents.save();
+  const captured = stored.get('hview_current_plan');
+  editor.execute(new ReplaceFurniture('f', 'chair'));
   pending[0](new Response('{"success":true}'));
   await save;
-  assert.equal(service.getSaveStatus(), 'saving');
+  assert.equal(editor.isDirty, true);
+  assert.equal(service.getSaveStatus(), 'saved');
   t.mock.timers.tick(5000);
-  assert.equal(service.getSaveStatus(), 'saving');
-  assert.equal(stored.get('hview_current_plan'), '{"revision":2}');
+  assert.equal(service.getSaveStatus(), 'idle');
+  assert.equal(editor.isDirty, true);
+  assert.equal(pending.length, 1);
+  assert.equal(stored.get('hview_current_plan'), captured);
 });
 
 test('reset waits for earlier writes and replaces the saved browser snapshot', async (t) => {
@@ -140,12 +146,14 @@ test('persistence installs no unload writes or beacons', async (t) => {
     else delete (globalThis as any).navigator;
   });
   const save = service.savePlan('{"revision":1}');
-  service.cachePlan('{"revision":2}');
+  const second = service.savePlan('{"revision":2}');
   assert.equal(unload.length, 0);
   assert.equal(beacon.mock.callCount(), 0);
   assert.equal(stored.get('hview_current_plan'), '{"revision":2}');
   pending[0](new Response('{"success":true}'));
   await save;
+  pending[1](new Response('{"success":true}'));
+  await second;
 });
 
 test('missing local and embedded data falls back to the server', async (t) => {

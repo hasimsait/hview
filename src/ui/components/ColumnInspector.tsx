@@ -13,7 +13,7 @@ export function ColumnInspector({ column, onClose }: { column: Column; onClose: 
   const selection = useSelection();
   const [error, setError] = useState('');
   const shape = column.wallShape(runtime.editor.getDocument().totalHeight);
-  const recesses = runtime.editor.getDocument().furniture.filter(item => item.assetKey === 'wall_recess' && item.rawItem?.wallId === column.id);
+  const recesses = runtime.editor.getDocument().recessesFor(column.id);
   const sides: readonly ColumnSide[] = ['all', 'front', 'back', 'left', 'right'];
   const side = sides.find(side => side === selection?.subtarget) ?? 'all';
   const finishes = { all: column.finish, front: column.finishFront, back: column.finishBack, left: column.finishLeft, right: column.finishRight };

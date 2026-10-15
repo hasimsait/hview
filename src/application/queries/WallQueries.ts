@@ -63,25 +63,5 @@ export function wallSplitCandidates(document: PlanDocument | null, wallId: strin
 
 export function wallRecesses(document: PlanDocument | null, wallId: string): readonly Furniture[] {
   if (!document) return [];
-  const wall = document.walls.find((w) => w.id === wallId);
-  if (!wall) return [];
-
-  const p1x = wall.p1.x;
-  const p1z = wall.p1.y;
-  const p2x = wall.p2.x;
-  const p2z = wall.p2.y;
-  const dx = p2x - p1x;
-  const dz = p2z - p1z;
-  const lenSq = dx * dx + dz * dz;
-  const maxDist = (wall.thickness || 0.1) / 2 + 0.35;
-
-  return document.furniture.filter((f) => {
-    if (f.visible === false) return false;
-    if (f.assetKey !== 'wall_recess' && f.assetKey !== 'recess' && f.assetKey !== 'girinti') return false;
-    const t = ((f.position.x - p1x) * dx + (f.position.z - p1z) * dz) / lenSq;
-    if (t < -0.15 || t > 1.15) return false;
-    const projX = p1x + t * dx;
-    const projZ = p1z + t * dz;
-    return Math.hypot(f.position.x - projX, f.position.z - projZ) <= maxDist;
-  });
+  return document.recessesFor(wallId).filter(recess => recess.visible !== false);
 }

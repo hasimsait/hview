@@ -4,6 +4,8 @@ import { Furniture } from '../../domain/elements/Furniture';
 import { Opening } from '../../domain/elements/Opening';
 import { Room } from '../../domain/elements/Room';
 import { Wall } from '../../domain/elements/Wall';
+import { WallRecess } from '../../domain/elements/WallRecess';
+import { FurnitureSceneNode } from './FurnitureSceneNode';
 import type { PlanDocument } from '../../domain/model/PlanDocument';
 import type { SceneNode } from './SceneNode';
 import type { SceneNodeFactory } from './SceneNodeFactory';
@@ -19,15 +21,18 @@ export class PlanSceneGraph {
   values(): IterableIterator<SceneNode> { return this.nodes.values(); }
   reconcile(document: PlanDocument): void {
     const rebuildWalls = new Set<string>();
-    const geometryChanged = (a: Furniture | undefined, b: Furniture | undefined) => !a || !b || a.assetKey !== b.assetKey || a.position !== b.position || a.dimensions !== b.dimensions;
-    for (const item of document.furniture) {
-      const previous = this.nodes.get(item.id)?.model;
-      if (geometryChanged(previous instanceof Furniture ? previous : undefined, item)) {
-        if (item.assetKey === 'wall_recess' && item.rawItem?.wallId) rebuildWalls.add(item.rawItem.wallId);
-        if (previous instanceof Furniture && previous.assetKey === 'wall_recess' && previous.rawItem?.wallId) rebuildWalls.add(previous.rawItem.wallId);
+    for (const recess of document.recesses) {
+      const previous = this.nodes.get(recess.id)?.model;
+      if (!(previous instanceof WallRecess) || !previous.transform.equals(recess.transform) || !previous.size.equals(recess.dimensions) || previous.hostId !== recess.hostId || previous.visible !== recess.visible) {
+        if (recess.hostId) rebuildWalls.add(recess.hostId);
+        if (previous instanceof WallRecess && previous.hostId) rebuildWalls.add(previous.hostId);
       }
     }
-    for (const node of this.nodes.values()) if (node.model instanceof Furniture && !document.get(node.id) && node.model.assetKey === 'wall_recess' && node.model.rawItem?.wallId) rebuildWalls.add(node.model.rawItem.wallId);
+    for (const node of this.nodes.values()) {
+      if (node.model instanceof WallRecess && node.model.hostId && !(document.get(node.id) instanceof WallRecess)) rebuildWalls.add(node.model.hostId);
+    }
+    const changedHosts = new Map([...document.walls, ...document.columns]
+      .filter(host => this.nodes.has(host.id) && this.nodes.get(host.id)?.model !== host).map(host => [host.id, this.nodes.get(host.id)?.model]));
     const ids = new Set(document.allElements.map(element => element.id));
     for (const [id, node] of this.nodes) if (!ids.has(id)) { node.dispose(); this.nodes.delete(id); }
     for (const element of document.allElements) {
@@ -43,6 +48,16 @@ export class PlanSceneGraph {
         id: element.id, type: element instanceof Room ? 'room' : element instanceof Opening ? 'opening' : element instanceof Furniture ? 'furniture' : 'wall',
         ...(element instanceof Furniture ? { entity: element } : element instanceof Wall || element instanceof Column ? { wall: element instanceof Column ? element.wallShape(document.totalHeight) : element } : {})
       };
+    }
+    // A host finish affects inherited recess surfaces; thickness affects its sleeve geometry.
+    for (const recess of document.recesses) if (recess.hostId && changedHosts.has(recess.hostId)) {
+      const node = this.nodes.get(recess.id);
+      if (node instanceof FurnitureSceneNode) {
+        const previous = changedHosts.get(recess.hostId);
+        const thickness = previous instanceof Wall ? previous.thickness : previous instanceof Column ? previous.depth : undefined;
+        if (thickness !== document.requireRecessHost(recess.hostId).thickness) node.rebuild();
+        else node.refreshAppearance();
+      }
     }
     for (const id of rebuildWalls) {
       const node = this.nodes.get(id);

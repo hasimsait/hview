@@ -1,3 +1,5 @@
+import { Shelving } from '../elements/Furniture';
+import { WallRecess } from '../elements/WallRecess';
 import { PlanDocument } from '@core/types/plan';
 
 
@@ -92,6 +94,14 @@ export class LegacyPlanWriter {
       } else {
         delete rawItem.hasLids;
       }
+
+      if (item instanceof Shelving) rawItem.shelfCount = item.shelfCount;
+      else delete rawItem.shelfCount;
+      delete rawItem.recessHostId;
+      delete rawItem.id_wall;
+      delete rawItem.wallId;
+      delete rawItem.wallThickness;
+      if (item instanceof WallRecess && item.hostId) rawItem.wallId = item.hostId;
 
       planObj.items[item.id] = rawItem;
     }

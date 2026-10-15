@@ -5,7 +5,8 @@ import type { PlanElement } from '../elements/PlanElement';
 import { Wall } from '../elements/Wall';
 import { PlanElementFactory } from '../factories/PlanElementFactory';
 import { PlanDocument } from '../model/PlanDocument';
-import { RecessPlacement } from '../model/RecessPlacement';
+import { WallRecess, type RecessHost } from '../elements/WallRecess';
+import { readLegacyRecess } from './LegacyRecessReader';
 import { legacyMetadata } from './LegacyMetadata';
 import { LegacyPlanReader } from './LegacyPlanReader';
 import { PlanEncoder } from './PlanEncoder';
@@ -33,13 +34,19 @@ export class PlanCodec {
           case 'wall': return this.factory.wall(entry.data);
           case 'column': return this.factory.column(entry.data);
           case 'room': return this.factory.room(entry.data);
-          case 'furniture.standard': return new StandardFurniture(entry.data);
+          case 'furniture.standard': return this.factory.catalog.behavior(entry.data.assetKey) === 'recess' ? this.factory.furniture(entry.data) : new StandardFurniture(entry.data);
+          case 'furniture.recess': return new WallRecess(entry.data);
           case 'furniture.luminaire': return new Luminaire(entry.data);
           case 'furniture.shelving': return new Shelving(entry.data);
           case 'furniture.basin': return new BasinCabinet(entry.data);
         }
       });
-      return new PlanDocument(elements, document.totalHeight, document.version, document.extensions);
+      // Previous canonical files encoded recesses as ordinary furniture with raw host metadata.
+      const hosts = elements.flatMap<RecessHost>(element => element instanceof Wall ? [element] : element instanceof Column ? [element.wallShape(document.totalHeight)] : []);
+      const legacyRecessIds = new Set(document.elements.filter(entry => entry.kind === 'furniture.standard' && this.factory.catalog.behavior(entry.data.assetKey) === 'recess').map(entry => entry.data.id));
+      const migrated = elements.map(element => element instanceof WallRecess && legacyRecessIds.has(element.id)
+        ? readLegacyRecess(element.toData(), hosts) : element);
+      return new PlanDocument(migrated, document.totalHeight, document.version, document.extensions);
     }
     const data = legacyDocumentSchema.parse(this.legacy.parse(raw));
     const elements: PlanElement[] = [];
@@ -57,7 +64,12 @@ export class PlanCodec {
         }));
       } else elements.push(this.factory.wall(wall));
     }
-    elements.push(...data.rooms.map(room => this.factory.room(room)), ...data.furniture.map(item => this.factory.furniture(new RecessPlacement().align(item, elements.filter((element): element is Wall => element instanceof Wall)))));
+    elements.push(...data.rooms.map(room => this.factory.room(room)));
+    const hosts = elements.flatMap<RecessHost>(element => element instanceof Wall ? [element] : element instanceof Column ? [element.wallShape(data.totalHeight)] : []);
+    for (const dataItem of data.furniture) {
+      const item = this.factory.furniture(dataItem);
+      elements.push(item instanceof WallRecess ? readLegacyRecess(item.toData(), hosts) : item);
+    }
     return new PlanDocument(elements, data.totalHeight, data.version, legacyMetadata(data.rawPlan));
   }
 

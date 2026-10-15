@@ -1,7 +1,6 @@
 import { Luminaire,Shelving } from '../../domain/elements/Furniture';
 import type { FurnitureData,LightFixtureConfig,SurfaceFinishConfig,Vector3D } from '../../domain/model/PlanData';
 import type { PlanDocument } from '../../domain/model/PlanDocument';
-import { RecessPlacement } from '../../domain/model/RecessPlacement';
 import type { CommandContext,EditorCommand } from './EditorCommand';
 
 export class SetLightIntensity implements EditorCommand {
@@ -21,12 +20,8 @@ export class ConfigureLuminaire implements EditorCommand {
 export class TransformFurniture implements EditorCommand {
   readonly label = 'Transform furniture';
   constructor(private readonly id: string, private readonly position?: Vector3D, private readonly rotationY?: number, private readonly dimensions?: Vector3D) { }
-  execute(document: PlanDocument, { factory }: CommandContext): PlanDocument {
-    let item = document.requireFurniture(this.id);
-    if (this.position !== undefined || this.rotationY !== undefined) item = item.withTransform(this.position ?? item.position, this.rotationY ?? item.rotationY);
-    if (this.dimensions) item = item.withDimensions(this.dimensions);
-    if (item.assetKey === 'wall_recess' && item !== document.requireFurniture(this.id)) item = factory.furniture(new RecessPlacement().align(item.toData(), [...document.walls, ...document.columns.map(column => column.wallShape(document.totalHeight))]));
-    return document.replace(item);
+  execute(document: PlanDocument): PlanDocument {
+    return document.transformFurniture(this.id, this.position, this.rotationY, this.dimensions);
   }
 }
 export class ReplaceFurniture implements EditorCommand {
@@ -42,8 +37,7 @@ export class ReplaceFurniture implements EditorCommand {
       ...data, assetKey: key, customModelUrl: this.customModelUrl,
       displayName: key.replace(/_/g, ' ').replace(/\b\w/g, character => character.toUpperCase()),
       category: (definition?.category as FurnitureData['category']) ?? data.category,
-      lightConfig: factory.catalog.behavior(key) === 'luminaire' ? data.lightConfig : undefined,
-      hasLids: factory.catalog.behavior(key) === 'shelving' ? data.hasLids : undefined, sectionFinishes: undefined
+      sectionFinishes: undefined,
     });
     return document.replaceFurniture(this.id, replacement);
   }
@@ -51,7 +45,7 @@ export class ReplaceFurniture implements EditorCommand {
 export class AddFurniture implements EditorCommand {
   readonly label = 'Add furniture';
   constructor(private readonly data: FurnitureData) { }
-  execute(document: PlanDocument, { factory }: CommandContext): PlanDocument { return document.add(factory.furniture(new RecessPlacement().align(this.data, [...document.walls, ...document.columns.map(column => column.wallShape(document.totalHeight))]))); }
+  execute(document: PlanDocument, { factory }: CommandContext): PlanDocument { return document.addFurniture(factory.furniture(this.data)); }
 }
 export class RemoveElement implements EditorCommand {
   readonly label = 'Delete element';

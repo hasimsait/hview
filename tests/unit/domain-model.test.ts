@@ -5,7 +5,9 @@ import { FinishFurniture, ReplaceFurniture, SetLightIntensity, TransformFurnitur
 import { FinishWall, SplitWall } from '../../src/application/commands/StructuralCommands';
 import { PlanCodec } from '../../src/domain/codec/PlanCodec';
 import { Column } from '../../src/domain/elements/Column';
-import { Luminaire, StandardFurniture } from '../../src/domain/elements/Furniture';
+import { Luminaire, Shelving, StandardFurniture } from '../../src/domain/elements/Furniture';
+import { Door, SlidingDoor } from '../../src/domain/elements/Opening';
+import { LegacyPlanWriter } from '../../src/domain/codec/LegacyPlanWriter';
 import { PlanElementFactory } from '../../src/domain/factories/PlanElementFactory';
 import { PlanDocument } from '../../src/domain/model/PlanDocument';
 import { rawPlan } from './fixtures';
@@ -24,6 +26,29 @@ function lightPlan() {
 }
 
 describe('class-based document and editing', () => {
+  it('keeps the full supported shelf range through both codecs and subsequent edits', () => {
+    const codec = new PlanCodec();
+    const data = codec.decode(lightPlan()).furniture[0].toData();
+    const shelves = new Shelving({ ...data, assetKey: 'open_shelving', shelfCount: Shelving.maxShelves, hasLids: true });
+    const document = new PlanDocument([shelves.withFinish({ type: 'paint', color: '#abcdef' })]);
+    for (const json of [codec.encode(document), new LegacyPlanWriter().encode(document)]) {
+      const restored = codec.decode(json).requireFurniture(shelves.id) as Shelving;
+      expect(restored).toBeInstanceOf(Shelving);
+      expect(restored.shelfCount).toBe(Shelving.maxShelves);
+      expect(restored.hasLids).toBe(true);
+    }
+    expect(() => shelves.withShelfConfiguration(11)).toThrow(/shelves/);
+  });
+  it('keeps door input and rotation rules on the door classes', () => {
+    const opening = new PlanCodec().decode(rawPlan()).walls[0].openings[0] as Door;
+    expect(opening.withOpenAngle(44.6).openAngle).toBe(45);
+    expect(opening.withOpenAngle(-1).openAngle).toBe(0);
+    expect(opening.rotatedBy(250).openAngle).toBe(180);
+    expect(opening.rotatedBy(180).swingSide).not.toBe(opening.swingSide);
+    expect(() => opening.withOpenAngle(NaN)).toThrow(/finite/);
+    const sliding = new SlidingDoor({ ...opening.toData(), type: 'door_coupe' });
+    expect(sliding.withOpenAngle(250).openAngle).toBe(180);
+  });
   it('constructs behavioral light instances without a DOM or renderer', () => {
     const document = new PlanCodec().decode(lightPlan());
     const light = document.requireLuminaire('light');

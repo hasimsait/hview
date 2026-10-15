@@ -170,7 +170,7 @@ export class FurnitureMeshBuilder {
       mode === 'transparent' ? 1 : mode === 'clip' ? 2 : 0;
   }
 
-  build(entity: Furniture): THREE.Object3D {
+  build(entity: Furniture, recessHostThickness?: number): THREE.Object3D {
     const key = entity.assetKey;
     const w = entity.dimensions.x;
     const h = entity.dimensions.y;
@@ -187,6 +187,7 @@ export class FurnitureMeshBuilder {
       h,
       d,
       materials: this.materials,
+      recessHostThickness,
     };
 
     // Strategy Pattern: dispatch directly to the registered builder

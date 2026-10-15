@@ -4,6 +4,10 @@ import type { OpeningData,SurfaceFinishConfig } from '../model/PlanData';
 import { SurfaceFinish } from '../model/SurfaceFinish';
 import { PlanElement,type PlanElementVisitor } from './PlanElement';
 
+function requestedDoorAngle(degrees: number): number {
+  return Math.max(0, Math.min(180, Math.round(finite(degrees, 'Door angle'))));
+}
+
 export abstract class Opening extends PlanElement {
   protected readonly state: Readonly<OpeningData>;
   protected constructor(data: OpeningData) {
@@ -47,7 +51,14 @@ export class Door extends Opening {
     this.angle = Angle.degrees(degrees);
     Object.freeze(this);
   }
-  withOpenAngle(degrees: number): Door { return new Door({ ...this.state, openAngle: degrees }); }
+  withOpenAngle(degrees: number): Door {
+    const openAngle = requestedDoorAngle(degrees);
+    return openAngle === this.openAngle ? this : new Door({ ...this.state, openAngle });
+  }
+  rotatedBy(delta: number): Door {
+    finite(delta, 'Door rotation');
+    return delta === 180 ? this.flipped('swing') : this.withOpenAngle(this.angle.degrees + delta);
+  }
   flipped(part: 'swing' | 'hinge'): Door {
     return new Door({
       ...this.state, ...(part === 'swing'
@@ -64,8 +75,8 @@ export class SlidingDoor extends Opening {
   constructor(data: OpeningData) { super(data); Object.freeze(this); }
   get travel() { return this.width; }
   withOpenAngle(degrees: number): SlidingDoor {
-    if (finite(degrees, 'Sliding door opening') < 0 || degrees > 180) throw new Error('Sliding door opening must be between 0 and 180');
-    return new SlidingDoor({ ...this.state, openAngle: degrees });
+    const openAngle = requestedDoorAngle(degrees);
+    return openAngle === this.openAngle ? this : new SlidingDoor({ ...this.state, openAngle });
   }
   protected recreate(data: OpeningData) { return new SlidingDoor(data); }
   accept<R>(visitor: PlanElementVisitor<R>): R { return visitor.visitSlidingDoor(this); }

@@ -1,11 +1,12 @@
 import { Column } from '../elements/Column';
-import { Furniture,Luminaire,StandardFurniture,type BasinCabinet,type Shelving } from '../elements/Furniture';
+import { Furniture,Luminaire,type StandardFurniture,type BasinCabinet,type Shelving } from '../elements/Furniture';
 import { Door,Opening,type SlidingDoor,type WindowOpening } from '../elements/Opening';
 import { PlanElement,type PlanElementVisitor } from '../elements/PlanElement';
 import { Room } from '../elements/Room';
 import { Wall } from '../elements/Wall';
+import { WallRecess, type RecessHost, type RecessOptions } from '../elements/WallRecess';
 import { immutable,positive } from './Immutable';
-import type { SurfaceFinishConfig } from './PlanData';
+import type { SurfaceFinishConfig, Vector3D } from './PlanData';
 import { WallJunctions } from './WallJunctions';
 import { WallTopology } from './WallTopology';
 
@@ -15,6 +16,7 @@ class DocumentIndex implements PlanElementVisitor<void> {
   readonly rooms: Room[] = [];
   readonly columns: Column[] = [];
   readonly furniture: Furniture[] = [];
+  readonly recesses: WallRecess[] = [];
   private add(element: PlanElement) {
     if (this.byId.has(element.id)) throw new Error(`Duplicate element ID: ${element.id}`);
     this.byId.set(element.id, element);
@@ -26,6 +28,7 @@ class DocumentIndex implements PlanElementVisitor<void> {
   visitSlidingDoor(element: SlidingDoor) { this.add(element); }
   visitWindow(element: WindowOpening) { this.add(element); }
   private addFurniture(element: Furniture) { this.add(element); this.furniture.push(element); }
+  visitRecess(element: WallRecess) { this.addFurniture(element); this.recesses.push(element); }
   visitFurniture(element: StandardFurniture) { this.addFurniture(element); }
   visitLuminaire(element: Luminaire) { this.addFurniture(element); }
   visitBasinCabinet(element: BasinCabinet) { this.addFurniture(element); }
@@ -40,6 +43,7 @@ export class PlanDocument {
   readonly rooms: readonly Room[];
   readonly columns: readonly Column[];
   readonly furniture: readonly Furniture[];
+  readonly recesses: readonly WallRecess[];
   readonly allElements: readonly PlanElement[];
   readonly rawPlan: unknown;
 
@@ -57,6 +61,9 @@ export class PlanDocument {
     this.rooms = Object.freeze(this.index.rooms);
     this.columns = Object.freeze(this.index.columns);
     this.furniture = Object.freeze(this.index.furniture);
+    this.recesses = Object.freeze(this.index.recesses);
+    for (const element of this.elements) if (element instanceof Opening) throw new Error('Openings must be owned by a wall');
+    for (const recess of this.recesses) if (recess.hostId) this.requireRecessHost(recess.hostId);
     this.allElements = Object.freeze([...this.index.byId.values()]);
     this.rawPlan = immutable(extensions);
     Object.freeze(this);
@@ -111,14 +118,53 @@ export class PlanDocument {
   remove(id: string): PlanDocument {
     if (!this.get(id)) return this;
     const host = this.walls.find(wall => wall.openings.some(opening => opening.id === id));
-    return host ? this.replace(host.withOpenings(host.openings.filter(opening => opening.id !== id)))
-      : this.next(this.elements.filter(element => element.id !== id));
+    if (host) return this.replace(host.withOpenings(host.openings.filter(opening => opening.id !== id)));
+    // A hosted recess cannot outlive its wall or column.
+    return this.next(this.elements.filter(element => element.id !== id && !(element instanceof WallRecess && element.hostId === id)));
+  }
+
+  requireRecessHost(id: string): RecessHost {
+    const host = this.require(id);
+    if (host instanceof Wall) return host;
+    if (host instanceof Column) return host.wallShape(this.totalHeight);
+    throw new Error('A recess needs a wall or column');
+  }
+
+  recessesFor(hostId: string): readonly WallRecess[] { return this.recesses.filter(recess => recess.hostId === hostId); }
+
+  get recessHosts(): readonly RecessHost[] { return [...this.walls, ...this.columns.map(column => column.wallShape(this.totalHeight))]; }
+
+  addWallRecess(id: string, hostId: string, options: RecessOptions = {}): PlanDocument {
+    return this.add(WallRecess.create(id, this.requireRecessHost(hostId), options));
+  }
+
+  addFurniture(item: Furniture): PlanDocument {
+    return this.add(item instanceof WallRecess ? item.alignedWith(this.recessHosts, true) : item);
+  }
+
+  transformFurniture(id: string, position?: Vector3D, rotationY?: number, dimensions?: Vector3D): PlanDocument {
+    const previous = this.requireFurniture(id);
+    let item = previous.withTransform(position ?? previous.position, rotationY ?? previous.rotationY);
+    if (dimensions) item = item.withDimensions(dimensions);
+    if (item === previous) return this;
+    if (item instanceof WallRecess) item = item.alignedWith(this.recessHosts, position === undefined);
+    return this.replace(item);
+  }
+
+  private assertRecessSplitClear(host: RecessHost, distance: number): void {
+    for (const recess of this.recessesFor(host.id)) recess.assertSplitClear(host, distance);
+  }
+
+  private rehostRecesses(elements: readonly PlanElement[], host: RecessHost, distance: number, firstId: string, secondId: string): readonly PlanElement[] {
+    return elements.map(element => element instanceof WallRecess && element.hostId === host.id
+      ? element.withHost(element.distanceAlong(host) <= distance ? firstId : secondId) : element);
   }
 
   replaceFurniture(id: string, replacement: Furniture): PlanDocument {
     const previous = this.requireFurniture(id);
     if (replacement.id !== previous.id) throw new Error('Replacement must preserve element identity');
-    return this.replace(replacement.withTransform(previous.position, previous.rotationY).withDimensions(previous.dimensions));
+    const item = replacement.withTransform(previous.position, previous.rotationY).withDimensions(previous.dimensions);
+    return this.replace(item instanceof WallRecess ? item.alignedWith(this.recessHosts, true) : item);
   }
 
   applyRoomFinish(roomId: string, finish: SurfaceFinishConfig): PlanDocument {
@@ -143,22 +189,16 @@ export class PlanDocument {
     if (!(column instanceof Column)) throw new Error('Expected a column');
     const [first, second] = column.splitAt(distance);
     if (this.get(first.id) || this.get(second.id)) throw new Error('Split segment IDs already exist');
-    const start = column.wallShape(this.totalHeight).p1;
-    const along = (item: Furniture) => (item.position.x - start.x) * Math.cos(column.rotationY) - (item.position.z - start.y) * Math.sin(column.rotationY);
-    for (const item of this.furniture) if (item.assetKey === 'wall_recess' && item.rawItem?.wallId === id && Math.abs(along(item) - distance) < item.dimensions.x / 2) throw new Error('Split intersects a recess');
-    return this.next(this.elements.flatMap(element => {
-      if (element.id === id) return [first, second];
-      if (element instanceof StandardFurniture && element.assetKey === 'wall_recess' && element.rawItem?.wallId === id) {
-        const data = element.toData();
-        return [new StandardFurniture({ ...data, rawItem: { ...data.rawItem, wallId: along(element) <= distance ? first.id : second.id } })];
-      }
-      return [element];
-    }));
+    const host = column.wallShape(this.totalHeight);
+    this.assertRecessSplitClear(host, distance);
+    const elements = this.elements.flatMap(element => element.id === id ? [first, second] : [element]);
+    return this.next(this.rehostRecesses(elements, host, distance, first.id, second.id));
   }
 
   splitWall(id: string, distance: number): { document: PlanDocument; wall1: Wall; wall2: Wall } {
     const wall = this.requireWall(id);
     wall.assertSplittable(distance);
+    this.assertRecessSplitClear(wall, distance);
     const firstId = `${id}_a`, secondId = `${id}_b`;
     if (this.get(firstId) || this.get(secondId)) throw new Error('Split segment IDs already exist');
     const point = {
@@ -185,12 +225,7 @@ export class PlanDocument {
     const elements = this.elements.flatMap(element => element.id === id ? [first, second] : [element]);
     const next = elements.map(element => element instanceof Column && element.stubIds?.includes(id)
       ? element.withSources(element.stubIds.flatMap(source => source === id ? [firstId, secondId] : [source])) : element);
-    const hosted = next.map(element => {
-      if (!(element instanceof StandardFurniture) || element.assetKey !== 'wall_recess' || element.rawItem?.wallId !== id) return element;
-      const along = ((element.position.x - wall.p1.x) * (wall.p2.x - wall.p1.x) + (element.position.z - wall.p1.y) * (wall.p2.y - wall.p1.y)) / wall.length;
-      const data = element.toData();
-      return new StandardFurniture({ ...data, rawItem: { ...data.rawItem, wallId: along <= distance ? firstId : secondId } });
-    });
+    const hosted = this.rehostRecesses(next, wall, distance, firstId, secondId);
     const offsets = WallJunctions.resolve(hosted.filter((element): element is Wall => element instanceof Wall));
     const resolved = hosted.map(element => {
       const offset = offsets.get(element.id);

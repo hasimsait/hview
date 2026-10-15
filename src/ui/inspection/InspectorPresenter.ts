@@ -1,3 +1,4 @@
+import type { WallRecess } from '../../domain/elements/WallRecess';
 import type { Column } from '../../domain/elements/Column';
 import type { BasinCabinet,Luminaire,Shelving,StandardFurniture } from '../../domain/elements/Furniture';
 import type { Door,SlidingDoor,WindowOpening } from '../../domain/elements/Opening';
@@ -16,6 +17,7 @@ export class InspectorPresenter implements PlanElementVisitor<InspectorPresentat
   visitDoor(element: Door): InspectorPresentation { return { title: element.displayName, sections: ['door', 'surfaces'] }; }
   visitSlidingDoor(element: SlidingDoor): InspectorPresentation { return { title: element.displayName, sections: ['door', 'surfaces'] }; }
   visitWindow(element: WindowOpening): InspectorPresentation { return { title: element.displayName, sections: ['window', 'surfaces'] }; }
+  visitRecess(element: WallRecess): InspectorPresentation { return { title: element.displayName, sections: ['transform', 'surfaces', 'replacement'] }; }
   visitFurniture(element: StandardFurniture): InspectorPresentation { return { title: element.displayName, sections: ['transform', 'surfaces', 'replacement'] }; }
   visitLuminaire(element: Luminaire): InspectorPresentation { return { title: element.displayName, sections: ['transform', 'luminaire', 'surfaces', 'replacement'] }; }
   visitShelving(element: Shelving): InspectorPresentation { return { title: element.displayName, sections: ['transform', 'shelving', 'surfaces', 'replacement'] }; }

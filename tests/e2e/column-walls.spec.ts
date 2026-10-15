@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { rawPlan } from '../unit/fixtures';
 
-test('a column selects its own inspector with four paint faces and recess controls', async ({ page, request }) => {
+test('column inspection creates one hosted recess, validates it, undoes it, and saves it', async ({ page, request }) => {
   const original = await (await request.get('/sample.plan')).text();
   try {
     const raw: any = rawPlan();
@@ -33,6 +33,37 @@ test('a column selects its own inspector with four paint faces and recess contro
     await expect(page.getByRole('button', { name: 'Add Recess', exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Add Recess', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Create Recess', exact: true })).toBeVisible();
+    const width = page.getByText('Width (cm)', { exact: true }).locator('..').locator('input');
+    await width.fill('200');
+    await page.getByRole('button', { name: 'Create Recess', exact: true }).click();
+    await expect(page.getByRole('alert')).toContainText('fit within its host');
+    await expect(page.getByText('0 Objects', { exact: true })).toBeVisible();
+    await width.fill('80');
+    await page.getByRole('button', { name: 'Create Recess', exact: true }).click();
+    await expect(page.getByText('1 Objects', { exact: true })).toBeVisible();
+    await expect(page.getByRole('alert')).toBeHidden();
+    const recessState = () => page.evaluate(async () => {
+      const runtimePath = '/src/main.tsx';
+      const { runtime } = await import(runtimePath);
+      const document = runtime.editor.getDocument();
+      const recess = document.recesses[0];
+      return recess ? { kind: recess.kind, hostId: recess.hostId, rawHost: recess.rawItem?.wallId, cut: recess.cutFor(document.requireRecessHost(recess.hostId)) } : null;
+    });
+    const state = await recessState();
+    expect(state).toMatchObject({ kind: 'furniture.recess', hostId: 'column' });
+    expect(state!.rawHost).toBeUndefined();
+    expect(state!.cut).toBeDefined();
+    await page.getByRole('button', { name: 'Undo', exact: true }).click();
+    expect(await recessState()).toBeNull();
+    await page.getByRole('button', { name: 'Redo', exact: true }).click();
+    expect(await recessState()).toEqual(state);
+    await page.getByRole('button', { name: 'Save .plan', exact: true }).click();
+    await expect(page.getByRole('dialog', { name: 'Saving plan' })).toBeHidden();
+    const saved = await (await request.get('/sample.plan')).json();
+    expect(saved.document.elements.filter((entry: { kind: string }) => entry.kind === 'furniture.recess')).toHaveLength(1);
+    await page.reload();
+    await expect(page.getByText('1 Objects', { exact: true })).toBeVisible();
+    expect(await recessState()).toEqual(state);
   } finally {
     expect((await request.post('/api/save-plan', { data: JSON.parse(original) })).ok()).toBe(true);
   }

@@ -6,6 +6,7 @@ import type { DocumentChange } from '../application/EditorSession';
 import { Furniture } from '../domain/elements/Furniture';
 import { Opening } from '../domain/elements/Opening';
 import { Wall } from '../domain/elements/Wall';
+import { WallRecess } from '../domain/elements/WallRecess';
 import { surfaceSection } from '../domain/model/SurfaceSections';
 import type { FurnitureMeshBuilder } from './assets/FurnitureMeshBuilder';
 import { PlanCameraFocus } from './camera/PlanCameraFocus';
@@ -141,11 +142,11 @@ export class SceneEngine implements ISceneService {
     );
 
 
-    this.appearance = new FurnitureAppearance(this.finishService, this.resources, () => this.settings, item => this.findWallForRecess(item));
+    this.appearance = new FurnitureAppearance(this.finishService, this.resources, () => this.settings, item => item.hostId ? this.currentPlan?.requireRecessHost(item.hostId) : undefined);
     const palette = Object.assign(new THREE.Object3D(), { material: [...this.furnitureBuilder.palette, ...this.wallBuilder.materials.palette, ...this.openingBuilder.palette, ...this.floorBuilder.palette, ...this.ceilingBuilder.palette] });
     this.paletteLease = this.resources.ownTree(palette);
     const factory = new SceneNodeFactory({
-      furniture: { build: element => this.furnitureBuilder.build(element) }, appearance: this.appearance,
+      furniture: { build: element => this.furnitureBuilder.build(element, element instanceof WallRecess && element.hostId ? this.currentPlan?.requireRecessHost(element.hostId).thickness : undefined) }, appearance: this.appearance,
       wall: { build: wall => this.wallBuilder.buildWall(wall, this.settings.wallCutaway ? 1.15 : undefined, undefined, this.getRecessHolesForWall(wall)), applyMaterials: (root, wall) => this.wallBuilder.materials.applyMaterials(root, wall) },
       column: { build: column => this.wallBuilder.buildWall(column.wallShape(this.currentPlan!.totalHeight), this.settings.wallCutaway ? 1.15 : undefined, undefined, this.getRecessHolesForWall(column.wallShape(this.currentPlan!.totalHeight))), applyMaterials: (root, column) => this.wallBuilder.materials.applyMaterials(root, column.wallShape(this.currentPlan!.totalHeight)) },
       room: { build: room => this.floorBuilder.buildFloor(room, this.settings.showRoomLabels), applyMaterials: (root, room) => this.floorBuilder.applyMaterials(root, room) },
@@ -296,101 +297,18 @@ export class SceneEngine implements ISceneService {
     return Array.from(sections);
   }
 
-  findWallForRecess(rec: FurnitureEntity): WallEntity | null {
-    if (!this.currentPlan) return null;
-    let closestWall: WallEntity | null = null;
-    let closestDist = Infinity;
-
-    for (const wall of [...this.currentPlan.walls, ...this.currentPlan.columns.map(column => column.wallShape(this.currentPlan!.totalHeight))]) {
-      const p1x = wall.p1.x;
-      const p1z = wall.p1.y;
-      const p2x = wall.p2.x;
-      const p2z = wall.p2.y;
-      const dx = p2x - p1x;
-      const dz = p2z - p1z;
-      const lenSq = dx * dx + dz * dz;
-      if (lenSq < 0.002) continue;
-
-      const t = ((rec.position.x - p1x) * dx + (rec.position.z - p1z) * dz) / lenSq;
-      if (t < -0.15 || t > 1.15) continue;
-
-      const projX = p1x + t * dx;
-      const projZ = p1z + t * dz;
-      const dist = Math.hypot(rec.position.x - projX, rec.position.z - projZ);
-      const maxDist = (wall.thickness || 0.1) / 2 + 0.35;
-      if (dist < maxDist && dist < closestDist) {
-        closestDist = dist;
-        closestWall = wall;
-      }
-    }
-    return closestWall;
-  }
-
-  getRecessHolesForWall(
-    wall: WallEntity
-  ): { start: number; end: number; floorHeight: number; topHeight: number }[] {
-    const holes: { start: number; end: number; floorHeight: number; topHeight: number }[] = [];
-
-    // 1. Native pinned wall cavities
-    if (wall.cavities && wall.cavities.length > 0) {
-      for (const cav of wall.cavities) {
-        holes.push({
-          start: cav.distanceAlongWall - cav.width / 2,
-          end: cav.distanceAlongWall + cav.width / 2,
-          floorHeight: cav.floorElevation,
-          topHeight: cav.floorElevation + cav.height,
-        });
-      }
-    }
-
-    if (!this.currentPlan) return holes;
-    const recesses = this.currentPlan.furniture.filter(
-      (f) =>
-        f.visible !== false &&
-        (f.assetKey === 'wall_recess' ||
-          f.assetKey === 'recess' ||
-          f.assetKey === 'girinti')
-    );
-    if (recesses.length === 0) return holes;
-
-    const p1x = wall.p1.x;
-    const p1z = wall.p1.y;
-    const p2x = wall.p2.x;
-    const p2z = wall.p2.y;
-    const dx = p2x - p1x;
-    const dz = p2z - p1z;
-    const lenSq = dx * dx + dz * dz;
-    const len = Math.sqrt(lenSq);
-    if (len < 0.05) return holes;
-
-    const maxDist = (wall.thickness || 0.1) / 2 + 0.25;
-
-    for (const rec of recesses) {
-      const rx = rec.position.x;
-      const rz = rec.position.z;
-
-      const t = ((rx - p1x) * dx + (rz - p1z) * dz) / lenSq;
-      if (t < -0.1 || t > 1.1) continue;
-
-      const projX = p1x + t * dx;
-      const projZ = p1z + t * dz;
-      const perpDist = Math.hypot(rx - projX, rz - projZ);
-      if (perpDist > maxDist) continue;
-
-      const distAlong = t * len;
-      const halfW = (rec.dimensions?.x || 1.2) / 2;
-      const floorH = rec.position.y;
-      const topH = floorH + (rec.dimensions?.y || 1.7);
-
-      holes.push({
-        start: distAlong - halfW,
-        end: distAlong + halfW,
-        floorHeight: floorH,
-        topHeight: topH,
-      });
-    }
-
-    return holes;
+  private getRecessHolesForWall(wall: WallEntity) {
+    const native = (wall.cavities ?? []).map(cavity => ({
+      start: cavity.distanceAlongWall - cavity.width / 2,
+      end: cavity.distanceAlongWall + cavity.width / 2,
+      floorHeight: cavity.floorElevation,
+      topHeight: cavity.floorElevation + cavity.height,
+    }));
+    const recesses = this.currentPlan?.recessesFor(wall.id) ?? [];
+    return [...native, ...recesses.flatMap(recess => {
+      const cut = recess.cutFor(wall);
+      return cut ? [cut] : [];
+    })];
   }
 
   setSelectionHighlight(entity: FurnitureEntity | null): void {

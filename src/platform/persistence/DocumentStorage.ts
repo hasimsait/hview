@@ -55,16 +55,6 @@ export class DocumentStorage implements IDocumentStorage {
     this.setStatus('idle');
   }
 
-  /** Write the browser backup when explicitly asked to save. */
-  cachePlan(planJson: string): boolean {
-    validateDocumentJson(planJson);
-    this.latestPlanJson = planJson;
-    this.saveGeneration++;
-    if (this.saveTimeout !== null) clearTimeout(this.saveTimeout);
-    this.setStatus('saving');
-    return this.browser.write(this.latestPlanJson);
-  }
-
   private finishSave(generation: number, ok: boolean): void {
     if (generation !== this.saveGeneration) return;
     this.setStatus(ok ? 'saved' : 'error');
@@ -80,7 +70,12 @@ export class DocumentStorage implements IDocumentStorage {
   async savePlan(planJson: string): Promise<boolean> {
     let cached: boolean;
     try {
-      cached = this.cachePlan(planJson);
+      validateDocumentJson(planJson);
+      this.latestPlanJson = planJson;
+      this.saveGeneration++;
+      if (this.saveTimeout !== null) clearTimeout(this.saveTimeout);
+      this.setStatus('saving');
+      cached = this.browser.write(planJson);
     } catch (err) {
       console.warn('[DocumentStorage] Invalid plan JSON:', err);
       this.saveGeneration++;
@@ -99,7 +94,7 @@ export class DocumentStorage implements IDocumentStorage {
     }
 
     const ok = await this.queue.run(async () => {
-      // New documents and newer edits supersede snapshots still waiting to write.
+      // Imports and later explicit saves supersede snapshots still waiting to write.
       if (epoch !== this.planEpoch || generation !== this.saveGeneration) return false;
       try {
         await this.server.save(cleanJson);
@@ -116,7 +111,7 @@ export class DocumentStorage implements IDocumentStorage {
 
   async loadPlan(): Promise<string> {
     const generation = this.saveGeneration;
-    // Browser edits are the working copy. Never replace them with a stale
+    // The browser stores the last explicit save. Never replace it with a stale
     // server template when reconnecting after an offline save.
     if (typeof window !== 'undefined') {
       try {

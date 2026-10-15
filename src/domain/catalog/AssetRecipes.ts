@@ -151,7 +151,7 @@ export const ASSET_RECIPES = [
       "wall_niche",
       "shower_niche"
     ],
-    "behavior": "standard"
+    "behavior": "recess"
   },
   {
     "id": "bed_double",

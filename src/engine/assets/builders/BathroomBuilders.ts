@@ -1085,17 +1085,12 @@ export function buildMirror(context: AssetBuildContext): void {
 }
 
 export function buildWallRecess(context: AssetBuildContext): void {
-  const { parent, entity, w, h, d, materials } = context;
+  const { parent, w, h, d, materials } = context;
   const recessW = Math.max(0.1, w || 1.2);
   const recessH = Math.max(0.1, h || 1.7);
 
   // Recess depth MUST cleanly match or exceed wall thickness so the cutout is fully sleeved without any hollow gaps
-  const wallT = Math.max(
-    0.05,
-    (entity.rawItem?.wallThickness as number) ||
-    (entity.rawItem?.depth ? entity.rawItem.depth / 100 : 0) ||
-    0.10
-  );
+  const wallT = Math.max(0.05, context.recessHostThickness ?? d);
   const recessD = Math.max(wallT, (d && d > 0.05 ? d : wallT));
 
   const halfW = recessW / 2;

@@ -1,3 +1,4 @@
+import type { WallRecess } from '../../domain/elements/WallRecess';
 import type * as THREE from 'three';
 import type { Column } from '../../domain/elements/Column';
 import type { BasinCabinet,Furniture,Luminaire,Shelving,StandardFurniture } from '../../domain/elements/Furniture';
@@ -30,6 +31,7 @@ export class SceneNodeFactory implements PlanElementVisitor<SceneNode> {
   visitSlidingDoor(element: SlidingDoor): SceneNode { return this.opening(element); }
   visitWindow(element: WindowOpening): SceneNode { return this.opening(element); }
   private furniture<T extends Furniture>(element: T): SceneNode { return new FurnitureSceneNode(element, this.builders.furniture, this.builders.appearance, this.resources, this.picking); }
+  visitRecess(element: WallRecess): SceneNode { return this.furniture(element); }
   visitFurniture(element: StandardFurniture): SceneNode { return this.furniture(element); }
   visitLuminaire(element: Luminaire): SceneNode { return this.furniture(element); }
   visitBasinCabinet(element: BasinCabinet): SceneNode { return this.furniture(element); }

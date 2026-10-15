@@ -163,6 +163,8 @@ export interface FurnitureData {
   assetKey: string;     // identifier for procedural asset or GLB model
   customModelUrl?: string;
   visible?: boolean;
+  shelfCount?: number;
+  recessHostId?: string; // Authoritative wall/column relationship for a recess
   hasLids?: boolean;    // Front lids / cabinet doors for shelving units
   finish?: SurfaceFinishConfig;
   /** Per-section finish overrides. Keys match the __section tags on procedural materials:

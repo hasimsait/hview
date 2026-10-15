@@ -32,4 +32,4 @@ export interface AssetDefinition {
   aliases?: string[];
 }
 
-export type FurnitureBehavior = 'standard' | 'luminaire' | 'shelving' | 'basin';
+export type FurnitureBehavior = 'standard' | 'luminaire' | 'shelving' | 'basin' | 'recess';

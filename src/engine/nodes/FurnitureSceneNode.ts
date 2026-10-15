@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { WallRecess } from '../../domain/elements/WallRecess';
 import type { Furniture } from '../../domain/elements/Furniture';
 import type { PickRegistry } from '../picking/PickRegistry';
 import type { ResourcePool } from '../resources/ResourcePool';
@@ -17,16 +18,18 @@ export class FurnitureSceneNode<T extends Furniture = Furniture> extends SceneNo
     this.group.rotation.y = element.rotationY;
     this.group.visible = element.visible !== false;
   }
-  private rebuild(element: T): void {
+  rebuild(element: T = this.element): void {
     const content = this.builder.build(element);
     content.position.set(0, 0, 0); content.rotation.set(0, 0, 0);
     this.appearance.apply(content, element);
     this.replaceGeometry(content);
   }
+  refreshAppearance(): void { this.appearance.apply(this.group, this.element); this.refreshMaterials(); }
   reconcile(element: T): void {
     const previous = this.element;
     const geometryChanged = previous.assetKey !== element.assetKey || previous.customModelUrl !== element.customModelUrl
       || !previous.size.equals(element.dimensions) || previous.hasLids !== element.hasLids
+      || (previous instanceof WallRecess && element instanceof WallRecess && previous.hostId !== element.hostId)
       || ('shelfCount' in previous && previous.shelfCount !== (element as T & { shelfCount?: number }).shelfCount);
     if (geometryChanged) this.rebuild(element);
     else if (previous.finish !== element.finish || previous.sectionFinishes !== element.sectionFinishes || previous.lightConfig !== element.lightConfig) {
