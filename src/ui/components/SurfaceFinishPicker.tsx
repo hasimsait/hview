@@ -5,6 +5,7 @@ import { useRuntime } from '@ui/context/RuntimeContext';
 import { Check,Disc,EyeOff,Grid,Layers,Paintbrush,Palette,Pipette,RotateCcw,RotateCw,Search,Sparkles } from 'lucide-react';
 import React,{ useEffect,useState } from 'react';
 import { getFabricScale,isFabricStretched } from '../../engine/materials/SurfaceMaterialFactory';
+import { resolveEmbeddedTextureUrl } from '../../engine/materials/TextureSource';
 import {
   ACOUSTIC_BACKING_COLORS,
   ACOUSTIC_SLAT_VARIANTS,
@@ -477,7 +478,7 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                     <div
                       className="w-10 h-10 rounded-md border border-slate-700 shadow-inner shrink-0 bg-cover bg-center overflow-hidden"
                       style={{
-                        backgroundImage: `url(${w.imageUrl})`,
+                        backgroundImage: `url(${resolveEmbeddedTextureUrl(w.imageUrl)})`,
                         backgroundColor: w.color,
                       }}
                     />
@@ -1037,7 +1038,7 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                       style={
                         swatchUrl
                           ? {
-                            backgroundImage: `url(${swatchUrl})`,
+                            backgroundImage: `url(${resolveEmbeddedTextureUrl(swatchUrl)})`,
                             backgroundSize: 'cover',
                             backgroundPosition: 'center',
                           }
@@ -1298,7 +1299,7 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                   >
                     <div
                       className="w-10 h-10 rounded-md border border-slate-700/80 shadow-md shrink-0 bg-cover bg-center overflow-hidden"
-                      style={{ backgroundImage: `url(${item.photoUrl})` }}
+                      style={{ backgroundImage: `url(${resolveEmbeddedTextureUrl(item.photoUrl)})` }}
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1">

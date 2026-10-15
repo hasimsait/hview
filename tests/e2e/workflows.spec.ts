@@ -110,10 +110,23 @@ test('downloaded editor saves edits offline, reloads, and exports the updated pl
   const context = await browser.newContext({ viewport: { width: 2300, height: 900 } });
   const offlineUrl = await offlineDocument(context, path, 'editor');
   const offline = await context.newPage();
+  const externalRequests: string[] = [];
+  offline.on('request', request => {
+    if (/^https?:/.test(request.url()) && !request.isNavigationRequest()) externalRequests.push(request.url());
+  });
   try {
     await offline.goto(offlineUrl); await expect(offline.getByText('1 Objects')).toBeVisible();
     await offline.getByRole('button', { name: /2D Plan/ }).click(); await offline.mouse.click(point.x, point.y);
     await expect(offline.getByText('ID: sofa', { exact: true })).toBeVisible();
+    await offline.getByRole('button', { name: 'Wood & Parquet', exact: true }).click();
+    const woodPreview = offline.getByRole('button', { name: /Natural Scandinavian Oak/ }).locator('[style*="background-image"]');
+    await expect(woodPreview).toHaveCSS('background-image', /^url\("?data:image\//);
+    await offline.getByRole('button', { name: 'Velvet & Fabric', exact: true }).click();
+    const fabricPreviews = offline.locator('main .bg-cover[style*="background-image"]').filter({ visible: true });
+    expect(await fabricPreviews.count()).toBeGreaterThan(0);
+    for (const preview of await fabricPreviews.all()) {
+      await expect(preview).toHaveCSS('background-image', /^url\("?data:image\//);
+    }
     await numberField(offline, 'Width (X)').fill('225');
     await offline.getByRole('button', { name: 'Save .plan', exact: true }).click();
     await expect(offline.getByRole('dialog', { name: 'Saving plan' })).toBeHidden();
@@ -128,6 +141,7 @@ test('downloaded editor saves edits offline, reloads, and exports the updated pl
     await offline.getByRole('button', { name: 'Export .plan', exact: true }).click();
     const plan = legacyData(readFileSync((await (await downloadingPlan).path())!, 'utf8'));
     expect(plan.plan.items.sofa.width).toBe(225);
+    expect(externalRequests).toEqual([]);
   } finally { await context.close(); }
 });
 

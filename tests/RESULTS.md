@@ -1,25 +1,32 @@
 # Validation results
 
-Validated on 15 October 2026 on `refactor`, extending the behavioral-domain implementation at `ae46d9e`.
+Final checks on 15 October 2026, starting from `refactor` at `afe277e` and including the fixes committed with this record.
 
 | Check | Result |
 | --- | --- |
-| Production editor and both standalone HTML builds (`npm run build`) | Pass |
+| Production editor and standalone builds (`npm run build`) | Pass |
+| Checked-in working-plan editor (`npm run build:sample-editor`) | Regenerated; exact match to current template and plan |
 | Strict application/test TypeScript (`npm run test:types`) | Pass |
-| Unit tests with coverage (`npm run test:coverage`) | 145 passed |
+| Unit tests and coverage (`npm run test:coverage`) | 150 passed; thresholds pass |
 | Node save/export/layer regressions (`npm run test:state`) | 80 passed |
-| Full Chromium suite (`npm run test:e2e`) | 19 passed |
-| Chromium recess/manual-save checks after the persistence cleanup | 3 passed |
-| Chromium asset-replacement check after factory cleanup | 1 passed |
-| GPU surface layers (`npm run test:layers:browser`) | 270 overlap pixel checks and layer-control validation passed |
-| Whitespace/conflict check (`git diff --check`) | Pass |
+| Complete Chromium suite (`npm run test:e2e`) | 22 passed |
+| Offline workflow after the final thumbnail fix | Pass, including embedded wood/fabric previews and zero HTTP requests |
+| Actual checked-in HTML with external requests blocked | Load, Bathroom isolation, plan import, room edit, manual save/reload, JSON/HTML export, and embedded reset pass |
+| GPU surface layers (`npm run test:layers:browser`) | 270 overlap pixels and layer-control validation passed |
+| `git diff --check` | Pass |
 
-Configured coverage is 92.41% lines/statements, 87.50% functions, and 84.85% branches. All retained thresholds pass. Scope includes domain, application, persistence, scene nodes, resources, picking, and scheduling; it does not cover the entire UI or geometry library.
+Configured coverage is 92.42% lines/statements, 87.90% functions, and 84.93% branches. Coverage includes domain, application, persistence, scene nodes, resources, picking, and scheduling; it does not measure the entire UI or geometry library.
 
-This cutover adds regression coverage for behavioral recess creation, invalid creation atomicity, one-host cuts, movement/rehosting, detached placement, wall and rotated-column splits, hidden recess preservation, host deletion, asset replacement, old canonical/RemPlanner migration, and canonical round-trip stability. Rendering checks verify that host finishes refresh recess appearance without replacing its geometry and that removing/replacing recesses rebuilds only their owned host cuts. Shelving tests cover the full supported shelf range through both codecs. Door input rules are exercised directly on domain classes.
+The final checks reproduced and fixed three additional defects:
 
-The column browser scenario creates a recess through actual controls, checks validation, undoes/redoes creation, saves, and reloads its typed host relationship. Existing scenarios cover the production plan, lighting, paint, room isolation, gizmo edits, explicit-save locking and retry, replacement, layouts, and offline HTML save/reload/re-export. Browser tests use disposable checkouts; source plans are unchanged.
+- Opening another plan while a room was isolated retained the old room IDs and could hide the new plan. Invalid room filters are now removed when the document changes.
+- Clearing a room-name field called the domain with an empty name, raising an uncaught error. The field now holds a draft, commits a valid name on blur/Enter, restores blanks, and cancels with Escape. A rename is one undoable edit and survives save/reload.
+- Finish thumbnails used external wood/tile/fabric URLs even when the texture bytes were embedded. CSS previews and Three.js now share the same embedded URL resolver.
 
-The full browser suite passed before the final cache-only API removal. The affected column/recess and manual-save scenarios were rerun after that cleanup. The asset-replacement scenario was rerun after consolidating subtype field rules in the factory. Unit/Node/type/build checks pass after the corresponding changes. No assertion was skipped or disabled.
+The first two fixes have browser regressions in `e2e/document-editing.spec.ts`. Embedded URL resolution has unit coverage in `unit/embedded-textures.test.ts`; the offline browser workflow verifies photographic previews use data URLs and make no HTTP requests.
 
-Offline browser checks block all external requests while serving the downloaded document bytes. Native file navigation and Safari/iPad compatibility still require device checks. Vite continues to report its existing large-bundle advisory.
+The complete 22-scenario browser suite passed after the document/room fixes. Following the final thumbnail fix, the affected offline workflow, unit/type/build/Node checks, and the actual checked-in HTML were validated again. No assertion was skipped or disabled. Browser save/reset tests use disposable checkouts, and standalone checks use isolated browser storage. Source plans and the dependency lock remain unchanged.
+
+The checked-in HTML check starts with all 119 objects and 10 rooms, exercises the actual portable file, and finishes with no page errors or HTTP requests. The artifact is regenerated from current source and `public/sample.plan`, including these fixes.
+
+Native file navigation and Safari/iPad compatibility still require device checks. Vite continues to report its existing large-bundle advisory.

@@ -50,6 +50,15 @@ export const App: React.FC = () => {
   const saveInProgress = useRef(false);
   const isSaving = saveRequested || saveStatus === 'saving';
 
+  useEffect(() => {
+    if (!document) return;
+    const validIds = isolatedRoomIds.filter(id => document.get(id) instanceof Room);
+    if (validIds.length !== isolatedRoomIds.length) {
+      setIsolatedRoomIds(validIds);
+      sceneService.isolateRooms(validIds);
+    }
+  }, [document, isolatedRoomIds, sceneService]);
+
   useEffect(() => runtime.storage.onSaveStatusChange(setSaveStatus), [editor]);
 
   const handleSave = async () => {

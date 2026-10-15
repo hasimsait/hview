@@ -30,7 +30,7 @@ export const FloorInspector: React.FC<FloorInspectorProps> = ({ room, onClose })
     if (room) {
       setRoomName(room.name);
     }
-  }, [room]);
+  }, [room?.id, room?.name]);
 
   if (!room) return null;
 
@@ -39,9 +39,10 @@ export const FloorInspector: React.FC<FloorInspectorProps> = ({ room, onClose })
     (w) => w.roomSideA === room.id || w.roomSideB === room.id || w.roomIds?.includes(room.id)
   );
 
-  const handleNameChange = (newName: string) => {
-    setRoomName(newName);
-    editor.execute(new RenameRoom(room.id, newName));
+  const handleNameCommit = () => {
+    const name = roomName.trim();
+    setRoomName(name || room.name);
+    if (name) editor.execute(new RenameRoom(room.id, name));
   };
 
   const handleFocus = () => {
@@ -140,7 +141,18 @@ export const FloorInspector: React.FC<FloorInspectorProps> = ({ room, onClose })
             <input
               type="text"
               value={roomName}
-              onChange={(e) => handleNameChange(e.target.value)}
+              onChange={(e) => setRoomName(e.target.value)}
+              onBlur={handleNameCommit}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  e.currentTarget.blur();
+                } else if (e.key === 'Escape') {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setRoomName(room.name);
+                }
+              }}
               className="flex-1 bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-sky-500 transition-colors font-medium"
               placeholder="e.g. Master Bedroom"
             />
