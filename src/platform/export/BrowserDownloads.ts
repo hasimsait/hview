@@ -5,6 +5,11 @@ export class BrowserDownloads {
     try {
       link.href = url; link.download = filename;
       document.body.appendChild(link); link.click();
-    } finally { link.remove(); URL.revokeObjectURL(url); }
+    } finally {
+      link.remove();
+      // Safari may consume the download after the click handler has returned.
+      const timer = setTimeout(() => URL.revokeObjectURL(url), 60_000) as ReturnType<typeof setTimeout> & { unref?: () => void };
+      timer.unref?.();
+    }
   }
 }

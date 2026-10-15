@@ -17,13 +17,15 @@ export async function embeddedAssets(publicDir: string): Promise<Record<string, 
       const hash = createHash('sha256').update(source).digest('hex');
       const existing = canonical.get(hash);
       if (existing) { assets[key] = '@' + existing; continue; }
-      // WebP is supported by Safari 15+ and preserves transparency where needed.
+      // Compare encoded sizes at the same resolution; never discard alpha.
       // Source images stay untouched; only portable HTML uses optimized bytes.
-      const resolution = key.startsWith('/textures/tiles/') ? 1024 : 512;
-      const optimized = await sharp(source).rotate()
-        .resize({ width: resolution, height: resolution, fit: 'inside', withoutEnlargement: true })
-        .webp({ quality: 78, effort: 4 }).toBuffer();
-      assets[key] = 'data:image/webp;base64,' + optimized.toString('base64');
+      const image = sharp(source).rotate()
+        .resize({ width: 512, height: 512, fit: 'inside', withoutEnlargement: true });
+      const webp = await image.clone().webp({ quality: 78, effort: 4 }).toBuffer();
+      const alpha = (await sharp(source).metadata()).hasAlpha;
+      const jpeg = alpha ? undefined : await image.clone().jpeg({ quality: 75, mozjpeg: true, progressive: true }).toBuffer();
+      const useJpeg = jpeg && jpeg.length < webp.length;
+      assets[key] = `data:image/${useJpeg ? 'jpeg' : 'webp'};base64,` + (useJpeg ? jpeg : webp).toString('base64');
       canonical.set(hash, key);
     }
   }

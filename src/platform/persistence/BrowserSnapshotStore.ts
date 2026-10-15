@@ -11,7 +11,8 @@ export class BrowserSnapshotStore {
       (Boolean(window.__STANDALONE_MODE__) || window.location.protocol === 'file:');
     // In WebKit a data URL's pathname contains the complete base64 HTML. Do
     // not even read it: these documents cannot use localStorage in any case.
-    const path = !this.opaque && offline ? window.location.pathname : undefined;
+    const scopedProtocol = typeof window !== 'undefined' && ['http:', 'https:', 'file:'].includes(window.location.protocol);
+    const path = !this.opaque && offline && scopedProtocol ? window.location.pathname : undefined;
     // Downloaded/hosted standalone documents on the same origin need separate working copies.
     const suffix = path && path !== '/' ? `:${this.pathKey(path)}` : '';
     this.key = STORAGE_KEY + suffix;

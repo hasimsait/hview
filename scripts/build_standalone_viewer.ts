@@ -1,7 +1,7 @@
 import postcss from 'postcss';
 import tailwindcss from 'tailwindcss';
 import autoprefixer from 'autoprefixer';
-import { createExportTemplates, EXPORT_TEMPLATES_ID, escapeScriptJson, setScriptContent } from '../src/services/export/StandaloneHtml';
+import { createExportTemplates, EXPORT_TEMPLATES_ID, escapeScriptJson, packStandaloneHtml, setScriptContent } from '../src/services/export/StandaloneHtml';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
@@ -23,6 +23,12 @@ export async function buildStandaloneArtifacts() {
   const distDir = path.join(rootDir, 'dist');
   const templateOutputPath = path.join(distDir, 'ipad_viewer_template.html');
   const distOutputPath = path.join(distDir, 'ipad_viewer.html');
+  const bootstrap = await esbuild.build({
+    entryPoints: [path.join(rootDir, 'src/platform/standalone/bootstrap.ts')], bundle: true,
+    format: 'iife', minify: true, write: false, target: ['safari15', 'chrome100', 'firefox100'],
+  });
+  const portableBootstrap = bootstrap.outputFiles[0].text;
+  const portableStatus = '<div id="portable-status" role="status" style="position:fixed;inset:0;z-index:9999;display:grid;place-content:center;gap:16px;background:#0f172a;color:#e2e8f0;text-align:center;padding:24px;font:15px system-ui">Opening your plan…</div>';
 
   if (!fs.existsSync(distDir)) {
     fs.mkdirSync(distDir, { recursive: true });
@@ -78,6 +84,7 @@ ${cssContent}
   </style>
 </head>
 <body>
+  ${portableStatus}
   <div id="canvas-container"></div>
   <div id="tap-indicator" class="tap-indicator"></div>
 
@@ -165,7 +172,6 @@ ${tilesJsonContent}
   </script>
   <script>
     try {
-      window.__EMBEDDED_TEXTURES__ = JSON.parse(document.getElementById('embedded-textures').textContent);
       window.__TILE_CATALOG__ = JSON.parse(document.getElementById('tile-catalog-data').textContent);
     } catch (e) {
       console.warn('Failed to parse embedded data:', e);
@@ -173,9 +179,10 @@ ${tilesJsonContent}
   </script>
 
   <!-- Bundled Viewer Logic -->
-  <script>
+  <script id="viewer-runtime" type="application/x-hview-runtime">
 ${bundledJs}
   </script>
+  <script id="portable-bootstrap">${portableBootstrap}</script>
 </body>
 </html>`;
 
@@ -196,8 +203,9 @@ ${bundledJs}
   samplePlanJson = JSON.stringify(JSON.parse(samplePlanJson));
 
   const standaloneHtml = setScriptContent(htmlTemplate, 'plan-data', escapeScriptJson(samplePlanJson));
-  fs.writeFileSync(distOutputPath, standaloneHtml, 'utf-8');
-  console.log(`🎉 Standalone iPad viewer generated: ${distOutputPath} (${(standaloneHtml.length / 1024 / 1024).toFixed(2)} MB)`);
+  const packedViewer = packStandaloneHtml(standaloneHtml);
+  fs.writeFileSync(distOutputPath, packedViewer, 'utf-8');
+  console.log(`🎉 Standalone iPad viewer generated: ${distOutputPath} (${(Buffer.byteLength(packedViewer) / 1024 / 1024).toFixed(2)} MiB)`);
 
   // 7. Bundle FULL React Editor into standalone HTML file
   console.log('📦 Bundling FULL React Editor into standalone HTML file...');
@@ -236,6 +244,7 @@ ${tailwindCss}
   </style>
 </head>
 <body class="h-full w-full overflow-hidden select-none font-['Inter',sans-serif]">
+  ${portableStatus}
   <div id="root" class="h-full w-full"></div>
 
   <!-- Embedded Data for 100% Offline Standalone Operation -->
@@ -251,7 +260,6 @@ ${tilesJsonContent}
   <script>
     window.__STANDALONE_MODE__ = true;
     try {
-      window.__EMBEDDED_TEXTURES__ = JSON.parse(document.getElementById('embedded-textures').textContent);
       window.__TILE_CATALOG__ = JSON.parse(document.getElementById('tile-catalog-data').textContent);
     } catch (e) {
       console.warn('Failed parsing embedded data:', e);
@@ -261,9 +269,10 @@ ${tilesJsonContent}
   <script id="standalone-export-templates" type="application/json"></script>
 
   <!-- Bundled Full React Editor Application -->
-  <script id="editor-runtime">
+  <script id="editor-runtime" type="application/x-hview-runtime">
 ${editorBundledJs}
   </script>
+  <script id="portable-bootstrap">${portableBootstrap}</script>
 </body>
 </html>`;
 
@@ -280,8 +289,9 @@ ${editorBundledJs}
 
   const fullEditorDistPath = path.join(distDir, 'hview_editor.html');
   const fullEditorHtml = setScriptContent(fullEditorHtmlTemplate, 'plan-data', escapeScriptJson(samplePlanJson));
-  fs.writeFileSync(fullEditorDistPath, fullEditorHtml, 'utf-8');
-  console.log(`🎉 Standalone FULL Editor generated: ${fullEditorDistPath} (${(fullEditorHtml.length / 1024 / 1024).toFixed(2)} MB)`);
+  const packedEditor = packStandaloneHtml(fullEditorHtml);
+  fs.writeFileSync(fullEditorDistPath, packedEditor, 'utf-8');
+  console.log(`🎉 Standalone FULL Editor generated: ${fullEditorDistPath} (${(Buffer.byteLength(packedEditor) / 1024 / 1024).toFixed(2)} MiB)`);
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === __filename) buildStandaloneArtifacts().catch((err) => {

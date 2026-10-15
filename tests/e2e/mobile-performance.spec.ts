@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 import { offlineDocument } from './workflow-helpers';
 
 async function ready(page: Page) {
@@ -12,6 +13,22 @@ async function ready(page: Page) {
   });
 }
 
+test('a damaged compressed application leaves a readable retry screen', async ({ browser }) => {
+  const context = await browser.newContext();
+  try {
+    const source = readFileSync('dist/hview_editor.html', 'utf8').replace(
+      /(<script id="editor-runtime"[^>]*>)[\s\S]*?(<\/script>)/,
+      '$1invalid compressed bytes$2',
+    );
+    await context.route('http://portable.test/broken.html', route => route.fulfill({ body: source, contentType: 'text/html' }));
+    const page = await context.newPage();
+    await page.goto('http://portable.test/broken.html');
+    await expect(page.getByRole('alert')).toContainText('This plan could not open');
+    await expect(page.getByRole('button', { name: 'Reload', exact: true })).toBeVisible();
+    await expect(page.locator('canvas')).toHaveCount(0);
+  } finally { await context.close(); }
+});
+
 test('mobile editor opens and re-exports offline, then redraws after GPU restoration', async ({ browser }, testInfo) => {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true, acceptDownloads: true });
   try {
@@ -19,6 +36,8 @@ test('mobile editor opens and re-exports offline, then redraws after GPU restora
     const page = await context.newPage(), errors: string[] = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.goto(url); await ready(page);
+    expect(await page.locator('#embedded-textures, #plan-data, #editor-runtime').count()).toBe(0);
+    expect(await page.evaluate(() => Boolean(window.__EMBEDDED_TEXTURES__))).toBe(false);
     const metrics = await page.evaluate(() => {
       const scene = (window as any).__testRuntime.scene;
       let outlines = 0, pointLights = 0;
@@ -77,6 +96,12 @@ test('mobile editor opens and re-exports offline, then redraws after GPU restora
         if (name === 'editor') await ready(exported);
         else await exported.waitForFunction(() => (window as any).__viewerApp?.sceneService.getStatus().state === 'ready');
         await expect(exported.locator('canvas').first()).toBeVisible();
+        if (name === 'editor') {
+          // Reset must still work after compressed source blocks left the DOM.
+          const count = await exported.evaluate(() => (window as any).__testRuntime.editor.getDocument().furniture.length);
+          await exported.evaluate(() => (window as any).__testRuntime.documents.reset());
+          expect(await exported.evaluate(() => (window as any).__testRuntime.editor.getDocument().furniture.length)).toBe(count);
+        }
       } finally { await offline.close(); }
     }
     expect(errors).toEqual([]);

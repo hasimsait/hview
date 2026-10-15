@@ -12,6 +12,7 @@ import { FurnitureMeshBuilder } from "../engine/assets/FurnitureMeshBuilder";
 import { SurfaceMaterialFactory } from "../engine/materials/SurfaceMaterialFactory";
 import { installEmbeddedTextureUrlModifier } from '../engine/materials/TextureSource';
 import { SceneEngine } from '../engine/SceneEngine';
+import { readEmbeddedText } from '../platform/standalone/PortableResources';
 
 export class StandaloneViewerApp {
   private sceneService: SceneEngine;
@@ -144,10 +145,10 @@ export class StandaloneViewerApp {
       rawData = window.__PLAN_DATA__;
     } else {
       // 2. Check <script id="plan-data" type="application/json">
-      const scriptEl = document.getElementById('plan-data');
-      if (scriptEl && scriptEl.textContent) {
+      const embedded = readEmbeddedText('plan-data');
+      if (embedded) {
         try {
-          rawData = JSON.parse(scriptEl.textContent.trim());
+          rawData = JSON.parse(embedded);
         } catch (err) {
           console.error('[StandaloneViewer] Failed to parse script#plan-data JSON:', err);
         }
@@ -501,9 +502,11 @@ export class StandaloneViewerApp {
 
 // Auto-boot when DOM is ready
 if (typeof window !== 'undefined') {
-  window.addEventListener('DOMContentLoaded', () => {
+  const start = () => {
     const app = new StandaloneViewerApp();
     app.init();
     window.__viewerApp = app;
-  });
+  };
+  if (document.readyState === 'loading') window.addEventListener('DOMContentLoaded', start, { once: true });
+  else start();
 }

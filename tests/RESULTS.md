@@ -1,5 +1,19 @@
 # Validation results
 
+Second Shortcut optimization pass on 15 October 2026, starting from `befa327`:
+
+- The checked-in working-plan editor falls from **3,657,156 to 1,615,688 bytes** (56% smaller). Its outer base64 Shortcut URL falls from **4,876,230 to 2,154,274 bytes**. Editor/viewer runtimes and plan JSON use compressed blocks with a bundled Safari 15-compatible decoder; all exports use the same packaging.
+- The 28 unique catalog images use **427,130 encoded bytes**, down from 944,854. All 30 paths remain available, including two aliases. Ten images use JPEG and eighteen use WebP. The 512-pixel cap reduces catalog-wide base RGBA from 50.28 to 24.96 MiB (not live VRAM). Original images and plans are unchanged; alpha preservation has build-level coverage. Representative tile/wood/fabric comparisons were visually inspected.
+- Consumed texture, plan, and runtime scripts are removed. The document retains binary image resources and compressed original plan/runtime bytes for Reset and re-export. CSS and rendering share image URLs; compatible palette/finish textures share decoded sources while retaining independent sampler settings.
+- A sampled mobile Chromium/SwiftShader scene retains 19 programs and 1,130 draws. Its texture count falls from 26 to 24; estimated RGBA storage including mipmaps across unique material image sources falls from 50.67 to 32.51 MiB. This estimate includes procedural material images and excludes render targets/buffers. It is not measured iPhone memory.
+- Production/standalone builds, 170 unit tests, 80 Node regressions, strict application/test TypeScript, coverage thresholds, and the GPU layer check pass. All 26 existing browser scenarios passed; after the final bootstrap error handling, the mobile/opaque checks passed again alongside the new compressed-data failure scenario (27 distinct scenarios total). The root HTML exactly matches the current template and working plan. Source images, plan files, and the dependency lock are unchanged.
+
+The portable checks exercise loading with requests blocked, editor/viewer re-export and reopening, reset after DOM cleanup, GPU restoration, opaque-origin import/edit/Save HTML/reopen, and readable retry screens for unavailable WebGL or corrupt compressed data. Download object URLs are kept alive briefly for Safari's asynchronous download handoff.
+
+A separate three-run comparison at 4× CPU throttling, with other browser checks stopped, had median scene-ready times of 4.50 s before and 4.32 s after; individual samples overlap. This HTTP-fulfilled Chromium test excludes Shortcut navigation and WebKit URL handling, and does not establish a substantial startup speedup.
+
+Native iPhone Shortcut loading and peak WebContent/GPU memory still require the user's device test. Payload reduction and lower texture storage are verified; a 2× native startup speedup is not established.
+
 Performance and iPhone Shortcut work on 15 October 2026, starting from `refactor` at `de40429` on branch `performance`:
 
 - The regenerated working-plan editor is about 3.66 MB, compared with 21.64 MB before the changes. Its outer base64 Shortcut URL is about 4.88 MB rather than 28.86 MB. All finish choices and offline editor/viewer re-export remain embedded.

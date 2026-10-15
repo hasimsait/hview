@@ -5,13 +5,11 @@ import { gunzipSync } from 'node:zlib';
 import { ReplaceFurniture } from '../src/application/commands/FurnitureCommands';
 import { DocumentExports } from '../src/application/DocumentExports';
 import { PlanCodec } from '../src/domain/codec/PlanCodec';
-import { EXPORT_TEMPLATES_ID, setScriptContent } from '../src/services/export/StandaloneHtml';
+import { EXPORT_TEMPLATES_ID, setScriptContent, standaloneBlockText } from '../src/services/export/StandaloneHtml';
 import { createEditor, legacyData } from './support/editor';
 
 function script(html: string, id: string): string {
-  const match = html.match(new RegExp(`<script\\b[^>]*\\bid="${id}"[^>]*>([\\s\\S]*?)</script\\s*>`, 'i'));
-  assert.ok(match, `Missing ${id}`);
-  return match[1].trim();
+  return standaloneBlockText(html, id);
 }
 
 for (const [id, otherId] of [
@@ -44,7 +42,7 @@ test('built editor re-exports editors and viewers repeatedly with network unavai
   const originalDocument = Object.getOwnPropertyDescriptor(globalThis, 'document');
   Object.defineProperty(globalThis, 'document', {
     configurable: true, value: {
-      getElementById: (id: string) => ({ textContent: script(source, id) }),
+      getElementById: (id: string) => ({ textContent: script(source, id), remove: () => {} }),
       createElement: () => link,
       body: { appendChild: () => { }, removeChild: () => { } },
     }

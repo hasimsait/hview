@@ -55,6 +55,16 @@ describe('Shortcut data URL startup', () => {
     expect(setItem).toHaveBeenCalledWith('hview_current_plan_timestamp:%2Fmy%20house.html', expect.any(String));
   });
 
+  it('never scopes keys by blob URL payloads, including non-opaque blobs', () => {
+    const pathname = vi.fn(() => { throw new Error('Blob pathname must not be used'); });
+    vi.stubGlobal('window', { __STANDALONE_MODE__: true, origin: 'https://example.test',
+      location: { protocol: 'blob:', origin: 'https://example.test', get pathname() { return pathname(); } } });
+    const setItem = vi.fn(); vi.stubGlobal('localStorage', { setItem });
+    expect(new BrowserSnapshotStore().write('{}')).toBe(true);
+    expect(pathname).not.toHaveBeenCalled();
+    expect(setItem).toHaveBeenCalledWith('hview_current_plan', '{}');
+  });
+
   it('bounds keys for extremely long file paths without percent-encoding another huge copy', () => {
     vi.stubGlobal('window', { location: { protocol: 'file:', pathname: '/' + 'x'.repeat(1024 * 1024) } });
     const setItem = vi.fn(); vi.stubGlobal('localStorage', { setItem });

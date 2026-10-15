@@ -3,7 +3,7 @@ import type { PlanCodec } from '../domain/codec/PlanCodec';
 import type { PlanDocument } from '../domain/model/PlanDocument';
 import { BrowserDownloads } from '../platform/export/BrowserDownloads';
 import { BrowserExportTemplates } from '../platform/export/BrowserExportTemplates';
-import { escapeScriptJson,setScriptContent,type StandaloneTemplates } from '../services/export/StandaloneHtml';
+import { escapeScriptJson,packStandaloneHtml,setScriptContent,type StandaloneTemplates } from '../services/export/StandaloneHtml';
 import type { EditorSession } from './EditorSession';
 
 /** Export formats share the same captured document and browser download adapter. */
@@ -23,6 +23,6 @@ export class DocumentExports {
     const document = plan ?? this.editor.getDocument();
     const template = await this.templates.load(kind);
     const html = setScriptContent(template, 'plan-data', escapeScriptJson(this.codec.encode(document, false)));
-    this.downloads.save(html, 'text/html;charset=utf-8', filename.endsWith('.html') ? filename : `${filename}.html`);
+    this.downloads.save(packStandaloneHtml(html), 'text/html;charset=utf-8', filename.endsWith('.html') ? filename : `${filename}.html`);
   }
 }

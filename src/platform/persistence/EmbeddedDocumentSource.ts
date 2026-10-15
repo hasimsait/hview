@@ -1,15 +1,16 @@
 import { validateDocumentJson } from './JsonDocument';
+import { readEmbeddedText } from '../standalone/PortableResources';
 export class EmbeddedDocumentSource {
   read(): string | null {
     if (typeof window === 'undefined') return null;
     const candidates: string[] = [];
     // The script is already the serialized document. Prefer it to serializing
     // the bootstrap object and then parsing that copy again.
-    const script = typeof document !== 'undefined' ? document.getElementById('plan-data') : null;
-    if (script?.textContent) {
+    const embedded = readEmbeddedText('plan-data');
+    if (embedded) {
       try {
-        validateDocumentJson(script.textContent);
-        return script.textContent;
+        validateDocumentJson(embedded);
+        return embedded;
       } catch (err) { console.warn('[DocumentStorage] Could not read embedded plan:', err); }
     }
     try {

@@ -1,31 +1,11 @@
 import * as THREE from 'three';
+import { embeddedAssets } from '../../platform/standalone/EmbeddedAssets';
 
 let urlModifierInstalled = false;
 
 /** Shared by Three.js loaders and CSS previews in the standalone editor. */
 export function resolveEmbeddedTextureUrl(url: string): string {
-  const map = typeof window !== 'undefined' ? window.__EMBEDDED_TEXTURES__ : undefined;
-  if (!map) return url;
-  const resolve = (key: string): string | undefined => {
-    const seen = new Set<string>();
-    while (map[key] && !seen.has(key)) {
-      seen.add(key);
-      const value = map[key];
-      if (!value.startsWith('@')) return value;
-      key = value.slice(1);
-    }
-    return undefined;
-  };
-  if (map[url]) return resolve(url) ?? url;
-  const normalized = url.startsWith('/') ? url : `/${url}`;
-  if (map[normalized]) return resolve(normalized) ?? url;
-  const filename = url.split('/').pop()?.split('?')[0];
-  if (filename) {
-    for (const key in map) {
-      if (key.endsWith('/' + filename) || key === filename) return resolve(key) ?? url;
-    }
-  }
-  return url;
+  return embeddedAssets()?.resolve(url) ?? url;
 }
 
 /** Intercept texture URLs with offline embedded base64 data URIs when running in standalone mode. */
@@ -41,9 +21,10 @@ export class TextureSource {
   private readonly manager = new THREE.LoadingManager();
   private loading = false;
   private readonly waiting = new Set<() => void>();
+  private readonly images = new Map<string, { image: HTMLImageElement; source: THREE.TextureSource<HTMLImageElement>; ready: Promise<THREE.TextureSource<HTMLImageElement>> }>();
 
   constructor() {
-    this.manager.setURLModifier((url) => THREE.DefaultLoadingManager.resolveURL(url));
+    this.manager.setURLModifier((url) => resolveEmbeddedTextureUrl(THREE.DefaultLoadingManager.resolveURL(url)));
     this.manager.onStart = () => { this.loading = true; };
     this.manager.onProgress = () => this.notify();
     this.manager.onLoad = () => {
@@ -64,11 +45,43 @@ export class TextureSource {
   }
 
   textureLoader(): THREE.TextureLoader {
-    return new THREE.TextureLoader(this.manager);
+    const loader = new THREE.TextureLoader(this.manager);
+    loader.load = (url, onLoad, onProgress, onError) => {
+      const entry = this.image(url, onProgress);
+      const texture = new THREE.Texture<HTMLImageElement>();
+      // Distinct samplers remain editable; compatible textures can share their
+      // decoded image and Three.js GPU source across palette/finish consumers.
+      texture.source = entry.source;
+      void entry.ready.then(() => { texture.needsUpdate = true; onLoad?.(texture); }, error => onError?.(error));
+      return texture;
+    };
+    return loader;
   }
 
   imageLoader(): THREE.ImageLoader {
-    return new THREE.ImageLoader(this.manager);
+    const loader = new THREE.ImageLoader(this.manager);
+    loader.load = (url, onLoad, onProgress, onError) => {
+      const entry = this.image(url, onProgress);
+      void entry.ready.then(() => onLoad?.(entry.image), error => onError?.(error));
+      return entry.image;
+    };
+    return loader;
+  }
+
+  private image(url: string, onProgress?: (event: ProgressEvent) => void) {
+    const key = this.manager.resolveURL(url);
+    const cached = this.images.get(key);
+    if (cached) return cached;
+    const source = new THREE.TextureSource<HTMLImageElement>(null!);
+    let image!: HTMLImageElement;
+    const ready = new Promise<THREE.TextureSource<HTMLImageElement>>((resolve, reject) => {
+      image = new THREE.ImageLoader(this.manager).load(key, loaded => {
+        source.data = loaded; resolve(source);
+      }, onProgress, error => { this.images.delete(key); reject(error); });
+    });
+    const entry = { image, source, ready };
+    this.images.set(key, entry);
+    return entry;
   }
 
   notify(): void {

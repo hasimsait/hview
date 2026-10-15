@@ -1,6 +1,7 @@
 import { expect, test, type Dialog, type Download } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { legacyData } from '../support/editor';
+import { standaloneBlockText } from '../../src/services/export/StandaloneHtml';
 import { numberField, objectPoint, offlineDocument, selectSofa, workflowPlan } from './workflow-helpers';
 
 test.use({ viewport: { width: 2300, height: 900 } });
@@ -93,7 +94,7 @@ test('downloaded viewer runs with every HTTP request blocked', async ({ page, br
     await offline.goto(offlineUrl);
     await expect(offline.locator('canvas')).toBeVisible();
     await expect(offline.locator('#room-bar')).toContainText('Living room');
-    expect(legacyData(await offline.locator('#plan-data').textContent() as string).plan.items.sofa.position).toEqual({ x: 2, y: 0, z: 2 });
+    expect(await offline.evaluate(() => JSON.parse(window.__HVIEW_RESOURCES__!.readText('plan-data')!).document.elements.find((entry: any) => entry.data.id === 'sofa').data.position)).toEqual({ x: 2, y: 0, z: 2 });
     await offline.locator('#btn-topdown').click();
     await expect(offline.locator('#btn-topdown')).toHaveClass(/active/);
     expect(errors).toEqual([]);
@@ -120,12 +121,12 @@ test('downloaded editor saves edits offline, reloads, and exports the updated pl
     await expect(offline.getByText('ID: sofa', { exact: true })).toBeVisible();
     await offline.getByRole('button', { name: 'Wood & Parquet', exact: true }).click();
     const woodPreview = offline.getByRole('button', { name: /Natural Scandinavian Oak/ }).locator('[style*="background-image"]');
-    await expect(woodPreview).toHaveCSS('background-image', /^url\("?data:image\//);
+    await expect(woodPreview).toHaveCSS('background-image', /^url\("?blob:/);
     await offline.getByRole('button', { name: 'Velvet & Fabric', exact: true }).click();
     const fabricPreviews = offline.locator('main .bg-cover[style*="background-image"]').filter({ visible: true });
     expect(await fabricPreviews.count()).toBeGreaterThan(0);
     for (const preview of await fabricPreviews.all()) {
-      await expect(preview).toHaveCSS('background-image', /^url\("?data:image\//);
+      await expect(preview).toHaveCSS('background-image', /^url\("?blob:/);
     }
     await numberField(offline, 'Width (X)').fill('225');
     await offline.getByRole('button', { name: 'Save .plan', exact: true }).click();
@@ -170,9 +171,7 @@ for (const exportButton of ['Full Editor (.html)', 'iPad Viewer (.html)']) {
       expect(result.error, 'exporting from the downloaded editor must not require an external template').toBeUndefined();
       expect(result.download).toBeDefined();
       const exported = readFileSync((await result.download!.path())!, 'utf8');
-      const planData = exported.match(/<script id="plan-data" type="application\/json">([\s\S]*?)<\/script>/);
-      expect(planData).not.toBeNull();
-      expect(legacyData(planData![1]).plan.items.sofa.pc).toEqual({ x: 200, y: 200 });
+      expect(legacyData(standaloneBlockText(exported, 'plan-data')).plan.items.sofa.pc).toEqual({ x: 200, y: 200 });
     } finally { await context.close(); }
   });
 }

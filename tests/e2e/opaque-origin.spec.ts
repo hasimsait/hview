@@ -1,6 +1,7 @@
 import { expect, test, type Frame, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { workflowPlan } from './workflow-helpers';
+import { standaloneBlockText } from '../../src/services/export/StandaloneHtml';
 
 async function opaqueEditor(page: Page, html: string): Promise<Frame> {
   // Managed Chromium blocks top-level data: navigation. A sandboxed srcdoc has
@@ -65,7 +66,7 @@ test('opaque-origin editor imports, edits, resets, and saves a portable HTML cop
     const destination = testInfo.outputPath('shortcut-saved.html');
     await (await downloading).saveAs(destination);
     const saved = readFileSync(destination, 'utf8');
-    const plan = JSON.parse(saved.match(/<script id="plan-data"[^>]*>([\s\S]*?)<\/script>/)![1]);
+    const plan = JSON.parse(standaloneBlockText(saved, 'plan-data'));
     expect(plan.document.elements.find((entry: any) => entry.data.id === 'sofa').data.dimensions.x).toBe(2.25);
     await expect(frame.getByRole('button', { name: 'Saved', exact: true })).toHaveCount(0);
     frame = await opaqueEditor(page, saved);
