@@ -1,5 +1,6 @@
 import type { AssetDefinition, AssetPlacement } from './AssetDefinition';
 import type { AccessoryModel } from './AccessoryModel';
+import { IKEA_BATHROOM_PRODUCTS } from './IkeaBathroomProducts';
 
 const WHITE = '#f4f1e9', BLACK = '#242427', GREY = '#62666a', BEIGE = '#cbbda6', GREEN = '#64796b', PINK = '#d6a4a4', GOLD = '#c4a35b', WOOD = '#c7a576';
 const shelf: AssetPlacement = { mount: 'surface', defaultElevation: .75 };
@@ -29,7 +30,7 @@ function product(article: string, range: string, label: string, collection: stri
   };
 }
 
-export const IKEA_ACCESSORIES: readonly AssetDefinition[] = [
+const GENERAL_ACCESSORIES: readonly AssetDefinition[] = [
   // Vases: hollow profiles rather than solid cylinders.
   product('10470991', 'PÅDRAG', 'Vase — Clear Glass, 17 cm', 'Vases', 'vase', [12, 12, 17], WHITE, 'padrag-vase-clear-glass', { material: 'glass', style: 'ribbed' }),
   product('20406297', 'BERÄKNA', 'Vase — Clear Glass, 30 cm', 'Vases', 'vase', [16, 16, 30], WHITE, 'beraekna-vase-clear-glass', { material: 'glass' }),
@@ -187,4 +188,10 @@ export const IKEA_ACCESSORIES: readonly AssetDefinition[] = [
   product('50411990', 'GLADOM', 'Tray Side Table — Black', 'Side tables', 'tray_table', [45, 45, 53], BLACK, 'gladom-tray-table-black', { material: 'metal' }),
   product('70337819', 'GLADOM', 'Tray Side Table — White', 'Side tables', 'tray_table', [45, 45, 53], WHITE, 'gladom-tray-table-white', { material: 'metal', url: 'https://www.ikea.com/de/en/p/gladom-tray-table-white-70337819/' }),
   product('70578451', 'GLADOM', 'Tray Side Table — Dark Grey-Green', 'Side tables', 'tray_table', [45, 45, 53], '#4b6359', 'gladom-tray-table-dark-grey-green', { material: 'metal', url: 'https://www.ikea.com/ae/en/p/gladom-tray-table-dark-grey-green-70578451/' }),
+];
+
+const bathroomArticles = new Set(IKEA_BATHROOM_PRODUCTS.map(asset => asset.source!.productCode));
+export const IKEA_ACCESSORIES: readonly AssetDefinition[] = [
+  ...GENERAL_ACCESSORIES.filter(asset => !bathroomArticles.has(asset.source!.productCode)),
+  ...IKEA_BATHROOM_PRODUCTS,
 ];

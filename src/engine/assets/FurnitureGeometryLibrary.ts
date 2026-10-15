@@ -5,10 +5,12 @@ import * as Furniture from "./builders/FurnitureBuilders";
 import * as Lighting from "./builders/LightingBuilders";
 import * as Catalogue from './builders/CatalogueBuilders';
 import { buildIkeaAccessory } from './builders/IkeaAccessoryBuilder';
+import { buildBathroomAccessory } from './builders/BathroomAccessoryBuilder';
 import { buildElectricalFitting } from './builders/ElectricalBuilders';
 import { buildAirPurifier, buildRobotVacuum } from './builders/HouseholdBuilders';
 
 export const FURNITURE_GEOMETRY: Readonly<Record<AssetRecipeId, AssetBuilderFn>> = {
+  bathroom_accessory: buildBathroomAccessory,
   electrical_fitting: buildElectricalFitting,
   robot_vacuum: buildRobotVacuum,
   air_purifier: buildAirPurifier,

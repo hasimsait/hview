@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { workflowPlan } from './workflow-helpers';
 import { escapeScriptJson, packStandaloneHtml, setScriptContent, standaloneBlockText } from '../../src/services/export/StandaloneHtml';
 import { IKEA_ACCESSORIES } from '../../src/domain/catalog/IkeaAccessories';
+import { IKEA_BATHROOM_PRODUCTS } from '../../src/domain/catalog/IkeaBathroomProducts';
 
 let original: string;
 const source = () => {
@@ -45,7 +46,7 @@ async function state(page: Page) {
   });
 }
 
-test('mobile catalogue filters 136 IKEA accessories and searches names without accents', async ({ page }, testInfo) => {
+test('mobile catalogue filters IKEA accessories and searches names without accents', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole('button', { name: 'Add Asset', exact: true }).click();
   await page.getByLabel('Catalogue source', { exact: true }).selectOption('IKEA');
@@ -82,6 +83,32 @@ test('IKEA lamps switch off, undo, and save; pendant cords meet a 2.7 m ceiling'
   expect((await state(page)).find(item => item.assetKey === 'ikea_60358015')).toMatchObject({ lightConfig: { enabled: false }, lights: [false] });
 });
 
+test('mobile bathroom catalogue finds Turkish-market caddies, mats and towels and saves their models', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('button', { name: 'Add Asset', exact: true }).click();
+  await page.getByLabel('Catalogue source', { exact: true }).selectOption('IKEA');
+  await page.getByLabel('Accessory type', { exact: true }).selectOption('Shower caddies');
+  await expect(page.getByText('7 assets available', { exact: true })).toBeVisible();
+  const search = page.getByPlaceholder('Search assets (e.g. towel, fan, sconce, bed, sink)...');
+  await search.fill('tisken');
+  await expect(page.getByText('2 assets available', { exact: true })).toBeVisible();
+  await search.fill('40381253');
+  await page.getByRole('button').filter({ has: page.getByRole('heading', { name: 'IKEA TISKEN Shower Basket — White', exact: true }) }).click();
+  expect((await state(page))[0]).toMatchObject({ assetKey: 'ikea_40381253', dimensions: { x: .28, z: .17, y: .17 }, position: { y: 1.25 } });
+  await choose(page, '90611812');
+  await choose(page, '10600964');
+  await choose(page, '10557423');
+  const items = await state(page);
+  expect(items.find(i => i.assetKey === 'ikea_90611812')).toMatchObject({ position: { y: 0 } });
+  expect(items.find(i => i.assetKey === 'ikea_10600964')).toMatchObject({ position: { y: .9 } });
+  expect(items.find(i => i.assetKey === 'ikea_10557423')).toMatchObject({ position: { y: .1 }, dimensions: { x: 1.8, y: 2, z: .08 } });
+  await page.getByRole('button', { name: 'Save .plan', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: 'Saving plan' })).toBeHidden();
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Move', exact: true })).toBeVisible();
+  expect((await state(page)).map(i => i.assetKey)).toEqual(expect.arrayContaining(['ikea_40381253', 'ikea_90611812', 'ikea_10600964', 'ikea_10557423']));
+});
+
 test('offline editor places IKEA accessories and exports their sizes and lamp settings', async ({ page, context, request }, testInfo) => {
   const template = await (await request.get('/hview_editor_template.html')).text();
   const html = packStandaloneHtml(setScriptContent(template, 'plan-data', escapeScriptJson(JSON.stringify(source()))));
@@ -92,6 +119,8 @@ test('offline editor places IKEA accessories and exports their sizes and lamp se
   await expect(page.getByRole('button', { name: 'Move', exact: true })).toBeVisible();
   await choose(page, '30586783');
   await choose(page, '10321618');
+  await choose(page, '40381253');
+  await choose(page, '20214731');
   await choose(page, '60358015');
   await page.getByRole('button', { name: '💡 ON', exact: true }).click();
   const downloading = page.waitForEvent('download');
@@ -103,8 +132,39 @@ test('offline editor places IKEA accessories and exports their sizes and lamp se
   expect(items).toEqual(expect.arrayContaining([
     expect.objectContaining({ assetKey: 'ikea_30586783', dimensions: { x: .35, y: .77, z: .45 }, position: expect.objectContaining({ y: 0 }) }),
     expect.objectContaining({ assetKey: 'ikea_10321618', dimensions: { x: .76, y: .56, z: .025 } }),
+    expect.objectContaining({ assetKey: 'ikea_40381253', dimensions: { x: .28, y: .17, z: .17 } }),
+    expect.objectContaining({ assetKey: 'ikea_20214731', position: expect.objectContaining({ y: 0 }) }),
     expect.objectContaining({ assetKey: 'ikea_60358015', lightConfig: expect.objectContaining({ enabled: false }) }),
   ]));
+});
+
+test('bathroom fittings, textiles and storage render together without shader errors', async ({ page, request }, testInfo) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('console', message => { if (message.type() === 'error' && /THREE|shader|WebGLProgram/.test(message.text())) errors.push(message.text()); });
+  const articles = ['40381253', '40454008', '10342545', '90342546', '10557423', '60426707', '38006200', '20214731', '40307866', '60265163', '70429003', '90611812'];
+  const raw = source();
+  const items: Record<string, object> = {};
+  articles.forEach((code, i) => {
+    const asset = IKEA_BATHROOM_PRODUCTS.find(a => a.source?.productCode === code)!;
+    items[code] = { name: asset.key, assetKey: asset.key, dimensions: asset.defaultDimensions,
+      pc: { x: 50 + i % 6 * 100, y: 40 + Math.floor(i / 6) * 180 }, angle: 180,
+      f0offset: i < 7 && !['10557423', '90342546', '10342545'].includes(code) ? 120 : 0 };
+  });
+  await request.post('/api/save-plan', { data: { plan: { ...raw.plan, walls: {}, items } } });
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Move', exact: true })).toBeVisible();
+  for (let i = 0; i < 2; i++) await page.getByRole('button', { name: /^Foreground:/ }).click();
+  await page.evaluate(async () => {
+    const path = '/src/main.tsx'; const { runtime } = await import(path);
+    runtime.scene.getCamera().position.set(7, 4, 7);
+    runtime.scene.getControls()!.target.set(2.8, 1, 1.2);
+    runtime.scene.getControls()!.update();
+  });
+  await expect.poll(async () => (await state(page)).length).toBe(articles.length);
+  await page.screenshot({ path: testInfo.outputPath('ikea-bathroom-gallery.png') });
+  expect(errors).toEqual([]);
 });
 
 test('different IKEA accessory families render together without shader errors', async ({ page, request }, testInfo) => {

@@ -1,6 +1,7 @@
 import type { Vector3D } from '../model/PlanData';
 import type { AssetRecipeId } from './AssetRecipes';
 import type { AccessoryModel } from './AccessoryModel';
+import type { BathroomModel } from './BathroomModel';
 
 export interface AssetPlacement {
   mount: 'floor' | 'wall' | 'ceiling' | 'surface';
@@ -34,6 +35,7 @@ export interface AssetDefinition {
   aliases?: string[];
   recipe?: AssetRecipeId;
   accessory?: AccessoryModel;
+  bathroom?: BathroomModel;
   electrical?: {
     series: 'karre' | 'bubble';
     control: 'single_switch' | 'double_switch' | 'socket' | 'double_socket';

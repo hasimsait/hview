@@ -3,7 +3,7 @@ import type { AccessoryKind } from '../../../domain/catalog/AccessoryModel';
 import type { AssetBuildContext } from './AssetBuildContext';
 
 /** Geometry is designed in a unit box then baked into metric coordinates. */
-function parts(c: AssetBuildContext) {
+export function accessoryParts(c: AssetBuildContext) {
   const add = (geometry: THREE.BufferGeometry, material: THREE.Material, section: string, x = 0, y = 0, z = 0) => {
     geometry.scale(c.w, c.h, c.d);
     const mesh = new THREE.Mesh(geometry, material);
@@ -32,7 +32,7 @@ function parts(c: AssetBuildContext) {
   };
   return { add, box, cylinder, lathe, ring, rod };
 }
-type Parts = ReturnType<typeof parts>;
+type Parts = ReturnType<typeof accessoryParts>;
 type Model = NonNullable<AssetBuildContext['definition']>['accessory'];
 interface Context { c: AssetBuildContext; p: Parts; model: NonNullable<Model>; body: THREE.Material; accent: THREE.Material; }
 
@@ -301,7 +301,7 @@ export function buildIkeaAccessory(c: AssetBuildContext): void {
   const base = bases[model.material ?? 'paint'];
   const body = c.coloredMaterial ? c.coloredMaterial(model.color, base) : base;
   const accent = model.accentColor && c.coloredMaterial ? c.coloredMaterial(model.accentColor, c.materials.whitePaint) : c.materials.woodLight;
-  const ctx: Context = { c, p: parts(c), model, body, accent }, { p } = ctx;
+  const ctx: Context = { c, p: accessoryParts(c), model, body, accent }, { p } = ctx;
   const builders: Record<AccessoryKind, () => void> = {
     vase: () => vessel(ctx, 'vase'), plant_pot: () => vessel(ctx, 'pot'), plant: () => plant(ctx),
     tumbler: () => vessel(ctx, 'cup'), soap_dish: () => vessel(ctx, 'dish'),

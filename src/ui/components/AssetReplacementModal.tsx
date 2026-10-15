@@ -147,7 +147,7 @@ export const AssetReplacementModal: React.FC<AssetReplacementModalProps> = ({
             const Icon = /plant|Vases/.test(collection) ? Flower2 : /lamp/.test(collection) ? Lamp
               : /Mirror|frame/.test(collection) ? Frame : collection === 'Clocks' ? Clock
                 : collection === 'Trolleys' ? ShoppingCart : collection === 'Kitchen accessories' ? Utensils
-                  : collection === 'Bathroom accessories' ? Bath : /Rug|Cushion/.test(collection) ? Layers
+                  : asset.category === 'bathroom' ? Bath : /Rug|Cushion/.test(collection) ? Layers
                     : /Storage|Basket|organiser/.test(collection) ? Archive : Box;
             const isCurrent = mode !== 'add' && item && asset.key.toLowerCase() === item.assetKey.toLowerCase();
             return (
@@ -177,7 +177,7 @@ export const AssetReplacementModal: React.FC<AssetReplacementModalProps> = ({
                   {asset.name}
                 </h4>
                 <p className="text-[10px] text-sky-300 mb-1">
-                  {asset.source ? `${asset.source.retailer} · ` : ''}{asset.source?.dimensions === 'estimated' ? 'Approx. ' : ''}
+                  {asset.source ? `${asset.source.retailer}${asset.source.productCode ? ` ${asset.source.productCode}` : ''} · ` : ''}{asset.source?.dimensions === 'estimated' ? 'Approx. ' : ''}
                   {[asset.defaultDimensions.x, asset.defaultDimensions.z, asset.defaultDimensions.y].map(n => +(n * 100).toFixed(1)).join(' × ')} cm (W × D × H)
                 </p>
                 {asset.source?.dimensionNotes && <p className="text-[10px] text-amber-200/80 mb-1">{asset.source.dimensionNotes}</p>}

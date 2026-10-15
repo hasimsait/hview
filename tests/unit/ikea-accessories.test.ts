@@ -4,7 +4,7 @@ import { AssetCatalog } from '../../src/domain/catalog/AssetCatalog';
 import { IKEA_ACCESSORIES } from '../../src/domain/catalog/IkeaAccessories';
 import { PlanCodec } from '../../src/domain/codec/PlanCodec';
 import { LegacyPlanWriter } from '../../src/domain/codec/LegacyPlanWriter';
-import { Luminaire } from '../../src/domain/elements/Furniture';
+import { Furniture, Luminaire } from '../../src/domain/elements/Furniture';
 import { FurnitureMeshBuilder } from '../../src/engine/assets/FurnitureMeshBuilder';
 import { ResourcePool } from '../../src/engine/resources/ResourcePool';
 import { EditorSession } from '../../src/application/EditorSession';
@@ -21,14 +21,14 @@ function item(asset: AssetDefinition) {
 }
 
 describe('IKEA accessory catalogue', () => {
-  it('offers over 100 distinct sourced products across 20 accessory collections', () => {
-    expect(IKEA_ACCESSORIES.length).toBeGreaterThanOrEqual(100);
-    expect(new Set(IKEA_ACCESSORIES.map(asset => asset.collection)).size).toBeGreaterThanOrEqual(20);
+  it('offers over 390 distinct sourced products across 40 accessory collections', () => {
+    expect(IKEA_ACCESSORIES.length).toBeGreaterThanOrEqual(390);
+    expect(new Set(IKEA_ACCESSORIES.map(asset => asset.collection)).size).toBeGreaterThanOrEqual(40);
     expect(new Set(IKEA_ACCESSORIES.map(asset => asset.source?.productCode)).size).toBe(IKEA_ACCESSORIES.length);
     for (const asset of IKEA_ACCESSORIES) {
       expect(catalog.get(asset.key)).toEqual(asset);
       expect(asset.name).toMatch(/^IKEA /);
-      expect(asset.source?.url).toMatch(/^https:\/\/www\.ikea\.com\//);
+      expect(asset.source?.url).toMatch(/^https:\/\/www\.ikea\.com(?:\.tr)?\//);
       expect(asset.source?.productCode).toMatch(/^\d{8}$/);
       expect(asset.placement?.mount).toBeTruthy();
       if (asset.source?.dimensions === 'estimated') expect(asset.source.dimensionNotes!.length).toBeGreaterThan(15);
@@ -49,7 +49,7 @@ describe('IKEA accessory catalogue', () => {
     }
     const lights: THREE.PointLight[] = [];
     model.traverse(child => { if (child instanceof THREE.PointLight) lights.push(child); });
-    expect(entity instanceof Luminaire).toBe(asset.accessory!.kind.endsWith('_lamp'));
+    expect(entity instanceof Luminaire).toBe(Boolean(asset.capabilities?.lighting));
     expect(lights.length).toBe(entity instanceof Luminaire ? 1 : 0);
   });
 
@@ -63,7 +63,7 @@ describe('IKEA accessory catalogue', () => {
     editor.execute(new TransformFurniture(vase.key, { x: 1, y: 1.2, z: 2 }, .7, { x: .2, y: .3, z: .2 }));
     for (const encoded of [codec.encode(editor.getDocument()), new LegacyPlanWriter().encode(editor.getDocument())]) {
       const restored = codec.decode(encoded);
-      for (const asset of IKEA_ACCESSORIES.slice(1)) expect(restored.get(asset.key)).toMatchObject({ assetKey: asset.key, displayName: asset.name, dimensions: asset.defaultDimensions });
+      for (const asset of IKEA_ACCESSORIES.slice(1)) expect((restored.get(asset.key) as Furniture).toData(), asset.key).toMatchObject({ assetKey: asset.key, displayName: asset.name, dimensions: asset.defaultDimensions });
       expect(restored.get(lamp.key)).toBeInstanceOf(Luminaire);
       expect(restored.get(lamp.key)).toMatchObject({ intensity: .35 });
       expect(restored.get(vase.key)).toMatchObject({ position: { x: 1, y: 1.2, z: 2 }, dimensions: { x: .2, y: .3, z: .2 }, sectionFinishes: { body: { color: '#557788' } } });

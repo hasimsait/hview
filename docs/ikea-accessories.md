@@ -1,6 +1,6 @@
 # IKEA accessory references
 
-136 additional IKEA products across 20 collections. Names use the official IKEA range followed by an English product description. These editable procedural planning models are based on official product pages and buying guides; they are not manufacturer CAD files.
+The original expansion added 136 IKEA products across 20 collections. The subsequent [IKEA Türkiye bathroom expansion](ikea-bathroom-turkiye.md) brings the complete accessory catalogue to 396 articles and supersedes five matching article entries below. Names use the official IKEA range followed by an English product description. These editable procedural planning models are based on official product pages and buying guides; they are not manufacturer CAD files.
 
 Dimensions are width × depth × height in centimetres. Where IKEA publishes only a height, print size, shade size or nursery-pot diameter, the remaining planning dimensions are explicitly estimated below and in the catalogue. Package dimensions are not treated as product dimensions. Plants have estimated foliage spread; cushion covers are shown filled, with an estimated depth. Pendant lamp heights include an estimated hanging drop. Availability and article numbers may differ by market.
 
