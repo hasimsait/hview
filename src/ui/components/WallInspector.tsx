@@ -8,7 +8,7 @@ import { SurfaceFinishPicker } from './SurfaceFinishPicker';
 import { WallFrameControls } from './wall/WallFrameControls';
 import { WallRecessSection } from './wall/WallRecessSection';
 import { WallRoomApplicator } from './wall/WallRoomApplicator';
-import { WallSideSelector } from './wall/WallSideSelector';
+import { SurfaceTargetSelector } from './SurfaceTargetSelector';
 import { WallSplitControls } from './wall/WallSplitControls';
 import { getWallTargetStrategy } from './wall/WallTargetStrategy';
 
@@ -180,9 +180,8 @@ export const WallInspector: React.FC<WallInspectorProps> = ({ wall, onClose }) =
         onSelectTarget={handleTargetChange}
       />
 
-      {/* Wall Side Selector */}
-      <WallSideSelector
-        wall={wall}
+      <SurfaceTargetSelector
+        kind="wall"
         activeTarget={activeTarget}
         roomA={roomA}
         roomB={roomB}

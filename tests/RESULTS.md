@@ -1,5 +1,9 @@
 # Validation results
 
+Column selector follow-up on 15 October 2026, starting from `443c816`: wall and column inspectors now render one shared `SurfaceTargetSelector`; the previous wall selector and column-only button row are removed. Strict TypeScript, production/standalone builds, five column unit tests, and three browser scenarios pass. The column browser scenario covers all-face and independent four-face painting, selected-target highlighting, undo/redo, recess selection/validation, and save/reload. The other browser scenarios cover wall paint highlighting and Bathroom isolation.
+
+The regenerated checked-in HTML also passes offline column selection, independent face painting, and manual save/reload, with zero page errors or external requests. Its bytes match the current template and working plan; source plans and the dependency lock are unchanged.
+
 Final checks on 15 October 2026, starting from `refactor` at `afe277e` and including the fixes committed with this record.
 
 | Check | Result |

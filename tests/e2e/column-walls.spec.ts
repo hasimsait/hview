@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { rawPlan } from '../unit/fixtures';
 
-test('column inspection creates one hosted recess, validates it, undoes it, and saves it', async ({ page, request }) => {
+test('column face selection edits independent finishes and saves them with its hosted recess', async ({ page, request }) => {
   const original = await (await request.get('/sample.plan')).text();
   try {
     const raw: any = rawPlan();
@@ -27,9 +27,33 @@ test('column inspection creates one hosted recess, validates it, undoes it, and 
     await page.mouse.click(point.x, point.y);
     await expect(page.getByText('ID: column', { exact: true })).toBeVisible();
     await expect(page.getByRole('heading', { name: /Column/ })).toBeVisible();
-    for (const name of ['front', 'back', 'left', 'right']) {
-      await expect(page.getByRole('button', { name })).toBeVisible();
+    await expect(page.getByRole('group', { name: 'Column Faces', exact: true })).toBeVisible();
+    await expect(page.getByRole('group', { name: 'End Faces', exact: true })).toBeVisible();
+    const faces = () => page.evaluate(async () => {
+      const runtimePath = '/src/main.tsx';
+      const { runtime } = await import(runtimePath);
+      const column = runtime.editor.getDocument().columns[0];
+      return [column.finishFront?.color, column.finishBack?.color, column.finishLeft?.color, column.finishRight?.color];
+    });
+    const allFaces = page.getByRole('button', { name: 'All Faces', exact: true });
+    await allFaces.click();
+    await expect(allFaces).toHaveAttribute('aria-pressed', 'true');
+    await page.getByTitle('White Dove (#f3f1ea)', { exact: true }).click();
+    expect(await faces()).toEqual(Array(4).fill('#f3f1ea'));
+    const colors = ['#fbfbf9', '#f7f6ef', '#f0ece2', '#2b343d'];
+    const names = ['Chantilly Lace', 'Simply White', 'Alabaster', 'Hale Navy'];
+    for (const [index, face] of ['Front', 'Back', 'Left', 'Right'].entries()) {
+      const button = page.getByRole('button', { name: face, exact: true });
+      await button.click();
+      await expect(button).toHaveAttribute('aria-pressed', 'true');
+      await expect(page.locator('aside button[aria-pressed="true"]')).toHaveCount(1);
+      await page.getByTitle(`${names[index]} (${colors[index]})`, { exact: true }).click();
+      expect(await faces()).toEqual(colors.map((color, i) => i <= index ? color : '#f3f1ea'));
     }
+    await page.getByRole('button', { name: 'Undo', exact: true }).click();
+    expect(await faces()).toEqual([...colors.slice(0, 3), '#f3f1ea']);
+    await page.getByRole('button', { name: 'Redo', exact: true }).click();
+    expect(await faces()).toEqual(colors);
     await expect(page.getByRole('button', { name: 'Add Recess', exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Add Recess', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Create Recess', exact: true })).toBeVisible();
@@ -42,6 +66,10 @@ test('column inspection creates one hosted recess, validates it, undoes it, and 
     await page.getByRole('button', { name: 'Create Recess', exact: true }).click();
     await expect(page.getByText('1 Objects', { exact: true })).toBeVisible();
     await expect(page.getByRole('alert')).toBeHidden();
+    const niche = page.getByRole('group', { name: 'Wall Recess Niche', exact: true });
+    await niche.getByRole('button', { name: 'Recess Sides', exact: true }).click();
+    await expect(niche.getByRole('button', { name: 'Recess Sides', exact: true })).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('aside button[aria-pressed="true"]')).toHaveCount(1);
     const recessState = () => page.evaluate(async () => {
       const runtimePath = '/src/main.tsx';
       const { runtime } = await import(runtimePath);
@@ -64,6 +92,7 @@ test('column inspection creates one hosted recess, validates it, undoes it, and 
     await page.reload();
     await expect(page.getByText('1 Objects', { exact: true })).toBeVisible();
     expect(await recessState()).toEqual(state);
+    expect(await faces()).toEqual(colors);
   } finally {
     expect((await request.post('/api/save-plan', { data: JSON.parse(original) })).ok()).toBe(true);
   }

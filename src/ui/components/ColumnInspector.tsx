@@ -6,6 +6,7 @@ import { Column } from '../../domain/elements/Column';
 import type { ColumnSide,SurfaceFinishConfig } from '../../domain/model/PlanData';
 import { useRuntime,useSelection } from '../context/RuntimeContext';
 import { SurfaceFinishPicker } from './SurfaceFinishPicker';
+import { SurfaceTargetSelector } from './SurfaceTargetSelector';
 import { WallRecessSection } from './wall/WallRecessSection';
 
 const COLUMN_SIDES: readonly ColumnSide[] = ['all', 'front', 'back', 'left', 'right'];
@@ -69,17 +70,12 @@ export function ColumnInspector({ column, onClose }: { column: Column; onClose: 
       <p className="text-xs text-slate-400">
         {column.width.toFixed(2)} × {column.depth.toFixed(2)} m
       </p>
-      <div className="flex gap-2">
-        {COLUMN_SIDES.map((value) => (
-          <button
-            key={value}
-            className={value === side && !isRecessTarget ? 'text-sky-400' : 'text-slate-400'}
-            onClick={() => runtime.editor.selection.select('column', column, value)}
-          >
-            {value}
-          </button>
-        ))}
-      </div>
+      <SurfaceTargetSelector
+        kind="column"
+        activeTarget={isRecessTarget && subtarget ? subtarget : side}
+        hasRecesses={recesses.length > 0}
+        onSelectTarget={(target) => runtime.editor.selection.select('column', column, target)}
+      />
       <p className="text-xs text-slate-500">ID: {column.id}</p>
       <WallRecessSection
         wall={shape}
