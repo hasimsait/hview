@@ -1,5 +1,11 @@
 # Validation results
 
+Wall-junction follow-up on 15 October 2026, starting from `e2628a9`: the 5 cm connector at the living-room door corner was being used as its own through-wall pair, cutting back `_w5f7a_a` by about 5 cm. Through-wall selection now uses distinct substantial walls and prefers the longest continuous run. `PlanDocument` owns junction resolution for imports and edits; the legacy reader and split operation no longer calculate separate trims. Stale canonical offsets are repaired without changing wall coordinates, openings, or finishes.
+
+All 155 unit tests (including five new junction regressions), strict TypeScript, 80 Node persistence/export checks, and production/standalone builds pass. Mesh raycasts reproduce the missing strip in both source plans before the fix and find solid wall after it. The actual regenerated root HTML imports an old canonical file with the bad trim, selects the formerly empty strip, and manually saves the repaired trim offline with zero page errors or external requests. The HTML exactly matches its current template and working plan; source plans and the dependency lock remain unchanged.
+
+The full Chromium run passed all 22 existing scenarios. The new junction scenario initially expected a zero-column badge that the header omits; after correcting that expectation, all three reported-bug scenarios passed again. All 23 distinct browser scenarios are verified; no assertion was skipped or disabled.
+
 Column selector follow-up on 15 October 2026, starting from `443c816`: wall and column inspectors now render one shared `SurfaceTargetSelector`; the previous wall selector and column-only button row are removed. Strict TypeScript, production/standalone builds, five column unit tests, and three browser scenarios pass. The column browser scenario covers all-face and independent four-face painting, selected-target highlighting, undo/redo, recess selection/validation, and save/reload. The other browser scenarios cover wall paint highlighting and Bathroom isolation.
 
 The regenerated checked-in HTML also passes offline column selection, independent face painting, and manual save/reload, with zero page errors or external requests. Its bytes match the current template and working plan; source plans and the dependency lock are unchanged.

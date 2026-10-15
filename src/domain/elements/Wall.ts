@@ -83,7 +83,7 @@ export class Wall extends PlanElement {
     return new Wall({ ...this.state, ...relationship, openings: [] }, this.openings);
   }
   withJunctionOffsets(startOffset: number, endOffset: number): Wall {
-    return startOffset === this.startOffset && endOffset === this.endOffset ? this
+    return startOffset === (this.startOffset ?? 0) && endOffset === (this.endOffset ?? 0) ? this
       : new Wall({ ...this.state, startOffset, endOffset, openings: [] }, this.openings);
   }
   assertSplittable(distance: number): void {

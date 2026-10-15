@@ -26,6 +26,29 @@ async function selectWall(page: import('@playwright/test').Page) {
   await page.getByTitle('Side A', { exact: true }).click();
 }
 
+test('the living-room door-wall junction has no selectable gap beside the door', async ({ page, request }) => {
+  const raw = legacyData(readFileSync('public/sample.plan', 'utf8'));
+  const plan = raw.plan || raw;
+  plan.walls = Object.fromEntries(['_g9657', '_rxf4v', '_vfhig', '_w5f7a_a'].map(id => [id, plan.walls[id]]));
+  plan.rooms2 = {}; plan.items = {}; plan.columns = [];
+  expect((await request.post('/api/save-plan', { data: raw })).ok()).toBe(true);
+  await page.goto('/');
+  await expect(page.getByText('4 Walls', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: /2D Plan/ }).click();
+  const point = await page.evaluate(async () => {
+    const runtimePath = '/src/main.tsx';
+    const { runtime } = await import(runtimePath);
+    const scene = runtime.scene;
+    const wall = runtime.editor.getDocument().requireWall('_w5f7a_a');
+    // Click the actual strip previously cut away by the junction resolver.
+    const p = scene.getCamera().position.clone().set(wall.p1.x, wall.height, wall.p1.y + 0.015).project(scene.getCamera());
+    const rect = scene.getDomElement().getBoundingClientRect();
+    return { x: rect.left + (p.x + 1) * rect.width / 2, y: rect.top + (1 - p.y) * rect.height / 2 };
+  });
+  await page.mouse.click(point.x, point.y);
+  await expect(page.getByText('ID: _w5f7a_a', { exact: true })).toBeVisible();
+});
+
 test('paint highlight changes while the wall remains focused, not only after reselection', async ({ page, request }) => {
   const plan = workflowPlan();
   Object.assign(plan.plan.walls.wall, { finishSideA: { type: 'paint', color: '#fbfbf9', roughness: 0.85 } });

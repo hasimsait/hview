@@ -9,7 +9,6 @@ Point2D,
 RoomData,
 WallData,
 } from '../model/PlanData';
-import { WallJunctions } from '../model/WallJunctions';
 import { WallTopology } from '../model/WallTopology';
 import { migrateColumnWalls } from './LegacyColumnMigration';
 
@@ -42,7 +41,6 @@ export class LegacyPlanReader {
       migrateColumnWalls(candidateDoc, false);
       this.excludeTinySpaces(candidateDoc);
       this.mapWallRooms(candidateDoc.walls, candidateDoc.rooms);
-      for (const [id, offset] of WallJunctions.resolve(candidateDoc.walls)) Object.assign(candidateDoc.walls.find((wall: WallData) => wall.id === id)!, offset);
       return {
         version: candidateDoc.version || 3,
         totalHeight: candidateDoc.totalHeight || 2.7,
@@ -168,9 +166,6 @@ export class LegacyPlanReader {
       });
       walls.length = 0;
       walls.push(...activeWalls);
-
-      // Compute exact non-penetrating wall corner offsets
-      for (const wall of walls) Object.assign(wall, WallJunctions.resolve(walls).get(wall.id));
     }
 
     const rooms: RoomData[] = [];
@@ -325,7 +320,6 @@ export class LegacyPlanReader {
     migrateColumnWalls(document);
     this.excludeTinySpaces(document);
     this.mapWallRooms(document.walls, document.rooms);
-    for (const [id, offset] of WallJunctions.resolve(document.walls)) Object.assign(document.walls.find(wall => wall.id === id)!, offset);
     return document;
   }
 

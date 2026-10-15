@@ -91,7 +91,7 @@ export class WallJunctions {
         }
       }
 
-      if (cluster.length === 2) {
+      if (cluster.length === 2 && cluster[0].wall.id !== cluster[1].wall.id) {
         // Two walls meeting at a corner or collinear joint
         const [a, b] = cluster;
         const dot = a.dirAway.x * b.dirAway.x + a.dirAway.y * b.dirAway.y;
@@ -154,24 +154,29 @@ export class WallJunctions {
           }
         }
       } else if (cluster.length > 2) {
-        // Multi-wall intersection: check if any pair is collinear (through-line)
+        // A short connector can have both endpoints in this cluster. It cannot
+        // be its own through-line or dominate the actual continuous wall run.
         let collinearPair: [EndpointRef, EndpointRef] | null = null;
+        let throughLength = 0;
         for (let m = 0; m < cluster.length; m++) {
           for (let n = m + 1; n < cluster.length; n++) {
+            const first = cluster[m], second = cluster[n];
+            if (first.wall.id === second.wall.id) continue;
+            const firstLength = getWallDir(first.wall).len;
+            const secondLength = getWallDir(second.wall).len;
+            if (firstLength < first.wall.thickness * 1.5 || secondLength < second.wall.thickness * 1.5) continue;
             const dot =
-              cluster[m].dirAway.x * cluster[n].dirAway.x +
-              cluster[m].dirAway.y * cluster[n].dirAway.y;
+              first.dirAway.x * second.dirAway.x + first.dirAway.y * second.dirAway.y;
             if (dot < -0.90) {
               const dx = cluster[n].point.x - cluster[m].point.x;
               const dy = cluster[n].point.y - cluster[m].point.y;
               const perpDist = Math.abs(dx * (-cluster[m].dirAway.y) + dy * cluster[m].dirAway.x);
-              if (perpDist <= 0.05) {
-                collinearPair = [cluster[m], cluster[n]];
-                break;
+              if (perpDist <= 0.05 && firstLength + secondLength > throughLength) {
+                collinearPair = [first, second];
+                throughLength = firstLength + secondLength;
               }
             }
           }
-          if (collinearPair) break;
         }
 
         if (collinearPair) {

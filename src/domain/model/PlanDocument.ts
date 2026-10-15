@@ -54,9 +54,18 @@ export class PlanDocument {
     extensions: unknown = {},
   ) {
     positive(totalHeight, 'Plan height');
-    this.elements = Object.freeze([...elements]);
+    // Junction trims belong to the current network, never to a saved offset.
+    // Resolve them once here for every import and structural edit.
+    const walls = elements.filter((element): element is Wall => element instanceof Wall);
+    const columns = elements.filter((element): element is Column => element instanceof Column);
+    const offsets = WallJunctions.resolve([...walls, ...columns.map(column => column.wallShape(totalHeight))]);
+    this.elements = Object.freeze(elements.map(element => {
+      const offset = offsets.get(element.id);
+      return element instanceof Wall && offset
+        ? element.withJunctionOffsets(offset.startOffset, offset.endOffset) : element;
+    }));
     this.index = new DocumentIndex();
-    for (const element of elements) element.accept(this.index);
+    for (const element of this.elements) element.accept(this.index);
     this.walls = Object.freeze(this.index.walls);
     this.rooms = Object.freeze(this.index.rooms);
     this.columns = Object.freeze(this.index.columns);
@@ -229,12 +238,7 @@ export class PlanDocument {
     const next = elements.map(element => element instanceof Column && element.stubIds?.includes(id)
       ? element.withSources(element.stubIds.flatMap(source => source === id ? [firstId, secondId] : [source])) : element);
     const hosted = this.rehostRecesses(next, wall, distance, firstId, secondId);
-    const offsets = WallJunctions.resolve(hosted.filter((element): element is Wall => element instanceof Wall));
-    const resolved = hosted.map(element => {
-      const offset = offsets.get(element.id);
-      return element instanceof Wall && offset ? element.withJunctionOffsets(offset.startOffset, offset.endOffset) : element;
-    });
-    const document = this.next(resolved);
+    const document = this.next(hosted);
     return { document, wall1: document.requireWall(firstId), wall2: document.requireWall(secondId) };
   }
 }

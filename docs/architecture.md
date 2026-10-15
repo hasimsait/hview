@@ -37,6 +37,8 @@ flowchart LR
 
 `PlanDocument` enforces global IDs and wall ownership of openings. Hosted openings are stored once in their wall and indexed by the aggregate. Its walls/rooms/columns/furniture collections are immutable derived indexes. Splitting a wall rejects intersecting apertures, preserves opening world positions, recomputes junctions and room relationships, and rehosts related recesses. Columns remain actual `Column` instances; their rectangular extrusion input is a temporary geometry value. Column splitting produces two columns.
 
+Every document snapshot resolves wall junction trims through `WallJunctions`. Imports, splits, and deletions use this same path; stale saved offsets cannot override the current network. Unchanged walls retain their identity, so finish edits keep the existing geometry. Codecs import coordinates and finishes without calculating their own junctions.
+
 Transport interfaces in `domain/model/PlanData.ts` describe codec inputs and detached `toData()` results. They are not another document store. Unknown legacy metadata is frozen and retained for compatibility; recognized top-level collections are removed from that sidecar and regenerated from live elements on legacy export.
 
 ## Editing, history, and selection
@@ -44,6 +46,8 @@ Transport interfaces in `domain/model/PlanData.ts` describe codec inputs and det
 React and gizmos execute commands such as `TransformFurniture`, `ConfigureLuminaire`, `FinishWall`, and `SplitColumn`. There is no generic mutable furniture patch API. Gizmo movement is a render preview; release commits one transform command. `CommandBatch` applies an operation atomically. A failing command leaves document/history unchanged.
 
 `EditHistory` holds immutable before/after document references. Undo and redo restore those references and reconcile rendering through the same document subscription. Selection is a discriminated ID union, separate from persistent state. Inspector surface targets read this union directly; they are not mirrored through React effects. Surface keys are canonicalized at the codec/entity boundary, so historical case and recess aliases cannot create competing finish values. Inspectors resolve selected IDs against the current document; they do not hold editable copies of selected entities.
+
+Wall and column inspectors render their supported faces and recess targets through `SurfaceTargetSelector`. That component owns the shared grouped controls and selection styling; inspectors send the selected target through the existing commands.
 
 ## Rendering and resources
 
