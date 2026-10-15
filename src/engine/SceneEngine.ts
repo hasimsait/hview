@@ -20,7 +20,7 @@ import { RenderScheduler } from './RenderScheduler';
 import { ResourcePool,type ResourceLease } from './resources/ResourcePool';
 import { SceneVisibility } from './visibility/SceneVisibility';
 
-import { CameraNavigationController } from '../services/rendering/CameraNavigationController';
+import { CameraNavigationController, MAX_CAMERA_PITCH } from '../services/rendering/CameraNavigationController';
 import { CeilingMeshBuilder } from "./geometry/CeilingMeshBuilder";
 import { FloorMeshBuilder } from "./geometry/FloorMeshBuilder";
 import { OpeningMeshBuilder } from "./geometry/OpeningMeshBuilder";
@@ -210,7 +210,9 @@ export class SceneEngine implements ISceneService {
     this.controls = new OrbitControls(this.activeCamera, this.renderer.domElement);
     this.controls.addEventListener('change', () => this.invalidate());
     this.controls.enableDamping = false; // Immediate stop on pointer release - zero momentum!
-    this.controls.maxPolarAngle = Math.PI / 2 - 0.02; // Don't dip below floor
+    // Looking toward the ceiling puts the target above the camera. A horizon
+    // limit would orbit the camera out of place when synchronising that view.
+    this.controls.maxPolarAngle = Math.PI / 2 + MAX_CAMERA_PITCH;
     this.controls.minDistance = 1;
     this.controls.maxDistance = 60;
     this.controls.target.set(0, 0, 0);

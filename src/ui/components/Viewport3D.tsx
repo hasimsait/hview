@@ -115,7 +115,10 @@ export const Viewport3D: React.FC<{ disabled?: boolean; hideControls?: boolean }
           <strong className="text-slate-200">Q / E:</strong> Elevation
         </span>
         <span>
-          <strong className="text-slate-200">Arrows:</strong> Look Angle
+          <strong className="text-slate-200">↑ / ↓:</strong> Tilt
+        </span>
+        <span>
+          <strong className="text-slate-200">← / →:</strong> Turn
         </span>
         <span>
           <strong className="text-slate-200">Shift:</strong> Boost

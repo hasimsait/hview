@@ -2,6 +2,8 @@ import { ViewMode } from '@core/types/services';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
+export const MAX_CAMERA_PITCH = Math.PI / 2 - .04;
+
 export interface CameraNavigationOptions {
   onInput?: () => void;
   moveSpeed?: number;      // Walking speed in meters/second (default: 2.8)
@@ -27,10 +29,8 @@ export class CameraNavigationController {
   private forwardVector = new THREE.Vector3();
   private rightVector = new THREE.Vector3();
   private tempOffset = new THREE.Vector3();
-  private camRight = new THREE.Vector3();
   private moveDelta = new THREE.Vector3();
   private panDelta = new THREE.Vector3();
-  private worldUp = new THREE.Vector3(0, 1, 0);
 
   constructor(
     private perspectiveCamera: THREE.PerspectiveCamera,
@@ -99,7 +99,8 @@ export class CameraNavigationController {
       key === 'ArrowDown' ||
       key === 'ArrowLeft' ||
       key === 'ArrowRight' ||
-      key === 'Shift';
+      key === 'Shift' ||
+      key === 'Control';
 
     if (isNavKey) {
       this.keys[code] = true;
@@ -157,49 +158,25 @@ export class CameraNavigationController {
 
     const camera = this.perspectiveCamera;
 
-    // --- 1. ROTATION (Arrow Keys) ---
-    // In-place rotation: rotate view direction (controls.target) around camera.position
+    // Arrow keys change the view from a fixed eye position. OrbitControls must
+    // allow the target above eye level or its next update would move the camera.
     const offset = this.tempOffset.subVectors(controls.target, camera.position);
     let distance = offset.length();
     if (distance < 0.2) {
       distance = 2.0;
-      offset.normalize().multiplyScalar(distance);
+      camera.getWorldDirection(offset).multiplyScalar(distance);
     }
 
-    let hasRotated = false;
-
-    // A. Yaw (Turn Left / Right)
-    if (!isCtrl) {
-      if (this.keys['ArrowLeft']) {
-        offset.applyAxisAngle(this.worldUp, currentRotSpeed);
-        hasRotated = true;
-      }
-      if (this.keys['ArrowRight']) {
-        offset.applyAxisAngle(this.worldUp, -currentRotSpeed);
-        hasRotated = true;
-      }
-
-      // B. Pitch (Tilt Up / Down)
-      const lookUp = this.keys['ArrowUp'];
-      const lookDown = this.keys['ArrowDown'];
-      if (lookUp || lookDown) {
-        // Calculate camera's horizontal right axis
-        const camRight = this.camRight.crossVectors(offset, this.worldUp).normalize();
-        if (camRight.lengthSq() > 0.001) {
-          const currentPitch = Math.asin(THREE.MathUtils.clamp(offset.y / distance, -0.999, 0.999));
-          const pitchDelta = (lookUp ? 1 : -1) * currentRotSpeed;
-          const maxPitch = Math.PI / 2 - 0.04;  // ~87 degrees (avoid gimbal flipping)
-          const minPitch = -Math.PI / 2 + 0.04;
-          const newPitch = THREE.MathUtils.clamp(currentPitch + pitchDelta, minPitch, maxPitch);
-          const actualDelta = newPitch - currentPitch;
-          offset.applyAxisAngle(camRight, actualDelta);
-          hasRotated = true;
-        }
-      }
-    }
-
-    if (hasRotated) {
-      offset.normalize().multiplyScalar(distance);
+    const turn = Number(Boolean(this.keys['ArrowLeft'])) - Number(Boolean(this.keys['ArrowRight']));
+    const tilt = Number(Boolean(this.keys['ArrowUp'])) - Number(Boolean(this.keys['ArrowDown']));
+    if (!isCtrl && (turn || tilt)) {
+      const yaw = Math.atan2(offset.x, offset.z) + turn * currentRotSpeed;
+      const pitch = THREE.MathUtils.clamp(
+        Math.atan2(offset.y, Math.hypot(offset.x, offset.z)) + tilt * currentRotSpeed,
+        -MAX_CAMERA_PITCH, MAX_CAMERA_PITCH
+      );
+      const horizontal = Math.cos(pitch) * distance;
+      offset.set(Math.sin(yaw) * horizontal, Math.sin(pitch) * distance, Math.cos(yaw) * horizontal);
       controls.target.copy(camera.position).add(offset);
     }
 
