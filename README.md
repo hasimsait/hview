@@ -4,6 +4,8 @@ A 3D interior viewer and editor built with TypeScript, React, and Three.js. Edit
 
 For a ready-to-open copy, download [hview_editor.html](hview_editor.html) using GitHub's **Download raw file** action and open it in your browser. It embeds the working `public/sample.plan` used for the bathroom regression, the current editor, textures, and offline export templates. Regenerate this portable snapshot with `npm ci && npm run build:sample-editor`. Browser storage preserves prior saves for the same file path; **Reset** restores the embedded working plan.
 
+**Required for future changes:** Any change to application code, styles, assets, dependencies, build/export logic, or `public/sample.plan` must include a freshly generated root-level `hview_editor.html` in the same commit or PR. Run `npm run build:sample-editor`, verify the generated editor opens offline, and commit the updated HTML alongside the source changes before pushing. The checked-in HTML must reflect the current source and working plan; do not leave an outdated build in the repository or edit the generated HTML by hand.
+
 ## Run
 
 Use Node.js 20.19+ or 22.12+ and npm. Install the locked dependencies, then start Vite:
@@ -48,6 +50,7 @@ Saving is explicit. **Save .plan** captures the current document and locks the a
 
 ```sh
 npm run build                 # Type check, production app, standalone HTML files
+npm run build:sample-editor   # Regenerate the required checked-in hview_editor.html
 npm run test:types            # Application and test TypeScript
 npm test                      # Unit tests and Node regressions; build first
 npm run test:coverage         # Domain/application/persistence/render-node coverage
