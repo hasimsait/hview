@@ -6,8 +6,10 @@ import { ensureLocalMetricBounds,ensureStretchedUvs } from "../materials/Surface
 import { TextureSource } from '../materials/TextureSource';
 import { AssetBuildContext,ProceduralMaterials } from "./builders/AssetBuildContext";
 import { FURNITURE_GEOMETRY } from "./FurnitureGeometryLibrary";
+import { mobileRendering } from '../RenderQuality';
 
 export class FurnitureMeshBuilder {
+  private readonly outlines = !mobileRendering();
   // Shared occlusion uniforms — same pattern as WallMeshBuilder.
   // Driven each frame by SceneEngine via updateOrbitPlane().
   private occlusionUniforms = createOcclusionUniforms();
@@ -174,7 +176,9 @@ export class FurnitureMeshBuilder {
     });
 
     // Add crisp architectural cel-shading contour outlines
-    this.addCelOutlines(group);
+    // Small contour meshes add hundreds of submissions on phones. The main
+    // geometry and all editable sections remain identical.
+    if (this.outlines) this.addCelOutlines(group);
 
     return group;
   }

@@ -165,8 +165,8 @@ export class TileTextureStrategy {
 
   private createTileAtlas(entry: TileEntry): THREE.Texture {
     const numVariants = entry.textures.length;
-    const cellW = 1024;
-    const cellH = 1024;
+    const cellW = 512;
+    const cellH = 512;
     const canvas = this.canvas.create();
     canvas.width = cellW * numVariants;
     canvas.height = cellH;

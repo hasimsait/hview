@@ -73,12 +73,12 @@ export class PlanCodec {
     return new PlanDocument(elements, data.totalHeight, data.version, legacyMetadata(data.rawPlan));
   }
 
-  encode(document: PlanDocument): string {
+  encode(document: PlanDocument, pretty = true): string {
     return JSON.stringify({
       schemaVersion: 1, document: {
         version: document.version, totalHeight: document.totalHeight,
         elements: document.elements.map(element => element.accept(this.encoder)), extensions: document.rawPlan,
       }
-    }, null, 2);
+    }, null, pretty ? 2 : undefined);
   }
 }

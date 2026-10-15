@@ -22,7 +22,7 @@ export class DocumentExports {
   private async html(kind: keyof StandaloneTemplates, plan: PlanDocument | undefined, filename: string): Promise<void> {
     const document = plan ?? this.editor.getDocument();
     const template = await this.templates.load(kind);
-    const html = setScriptContent(template, 'plan-data', escapeScriptJson(this.codec.encode(document)));
+    const html = setScriptContent(template, 'plan-data', escapeScriptJson(this.codec.encode(document, false)));
     this.downloads.save(html, 'text/html;charset=utf-8', filename.endsWith('.html') ? filename : `${filename}.html`);
   }
 }

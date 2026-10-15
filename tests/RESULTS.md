@@ -1,5 +1,19 @@
 # Validation results
 
+Performance and iPhone Shortcut work on 15 October 2026, starting from `refactor` at `de40429` on branch `performance`:
+
+- The regenerated working-plan editor is about 3.66 MB, compared with 21.64 MB before the changes. Its outer base64 Shortcut URL is about 4.88 MB rather than 28.86 MB. All finish choices and offline editor/viewer re-export remain embedded.
+- The mobile-sized Chromium/SwiftShader profile submits 1,130 draws per sampled frame, compared with 2,371. Initial programs fall from 36 (22 distinct sources) to 19 (19 distinct sources). These are rendering diagnostics, not native Safari timings.
+- Estimated RGBA material-texture storage, including enabled mipmaps, falls from about 146 MiB to 51 MiB. This estimate excludes buffers/render targets and is not a measured iOS process total.
+- Context restoration now prepares materials and redraws without user input. Mobile lighting follows the focused area with at most four fixtures at night; new glass finishes retain the mobile transmission budget. Hidden ceilings are built when requested.
+- Shortcut/opaque documents never read their payload-sized pathname for a persistence key and do not access localStorage. Ordinary saved-copy keys remain compatible. Save HTML downloads the current document; reset works in memory. Element IDs work when secure-context-only randomUUID is unavailable.
+
+The 166 unit tests, 80 Node persistence/export regressions, strict application/test TypeScript, coverage thresholds, production/standalone builds, and GPU layer check pass. The complete 25-scenario Chromium suite passed before the additional Shortcut-specific changes; affected save, mobile, and export workflows were rerun alongside the new opaque-origin regression. Coverage is 92.67% lines/statements, 87.97% functions, and 85.43% branches for the configured scope.
+
+The opaque-origin browser regression imports a plan, edits a dimension, resets, downloads Save HTML, and reopens the edited HTML with localStorage throwing SecurityError and all HTTP requests blocked. Top-level data navigation is blocked by managed Chromium, so the actual opaque security origin is exercised using a sandboxed srcdoc; a separate regression throws on any data-URL pathname access or encoding. Native iPhone Shortcut navigation, peak process memory, and Jetsam/GPU reset causation still require device verification.
+
+Original plans and source images are unchanged. The root HTML is regenerated from the current template and working plan. The dependency lock adds build-time Sharp image optimization and the bundled fflate decoder used only for offline viewer-template expansion.
+
 Wall-junction follow-up on 15 October 2026, starting from `e2628a9`: the 5 cm connector at the living-room door corner was being used as its own through-wall pair, cutting back `_w5f7a_a` by about 5 cm. Through-wall selection now uses distinct substantial walls and prefers the longest continuous run. `PlanDocument` owns junction resolution for imports and edits; the legacy reader and split operation no longer calculate separate trims. Stale canonical offsets are repaired without changing wall coordinates, openings, or finishes.
 
 All 155 unit tests (including five new junction regressions), strict TypeScript, 80 Node persistence/export checks, and production/standalone builds pass. Mesh raycasts reproduce the missing strip in both source plans before the fix and find solid wall after it. The actual regenerated root HTML imports an old canonical file with the bad trim, selects the formerly empty strip, and manually saves the repaired trim offline with zero page errors or external requests. The HTML exactly matches its current template and working plan; source plans and the dependency lock remain unchanged.

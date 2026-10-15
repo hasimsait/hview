@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
+import { gunzipSync } from 'node:zlib';
 import { ReplaceFurniture } from '../src/application/commands/FurnitureCommands';
 import { DocumentExports } from '../src/application/DocumentExports';
 import { PlanCodec } from '../src/domain/codec/PlanCodec';
@@ -62,7 +63,8 @@ test('built editor re-exports editors and viewers repeatedly with network unavai
   const catalog = script(source, 'tile-catalog-data');
   const templates = legacyData(templatesJson);
   assert.equal(script(templates.editor, EXPORT_TEMPLATES_ID), '');
-  assert.equal(script(templates.viewer, 'embedded-textures'), '');
+  assert.equal(script(gunzipSync(Buffer.from(templates.viewer.slice('gzip-base64:'.length), 'base64')).toString(), 'embedded-textures'), '');
+  assert.equal(script(templates.editor, 'editor-runtime'), '');
 
   for (const key of ['chair', 'bed_double', 'table']) {
     manager.execute(new ReplaceFurniture('item_1', key));
@@ -72,6 +74,7 @@ test('built editor re-exports editors and viewers repeatedly with network unavai
     assert.equal(script(editor, EXPORT_TEMPLATES_ID), templatesJson);
     assert.equal(script(editor, 'embedded-textures'), textures);
     assert.equal(script(editor, 'tile-catalog-data'), catalog);
+    assert.equal(script(editor, 'editor-runtime'), script(source, 'editor-runtime'));
     const plan = legacyData(script(editor, 'plan-data'));
     assert.equal(plan.plan.items.item_1.assetKey, manager.factory.catalog.canonicalKey(key));
     assert.equal(plan.plan.items.item_1.name, title);

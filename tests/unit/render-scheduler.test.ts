@@ -25,4 +25,13 @@ describe('render scheduling', () => {
   it('cancels pending work on disposal and ignores later invalidations', () => {
     const { scheduler, pending } = fixture(); scheduler.invalidate(); scheduler.dispose(); scheduler.invalidate(); expect(pending.size).toBe(0);
   });
+  it('pauses pending draws during context loss and redraws after restoration', () => {
+    const { scheduler, pending, render, frame } = fixture();
+    scheduler.invalidate(); scheduler.suspend(); scheduler.invalidate();
+    expect(pending.size).toBe(0);
+    scheduler.resume(); scheduler.resume();
+    expect(pending.size).toBe(1);
+    frame(); expect(render).toHaveBeenCalledOnce(); expect(pending.size).toBe(0);
+    scheduler.dispose(); scheduler.resume(); expect(pending.size).toBe(0);
+  });
 });

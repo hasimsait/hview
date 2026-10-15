@@ -46,6 +46,12 @@ Saving is explicit. **Save .plan** captures the current document and locks the a
 - Standalone editors save to browser storage scoped to their document path and reset to their embedded original plan. They can export updated plans and HTML files offline.
 - Unknown vendor metadata is preserved, but recognized collections and relationships are exported from live domain objects.
 
+Portable HTML includes the full finish catalog and requires no server, asset folder, or network connection. Export builds resize tile photos to at most 1024 pixels and wood/fabric photos to 512 pixels, encode them as WebP, and store identical images once. Original source images remain unchanged. Offline editors reuse their own embedded application code for another editor export and unpack the embedded viewer only when requested.
+
+On touch devices, the renderer limits pixel density, omits furniture contour meshes and shadow/transmission passes, and uses at most four nearby fixture lights in night mode. Daylight uses the sun and ambient fill. Desktop rendering retains its existing quality settings. Shader preparation happens before the initial view, and a restored GPU context triggers preparation and redraw automatically.
+
+For iPhone Shortcuts that open HTML through a `data:` URL, the editor never reads the payload-sized pathname for storage keys and never attempts origin-based browser storage. Edits live in the tab; **Save HTML** downloads a new self-contained copy with those edits. **Reset** restores the embedded plan in memory. Ordinary file/hosted copies retain their existing browser saves. No server, service worker, database, or asset fetch is required for a portable copy.
+
 ## Build and test
 
 ```sh

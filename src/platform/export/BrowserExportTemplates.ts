@@ -1,4 +1,4 @@
-import { EXPORT_TEMPLATES_ID,type StandaloneTemplates,restoreExportTemplate } from '../../services/export/StandaloneHtml';
+import { EDITOR_RUNTIME_ID,EXPORT_TEMPLATES_ID,type StandaloneTemplates,restoreExportTemplate } from '../../services/export/StandaloneHtml';
 
 export class BrowserExportTemplates {
   async load(kind: keyof StandaloneTemplates): Promise<string> {
@@ -8,7 +8,7 @@ export class BrowserExportTemplates {
       const textures = document.getElementById('embedded-textures')?.textContent;
       const catalog = document.getElementById('tile-catalog-data')?.textContent;
       if (!textures || !catalog) throw new Error('Missing embedded standalone resources');
-      return restoreExportTemplate(templates, kind, textures, catalog);
+      return restoreExportTemplate(templates, kind, textures, catalog, document.getElementById(EDITOR_RUNTIME_ID)?.textContent ?? undefined);
     }
     const path = kind === 'viewer' ? '/ipad_viewer_template.html' : '/hview_editor_template.html';
     const response = await fetch(path);

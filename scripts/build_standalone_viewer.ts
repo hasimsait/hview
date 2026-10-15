@@ -6,6 +6,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import * as esbuild from 'esbuild';
+import { gzipSync } from 'node:zlib';
+import { embeddedAssets } from './embedded_assets';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -53,33 +55,14 @@ export async function buildStandaloneArtifacts() {
     tilesJsonContent = fs.readFileSync(tilesJsonPath, 'utf-8');
   }
 
-  // 4. Encode textures to base64
-  console.log('🖼️ Inlining textures to base64 for 100% offline support...');
-  const texturesMap: Record<string, string> = {};
-  const texturesBaseDir = path.join(rootDir, 'public', 'textures');
-
-  function scanTextures(dir: string) {
-    if (!fs.existsSync(dir)) return;
-    const items = fs.readdirSync(dir);
-    for (const item of items) {
-      const fullPath = path.join(dir, item);
-      const stat = fs.statSync(fullPath);
-      if (stat.isDirectory()) {
-        scanTextures(fullPath);
-      } else if (/\.(jpg|jpeg|png)$/i.test(item)) {
-        const mime = item.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
-        const b64 = fs.readFileSync(fullPath).toString('base64');
-        const dataUri = `data:${mime};base64,${b64}`;
-
-        // Relative path from /public, e.g. /textures/wood/wood_natural_oak.jpg
-        const relPath = fullPath.replace(publicDir, '');
-        texturesMap[relPath] = dataUri;
-      }
-    }
-  }
-
-  scanTextures(texturesBaseDir);
+  // 4. Optimize all finishes, including ones not currently used in the plan.
+  console.log('🖼️ Optimizing and embedding textures for 100% offline support...');
+  const texturesMap = await embeddedAssets(publicDir);
   console.log(`✅ Inlined ${Object.keys(texturesMap).length} texture files.`);
+  // Identical catalog variants do not need a duplicate atlas cell.
+  const catalog = JSON.parse(tilesJsonContent) as { textures: string[] }[];
+  for (const entry of catalog) entry.textures = [...new Map(entry.textures.map(url => [texturesMap[url]?.startsWith('@') ? texturesMap[url].slice(1) : url, url])).values()];
+  tilesJsonContent = JSON.stringify(catalog);
 
   // 5. Construct HTML Template
   const htmlTemplate = `<!DOCTYPE html>
@@ -210,6 +193,7 @@ ${bundledJs}
   } else if (fs.existsSync(publicSamplePlanPath)) {
     samplePlanJson = fs.readFileSync(publicSamplePlanPath, 'utf-8');
   }
+  samplePlanJson = JSON.stringify(JSON.parse(samplePlanJson));
 
   const standaloneHtml = setScriptContent(htmlTemplate, 'plan-data', escapeScriptJson(samplePlanJson));
   fs.writeFileSync(distOutputPath, standaloneHtml, 'utf-8');
@@ -269,7 +253,6 @@ ${tilesJsonContent}
     try {
       window.__EMBEDDED_TEXTURES__ = JSON.parse(document.getElementById('embedded-textures').textContent);
       window.__TILE_CATALOG__ = JSON.parse(document.getElementById('tile-catalog-data').textContent);
-      window.__PLAN_DATA__ = JSON.parse(document.getElementById('plan-data').textContent);
     } catch (e) {
       console.warn('Failed parsing embedded data:', e);
     }
@@ -278,13 +261,16 @@ ${tilesJsonContent}
   <script id="standalone-export-templates" type="application/json"></script>
 
   <!-- Bundled Full React Editor Application -->
-  <script>
+  <script id="editor-runtime">
 ${editorBundledJs}
   </script>
 </body>
 </html>`;
 
   const templates = createExportTemplates(htmlTemplate, editorShell);
+  // The editor reuses its own runtime when re-exporting. The viewer is only
+  // decompressed on demand, with a bundled decoder for older mobile browsers.
+  templates.viewer = 'gzip-base64:' + gzipSync(templates.viewer, { level: 9 }).toString('base64');
   const fullEditorHtmlTemplate = setScriptContent(
     editorShell, EXPORT_TEMPLATES_ID, escapeScriptJson(JSON.stringify(templates)),
   );

@@ -24,6 +24,7 @@ Zap,
 } from 'lucide-react';
 import React,{ useEffect,useRef,useState } from 'react';
 import { RenameRoom } from '../../application/commands/StructuralCommands';
+import { isOpaquePlanSource } from '../../services/plan/PlanRequest';
 
 interface HeaderProps {
   onSave: () => Promise<void>;
@@ -70,6 +71,7 @@ export const Header: React.FC<HeaderProps> = ({
   const editor = runtime.editor;
   const sceneService = runtime.scene;
   const standaloneExportService = runtime.exports;
+  const downloadOnly = isOpaquePlanSource();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const roomPopoverRef = useRef<HTMLDivElement>(null);
   const lightingPopoverRef = useRef<HTMLDivElement>(null);
@@ -621,7 +623,7 @@ export const Header: React.FC<HeaderProps> = ({
                 ? 'border-red-500/40 bg-red-500/10 text-red-300'
                 : 'border-slate-700 bg-slate-800/60 text-slate-300 hover:bg-slate-700/80 hover:text-white'
             }`}
-          title="Save this plan. Changes are saved only when you click Save."
+          title={downloadOnly ? 'Download a self-contained HTML copy with your current edits.' : 'Save this plan. Changes are saved only when you click Save.'}
         >
           {isSaving ? (
             <>
@@ -636,11 +638,11 @@ export const Header: React.FC<HeaderProps> = ({
           ) : (
             <>
               <Save className="w-3.5 h-3.5 text-slate-400" />
-              <span>{saveStatus === 'error' ? 'Save failed · Retry' : 'Save .plan'}</span>
+              <span>{downloadOnly ? 'Save HTML' : saveStatus === 'error' ? 'Save failed · Retry' : 'Save .plan'}</span>
             </>
           )}
         </button>
-        {hasUnsavedChanges && !isSaving && <span className="text-xs text-amber-300">Unsaved changes</span>}
+        {hasUnsavedChanges && !isSaving && !downloadOnly && <span className="text-xs text-amber-300">Unsaved changes</span>}
 
         {/* Reset to pristine template */}
         <button

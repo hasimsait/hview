@@ -8,6 +8,7 @@ import { SlatTextureStrategy } from './strategies/SlatTextureStrategy';
 import { TileTextureStrategy } from './strategies/TileTextureStrategy';
 import { WoodTextureStrategy } from './strategies/WoodTextureStrategy';
 import { TextureSource } from './TextureSource';
+import { mobileRendering } from '../RenderQuality';
 export { ensureLocalMetricBounds,ensureStretchedUvs } from '../geometry/UVProjector';
 
 export function isFabricStretched(config?: Pick<SurfaceFinishConfig, 'variant' | 'mappingMode'>): boolean {
@@ -114,6 +115,7 @@ const PORCELAIN_PRESETS: Record<string, { roughness: number; metalness: number; 
 };
 
 export class SurfaceMaterialFactory implements ISurfaceFinishService {
+  private readonly mobile = mobileRendering();
   private layerMaterials = new Map<THREE.Material, number>();
   ensureLocalMetricBounds(mesh: THREE.Mesh): void {
     ensureLocalMetricBounds(mesh);
@@ -233,7 +235,9 @@ export class SurfaceMaterialFactory implements ISurfaceFinishService {
       const opacity = preset.opacity;
       const roughness = config.roughness ?? preset.roughness;
       const metalness = config.metalness ?? preset.metalness;
-      const transmission = preset.transmission;
+      // Apply the budget at creation as well as initial scene preparation, so
+      // choosing a new glass finish cannot re-enable a transmission render pass.
+      const transmission = this.mobile ? 0 : preset.transmission;
       const depthWrite = options?.depthWrite ?? preset.depthWrite;
 
       const physParams: THREE.MeshPhysicalMaterialParameters = {

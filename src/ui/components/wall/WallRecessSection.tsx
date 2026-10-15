@@ -1,4 +1,5 @@
 import { FurnitureEntity,WallEntity } from '@core/types/plan';
+import { createElementId } from '../../../platform/ElementId';
 import { ISceneService } from '@core/types/services';
 import { Check,LayoutGrid,Move,Plus,Trash2 } from 'lucide-react';
 import React,{ useEffect,useState } from 'react';
@@ -51,7 +52,7 @@ export const WallRecessSection: React.FC<WallRecessSectionProps> = ({
     const preset = RECESS_PRESETS[selectedPreset] || RECESS_PRESETS.kale_sage;
     const backFinish = preset.resolveFinish(wall);
 
-    const id = crypto.randomUUID();
+    const id = createElementId();
     try {
       editor.execute(new CommandBatch('Add finished recess', [
         new AddWallRecess(id, wall.id, {

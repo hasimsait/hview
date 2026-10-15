@@ -131,6 +131,7 @@ export const Inspector: React.FC<InspectorProps> = ({
         </div>
         <button
           onClick={onClose}
+          aria-label="Close inspector"
           className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
         >
           <X className="w-4 h-4" />

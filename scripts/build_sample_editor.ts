@@ -11,7 +11,7 @@ const root = new URL('../', import.meta.url);
 const template = await readFile(new URL('dist/hview_editor_template.html', root), 'utf8');
 const source = await readFile(new URL('public/sample.plan', root), 'utf8');
 const codec = new PlanCodec();
-const html = setScriptContent(template, 'plan-data', escapeScriptJson(codec.encode(codec.decode(source))));
+const html = setScriptContent(template, 'plan-data', escapeScriptJson(codec.encode(codec.decode(source), false)));
 const destination = new URL('hview_editor.html', root);
 await writeFile(destination, html);
 console.log(`Working-plan editor written to ${fileURLToPath(destination)}`);

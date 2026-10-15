@@ -1,5 +1,5 @@
 import { IDocumentStorage,PlanSaveStatus,PlanSaveStatusListener } from '@core/types/services';
-import { isStandalonePlanSource } from '../../services/plan/PlanRequest';
+import { isOpaquePlanSource,isStandalonePlanSource } from '../../services/plan/PlanRequest';
 import { AsyncWriteQueue } from './AsyncWriteQueue';
 import { BrowserSnapshotStore } from './BrowserSnapshotStore';
 import { EmbeddedDocumentSource } from './EmbeddedDocumentSource';
@@ -156,7 +156,7 @@ export class DocumentStorage implements IDocumentStorage {
       if (this.isOffline()) {
         const embedded = this.embedded.read();
         if (!embedded) throw new Error('No embedded plan available to reset');
-        if (!this.browser.write(embedded)) throw new Error('Could not store the reset plan');
+        if (!this.browser.write(embedded) && !isOpaquePlanSource()) throw new Error('Could not store the reset plan');
         this.latestPlanJson = embedded;
         this.setStatus('idle');
         return embedded;

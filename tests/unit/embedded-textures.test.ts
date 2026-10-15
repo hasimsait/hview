@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from 'vitest';
-import { resolveEmbeddedTextureUrl } from '../../src/engine/materials/TextureSource';
+import { resolveEmbeddedTextureUrl, TextureSource } from '../../src/engine/materials/TextureSource';
 
 afterEach(() => { delete window.__EMBEDDED_TEXTURES__; });
 
@@ -25,5 +25,24 @@ describe('shared offline texture resolution', () => {
   it('leaves data URLs unchanged when rendering already embedded assets', () => {
     window.__EMBEDDED_TEXTURES__ = { '/textures/wood/oak.jpg': 'data:image/jpeg;base64,oak' };
     expect(resolveEmbeddedTextureUrl('data:image/jpeg;base64,oak')).toBe('data:image/jpeg;base64,oak');
+  });
+  it('resolves deduplicated assets for loaders and relocated CSS previews', () => {
+    window.__EMBEDDED_TEXTURES__ = {
+      '/textures/tile.jpg': 'data:image/webp;base64,canonical',
+      '/textures/tile_v2.jpg': '@/textures/tile.jpg',
+    };
+    expect(resolveEmbeddedTextureUrl('/textures/tile_v2.jpg')).toBe('data:image/webp;base64,canonical');
+    expect(resolveEmbeddedTextureUrl('https://example.test/tile_v2.jpg?v=1')).toBe('data:image/webp;base64,canonical');
+    window.__EMBEDDED_TEXTURES__['/textures/tile.jpg'] = '@/textures/tile_v2.jpg';
+    expect(resolveEmbeddedTextureUrl('/textures/tile_v2.jpg')).toBe('/textures/tile_v2.jpg');
+  });
+  it('waits for all image loads, including failed images, before shader preparation', async () => {
+    const source = new TextureSource(), manager = source.textureLoader().manager;
+    manager.itemStart('one'); manager.itemStart('two');
+    let ready = false;
+    const waiting = source.ready().then(() => { ready = true; });
+    manager.itemEnd('one'); await Promise.resolve(); expect(ready).toBe(false);
+    manager.itemError('two'); manager.itemEnd('two'); await waiting;
+    expect(ready).toBe(true); await source.ready();
   });
 });

@@ -13,7 +13,7 @@ export class DocumentController {
     const document = this.codec.decode(input);
     this.loadRequest++;
     this.editor.load(document);
-    this.storage.setCurrentPlan?.(this.codec.encode(document));
+    this.storage.setCurrentPlan?.(this.codec.encode(document, false));
     return document;
   }
 

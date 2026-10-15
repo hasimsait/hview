@@ -25,8 +25,27 @@ import { CeilingMeshBuilder } from "./geometry/CeilingMeshBuilder";
 import { FloorMeshBuilder } from "./geometry/FloorMeshBuilder";
 import { OpeningMeshBuilder } from "./geometry/OpeningMeshBuilder";
 import { SurfaceMaterialFactory } from "./materials/SurfaceMaterialFactory";
+import { mobileRendering } from './RenderQuality';
+
+export interface SceneStatus { readonly state: 'loading' | 'ready' | 'recovering' | 'error'; readonly message: string; }
 
 export class SceneEngine implements ISceneService {
+  private readonly mobile = mobileRendering();
+  private mobileLights: THREE.PointLight[] = [];
+  private readonly lightTarget = new THREE.Vector3(Infinity, Infinity, Infinity);
+  private status: SceneStatus = { state: 'loading', message: 'Preparing 3D view…' };
+  private readonly statusListeners = new Set<() => void>();
+  readonly getStatus = (): SceneStatus => this.status;
+  readonly subscribeStatus = (listener: () => void): (() => void) => { this.statusListeners.add(listener); return () => { this.statusListeners.delete(listener); }; };
+  private setStatus(state: SceneStatus['state'], message: string): void {
+    if (state === this.status.state && message === this.status.message) return;
+    this.status = { state, message };
+    for (const listener of this.statusListeners) listener();
+  }
+  reportError(error: unknown): void {
+    console.error('Could not prepare 3D view', error);
+    this.setStatus('error', 'The 3D view could not start. Close other tabs and reload to try again.');
+  }
   private container: HTMLElement | null = null;
   private scene: THREE.Scene;
   private renderer: THREE.WebGLRenderer | null = null;
@@ -60,6 +79,7 @@ export class SceneEngine implements ISceneService {
   private readonly appearance: FurnitureAppearance;
   private readonly paletteLease: ResourceLease;
   private ceilingLease: ResourceLease | null = null;
+  private ceilingsDirty = true;
   private finishService: SurfaceMaterialFactory;
   private wallBuilder: WallMeshBuilder;
   private openingBuilder: OpeningMeshBuilder;
@@ -87,6 +107,11 @@ export class SceneEngine implements ISceneService {
   };
 
   private scheduler: RenderScheduler | null = null;
+  private resourcesDirty = false;
+  private needsPreparation = true;
+  private preparing = false;
+  private preparationVersion = 0;
+  private disposed = false;
   private stopTextureNotifications: (() => void) | null = null;
   invalidate(): void { this.scheduler?.invalidate(); }
   private resizeObserver: ResizeObserver | null = null;
@@ -167,15 +192,17 @@ export class SceneEngine implements ISceneService {
   initialize(container: HTMLElement): void {
     this.container = container;
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
+    this.renderer = new THREE.WebGLRenderer({ antialias: !this.mobile, alpha: false, powerPreference: this.mobile ? 'default' : 'high-performance' });
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, this.mobile ? 1.25 : 2));
     this.renderer.setSize(container.clientWidth, container.clientHeight);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.enabled = !this.mobile;
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.05;
 
     container.appendChild(this.renderer.domElement);
+    this.renderer.domElement.addEventListener('webglcontextlost', this.onContextLost);
+    this.renderer.domElement.addEventListener('webglcontextrestored', this.onContextRestored);
 
     this.controls = new OrbitControls(this.activeCamera, this.renderer.domElement);
     this.controls.addEventListener('change', () => this.invalidate());
@@ -204,7 +231,8 @@ export class SceneEngine implements ISceneService {
     this.paletteLease.refresh(); this.graph.refreshResources();
     this.scheduler = new RenderScheduler(delta => this.renderFrame(delta), () => this.cameraNavController?.hasActiveInput ?? false);
     this.stopTextureNotifications = this.finishService.textures.subscribe(() => {
-      this.paletteLease.refresh(); this.graph.refreshResources(); this.invalidate();
+      // Coalesce image completions into one scan immediately before rendering.
+      this.resourcesDirty = true; this.invalidate();
     });
     this.invalidate();
   }
@@ -218,6 +246,7 @@ export class SceneEngine implements ISceneService {
   }
 
   dispose(): void {
+    this.disposed = true; this.preparationVersion++;
     this.graph.dispose(); this.ceilingLease?.dispose(); this.paletteLease.dispose();
     this.finishService.dispose();
     this.scene.environment?.dispose();
@@ -235,6 +264,8 @@ export class SceneEngine implements ISceneService {
       this.controls.dispose();
     }
     if (this.renderer && this.renderer.domElement.parentElement) {
+      this.renderer.domElement.removeEventListener('webglcontextlost', this.onContextLost);
+      this.renderer.domElement.removeEventListener('webglcontextrestored', this.onContextRestored);
       this.renderer.domElement.parentElement.removeChild(this.renderer.domElement);
       this.renderer.dispose();
     }
@@ -250,31 +281,117 @@ export class SceneEngine implements ISceneService {
 
   applyDocumentChange(change: DocumentChange): void {
     this.invalidate();
+    // Transforms and saves retain their programs. Do not walk the entire scene
+    // through the compiler on every drag event.
+    if (!change.previous || change.label === 'Load document' || change.added.length > 0) this.needsPreparation = true;
     this.currentPlan = change.document;
     this.graph.reconcile(change.document);
-    if (!change.previous || change.previous.rooms.length !== change.document.rooms.length || change.document.rooms.some((room, index) => room !== change.previous!.rooms[index])) this.rebuildCeilings();
+    if (!change.previous || change.previous.rooms.length !== change.document.rooms.length || change.document.rooms.some((room, index) => room !== change.previous!.rooms[index])) this.ceilingsDirty = true;
     this.applyVisibilitySettings(); this.applyLightingSettings();
     if (!change.previous || change.label === 'Load document') this.fitPlanInView();
   }
 
   renderPlan(plan: PlanDocument): void {
     this.invalidate();
-    this.currentPlan = plan; this.graph.reconcile(plan); this.rebuildCeilings();
+    this.needsPreparation = true; this.ceilingsDirty = true;
+    this.currentPlan = plan; this.graph.reconcile(plan);
     this.applyVisibilitySettings(); this.applyLightingSettings(); this.fitPlanInView();
   }
 
   private rebuildCeilings(): void {
-    const next = this.ceilingBuilder.buildCeilings(this.currentPlan!, this.settings.isolatedRoomIds);
+    // Build all rooms once when ceilings are first shown; room isolation only
+    // changes visibility, so showing another room never needs missing geometry.
+    const next = this.ceilingBuilder.buildCeilings(this.currentPlan!);
     const lease = this.resources.ownTree(next);
     this.ceilingsGroup.clear(); this.ceilingsGroup.add(next);
     this.ceilingLease?.dispose(); this.ceilingLease = lease;
+    this.ceilingsDirty = false;
   }
   private applyLightingSettings(): void {
     this.lighting.update(this.settings);
     // Update all fixture lights across the scene
     for (const node of this.graph.values()) if (node.model instanceof Furniture) this.appearance.applyLighting(node.group, node.model);
-    this.graph.refreshResources();
+    if (this.mobile) this.limitFixtureLights();
+  }
 
+  private limitFixtureLights(): void {
+    const lights: THREE.PointLight[] = [];
+    this.scene.traverseVisible(object => {
+      if (object instanceof THREE.PointLight && object.userData.isFixtureLight && object.intensity > 0) lights.push(object);
+    });
+    // Sunlight already illuminates the daylight view. At night, retain the four
+    // closest enabled fixtures; their controls and emissive bulbs stay intact.
+    const daylight = this.settings.globalLighting && this.settings.globalLightIntensity > 0.001;
+    this.mobileLights = lights;
+    if (daylight) lights.forEach(light => { light.visible = false; });
+    else this.updateFixtureLightBudget(true);
+  }
+
+  private updateFixtureLightBudget(force = false): void {
+    if (!this.mobile || (this.settings.globalLighting && this.settings.globalLightIntensity > 0.001)) return;
+    const target = this.controls?.target ?? this.activeCamera.position;
+    if (!force && this.lightTarget.distanceToSquared(target) < 0.01) return;
+    this.lightTarget.copy(target);
+    const distances = new Map(this.mobileLights.map(light => [light, light.getWorldPosition(new THREE.Vector3()).distanceToSquared(target)]));
+    this.mobileLights.sort((a, b) => distances.get(a)! - distances.get(b)!);
+    this.mobileLights.forEach((light, index) => { light.visible = index < 4; });
+  }
+
+  private readonly onContextLost = (event: Event): void => {
+    event.preventDefault();
+    this.preparationVersion++; this.preparing = false;
+    this.scheduler?.suspend();
+    this.setStatus('recovering', 'Restoring 3D view…');
+  };
+
+  private readonly onContextRestored = (): void => {
+    if (this.disposed) return;
+    this.needsPreparation = true; this.resourcesDirty = true;
+    this.scheduler?.resume();
+  };
+
+  private prepareMaterials(): void {
+    const renderer = this.renderer;
+    if (!renderer || this.preparing) return;
+    const version = this.preparationVersion;
+    this.preparing = true; this.needsPreparation = false;
+    // Let images settle before compiling: adding a map afterwards would compile
+    // a second variant. compileAsync keeps parallel shader compilation off the
+    // first draw's critical path on supporting browsers.
+    void this.finishService.textures.ready().then(async () => {
+      if (this.disposed || version !== this.preparationVersion) return;
+      this.applyLightingSettings();
+      if (this.mobile) {
+        const materials = new Set<THREE.Material>();
+        this.scene.traverse(object => {
+          const material = (object as THREE.Mesh).material;
+          if (material) for (const item of Array.isArray(material) ? material : [material]) materials.add(item);
+        });
+        for (const material of materials) {
+          if (material instanceof THREE.MeshPhysicalMaterial && material.transmission > 0) {
+            // Alpha transparency preserves glass while avoiding an extra full
+            // scene transmission pass and its render target on touch devices.
+            material.transmission = 0; material.needsUpdate = true;
+          }
+        }
+      }
+      // Compile visible content only. Passing the real scene as the target
+      // preserves its light setup without warming hidden fixtures/ceilings.
+      const visible = new THREE.Group();
+      this.scene.traverseVisible(object => {
+        if (object instanceof THREE.Mesh || object instanceof THREE.Line || object instanceof THREE.Points || object instanceof THREE.Sprite) visible.add(object.clone(false));
+      });
+      if (renderer.extensions.has('KHR_parallel_shader_compile')) {
+        await renderer.compileAsync(visible, this.activeCamera, this.scene);
+      } else {
+        renderer.compile(visible, this.activeCamera, this.scene);
+        await new Promise<void>(resolve => setTimeout(resolve, 0));
+      }
+    }).catch(error => { if (!this.disposed && version === this.preparationVersion) this.reportError(error); })
+      .finally(() => {
+        if (this.disposed || version !== this.preparationVersion) return;
+        this.preparing = false; this.invalidate();
+      });
   }
 
 
@@ -506,6 +623,7 @@ export class SceneEngine implements ISceneService {
 
   toggleCeilings(): boolean {
     this.invalidate();
+    this.needsPreparation = true;
     this.settings.showCeiling = !this.settings.showCeiling;
     this.applyVisibilitySettings();
     return this.settings.showCeiling;
@@ -517,6 +635,7 @@ export class SceneEngine implements ISceneService {
 
   setViewMode(mode: ViewMode): void {
     this.invalidate();
+    this.needsPreparation = true;
     this.settings.viewMode = mode;
 
     if (mode === 'topDown') {
@@ -566,6 +685,7 @@ export class SceneEngine implements ISceneService {
 
   updateSettings(settings: Partial<ViewportSettings>): void {
     this.invalidate();
+    this.needsPreparation = true;
     const prevCutaway = this.settings.wallCutaway;
     this.settings = { ...this.settings, ...settings };
 
@@ -587,6 +707,7 @@ export class SceneEngine implements ISceneService {
   }
 
   private applyVisibilitySettings(): void {
+    if (this.currentPlan && this.settings.showCeiling && this.ceilingsDirty) this.rebuildCeilings();
     if (this.currentPlan) for (const node of this.graph.values()) node.group.visible = this.visibility.isVisible(node.model, this.currentPlan, this.settings);
     this.ceilingsGroup.visible = this.settings.showCeiling;
     for (const child of this.ceilingsGroup.children) {
@@ -606,6 +727,7 @@ export class SceneEngine implements ISceneService {
   isolateRooms(roomIds: string[]): void {
     this.settings.isolatedRoomIds = roomIds;
     this.applyVisibilitySettings();
+    this.applyLightingSettings(); this.needsPreparation = true; this.invalidate();
 
     if (roomIds.length === 1) {
       // Single room selected — focus camera on it
@@ -767,13 +889,22 @@ export class SceneEngine implements ISceneService {
     this.orthographicCamera.right = (frustumHeight * aspect) / 2;
     this.orthographicCamera.updateProjectionMatrix();
 
-    this.renderer.setSize(width, height);
+    const size = this.renderer.getSize(new THREE.Vector2());
+    if (size.x !== width || size.y !== height) this.renderer.setSize(width, height);
   }
 
   private readonly tempDir = new THREE.Vector3();
   private readonly tempDelta = new THREE.Vector3();
 
   private renderFrame(dt: number): void {
+    if (!this.renderer || this.renderer.getContext().isContextLost() || this.status.state === 'error') return;
+    if (this.resourcesDirty) {
+      this.resourcesDirty = false;
+      this.paletteLease.refresh(); this.graph.refreshResources();
+    }
+    if (!this.currentPlan) return;
+    if (this.needsPreparation) { this.prepareMaterials(); return; }
+    if (this.preparing) return;
     this.selectionHelper?.update();
     this.wallSelectionHelper?.update();
     this.openingSelectionHelper?.update();
@@ -801,7 +932,9 @@ export class SceneEngine implements ISceneService {
       }
     }
     if (this.renderer) {
+      this.updateFixtureLightBudget();
       this.renderer.render(this.scene, this.activeCamera);
+      this.setStatus('ready', '');
     }
   }
 

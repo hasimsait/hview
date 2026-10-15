@@ -25,4 +25,8 @@ The runner uses system Chromium when available. Otherwise run `npx playwright in
 
 Offline checks fulfill downloaded HTML from its bytes in a fresh browser context and block every other HTTP request. They verify the offline runtime; native file navigation and Safari/iPad still require device checks.
 
+`mobile-performance.spec.ts` opens the self-contained editor in a touch/mobile viewport, checks framebuffer and lighting budgets, toggles deferred ceilings, forces GPU loss/restoration, and opens both HTML formats re-exported without network access. It also checks readable startup failure/retry when WebGL is unavailable. `shader-reuse.test.ts` verifies shared program sources keep independent surface uniforms, and scheduler/texture tests cover recovery suspension, image readiness, and deduplicated offline assets.
+
+`data-url-startup.test.ts` fails if a Shortcut document's pathname is read or percent-encoded, checks bounded keys and unchanged ordinary saved-copy keys, and verifies reset/load without storage or network. `opaque-origin.spec.ts` uses an actual sandboxed opaque origin to exercise import → edit → Save HTML → reopen with `localStorage` throwing `SecurityError` and all HTTP requests blocked. Managed Chromium blocks top-level `data:` navigation, so native iPhone Shortcut navigation and its memory ceiling remain device checks.
+
 [RESULTS.md](RESULTS.md) records validation results. [KNOWN_BUGS.md](KNOWN_BUGS.md) maps resolved defects to retained regression coverage.

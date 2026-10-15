@@ -18,6 +18,8 @@ import { Room } from '../domain/elements/Room';
 import { Wall } from '../domain/elements/Wall';
 import type { FurnitureCategory } from '../domain/model/PlanData';
 import { isPointInPolygon } from '../domain/model/WallTopology';
+import { isOpaquePlanSource } from '../services/plan/PlanRequest';
+import { createElementId } from '../platform/ElementId';
 import { ColumnInspector } from './components/ColumnInspector';
 import { WindowInspector } from './components/WindowInspector';
 
@@ -45,6 +47,9 @@ export const App: React.FC = () => {
   const [spotLightIntensity, setSpotLightIntensity] = useState<number>(1.0);
   const [chandelierIntensity, setChandelierIntensity] = useState<number>(1.0);
   const [loading, setLoading] = useState<boolean>(true);
+  const [loadError, setLoadError] = useState(false);
+  const [saveError, setSaveError] = useState(false);
+  const downloadOnly = isOpaquePlanSource();
   const [saveRequested, setSaveRequested] = useState(false);
   const [saveStatus, setSaveStatus] = useState<PlanSaveStatus>(runtime.storage.getSaveStatus());
   const saveInProgress = useRef(false);
@@ -65,10 +70,15 @@ export const App: React.FC = () => {
     if (saveInProgress.current || isSaving) return;
     saveInProgress.current = true;
     setSaveRequested(true);
+    setSaveError(false);
     try {
       // Paint the lock before serialization or synchronous offline storage.
       await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
-      await runtime.documents.save();
+      if (downloadOnly) await runtime.exports.exportStandaloneEditor();
+      else await runtime.documents.save();
+    } catch (error) {
+      console.error('Could not prepare saved copy', error);
+      setSaveError(true);
     } finally {
       saveInProgress.current = false;
       setSaveRequested(false);
@@ -120,9 +130,12 @@ export const App: React.FC = () => {
   useEffect(() => {
     async function loadInitialPlan() {
       try {
+        // Show the loading UI before decoding and constructing the scene.
+        await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
         await runtime.documents.restore();
       } catch (err) {
         console.error('Failed to load initial plan:', err);
+        setLoadError(true);
       } finally {
         setLoading(false);
       }
@@ -226,7 +239,7 @@ export const App: React.FC = () => {
       roomId = planSnapshot?.rooms.find((r) => isPointInPolygon({ x, y: z }, r.polygon))?.id;
     }
 
-    const id = crypto.randomUUID();
+    const id = createElementId();
     editor.execute(new AddFurniture({
       id,
       name: asset.key,
@@ -272,6 +285,8 @@ export const App: React.FC = () => {
         onUpdateLighting={handleUpdateLighting}
         onOpenAddAssetModal={() => setIsAddAssetModalOpen(true)}
       />
+      {downloadOnly && <p className="bg-slate-900 px-4 py-1 text-xs text-amber-200">Changes stay in this tab. Use Save HTML to keep a copy.</p>}
+      {saveError && <p role="alert" className="bg-red-950 px-4 py-2 text-sm text-red-200">The saved copy could not be prepared. Please try Save again.</p>}
 
       {/* Main 3D Canvas Area */}
       <main className="flex-1 min-h-0 relative w-full">
@@ -317,11 +332,12 @@ export const App: React.FC = () => {
         </ErrorBoundary>
 
         {/* Loading Overlay */}
-        {loading && (
+        {(loading || loadError) && (
           <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-30">
             <div className="flex flex-col items-center gap-3">
-              <div className="w-10 h-10 border-4 border-sky-500/20 border-t-sky-500 rounded-full animate-spin" />
-              <p className="text-sm font-medium text-slate-300">Loading house plan...</p>
+              {!loadError && <div className="w-10 h-10 border-4 border-sky-500/20 border-t-sky-500 rounded-full animate-spin" />}
+              <p role={loadError ? 'alert' : 'status'} className="text-sm font-medium text-slate-300">{loadError ? 'The house plan could not be loaded.' : 'Loading house plan...'}</p>
+              {loadError && <button onClick={() => window.location.reload()} className="rounded-lg bg-sky-600 px-4 py-2 text-white">Reload</button>}
             </div>
           </div>
         )}

@@ -1,6 +1,6 @@
 import { useRuntime } from '@ui/context/RuntimeContext';
 import { Compass,Move,RotateCw } from 'lucide-react';
-import React,{ useEffect,useLayoutEffect,useRef,useState } from 'react';
+import React,{ useEffect,useLayoutEffect,useRef,useState,useSyncExternalStore } from 'react';
 import { selectedOpening,selectedRoom,selectedWall } from '../../application/queries/SelectionQueries';
 
 export const Viewport3D: React.FC<{ disabled?: boolean }> = ({ disabled = false }) => {
@@ -9,6 +9,7 @@ export const Viewport3D: React.FC<{ disabled?: boolean }> = ({ disabled = false 
   const sceneService = runtime.scene;
   const interactionService = runtime.interaction;
   const editor = runtime.editor;
+  const status = useSyncExternalStore(sceneService.subscribeStatus, sceneService.getStatus);
 
   const [gizmoMode, setGizmoMode] = useState<'translate' | 'rotate'>('translate');
   const [hasPlan, setHasPlan] = useState<boolean>(false);
@@ -17,8 +18,13 @@ export const Viewport3D: React.FC<{ disabled?: boolean }> = ({ disabled = false 
     if (!containerRef.current) return;
 
     // Initialize 3D Scene and Interaction Services
-    sceneService.initialize(containerRef.current);
-    interactionService.initialize(sceneService, editor);
+    try {
+      sceneService.initialize(containerRef.current);
+      interactionService.initialize(sceneService, editor);
+    } catch (error) {
+      sceneService.reportError(error);
+      return () => sceneService.dispose();
+    }
 
     // Initial plan render if already available
     const initialPlan = editor.getSnapshot();
@@ -28,8 +34,10 @@ export const Viewport3D: React.FC<{ disabled?: boolean }> = ({ disabled = false 
     }
 
     const unsubscribeDocument = editor.subscribe(change => {
-      sceneService.applyDocumentChange(change);
-      setHasPlan(true);
+      try {
+        sceneService.applyDocumentChange(change);
+        setHasPlan(true);
+      } catch (error) { sceneService.reportError(error); }
     });
     const unsubscribeSelection = editor.selection.subscribe(() => {
       sceneService.setOpeningSelectionHighlight(selectedOpening(editor));
@@ -59,6 +67,13 @@ export const Viewport3D: React.FC<{ disabled?: boolean }> = ({ disabled = false 
     <div className="relative w-full h-full overflow-hidden bg-slate-950">
       {/* Three.js Canvas Container */}
       <div ref={containerRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
+      {status.state !== 'ready' && (
+        <div role={status.state === 'error' ? 'alert' : 'status'} className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-slate-950/90 p-6 text-center text-sm text-slate-200">
+          {status.state !== 'error' && <div className="h-8 w-8 animate-spin rounded-full border-4 border-sky-500/20 border-t-sky-500" />}
+          <p>{status.message}</p>
+          {status.state === 'error' && <button onClick={() => window.location.reload()} className="rounded-lg bg-sky-600 px-4 py-2 text-white">Reload</button>}
+        </div>
+      )}
 
       {/* Floating Gizmo Tool Toolbar */}
       {hasPlan && (

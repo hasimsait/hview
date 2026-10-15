@@ -60,7 +60,23 @@ export class StandaloneViewerApp {
     installEmbeddedTextureUrlModifier();
     this.cacheDomElements();
     this.setupUIListeners();
-    this.initScene();
+    const status = document.createElement('div');
+    status.className = 'scene-status';
+    status.setAttribute('role', 'status');
+    status.style.cssText = 'position:fixed;inset:0;z-index:100;display:grid;place-content:center;gap:16px;background:#0f172aee;color:#e2e8f0;text-align:center;padding:24px;font:15px system-ui';
+    document.body.appendChild(status);
+    const update = () => {
+      const current = this.sceneService.getStatus();
+      status.style.display = current.state === 'ready' ? 'none' : 'grid';
+      status.textContent = current.message;
+      if (current.state === 'error') {
+        const reload = document.createElement('button');
+        reload.textContent = 'Reload'; reload.onclick = () => location.reload();
+        status.appendChild(reload);
+      }
+    };
+    this.sceneService.subscribeStatus(update); update();
+    try { this.initScene(); } catch (error) { this.sceneService.reportError(error); return; }
     this.loadPlanData();
   }
 
@@ -140,6 +156,7 @@ export class StandaloneViewerApp {
 
     if (!rawData) {
       console.warn('[StandaloneViewer] No plan data found in document.');
+      this.sceneService.reportError(new Error('No embedded plan data'));
       return;
     }
 
@@ -149,6 +166,7 @@ export class StandaloneViewerApp {
       this.buildRoomBar(this.currentPlan.rooms);
     } catch (err) {
       console.error('[StandaloneViewer] Error rendering plan:', err);
+      this.sceneService.reportError(err);
     }
   }
 

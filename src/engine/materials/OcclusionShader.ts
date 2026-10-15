@@ -30,6 +30,7 @@ export function applyBasicOcclusionShader(
   fadeDistance = 0.5
 ): void {
   const fadeEdge = fadeDistance.toFixed(2);
+  mat.customProgramCacheKey = () => `orbit-fade-v1_${fadeEdge}`;
   mat.onBeforeCompile = (shader) => {
     shader.uniforms.uOrbitCenter = uniforms.uOrbitCenter;
     shader.uniforms.uCameraDir = uniforms.uCameraDir;
@@ -114,7 +115,9 @@ export class OcclusionShader {
     };
 
     mat.customProgramCacheKey = () => {
-      return `metric_${projection}_${isStretched ? 'stretched' : 'tiled'}_${tilingScale.x.toFixed(4)}_${tilingScale.y.toFixed(4)}_${rotation}_${pattern}_${groutWidth}_${groutColor}_v${numVariants}_${mat.map ? 'map' : 'nomap'}`;
+      // Values supplied as uniforms must not create duplicate GPU programs.
+      // Three.js already keys texture/material features and the defines above.
+      return `metric-v2_${projection}_${isStretched ? 'stretched' : 'tiled'}`;
     };
 
     mat.onBeforeCompile = (shader) => {
