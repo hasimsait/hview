@@ -1,6 +1,6 @@
 import { Column } from '../../domain/elements/Column';
-import { Door,Opening,SlidingDoor } from '../../domain/elements/Opening';
-import type { ColumnSide,RoomData,SurfaceFinishConfig,WallFrameStyle,WallSide } from '../../domain/model/PlanData';
+import { Door,Opening,SlidingDoor,WindowOpening } from '../../domain/elements/Opening';
+import type { ColumnSide,CurtainState,RoomData,SurfaceFinishConfig,WallFrameStyle,WallSide } from '../../domain/model/PlanData';
 import type { PlanDocument } from '../../domain/model/PlanDocument';
 import type { EditorCommand } from './EditorCommand';
 
@@ -79,6 +79,26 @@ export class FinishOpening implements EditorCommand {
     const opening = document.require(this.id);
     if (!(opening instanceof Opening)) throw new Error('Expected an opening');
     return document.replace(opening.withFinish(this.finish));
+  }
+}
+
+export class ColorOpeningFrame implements EditorCommand {
+  readonly label = 'Color opening frame';
+  constructor(private readonly id: string, private readonly color?: string) { }
+  execute(document: PlanDocument): PlanDocument {
+    const opening = document.require(this.id);
+    if (!(opening instanceof Opening)) throw new Error('Expected an opening');
+    return document.replace(opening.withFrameColor(this.color));
+  }
+}
+
+export class SetWindowCurtains implements EditorCommand {
+  readonly label = 'Configure window curtains';
+  constructor(private readonly id: string, private readonly state: CurtainState) { }
+  execute(document: PlanDocument): PlanDocument {
+    const window = document.require(this.id);
+    if (!(window instanceof WindowOpening)) throw new Error('Expected a window');
+    return document.replace(window.withCurtainState(this.state));
   }
 }
 

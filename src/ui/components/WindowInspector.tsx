@@ -1,5 +1,5 @@
 import { Focus,X } from 'lucide-react';
-import { FinishOpening } from '../../application/commands/StructuralCommands';
+import { FinishOpening,SetWindowCurtains } from '../../application/commands/StructuralCommands';
 import type { WindowOpening } from '../../domain/elements/Opening';
 import { useRuntime } from '../context/RuntimeContext';
 import { SurfaceFinishPicker } from './SurfaceFinishPicker';
@@ -26,6 +26,32 @@ export function WindowInspector({
       <p className="text-xs text-slate-400">
         Sill: {window.floorHeight.toFixed(2)} m · Top: {window.topElevation.toFixed(2)} m
       </p>
+      <section aria-label="Window curtains" className="rounded-lg border border-slate-700 p-3 space-y-3">
+        <h3 className="text-sm font-semibold text-slate-200">Ceiling-mounted curtains</h3>
+        <p className="text-xs text-slate-400">Floor-length pleated panels on a ceiling track.</p>
+        <div className="flex flex-wrap gap-2">
+          {window.curtainState === 'removed' ? (
+            <button
+              type="button"
+              onClick={() => editor.execute(new SetWindowCurtains(window.id, 'visible'))}
+              className="rounded bg-sky-600 px-3 py-2 text-xs text-white hover:bg-sky-500"
+            >Add curtains</button>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => editor.execute(new SetWindowCurtains(window.id, window.curtainState === 'hidden' ? 'visible' : 'hidden'))}
+                className="rounded bg-slate-800 px-3 py-2 text-xs text-slate-200 hover:bg-slate-700"
+              >{window.curtainState === 'hidden' ? 'Show curtains' : 'Hide curtains'}</button>
+              <button
+                type="button"
+                onClick={() => editor.execute(new SetWindowCurtains(window.id, 'removed'))}
+                className="rounded border border-red-900 px-3 py-2 text-xs text-red-300 hover:bg-red-950"
+              >Delete curtains</button>
+            </>
+          )}
+        </div>
+      </section>
       <SurfaceFinishPicker
         currentFinish={window.finish}
         onSelectFinish={(finish) => editor.execute(new FinishOpening(window.id, finish))}

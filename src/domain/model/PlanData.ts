@@ -37,6 +37,8 @@ export interface SurfaceFinishConfig {
 }
 
 
+export type CurtainState = 'visible' | 'hidden' | 'removed';
+
 export interface OpeningData {
   id: string;
   type: OpeningType;
@@ -52,6 +54,9 @@ export interface OpeningData {
   hingeFlipped?: boolean;
   openAngle?: number;  // degrees (0 = closed, 40 = default ajar, 90 = open, etc.)
   finish?: SurfaceFinishConfig;
+  frameColor?: string;
+  /** Absent on older plans means ceiling-mounted curtains are visible. */
+  curtainState?: CurtainState;
   rawOpening?: any;
 }
 

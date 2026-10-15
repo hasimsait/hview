@@ -1,6 +1,6 @@
 import { Angle } from '../model/Angle';
 import { finite,immutable,positive } from '../model/Immutable';
-import type { OpeningData,SurfaceFinishConfig } from '../model/PlanData';
+import type { CurtainState,OpeningData,SurfaceFinishConfig } from '../model/PlanData';
 import { SurfaceFinish } from '../model/SurfaceFinish';
 import { PlanElement,type PlanElementVisitor } from './PlanElement';
 
@@ -16,6 +16,8 @@ export abstract class Opening extends PlanElement {
     finite(data.distanceAlongWall, 'Opening position');
     if (finite(data.floorHeight, 'Sill elevation') < 0) throw new Error('Sill elevation cannot be negative');
     if (!data.wallId) throw new Error('Opening must belong to a wall');
+    if (data.frameColor !== undefined && !/^#[0-9a-fA-F]{6}$/.test(data.frameColor)) throw new Error('Frame color must be a six-digit hex color');
+    if (data.curtainState !== undefined && !['visible', 'hidden', 'removed'].includes(data.curtainState)) throw new Error('Invalid curtain state');
     this.state = immutable({ ...data, finish: SurfaceFinish.optional(data.finish) });
   }
   get displayName() { return this.type.replace('_', ' '); }
@@ -32,12 +34,14 @@ export abstract class Opening extends PlanElement {
   get hingeFlipped() { return this.state.hingeFlipped; }
   get openAngle() { return this.state.openAngle; }
   get finish() { return this.state.finish; }
+  get frameColor() { return this.state.frameColor; }
   get rawOpening() { return this.state.rawOpening; }
   protected abstract recreate(data: OpeningData): Opening;
   withHost(wallId: string, distanceAlongWall: number): Opening {
     return this.recreate({ ...this.state, wallId, distanceAlongWall });
   }
   withFinish(finish?: SurfaceFinishConfig): Opening { return this.recreate({ ...this.state, finish }); }
+  withFrameColor(frameColor?: string): Opening { return this.recreate({ ...this.state, frameColor }); }
   toData(): OpeningData { return structuredClone(this.state); }
 }
 
@@ -87,6 +91,8 @@ export class WindowOpening extends Opening {
   constructor(data: OpeningData) { super(data); Object.freeze(this); }
   get isFrenchWindow() { return this.type === 'french_window'; }
   get topElevation() { return this.floorHeight + this.height; }
+  get curtainState(): CurtainState { return this.state.curtainState ?? 'visible'; }
+  withCurtainState(curtainState: CurtainState): WindowOpening { return new WindowOpening({ ...this.state, curtainState }); }
   protected recreate(data: OpeningData) { return new WindowOpening(data); }
   accept<R>(visitor: PlanElementVisitor<R>): R { return visitor.visitWindow(this); }
 }

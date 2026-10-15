@@ -178,7 +178,10 @@ export class SceneEngine implements ISceneService {
       opening: {
         update: (root, opening) => this.openingBuilder.update(root, opening), build: opening => {
           if (this.settings.wallCutaway && opening.floorHeight >= 1.15) return new THREE.Group();
-          return this.openingBuilder.buildOpening(opening, this.currentPlan!.requireWall(opening.wallId));
+          const wall = this.currentPlan!.requireWall(opening.wallId);
+          const roomId = wall.roomSideA ?? wall.roomSideB ?? wall.roomIds?.[0];
+          const ceilingHeight = this.currentPlan!.rooms.find(room => room.id === roomId)?.height ?? wall.height;
+          return this.openingBuilder.buildOpening(opening, wall, { ceilingHeight });
         }
       },
     }, this.resources, this.picking);

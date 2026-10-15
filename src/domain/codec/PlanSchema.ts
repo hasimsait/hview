@@ -21,7 +21,8 @@ export const openingSchema = z.object({
   wallId: id, floorHeight: number.nonnegative(), distanceAlongWall: number, position: point,
   swingSide: z.enum(['r', 'l']).optional(), hingeSide: z.enum(['r', 'l']).optional(),
   swingFlipped: z.boolean().optional(), hingeFlipped: z.boolean().optional(), openAngle: number.min(0).max(180).optional(),
-  finish, rawOpening: z.unknown().optional(),
+  finish, frameColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
+  curtainState: z.enum(['visible', 'hidden', 'removed']).optional(), rawOpening: z.unknown().optional(),
 }).passthrough();
 export const wallSchema = z.object({
   id, p1: point, p2: point, thickness: positive, height: positive, material: z.string(), openings: z.array(openingSchema),

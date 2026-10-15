@@ -121,6 +121,8 @@ export class LegacyPlanReader {
               hingeSide,
               openAngle: typeof h.openAngle === 'number' ? h.openAngle : 40,
               finish: h.finish || undefined,
+              frameColor: h.frameColor || undefined,
+              curtainState: h.curtainState,
               rawOpening: h,
             });
           }
