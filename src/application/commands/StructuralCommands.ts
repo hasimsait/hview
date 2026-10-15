@@ -102,6 +102,16 @@ export class SetWindowCurtains implements EditorCommand {
   }
 }
 
+export class SetWindowPelmet implements EditorCommand {
+  readonly label = 'Configure ceiling cornice';
+  constructor(private readonly id: string, private readonly state: CurtainState) { }
+  execute(document: PlanDocument): PlanDocument {
+    const window = document.require(this.id);
+    if (!(window instanceof WindowOpening)) throw new Error('Expected a window');
+    return document.replace(window.withPelmetState(this.state));
+  }
+}
+
 export class RotateDoor implements EditorCommand {
   readonly label = 'Rotate door';
   constructor(private readonly id: string, private readonly delta: number) { }

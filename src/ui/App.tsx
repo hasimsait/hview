@@ -207,6 +207,9 @@ export const App: React.FC = () => {
         const offset = asset.placement?.ceilingOffset ?? (dims.y + 0.05);
         elevation = Math.max(2.1, planTotalH - offset);
         offsetDist = Math.max(0.15, dims.z / 2);
+      } else if (mount === 'surface') {
+        elevation = asset.placement?.defaultElevation ?? 0.9;
+        offsetDist = dims.z / 2 + 0.04;
       } else if (mount === 'floor') {
         elevation = 0.0;
         offsetDist = dims.z / 2 + 0.04;
@@ -236,7 +239,7 @@ export const App: React.FC = () => {
       const elevation =
         mount === 'ceiling'
           ? Math.max(2.1, planTotalH - (asset.placement?.ceilingOffset ?? dims.y + 0.05))
-          : 0.0;
+          : mount === 'surface' ? (asset.placement?.defaultElevation ?? 0.9) : 0.0;
       position = { x, y: elevation, z };
       roomId = planSnapshot?.rooms.find((r) => isPointInPolygon({ x, y: z }, r.polygon))?.id;
     }

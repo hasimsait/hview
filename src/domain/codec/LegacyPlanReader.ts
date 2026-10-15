@@ -123,6 +123,7 @@ export class LegacyPlanReader {
               finish: h.finish || undefined,
               frameColor: h.frameColor || undefined,
               curtainState: h.curtainState,
+              pelmetState: h.pelmetState,
               rawOpening: h,
             });
           }

@@ -3,6 +3,18 @@ import type { FurnitureBehavior } from './AssetDefinition';
 export interface AssetRecipe { readonly id: string; readonly aliases: readonly string[]; readonly behavior: FurnitureBehavior; }
 
 export const ASSET_RECIPES = [
+  { id: 'angled_range_hood', aliases: [], behavior: 'standard' },
+  { id: 'gas_cooktop', aliases: [], behavior: 'standard' },
+  { id: 'built_in_oven', aliases: [], behavior: 'standard' },
+  { id: 'soap_dispenser', aliases: [], behavior: 'standard' },
+  { id: 'toothbrush_tumbler', aliases: [], behavior: 'standard' },
+  { id: 'soap_dish', aliases: [], behavior: 'standard' },
+  { id: 'pedal_bin', aliases: [], behavior: 'standard' },
+  { id: 'brush_set', aliases: [], behavior: 'standard' },
+  { id: 'paper_towel_holder', aliases: [], behavior: 'standard' },
+  { id: 'curtain_pelmet', aliases: [], behavior: 'standard' },
+  { id: 'hemnes_bookcase', aliases: [], behavior: 'shelving' },
+  { id: 'billy_bookcase', aliases: [], behavior: 'shelving' },
   {
     "id": "chandelier",
     "aliases": [

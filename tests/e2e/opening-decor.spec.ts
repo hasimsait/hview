@@ -95,13 +95,13 @@ test('curtains can be selected, hidden, deleted, restored, and stay deleted afte
   expect(await state(page)).toMatchObject({ curtainState: 'removed', curtainVisible: null });
 });
 
-test('offline editor retains frame colors and curtain settings in downloaded HTML', async ({ page,context,request }, testInfo) => {
+test('offline editor adds HEMNES and retains frame, curtain and cornice settings in downloaded HTML', async ({ page,context,request }, testInfo) => {
   const source = workflowPlan();
   const plan = {
     plan: { ...source.plan, items: {}, walls: { wall: {
       ...source.plan.walls.wall, holes: {
         door: { ...source.plan.walls.wall.holes.door, frameColor: '#225588' },
-        window: { ...source.plan.walls.wall.holes.window, curtainState: 'hidden' },
+        window: { ...source.plan.walls.wall.holes.window, curtainState: 'hidden', pelmetState: 'hidden' },
       },
     } } },
   };
@@ -120,6 +120,23 @@ test('offline editor retains frame colors and curtain settings in downloaded HTM
   });
   await expect(page.getByRole('button', { name: 'Show curtains', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Delete curtains', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Show cornice', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Remove cornice', exact: true }).click();
+  await page.getByRole('button', { name: 'Add Asset', exact: true }).click();
+  await page.getByPlaceholder('Search assets (e.g. towel, fan, sconce, bed, sink)...').fill('HEMNES');
+  await page.getByRole('button').filter({ has: page.getByRole('heading', { name: 'IKEA HEMNES Narrow Bookcase — White Stain', exact: true }) }).click();
+  await expect(page.getByRole('spinbutton', { name: 'Shelf count', exact: true })).toHaveValue('6');
+  const modelSections = await page.evaluate(() => {
+    const root = document.getElementById('root') as any;
+    const key = Object.keys(root).find(key => key.startsWith('__reactContainer$'))!;
+    const runtime = root[key].stateNode.current.memoizedState.element.props.value;
+    const bookcase = runtime.editor.getDocument().furniture[0];
+    const sections: string[] = [];
+    runtime.scene.getRenderObject(bookcase.id).traverse((child: any) => { if (child.isMesh && child.userData.section) sections.push(child.userData.section); });
+    return sections;
+  });
+  expect(modelSections).toContain('Posts');
+  expect(modelSections.filter(section => section === 'Shelves')).toHaveLength(6);
   const downloading = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Full Editor (.html)', exact: true }).click();
   const path = testInfo.outputPath('opening-decor.html');
@@ -128,4 +145,9 @@ test('offline editor retains frame colors and curtain settings in downloaded HTM
   const wall = saved.document.elements.find((element: any) => element.kind === 'wall').data;
   expect(wall.openings.find((opening: any) => opening.id === 'door').frameColor).toBe('#225588');
   expect(wall.openings.find((opening: any) => opening.id === 'window').curtainState).toBe('removed');
+  expect(wall.openings.find((opening: any) => opening.id === 'window').pelmetState).toBe('removed');
+  expect(saved.document.elements.find((element: any) => element.kind === 'furniture.shelving').data).toMatchObject({
+    assetKey: 'ikea_hemnes_49_white', displayName: 'IKEA HEMNES Narrow Bookcase — White Stain',
+    dimensions: { x: .49, y: 1.97, z: .37 }, shelfCount: 6,
+  });
 });

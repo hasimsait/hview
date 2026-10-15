@@ -1,6 +1,8 @@
 import type { AssetDefinition } from './AssetDefinition';
+import { CURATED_ASSETS } from './CuratedAssets';
 
 export const DEFAULT_ASSETS: readonly AssetDefinition[] = [
+  ...CURATED_ASSETS,
   // Beds
   {
     key: 'bed_double',

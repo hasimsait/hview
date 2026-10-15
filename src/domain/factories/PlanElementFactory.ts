@@ -12,7 +12,7 @@ export class PlanElementFactory {
   furniture(data: FurnitureData): Furniture {
     const key = this.catalog.canonicalKey(data.assetKey);
     const behavior = this.catalog.behavior(key);
-    const input = { ...data, assetKey: key, lightConfig: behavior === 'luminaire' ? data.lightConfig : undefined, hasLids: behavior === 'shelving' ? data.hasLids : undefined, shelfCount: behavior === 'shelving' ? data.shelfCount : undefined, recessHostId: behavior === 'recess' ? data.recessHostId : undefined };
+    const input = { ...data, displayName: this.catalog.get(key)?.source ? this.catalog.get(key)!.name : data.displayName, assetKey: key, lightConfig: behavior === 'luminaire' ? data.lightConfig : undefined, hasLids: behavior === 'shelving' ? data.hasLids : undefined, shelfCount: behavior === 'shelving' ? data.shelfCount : undefined, recessHostId: behavior === 'recess' ? data.recessHostId : undefined };
     const constructors = { standard: StandardFurniture, luminaire: Luminaire, shelving: Shelving, basin: BasinCabinet, recess: WallRecess };
     return new constructors[behavior](input);
   }

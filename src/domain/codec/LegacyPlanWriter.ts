@@ -202,6 +202,8 @@ export class LegacyPlanWriter {
           delete rawHole.finish;
         }
         if (op.frameColor) rawHole.frameColor = op.frameColor; else delete rawHole.frameColor;
+        const pelmetState = op instanceof Opening ? op.toData().pelmetState : op.pelmetState;
+        if (pelmetState) rawHole.pelmetState = pelmetState; else delete rawHole.pelmetState;
         const curtainState = op instanceof Opening ? op.toData().curtainState : op.curtainState;
         if (curtainState) rawHole.curtainState = curtainState; else delete rawHole.curtainState;
         rawWall.holes[op.id] = rawHole;

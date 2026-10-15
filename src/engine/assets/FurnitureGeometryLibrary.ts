@@ -3,8 +3,21 @@ import type { AssetBuilderFn } from "./builders/AssetBuildContext";
 import * as Bathroom from "./builders/BathroomBuilders";
 import * as Furniture from "./builders/FurnitureBuilders";
 import * as Lighting from "./builders/LightingBuilders";
+import * as Catalogue from './builders/CatalogueBuilders';
 
 export const FURNITURE_GEOMETRY: Readonly<Record<AssetRecipeId, AssetBuilderFn>> = {
+  angled_range_hood: Catalogue.buildAngledHood,
+  gas_cooktop: Catalogue.buildGasCooktop,
+  built_in_oven: Catalogue.buildBuiltInOven,
+  soap_dispenser: Catalogue.buildSoapDispenser,
+  toothbrush_tumbler: Catalogue.buildTumbler,
+  soap_dish: Catalogue.buildSoapDish,
+  pedal_bin: Catalogue.buildPedalBin,
+  brush_set: Catalogue.buildBrushSet,
+  paper_towel_holder: Catalogue.buildPaperTowelHolder,
+  curtain_pelmet: Catalogue.buildCurtainPelmet,
+  hemnes_bookcase: Catalogue.buildHemnesBookcase,
+  billy_bookcase: Catalogue.buildBillyBookcase,
   'chandelier': Lighting.buildChandelier,
   'chandelier_cascading': Lighting.buildCascadingChandelier,
   'ceiling_spot': Lighting.buildCylinderSpotlight,

@@ -2,6 +2,10 @@ import * as THREE from 'three';
 import type { Furniture } from '../../../domain/elements/Furniture';
 
 export interface ProceduralMaterials {
+  whitePaint: THREE.MeshStandardMaterial;
+  woodBlackBrown: THREE.MeshStandardMaterial;
+  plasticBeige: THREE.MeshStandardMaterial;
+  glassBlack: THREE.MeshStandardMaterial;
   woodLight: THREE.MeshStandardMaterial;
   woodDark: THREE.MeshStandardMaterial;
   fabricLight: THREE.MeshStandardMaterial;

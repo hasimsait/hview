@@ -38,7 +38,7 @@ export class OpeningSceneNode extends SceneNode<Opening> {
   }
   reconcile(element: Opening): void {
     const previous = this.element;
-    if (previous.width !== element.width || previous.height !== element.height || previous.floorHeight !== element.floorHeight || previous.position !== element.position || previous.wallId !== element.wallId || previous.swingSide !== element.swingSide || previous.hingeSide !== element.hingeSide || (previous instanceof WindowOpening && element instanceof WindowOpening && previous.curtainState !== element.curtainState)) this.replaceGeometry(this.builder.build(element));
+    if (previous.width !== element.width || previous.height !== element.height || previous.floorHeight !== element.floorHeight || previous.position !== element.position || previous.wallId !== element.wallId || previous.swingSide !== element.swingSide || previous.hingeSide !== element.hingeSide || (previous instanceof WindowOpening && element instanceof WindowOpening && (previous.curtainState !== element.curtainState || previous.pelmetState !== element.pelmetState))) this.replaceGeometry(this.builder.build(element));
     else { this.builder.update(this.group.children[0], element); this.refreshMaterials(); }
     this.element = element;
   }

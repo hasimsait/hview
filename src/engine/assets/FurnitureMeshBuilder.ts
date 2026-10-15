@@ -16,6 +16,10 @@ export class FurnitureMeshBuilder {
 
   // Shared materials for architectural rendering
   private materials: ProceduralMaterials = {
+    whitePaint: new THREE.MeshStandardMaterial({ color: 0xf3f1eb, roughness: 0.65 }),
+    woodBlackBrown: new THREE.MeshStandardMaterial({ color: 0x30251e, roughness: 0.6 }),
+    plasticBeige: new THREE.MeshStandardMaterial({ color: 0xd6cbb8, roughness: 0.4 }),
+    glassBlack: new THREE.MeshStandardMaterial({ color: 0x101116, roughness: 0.12, metalness: 0.15 }),
     woodLight: new THREE.MeshStandardMaterial({ color: 0xdfcbaf, roughness: 0.5 }),
     woodDark: new THREE.MeshStandardMaterial({ color: 0x4a3b32, roughness: 0.6 }),
     fabricLight: new THREE.MeshStandardMaterial({ color: 0xe8e6e1, roughness: 0.85 }),
@@ -52,6 +56,7 @@ export class FurnitureMeshBuilder {
     // MeshBasicMaterial and MeshPhysicalMaterial (glass) are excluded —
     // basics have no lighting pipeline, glass is already transparent.
     const opaqueMats: THREE.MeshStandardMaterial[] = [
+      this.materials.whitePaint, this.materials.woodBlackBrown, this.materials.plasticBeige, this.materials.glassBlack,
       this.materials.woodLight, this.materials.woodDark,
       this.materials.fabricLight, this.materials.fabricBlue,
       this.materials.fabricDark, this.materials.fabricBeige,

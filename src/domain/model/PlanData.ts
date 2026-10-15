@@ -57,6 +57,7 @@ export interface OpeningData {
   frameColor?: string;
   /** Absent on older plans means ceiling-mounted curtains are visible. */
   curtainState?: CurtainState;
+  pelmetState?: CurtainState;
   rawOpening?: any;
 }
 

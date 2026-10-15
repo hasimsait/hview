@@ -22,6 +22,7 @@ const CATEGORIES = [
   { id: 'table', label: 'Tables' },
   { id: 'bed', label: 'Beds' },
   { id: 'kitchen', label: 'Kitchen' },
+  { id: 'appliance', label: 'Appliances' },
 ];
 
 export const AssetReplacementModal: React.FC<AssetReplacementModalProps> = ({
@@ -45,6 +46,7 @@ export const AssetReplacementModal: React.FC<AssetReplacementModalProps> = ({
     const matchesCategory =
       selectedCategory === 'all' || asset.category.toLowerCase() === selectedCategory.toLowerCase();
     const matchesSearch =
+      (asset.source?.retailer.toLowerCase().includes(searchQuery.toLowerCase())) ||
       asset.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (asset.description && asset.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
       asset.key.toLowerCase().includes(searchQuery.toLowerCase());
@@ -72,7 +74,7 @@ export const AssetReplacementModal: React.FC<AssetReplacementModalProps> = ({
             </h3>
             <p className="text-xs text-slate-400">
               {mode === 'add' ? (
-                'Choose an asset to place onto the active wall in view'
+                'Choose an item to place in your plan'
               ) : (
                 <>
                   Replacing <span className="text-sky-400 font-medium">{item?.displayName || 'Asset'}</span>
@@ -144,9 +146,13 @@ export const AssetReplacementModal: React.FC<AssetReplacementModalProps> = ({
                     </span>
                   )}
                 </div>
-                <h4 className="font-medium text-xs text-slate-100 truncate mb-1">
+                <h4 className="font-medium text-xs text-slate-100 mb-1">
                   {asset.name}
                 </h4>
+                <p className="text-[10px] text-sky-300 mb-1">
+                  {asset.source ? `${asset.source.retailer} · ` : ''}{asset.source?.dimensions === 'estimated' ? 'Approx. ' : ''}
+                  {[asset.defaultDimensions.x, asset.defaultDimensions.z, asset.defaultDimensions.y].map(n => +(n * 100).toFixed(1)).join(' × ')} cm (W × D × H)
+                </p>
                 {asset.description && (
                   <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
                     {asset.description}

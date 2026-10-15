@@ -18,6 +18,7 @@ export abstract class Opening extends PlanElement {
     if (!data.wallId) throw new Error('Opening must belong to a wall');
     if (data.frameColor !== undefined && !/^#[0-9a-fA-F]{6}$/.test(data.frameColor)) throw new Error('Frame color must be a six-digit hex color');
     if (data.curtainState !== undefined && !['visible', 'hidden', 'removed'].includes(data.curtainState)) throw new Error('Invalid curtain state');
+    if (data.pelmetState !== undefined && !['visible', 'hidden', 'removed'].includes(data.pelmetState)) throw new Error('Invalid cornice state');
     this.state = immutable({ ...data, finish: SurfaceFinish.optional(data.finish) });
   }
   get displayName() { return this.type.replace('_', ' '); }
@@ -92,6 +93,8 @@ export class WindowOpening extends Opening {
   get isFrenchWindow() { return this.type === 'french_window'; }
   get topElevation() { return this.floorHeight + this.height; }
   get curtainState(): CurtainState { return this.state.curtainState ?? 'visible'; }
+  get pelmetState(): CurtainState { return this.state.pelmetState ?? 'visible'; }
+  withPelmetState(pelmetState: CurtainState): WindowOpening { return new WindowOpening({ ...this.state, pelmetState }); }
   withCurtainState(curtainState: CurtainState): WindowOpening { return new WindowOpening({ ...this.state, curtainState }); }
   protected recreate(data: OpeningData) { return new WindowOpening(data); }
   accept<R>(visitor: PlanElementVisitor<R>): R { return visitor.visitWindow(this); }

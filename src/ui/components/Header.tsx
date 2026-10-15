@@ -419,7 +419,7 @@ export const Header: React.FC<HeaderProps> = ({
             ? 'bg-purple-500/20 border-purple-500/40 text-purple-300 shadow-sm'
             : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:text-slate-200'
             }`}
-          title="Toggle suspended ceilings (Asma Tavan) - OFF by default for unobstructed top-down planning"
+          title="Toggle suspended ceilings - OFF by default for unobstructed top-down planning"
         >
           <Grid className="w-3.5 h-3.5" />
           Ceilings: {showCeilings ? 'ON' : 'OFF'}
