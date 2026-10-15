@@ -27,6 +27,8 @@ import { RenameRoom } from '../../application/commands/StructuralCommands';
 import { isOpaquePlanSource } from '../../services/plan/PlanRequest';
 
 interface HeaderProps {
+  isViewportFullscreen: boolean;
+  onToggleViewportFullscreen: () => void;
   onSave: () => Promise<void>;
   isSaving: boolean;
   viewMode: ViewMode;
@@ -48,6 +50,8 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
+  isViewportFullscreen,
+  onToggleViewportFullscreen,
   onSave,
   isSaving,
   viewMode,
@@ -180,14 +184,25 @@ export const Header: React.FC<HeaderProps> = ({
       : `🏠 ${isolatedRoomIds.length} Rooms`;
 
   return (
-    <header className="min-h-14 shrink-0 border-b border-slate-800 bg-slate-900/90 backdrop-blur px-4 py-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 z-20 select-none">
+    <header className={`app-header ${isViewportFullscreen ? 'app-header--fullscreen' : ''} min-h-14 shrink-0 border-b border-slate-800 bg-slate-900/90 backdrop-blur px-4 py-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 z-20 select-none`}>
       {/* Brand & Stats */}
-      <div className="flex items-center gap-3">
+      <div className="app-header-brand flex items-center gap-3">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-sky-500/20 border border-sky-400/30 flex items-center justify-center text-sky-400">
-            <Box className="w-4 h-4" />
-          </div>
-          <div>
+          <button
+            type="button"
+            onClick={() => {
+              setRoomPopoverOpen(false);
+              setLightingPopoverOpen(false);
+              onToggleViewportFullscreen();
+            }}
+            aria-label={isViewportFullscreen ? 'Exit fullscreen and show topbar' : 'Enter fullscreen and hide topbar'}
+            aria-expanded={!isViewportFullscreen}
+            title={isViewportFullscreen ? 'Show topbar' : 'Fullscreen viewport'}
+            className="w-11 h-11 shrink-0 rounded-lg bg-slate-900/95 border border-sky-400/30 flex items-center justify-center text-sky-400 hover:bg-sky-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400"
+          >
+            <Box className="w-4 h-4" aria-hidden="true" />
+          </button>
+          <div className="app-header-title">
             <h1 className="font-semibold text-sm tracking-wide text-white flex items-center gap-2">
               HView
               <span className="text-[10px] font-normal px-1.5 py-0.5 rounded bg-sky-950 text-sky-400 border border-sky-800/50">
@@ -198,7 +213,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {plan && (
-          <div className="hidden md:flex items-center gap-2 text-xs text-slate-400 pl-4 border-l border-slate-800">
+          <div className="app-header-stats hidden md:flex items-center gap-2 text-xs text-slate-400 pl-4 border-l border-slate-800">
             <span className="bg-slate-800/80 px-2 py-0.5 rounded text-slate-300">
               {plan.walls.length} Walls{plan.columns.length > 0 && ` · ${plan.columns.length} Columns`}
             </span>

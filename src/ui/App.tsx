@@ -22,8 +22,10 @@ import { isOpaquePlanSource } from '../services/plan/PlanRequest';
 import { createElementId } from '../platform/ElementId';
 import { ColumnInspector } from './components/ColumnInspector';
 import { WindowInspector } from './components/WindowInspector';
+import { useViewportFullscreen } from '@ui/hooks/useViewportFullscreen';
 
 export const App: React.FC = () => {
+  const { isViewportFullscreen, toggleViewportFullscreen } = useViewportFullscreen();
   const runtime = useRuntime();
   const editor = runtime.editor;
   const sceneService = runtime.scene;
@@ -263,9 +265,11 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-slate-950 text-slate-100">
+    <div className="app-shell relative flex flex-col w-full overflow-hidden bg-slate-950 text-slate-100">
       {/* Top Header */}
       <Header
+        isViewportFullscreen={isViewportFullscreen}
+        onToggleViewportFullscreen={toggleViewportFullscreen}
         onSave={handleSave}
         isSaving={isSaving}
         viewMode={viewMode}
@@ -285,12 +289,12 @@ export const App: React.FC = () => {
         onUpdateLighting={handleUpdateLighting}
         onOpenAddAssetModal={() => setIsAddAssetModalOpen(true)}
       />
-      {downloadOnly && <p className="bg-slate-900 px-4 py-1 text-xs text-amber-200">Changes stay in this tab. Use Save HTML to keep a copy.</p>}
-      {saveError && <p role="alert" className="bg-red-950 px-4 py-2 text-sm text-red-200">The saved copy could not be prepared. Please try Save again.</p>}
+      {downloadOnly && !isViewportFullscreen && <p className="bg-slate-900 px-4 py-1 text-xs text-amber-200">Changes stay in this tab. Use Save HTML to keep a copy.</p>}
+      {saveError && !isViewportFullscreen && <p role="alert" className="bg-red-950 px-4 py-2 text-sm text-red-200">The saved copy could not be prepared. Please try Save again.</p>}
 
       {/* Main 3D Canvas Area */}
       <main className="flex-1 min-h-0 relative w-full">
-        <Viewport3D disabled={isSaving} />
+        <Viewport3D disabled={isSaving} hideControls={isViewportFullscreen} />
 
         {/* Inspector Drawers wrapped in ErrorBoundary */}
         <ErrorBoundary>

@@ -13,6 +13,29 @@ html, body, #root {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
+.app-shell {
+  height: 100vh;
+  height: 100dvh;
+}
+
+/* Keep the logo over the canvas without reserving any toolbar space. */
+.app-header--fullscreen {
+  position: absolute;
+  top: max(0.5rem, env(safe-area-inset-top));
+  left: max(1rem, env(safe-area-inset-left));
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  backdrop-filter: none;
+}
+
+.app-header--fullscreen > :not(.app-header-brand),
+.app-header--fullscreen .app-header-title,
+.app-header--fullscreen .app-header-stats {
+  display: none;
+}
+
 /* Custom scrollbars */
 ::-webkit-scrollbar {
   width: 6px;

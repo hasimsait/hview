@@ -3,7 +3,7 @@ import { Compass,Move,RotateCw } from 'lucide-react';
 import React,{ useEffect,useLayoutEffect,useRef,useState,useSyncExternalStore } from 'react';
 import { selectedOpening,selectedRoom,selectedWall } from '../../application/queries/SelectionQueries';
 
-export const Viewport3D: React.FC<{ disabled?: boolean }> = ({ disabled = false }) => {
+export const Viewport3D: React.FC<{ disabled?: boolean; hideControls?: boolean }> = ({ disabled = false, hideControls = false }) => {
   const runtime = useRuntime();
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneService = runtime.scene;
@@ -76,7 +76,7 @@ export const Viewport3D: React.FC<{ disabled?: boolean }> = ({ disabled = false 
       )}
 
       {/* Floating Gizmo Tool Toolbar */}
-      {hasPlan && (
+      {hasPlan && !hideControls && (
         <div className="absolute top-4 left-4 flex bg-slate-900/90 backdrop-blur-md border border-slate-800 p-1 rounded-xl shadow-xl z-10 gap-1">
           <button
             onClick={() => handleGizmoModeChange('translate')}
@@ -105,6 +105,7 @@ export const Viewport3D: React.FC<{ disabled?: boolean }> = ({ disabled = false 
       )}
 
       {/* Bottom Floating Control Hints */}
+      {!hideControls && (
       <div className="absolute bottom-4 left-4 bg-slate-900/85 backdrop-blur border border-slate-800/80 px-3.5 py-1.5 rounded-lg text-[11px] text-slate-400 flex items-center gap-3.5 z-10 pointer-events-none select-none shadow-lg">
         <span className="flex items-center gap-1">
           <Compass className="w-3.5 h-3.5 text-sky-400" />
@@ -130,6 +131,7 @@ export const Viewport3D: React.FC<{ disabled?: boolean }> = ({ disabled = false 
           <strong className="text-slate-300">Scroll:</strong> Zoom
         </span>
       </div>
+      )}
     </div>
   );
 };
