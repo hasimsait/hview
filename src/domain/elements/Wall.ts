@@ -1,0 +1,104 @@
+import { finite,immutable,positive } from '../model/Immutable';
+import type { CavityModifier,SurfaceFinishConfig,WallData,WallFrameStyle,WallSide } from '../model/PlanData';
+import { SurfaceFinish } from '../model/SurfaceFinish';
+import type { Opening } from './Opening';
+import { PlanElement,type PlanElementVisitor } from './PlanElement';
+
+export class Wall extends PlanElement {
+  readonly kind = 'wall';
+  private readonly state: Readonly<Omit<WallData, 'openings'>>;
+  readonly openings: readonly Opening[];
+
+  constructor(data: WallData, openings: readonly Opening[]) {
+    super(data.id);
+    positive(data.thickness, 'Wall thickness'); positive(data.height, 'Wall height');
+    for (const point of [data.p1, data.p2]) { finite(point.x, 'Wall X'); finite(point.y, 'Wall Y'); }
+    const { openings: _transportOpenings, ...shape } = data;
+    this.state = immutable(shape);
+    this.openings = Object.isFrozen(openings) ? openings : Object.freeze([...openings]);
+    if (openings.some(opening => opening.wallId !== this.id)) throw new Error('Opening belongs to another wall');
+    Object.freeze(this);
+  }
+  get displayName() { return `Wall ${this.id}`; }
+  get p1(): Readonly<WallData['p1']> { return this.state.p1; }
+  get p2(): Readonly<WallData['p2']> { return this.state.p2; }
+  get thickness() { return this.state.thickness; }
+  get height() { return this.state.height; }
+  get material() { return this.state.material; }
+  get color() { return this.state.color; }
+  get finish() { return this.state.finish; }
+  get finishSideA() { return this.state.finishSideA; }
+  get finishSideB() { return this.state.finishSideB; }
+  get finishEdges() { return this.state.finishEdges; }
+  get finishEdgeStart() { return this.state.finishEdgeStart; }
+  get finishEdgeEnd() { return this.state.finishEdgeEnd; }
+  get finishEdgeTop() { return this.state.finishEdgeTop; }
+  get finishBaseboard() { return this.state.finishBaseboard; }
+  get cavities(): readonly Readonly<NonNullable<WallData['cavities']>[number]>[] | undefined { return this.state.cavities; }
+  get roomIds(): readonly string[] | undefined { return this.state.roomIds; }
+  get roomSideA() { return this.state.roomSideA; }
+  get roomSideB() { return this.state.roomSideB; }
+  get frameStyle() { return this.state.frameStyle; }
+  get frameColor() { return this.state.frameColor; }
+  get startOffset() { return this.state.startOffset; }
+  get endOffset() { return this.state.endOffset; }
+  get rawWall() { return this.state.rawWall; }
+  get isColumn() { return false; }
+  get length() { return Math.hypot(this.p2.x - this.p1.x, this.p2.y - this.p1.y); }
+
+  withFinish(side: WallSide, config: SurfaceFinishConfig): Wall {
+    const finish = new SurfaceFinish(config).config;
+    const next = { ...this.state };
+    if (side === 'A' || side === 'B') {
+      const own = side === 'A' ? 'finishSideA' : 'finishSideB';
+      const opposite = side === 'A' ? 'finishSideB' : 'finishSideA';
+      next[own] = finish;
+      next[opposite] ??= next.finish;
+      delete next.finish;
+    } else if (side === 'both') {
+      Object.assign(next, {
+        finish, finishSideA: finish, finishSideB: finish, finishEdges: finish,
+        finishEdgeStart: finish, finishEdgeEnd: finish, finishEdgeTop: finish
+      });
+    } else if (side === 'edges') {
+      Object.assign(next, { finishEdges: finish, finishEdgeStart: finish, finishEdgeEnd: finish, finishEdgeTop: finish });
+    } else {
+      const field = {
+        edge_start: 'finishEdgeStart', edge_end: 'finishEdgeEnd', edge_top: 'finishEdgeTop',
+        baseboard: 'finishBaseboard', edge_bottom: 'finishBaseboard'
+      } as const;
+      next[field[side]] = finish;
+    }
+    return new Wall({ ...next, openings: [] }, this.openings);
+  }
+
+  withFrame(frameStyle: WallFrameStyle, frameColor: string): Wall {
+    return new Wall({ ...this.state, frameStyle, frameColor, openings: [] }, this.openings);
+  }
+  withMaterial(material: string): Wall {
+    if (!material.trim()) throw new Error('Wall material is required');
+    return new Wall({ ...this.state, material, openings: [] }, this.openings);
+  }
+  withOpenings(openings: readonly Opening[]): Wall { return new Wall({ ...this.state, openings: [] }, openings); }
+  withRoomRelationship(relationship: Pick<WallData, 'roomIds' | 'roomSideA' | 'roomSideB'>): Wall {
+    return new Wall({ ...this.state, ...relationship, openings: [] }, this.openings);
+  }
+  withJunctionOffsets(startOffset: number, endOffset: number): Wall {
+    return startOffset === this.startOffset && endOffset === this.endOffset ? this
+      : new Wall({ ...this.state, startOffset, endOffset, openings: [] }, this.openings);
+  }
+  withCavities(cavities: readonly CavityModifier[]): Wall {
+    for (const cavity of cavities) this.validateHostedFeature(cavity.distanceAlongWall, cavity.width);
+    return new Wall({ ...this.state, cavities: [...cavities], openings: [] }, this.openings);
+  }
+  validateHostedFeature(center: number, width: number): void {
+    if (center - width / 2 < -0.001 || center + width / 2 > this.length + 0.001) throw new Error('Hosted feature extends beyond the wall');
+  }
+  assertSplittable(distance: number): void {
+    if (distance <= 0.05 || distance >= this.length - 0.05) throw new Error('Split must leave two usable wall segments');
+    const features = [...this.openings, ...(this.cavities ?? [])];
+    if (features.some(feature => Math.abs(feature.distanceAlongWall - distance) < feature.width / 2 - 0.001)) throw new Error('Cannot split through a hosted opening or recess');
+  }
+  toData(): WallData { return { ...structuredClone(this.state), openings: this.openings.map(opening => opening.toData()) }; }
+  accept<R>(visitor: PlanElementVisitor<R>): R { return visitor.visitWall(this); }
+}

@@ -1,19 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { RoomEntity, SurfaceFinishConfig } from '@core/types/plan';
-import { useService } from '@ui/context/DIContext';
-import { TOKENS } from '@core/di/tokens';
-import { IPlanManagerService, ISceneService } from '@core/types/services';
-import { SurfaceFinishPicker } from './SurfaceFinishPicker';
+import { RoomEntity,SurfaceFinishConfig } from '@core/types/plan';
+import { useRuntime } from '@ui/context/RuntimeContext';
 import {
-  X,
-  Focus,
-  RotateCcw,
-  RotateCw,
-  Grid,
-  Sparkles,
-  Layers,
-  Split,
+Focus,
+Grid,
+Layers,
+RotateCcw,
+RotateCw,
+Sparkles,
+Split,
+X,
 } from 'lucide-react';
+import React,{ useEffect,useState } from 'react';
+import { ConfigureCeiling,FinishFloor,RenameRoom } from '../../application/commands/StructuralCommands';
+import { SurfaceFinishPicker } from './SurfaceFinishPicker';
 
 interface FloorInspectorProps {
   room: RoomEntity | null;
@@ -21,8 +20,9 @@ interface FloorInspectorProps {
 }
 
 export const FloorInspector: React.FC<FloorInspectorProps> = ({ room, onClose }) => {
-  const planManager = useService<IPlanManagerService>(TOKENS.PlanManagerService);
-  const sceneService = useService<ISceneService>(TOKENS.SceneService);
+  const runtime = useRuntime();
+  const editor = runtime.editor;
+  const sceneService = runtime.scene;
 
   const [roomName, setRoomName] = useState(room?.name || '');
 
@@ -35,13 +35,13 @@ export const FloorInspector: React.FC<FloorInspectorProps> = ({ room, onClose })
   if (!room) return null;
 
   const isWetZone = /bath|toilet|wc|san|shower/i.test(room.name);
-  const borderingWalls = (planManager.getPlan()?.walls || []).filter(
+  const borderingWalls = (editor.getSnapshot()?.walls || []).filter(
     (w) => w.roomSideA === room.id || w.roomSideB === room.id || w.roomIds?.includes(room.id)
   );
 
   const handleNameChange = (newName: string) => {
     setRoomName(newName);
-    planManager.updateRoomName(room.id, newName);
+    editor.execute(new RenameRoom(room.id, newName));
   };
 
   const handleFocus = () => {
@@ -49,15 +49,15 @@ export const FloorInspector: React.FC<FloorInspectorProps> = ({ room, onClose })
   };
 
   const handleApplyFinish = (finish: SurfaceFinishConfig) => {
-    planManager.setRoomFloorFinish(room.id, finish);
+    editor.execute(new FinishFloor(room.id, finish));
   };
 
   const handleResetToDefault = () => {
-    planManager.setRoomFloorFinish(room.id, undefined);
+    editor.execute(new FinishFloor(room.id, undefined));
   };
 
   const handleCeilingChange = (type: 'clip_in' | 'gypsum' | 'none') => {
-    planManager.setRoomCeiling(room.id, type);
+    editor.execute(new ConfigureCeiling(room.id, type));
   };
 
   // Human-readable finish name
@@ -138,11 +138,10 @@ export const FloorInspector: React.FC<FloorInspectorProps> = ({ room, onClose })
           <div className="flex items-center justify-between">
             <label className="text-[11px] font-medium text-slate-400">Room Name</label>
             <span
-              className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
-                isWetZone
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                  : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-              }`}
+              className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${isWetZone
+                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                }`}
             >
               {isWetZone ? 'Wet Zone' : 'Dry Zone'}
             </span>
@@ -200,11 +199,10 @@ export const FloorInspector: React.FC<FloorInspectorProps> = ({ room, onClose })
                 key={c.id}
                 type="button"
                 onClick={() => handleCeilingChange(c.id)}
-                className={`py-1 text-[11px] font-medium rounded transition-colors ${
-                  (room.ceilingType || 'none') === c.id
-                    ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
+                className={`py-1 text-[11px] font-medium rounded transition-colors ${(room.ceilingType || 'none') === c.id
+                  ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30'
+                  : 'text-slate-400 hover:text-slate-200'
+                  }`}
               >
                 {c.label}
               </button>
@@ -234,15 +232,14 @@ export const FloorInspector: React.FC<FloorInspectorProps> = ({ room, onClose })
                     type="button"
                     onClick={() => {
                       const side = w.roomSideA === room.id ? 'A' : 'B';
-                      planManager.setSelectedWall(w, side);
+                      editor.selection.select('wall', w, side);
                       sceneService.focusOnWall(w);
                     }}
                     className="w-full flex items-center justify-between p-2 rounded bg-slate-950 hover:bg-slate-800 border border-slate-800/80 hover:border-sky-500/50 transition-colors text-left group"
                   >
                     <div className="flex items-center gap-1.5 truncate">
-                      <span className={`text-[9px] px-1 py-0.2 rounded font-mono ${
-                        isGlass ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30' : 'bg-slate-800 text-slate-400'
-                      }`}>
+                      <span className={`text-[9px] px-1 py-0.2 rounded font-mono ${isGlass ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30' : 'bg-slate-800 text-slate-400'
+                        }`}>
                         {isGlass ? 'Glass' : 'Solid'}
                       </span>
                       <span className="text-xs text-slate-200 group-hover:text-sky-300 font-medium truncate">
@@ -303,8 +300,8 @@ export const FloorInspector: React.FC<FloorInspectorProps> = ({ room, onClose })
                 {room.floorFinish
                   ? `${room.floorFinish.type} • roughness ${room.floorFinish.roughness ?? 0.35}`
                   : isWetZone
-                  ? 'Tile applied automatically for wet zone'
-                  : 'Parquet applied automatically for dry space'}
+                    ? 'Tile applied automatically for wet zone'
+                    : 'Parquet applied automatically for dry space'}
               </div>
             </div>
           </div>

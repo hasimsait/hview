@@ -1,20 +1,20 @@
-import React from 'react';
-import { OpeningEntity, WallEntity } from '@core/types/plan';
-import { useService } from '@ui/context/DIContext';
-import { TOKENS } from '@core/di/tokens';
-import { IPlanManagerService, ISceneService } from '@core/types/services';
+import { OpeningEntity,WallEntity } from '@core/types/plan';
+import { useRuntime } from '@ui/context/RuntimeContext';
 import {
-  X,
-  RotateCcw,
-  RotateCw,
-  ArrowLeftRight,
-  Focus,
-  ChevronLeft,
-  ChevronRight,
-  DoorOpen,
-  SlidersHorizontal,
-  Sparkles,
+ArrowLeftRight,
+ChevronLeft,
+ChevronRight,
+DoorOpen,
+Focus,
+RotateCcw,
+RotateCw,
+SlidersHorizontal,
+Sparkles,
+X,
 } from 'lucide-react';
+import React from 'react';
+import { FinishOpening,FlipDoor,OpenDoor,RotateDoor } from '../../application/commands/StructuralCommands';
+import { allDoors as queryDoors } from '../../application/queries/SelectionQueries';
 import { SurfaceFinishPicker } from './SurfaceFinishPicker';
 
 interface DoorInspectorProps {
@@ -23,14 +23,15 @@ interface DoorInspectorProps {
 }
 
 export const DoorInspector: React.FC<DoorInspectorProps> = ({ selected, onClose }) => {
-  const planManager = useService<IPlanManagerService>(TOKENS.PlanManagerService);
-  const sceneService = useService<ISceneService>(TOKENS.SceneService);
+  const runtime = useRuntime();
+  const editor = runtime.editor;
+  const sceneService = runtime.scene;
 
   if (!selected) return null;
 
   const { opening, wall } = selected;
-  const plan = planManager.getPlan();
-  const allDoors = planManager.getAllDoors();
+  const plan = editor.getSnapshot();
+  const allDoors = queryDoors(editor.getSnapshot());
   const currentIndex = allDoors.findIndex((d) => d.opening.id === opening.id);
 
   // Canonical swing/hinge — set at parse time, mutated by flipDoor()
@@ -52,11 +53,11 @@ export const DoorInspector: React.FC<DoorInspectorProps> = ({ selected, onClose 
   }
 
   const handleFlipSwing = () => {
-    planManager.flipDoor(opening.id, 'swing');
+    editor.execute(new FlipDoor(opening.id, 'swing'));
   };
 
   const handleFlipHinge = () => {
-    planManager.flipDoor(opening.id, 'hinge');
+    editor.execute(new FlipDoor(opening.id, 'hinge'));
   };
 
   const handleFocus = () => {
@@ -66,7 +67,7 @@ export const DoorInspector: React.FC<DoorInspectorProps> = ({ selected, onClose 
   const handleSelectDoor = (index: number) => {
     if (index >= 0 && index < allDoors.length) {
       const nextDoor = allDoors[index];
-      planManager.setSelectedOpening(nextDoor);
+      editor.selection.select('opening', (nextDoor)?.opening);
       sceneService.focusOnOpening(nextDoor.opening, nextDoor.wall);
     }
   };
@@ -140,15 +141,15 @@ export const DoorInspector: React.FC<DoorInspectorProps> = ({ selected, onClose 
               <ArrowLeftRight className="w-3.5 h-3.5 text-sky-400" />
               Hinge Position
             </span>
-            <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-medium ${
-              opening.hingeFlipped
-                ? 'bg-sky-500/30 text-sky-300 border border-sky-400/40'
-                : 'bg-slate-800 text-slate-300'
-            }`}>
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-medium ${opening.hingeFlipped
+              ? 'bg-sky-500/30 text-sky-300 border border-sky-400/40'
+              : 'bg-slate-800 text-slate-300'
+              }`}>
               {currentHinge === 'l' ? '👈 HINGE ON LEFT' : '👉 HINGE ON RIGHT'}
             </span>
           </div>
           <button
+            disabled={isSliding}
             onClick={handleFlipHinge}
             className="w-full py-2 px-3 rounded-lg bg-sky-600 hover:bg-sky-500 text-white flex items-center justify-center gap-2 font-semibold text-xs transition-all shadow-md active:scale-[0.98]"
             title="Flip hinge side to the other frame post (Left / Right)"
@@ -165,15 +166,15 @@ export const DoorInspector: React.FC<DoorInspectorProps> = ({ selected, onClose 
               <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
               Swing Direction
             </span>
-            <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-medium ${
-              opening.swingFlipped
-                ? 'bg-amber-500/30 text-amber-300 border border-amber-400/40'
-                : 'bg-slate-800 text-slate-300'
-            }`}>
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-medium ${opening.swingFlipped
+              ? 'bg-amber-500/30 text-amber-300 border border-amber-400/40'
+              : 'bg-slate-800 text-slate-300'
+              }`}>
               {currentSwing === 'r' ? 'OUTWARD (Side R)' : 'INWARD (Side L)'}
             </span>
           </div>
           <button
+            disabled={isSliding}
             onClick={handleFlipSwing}
             className="w-full py-2 px-3 rounded-lg bg-amber-600 hover:bg-amber-500 text-white flex items-center justify-center gap-2 font-semibold text-xs transition-all shadow-md active:scale-[0.98]"
             title="Flip door swing inward or outward across the wall"
@@ -200,7 +201,7 @@ export const DoorInspector: React.FC<DoorInspectorProps> = ({ selected, onClose 
               value={currentAngleDeg}
               onChange={(e) => {
                 const val = parseInt(e.target.value);
-                if (!isNaN(val)) planManager.setDoorAngle(opening.id, val);
+                if (!isNaN(val)) editor.execute(new OpenDoor(opening.id, val));
               }}
               className="w-14 bg-slate-950 border border-slate-700 text-sky-300 font-mono text-xs rounded px-1.5 py-0.5 text-right outline-none focus:border-sky-500"
             />
@@ -216,7 +217,7 @@ export const DoorInspector: React.FC<DoorInspectorProps> = ({ selected, onClose 
             max="180"
             step="5"
             value={currentAngleDeg}
-            onChange={(e) => planManager.setDoorAngle(opening.id, parseInt(e.target.value) || 0)}
+            onChange={(e) => editor.execute(new OpenDoor(opening.id, parseInt(e.target.value) || 0))}
             className="w-full accent-sky-500 h-1.5 bg-slate-800 rounded-lg cursor-pointer"
           />
           <div className="flex justify-between text-[10px] text-slate-500 font-mono px-0.5">
@@ -237,12 +238,11 @@ export const DoorInspector: React.FC<DoorInspectorProps> = ({ selected, onClose 
           ].map((preset) => (
             <button
               key={preset.val}
-              onClick={() => planManager.setDoorAngle(opening.id, preset.val)}
-              className={`py-1 rounded text-[10px] font-medium transition-all ${
-                currentAngleDeg === preset.val
-                  ? 'bg-sky-500 text-white font-semibold shadow-sm'
-                  : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-              }`}
+              onClick={() => editor.execute(new OpenDoor(opening.id, preset.val))}
+              className={`py-1 rounded text-[10px] font-medium transition-all ${currentAngleDeg === preset.val
+                ? 'bg-sky-500 text-white font-semibold shadow-sm'
+                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                }`}
             >
               {preset.label}
             </button>
@@ -252,7 +252,7 @@ export const DoorInspector: React.FC<DoorInspectorProps> = ({ selected, onClose 
         {/* Fine-Tuning Step & Rotate 180 Buttons */}
         <div className="flex items-center gap-1.5 pt-1">
           <button
-            onClick={() => planManager.rotateDoor(opening.id, -15)}
+            onClick={() => editor.execute(new RotateDoor(opening.id, -15))}
             className="flex-1 py-1.5 px-2 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center gap-1 text-[11px] transition-colors"
             title="Rotate door -15 degrees"
           >
@@ -260,7 +260,7 @@ export const DoorInspector: React.FC<DoorInspectorProps> = ({ selected, onClose 
             -15°
           </button>
           <button
-            onClick={() => planManager.rotateDoor(opening.id, 15)}
+            onClick={() => editor.execute(new RotateDoor(opening.id, 15))}
             className="flex-1 py-1.5 px-2 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center gap-1 text-[11px] transition-colors"
             title="Rotate door +15 degrees"
           >
@@ -268,7 +268,7 @@ export const DoorInspector: React.FC<DoorInspectorProps> = ({ selected, onClose 
             +15°
           </button>
           <button
-            onClick={() => planManager.rotateDoor(opening.id, 180)}
+            onClick={() => editor.execute(new RotateDoor(opening.id, 180))}
             className="flex-1 py-1.5 px-2 rounded-md bg-sky-600/30 hover:bg-sky-600/50 text-sky-200 border border-sky-500/40 flex items-center justify-center gap-1 text-[11px] font-medium transition-colors"
             title="Rotate door 180 degrees (flip facing direction)"
           >
@@ -287,10 +287,10 @@ export const DoorInspector: React.FC<DoorInspectorProps> = ({ selected, onClose 
         <SurfaceFinishPicker
           currentFinish={opening.finish}
           onSelectFinish={(finish) => {
-            planManager.setOpeningFinish(opening.id, finish);
+            editor.execute(new FinishOpening(opening.id, finish));
           }}
           onClearFinish={() => {
-            planManager.setOpeningFinish(opening.id, undefined as any);
+            editor.execute(new FinishOpening(opening.id, undefined as any));
           }}
         />
       </div>

@@ -1,5 +1,6 @@
-import { test, expect, type Page } from '@playwright/test';
-import { workflowPlan, selectSofa, numberField } from './workflow-helpers';
+import { expect, test, type Page } from '@playwright/test';
+import { legacyData } from '../support/editor';
+import { numberField, selectSofa, workflowPlan } from './workflow-helpers';
 
 test.use({ viewport: { width: 2300, height: 900 } });
 let original: string;
@@ -16,10 +17,9 @@ test.afterEach(async ({ page, request }) => {
 
 async function viewportState(page: Page) {
   return page.evaluate(async () => {
-    const containerPath = '/src/core/di/container.ts', tokensPath = '/src/core/di/tokens.ts';
-    const { defaultContainer } = await import(containerPath);
-    const { TOKENS } = await import(tokensPath);
-    const scene = defaultContainer.resolve(TOKENS.SceneService) as any;
+    const runtimePath = '/src/main.tsx';
+    const { runtime } = await import(runtimePath);
+    const scene = runtime.scene as any;
     return { enabled: scene.getControls().enabled, target: scene.getControls().target.toArray() };
   });
 }
@@ -39,7 +39,7 @@ test('edits wait for Save and the saving dialog blocks clicks, Escape, and navig
     await numberField(page, 'Width (X)').fill('225');
     await page.waitForTimeout(1000);
     expect(saves).toHaveLength(0);
-    expect((await (await request.get('/sample.plan')).json()).plan.items.sofa.width).toBe(160);
+    expect((legacyData(await (await request.get('/sample.plan')).text())).plan.items.sofa.width).toBe(160);
     expect(await page.evaluate(() => JSON.parse(localStorage.getItem('hview_current_plan')!).plan.items.sofa.width)).toBe(160);
     await expect(page.getByText('Unsaved changes', { exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Save .plan', exact: true }).click();
@@ -58,12 +58,12 @@ test('edits wait for Save and the saving dialog blocks clicks, Escape, and navig
     await page.keyboard.press('Tab');
     expect(await page.evaluate(() => !document.activeElement?.closest('header, main'))).toBe(true);
     expect(saves).toHaveLength(1);
-    expect(JSON.parse(saves[0]).plan.items.sofa.width).toBe(225);
+    expect(legacyData(saves[0]).plan.items.sofa.width).toBe(225);
     release();
     await expect(dialog).toBeHidden();
     expect((await viewportState(page)).enabled).toBe(true);
     await expect(page.getByText('Unsaved changes', { exact: true })).toBeHidden();
-    await expect.poll(async () => (await (await request.get('/sample.plan')).json()).plan.items.sofa.width).toBe(225);
+    await expect.poll(async () => (legacyData(await (await request.get('/sample.plan')).text())).plan.items.sofa.width).toBe(225);
   } finally { release(); }
 });
 
@@ -87,5 +87,5 @@ test('a failed save unlocks the application and retains edits for manual retry',
   await expect(page.getByRole('dialog', { name: 'Saving plan' })).toBeHidden();
   await expect(page.getByRole('button', { name: 'Saved', exact: true })).toBeVisible();
   expect(attempts).toBe(2);
-  expect((await (await request.get('/sample.plan')).json()).plan.items.sofa.width).toBe(230);
+  expect((legacyData(await (await request.get('/sample.plan')).text())).plan.items.sofa.width).toBe(230);
 });

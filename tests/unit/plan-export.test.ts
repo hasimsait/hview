@@ -1,58 +1,65 @@
 import { describe, expect, it } from 'vitest';
-import { PlanParserService } from '../../src/services/plan/PlanParserService';
-import { PlanExportService } from '../../src/services/plan/PlanExportService';
+import { ConfigureLuminaire, FinishFurniture, RemoveElement, ReplaceFurniture, TransformFurniture } from '../../src/application/commands/FurnitureCommands';
+import { ConfigureCeiling, FinishFloor, FinishWall, FrameWall, OpenDoor, RenameRoom, SplitWall } from '../../src/application/commands/StructuralCommands';
+import { LegacyPlanWriter } from '../../src/domain/codec/LegacyPlanWriter';
+import { PlanCodec } from '../../src/domain/codec/PlanCodec';
+import { createEditor } from '../support/editor';
 import { rawPlan } from './fixtures';
 
-const parser = new PlanParserService();
-const exporter = new PlanExportService();
-
-describe('plan export round trips', () => {
-  it('preserves unknown metadata and does not mutate source JSON', () => {
-    const raw = rawPlan();
-    const before = structuredClone(raw);
-    const exported = JSON.parse(exporter.exportPlan(parser.parse(raw)));
-    expect(exported.metadata).toEqual(raw.metadata);
-    expect(exported.plan.items.sofa.vendorData).toBe('preserve me');
-    expect(raw).toEqual(before);
+const codec = new PlanCodec(), legacy = new LegacyPlanWriter();
+for (const format of ['canonical', 'legacy'] as const) describe(`${format} document round trips`, () => {
+  const encode = format === 'canonical' ? codec.encode.bind(codec) : legacy.encode.bind(legacy);
+  it('preserves unknown metadata without mutating input', () => {
+    const input = rawPlan(), original = structuredClone(input);
+    const result = codec.decode(encode(codec.decode(input)));
+    expect(legacy.encode(result)).toContain('preserve me');
+    expect(legacy.encode(result)).toContain('regression fixture');
+    expect(input).toEqual(original);
   });
-  it('round trips moved, elevated, rotated and resized furniture', () => {
-    const plan = parser.parse(rawPlan());
-    Object.assign(plan.furniture[0], { position: { x: 2.3456, y: 1.2345, z: 0.8765 }, dimensions: { x: 1.1111, y: 2.2222, z: 3.3333 }, rotationY: -0.4567 });
-    const restored = parser.parse(exporter.exportPlan(plan)).furniture[0];
-    expect(restored.position).toEqual(plan.furniture[0].position);
-    expect(restored.dimensions).toEqual(plan.furniture[0].dimensions);
-    expect(restored.rotationY).toBe(-0.4567);
+  it('round trips moves, elevations, radians and custom dimensions', () => {
+    const editor = createEditor(); editor.documents.load(rawPlan());
+    editor.execute(new TransformFurniture('sofa', { x: 1.2345, y: 0.4321, z: 3.4567 }, -0.4567, { x: 2.1234, y: 0.7654, z: 0.9876 }));
+    const before = editor.getDocument().requireFurniture('sofa'), after = codec.decode(encode(editor.getDocument())).requireFurniture('sofa');
+    expect(after.position).toEqual(before.position); expect(after.dimensions).toEqual(before.dimensions); expect(after.rotationY).toBe(before.rotationY);
   });
-  it('round trips furniture finishes, section finishes and lighting', () => {
-    const plan = parser.parse(rawPlan());
-    Object.assign(plan.furniture[0], { finish: { type: 'wood', variant: 'oak' }, sectionFinishes: { door: { type: 'paint', color: '#ff0000' } }, lightConfig: { enabled: false, intensity: 0.5 }, hasLids: false, customModelUrl: '/models/chair.glb' });
-    expect(parser.parse(exporter.exportPlan(plan)).furniture[0]).toMatchObject({ finish: plan.furniture[0].finish, sectionFinishes: plan.furniture[0].sectionFinishes, lightConfig: plan.furniture[0].lightConfig, hasLids: false, customModelUrl: '/models/chair.glb' });
+  it('round trips a real luminaire and clears incompatible settings when replaced', () => {
+    const editor = createEditor(); editor.documents.load(rawPlan());
+    editor.execute(new ReplaceFurniture('sofa', 'chandelier'));
+    editor.execute(new ConfigureLuminaire('sofa', { enabled: false, intensity: 0.5 }));
+    expect(codec.decode(encode(editor.getDocument())).requireLuminaire('sofa').intensity).toBe(0.5);
+    editor.execute(new ReplaceFurniture('sofa', 'chair'));
+    editor.execute(new FinishFurniture('sofa', { type: 'wood', variant: 'oak' }));
+    editor.execute(new FinishFurniture('sofa', { type: 'paint', color: '#ff0000' }, 'legs'));
+    editor.execute(new FinishFurniture('sofa', undefined, 'legs'));
+    editor.execute(new FinishFurniture('sofa'));
+    const item = codec.decode(encode(editor.getDocument())).requireFurniture('sofa');
+    expect(item.lightConfig).toBeUndefined(); expect(item.finish).toBeUndefined(); expect(Object.keys(item.sectionFinishes ?? {})).toHaveLength(0);
   });
-  it('removes cleared optional properties instead of restoring stale finishes', () => {
-    const raw = rawPlan();
-    Object.assign(raw.plan.items.sofa, { finish: { type: 'paint' }, sectionFinishes: { top: { type: 'wood' } }, customModelUrl: '/old.glb', lightConfig: { enabled: true }, hasLids: true });
-    const plan = parser.parse(raw);
-    Object.assign(plan.furniture[0], { finish: undefined, sectionFinishes: {}, customModelUrl: undefined, lightConfig: undefined, hasLids: undefined });
-    const item = JSON.parse(exporter.exportPlan(plan)).plan.items.sofa;
-    for (const key of ['finish', 'sectionFinishes', 'customModelUrl', 'lightConfig', 'hasLids']) expect(item).not.toHaveProperty(key);
+  it('removes deleted walls, furniture and hosted openings without resurrection', () => {
+    const editor = createEditor(); editor.documents.load(rawPlan());
+    editor.execute(new RemoveElement('door'));
+    expect(codec.decode(encode(editor.getDocument())).get('door')).toBeUndefined();
+    editor.execute(new RemoveElement('sofa')); editor.execute(new RemoveElement('wall'));
+    const restored = codec.decode(encode(editor.getDocument()));
+    expect(restored.walls).toHaveLength(0); expect(restored.furniture).toHaveLength(0); expect(restored.get('window')).toBeUndefined();
   });
-  it('prunes deleted furniture and walls from the saved plan', () => {
-    const plan = parser.parse(rawPlan());
-    plan.furniture = []; plan.walls = [];
-    const saved = JSON.parse(exporter.exportPlan(plan)).plan;
-    expect(saved.items).toEqual({}); expect(saved.walls).toEqual({});
+  it('round trips split walls, retained opening world positions, frames and surfaces', () => {
+    const editor = createEditor(); editor.documents.load(rawPlan());
+    editor.execute(new FinishWall('wall', { type: 'paint', color: '#123456' }, 'A'));
+    editor.execute(new FrameWall('wall', 'grid_3', '#101010'));
+    editor.execute(new OpenDoor('door', 85)); editor.execute(new SplitWall('wall', 2));
+    const restored = codec.decode(encode(editor.getDocument()));
+    expect(restored.walls.map(wall => wall.id)).toEqual(['wall_a', 'wall_b']);
+    expect(restored.requireWall('wall_b').openings[0].distanceAlongWall).toBe(1);
+    expect(restored.requireWall('wall_a').openings[0].openAngle).toBe(85);
+    expect(restored.requireWall('wall_a').finishSideA?.color).toBe('#123456');
+    expect(restored.requireWall('wall_a').frameStyle).toBe('grid_3');
   });
-  it('round trips wall finishes, frames, cavities and opening angle', () => {
-    const plan = parser.parse(rawPlan());
-    Object.assign(plan.walls[0], { finishSideA: { type: 'paint', color: '#123456' }, frameStyle: 'grid_3', cavities: [{ id: 'recess', distanceAlongWall: 2, floorElevation: 1, width: 0.5, height: 0.5, depth: 0.1 }] });
-    plan.walls[0].openings[0].openAngle = 85;
-    const restored = parser.parse(exporter.exportPlan(plan));
-    expect(restored.walls[0]).toMatchObject({ finishSideA: plan.walls[0].finishSideA, frameStyle: 'grid_3', cavities: plan.walls[0].cavities });
-    expect(restored.walls[0].openings[0].openAngle).toBe(85);
-  });
-  it('round trips room naming, floor finishes and ceiling settings', () => {
-    const plan = parser.parse(rawPlan());
-    Object.assign(plan.rooms[0], { name: 'Kitchen', floorFinish: { type: 'tile', groutWidth: 2 }, ceilingType: 'gypsum' });
-    expect(parser.parse(exporter.exportPlan(plan)).rooms[0]).toMatchObject({ name: 'Kitchen', floorFinish: { type: 'tile', groutWidth: 2 }, ceilingType: 'gypsum' });
+  it('round trips room naming, floors, ceilings and window elevation', () => {
+    const editor = createEditor(); editor.documents.load(rawPlan());
+    editor.execute(new RenameRoom('room', 'Kitchen')); editor.execute(new FinishFloor('room', { type: 'tile', groutWidth: 2 })); editor.execute(new ConfigureCeiling('room', 'gypsum'));
+    const restored = codec.decode(encode(editor.getDocument()));
+    expect(restored.rooms[0]).toMatchObject({ name: 'Kitchen', floorFinish: { type: 'tile', groutWidth: 2 }, ceilingType: 'gypsum' });
+    expect(restored.requireWall('wall').openings.find(opening => opening.id === 'window')!.floorHeight).toBe(0.9);
   });
 });

@@ -1,7 +1,10 @@
-import React, { useEffect } from 'react';
-import { WallEntity, Point2D } from '@core/types/plan';
-import { IPlanManagerService, ISceneService } from '@core/types/services';
+import { Point2D,WallEntity } from '@core/types/plan';
+import { ISceneService } from '@core/types/services';
 import { Scissors } from 'lucide-react';
+import React,{ useEffect } from 'react';
+import { SplitWall } from '../../../application/commands/StructuralCommands';
+import type { EditorSession } from '../../../application/EditorSession';
+import { wallSplitCandidates } from '../../../application/queries/WallQueries';
 
 interface SplitCandidate {
   distance: number;
@@ -12,14 +15,14 @@ interface SplitCandidate {
 interface WallSplitControlsProps {
   wall: WallEntity;
   wallLength: number;
-  planManager: IPlanManagerService;
+  editor: EditorSession;
   sceneService: ISceneService;
 }
 
 export const WallSplitControls: React.FC<WallSplitControlsProps> = ({
   wall,
   wallLength,
-  planManager,
+  editor,
   sceneService,
 }) => {
   useEffect(() => {
@@ -31,12 +34,12 @@ export const WallSplitControls: React.FC<WallSplitControlsProps> = ({
   if (wallLength <= 0.6) return null;
 
   const splitCandidates: SplitCandidate[] =
-    planManager.findWallSplitCandidates?.(wall.id) || [];
+    wallSplitCandidates(editor.getSnapshot(), wall.id) || [];
   if (splitCandidates.length === 0) return null;
 
   const handleSplit = (dist: number) => {
     sceneService.hideWallSplitPreview?.();
-    planManager.splitWall(wall.id, dist);
+    editor.execute(new SplitWall(wall.id, dist));
   };
 
   return (

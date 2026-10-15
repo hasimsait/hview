@@ -4,6 +4,10 @@ Revised 15 October 2026 on branch `refactor`. Source audit: commit `76e318ef7e0c
 
 Publication note, 15 October: fetching the remote revealed that `main` is now at `808356368beb927f7523ff1fb7ce1d151df0b5f9`, with column/picking/test changes (#1) and persistence/offline export/surface-layer changes (#2) absent from the supplied workspace. The source audit at the end of this document describes `76e318e`, not current `main`. Current `main` includes tests, column migration modules, and persistence/export repairs. Before implementation, reassess the initial repair tasks against those commits and reuse their regression coverage. The class-based target remains the proposal; findings from the older snapshot must not be treated as newly reproduced defects on current `main`.
 
+## Implementation record
+
+The active implementation is described in [architecture.md](architecture.md). The editor and viewer now use the domain classes and shared codec; commands/history/ID selection replace the mutable manager; retained scene nodes, resource leases, typed picking, material strategies, explicit runtime construction, and storage adapters are active. The previous manager/parser/exporter, service locator, duplicate entity hierarchy, builder registry, and generated public templates have been removed. Manual Save and the application lock remain the save interaction. Verification results are recorded with the implementation commit.
+
 ## Objective
 
 Make the repository readable as a coherent object-oriented program. A reader should find an architectural object's rules on its class, follow an edit through a named command, and find the corresponding rendering behavior through explicit polymorphic dispatch. Fixing bugs and splitting large services into files is insufficient.

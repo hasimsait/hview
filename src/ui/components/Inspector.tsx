@@ -1,25 +1,26 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { FurnitureEntity, SurfaceFinishConfig } from '@core/types/plan';
-import { useService } from '@ui/context/DIContext';
-import { TOKENS } from '@core/di/tokens';
-import { IPlanManagerService, IInteractionService, ISceneService, IAssetRegistryService } from '@core/types/services';
+import { SurfaceFinishConfig } from '@core/types/plan';
+import { useRuntime,useSelection } from '@ui/context/RuntimeContext';
 import {
-  X,
-  Move,
-  RotateCw,
-  Maximize2,
-  Trash2,
-  Replace,
-  MapPin,
-  Sparkles,
-  ArrowUpDown,
-  Layers,
-  Lightbulb,
+ArrowUpDown,
+Layers,
+Lightbulb,
+MapPin,
+Maximize2,
+Move,
+Replace,
+RotateCw,
+Sparkles,
+Trash2,
+X,
 } from 'lucide-react';
+import React,{ useCallback,useState } from 'react';
+import { ConfigureLuminaire,ConfigureShelving,FinishFurniture,RemoveElement,TransformFurniture } from '../../application/commands/FurnitureCommands';
+import { Furniture } from '../../domain/elements/Furniture';
+import { InspectorPresenter } from '../inspection/InspectorPresenter';
 import { SurfaceFinishPicker } from './SurfaceFinishPicker';
 
 interface InspectorProps {
-  item: FurnitureEntity | null;
+  item: Furniture | null;
   onOpenReplaceModal: () => void;
   onClose: () => void;
 }
@@ -29,97 +30,62 @@ export const Inspector: React.FC<InspectorProps> = ({
   onOpenReplaceModal,
   onClose,
 }) => {
-  const planManager = useService<IPlanManagerService>(TOKENS.PlanManagerService);
-  const interactionService = useService<IInteractionService>(TOKENS.InteractionService);
-  const sceneService = useService<ISceneService>(TOKENS.SceneService);
-  const assetRegistry = useService<IAssetRegistryService>(TOKENS.AssetRegistryService);
+  const runtime = useRuntime();
+  const editor = runtime.editor;
+  const interactionService = runtime.interaction;
+  const sceneService = runtime.scene;
+  const selection = useSelection();
 
   const [showYGizmo, setShowYGizmo] = useState(false);
-  const [activeSection, setActiveSection] = useState<string>('all');
-  const [availableSections, setAvailableSections] = useState<string[]>([]);
-
-  // Keep activeSection and availableSections in sync when item changes
-  useEffect(() => {
-    if (!item) {
-      setAvailableSections([]);
-      return;
-    }
-    const currentSection = planManager.getSelectedFurnitureSection?.() || 'all';
-    setActiveSection(currentSection);
-
-    const sections = sceneService.getFurnitureSections(item.id);
-    setAvailableSections(sections);
-  }, [item?.id, item?.assetKey, planManager, sceneService]);
-
-  // Listen to 3D mesh click section changes
-  useEffect(() => {
-    const unsub = planManager.onSelectionChange((_selected, section) => {
-      if (section) {
-        setActiveSection(section);
-      }
-    });
-    return () => unsub();
-  }, [planManager]);
+  const availableSections = item ? sceneService.getFurnitureSections(item.id) : [];
+  const activeSection = selection?.kind === 'furniture' && selection.id === item?.id ? selection.subtarget ?? 'all' : 'all';
 
   if (!item) return null;
-
-  const isLightFixture = assetRegistry.hasCapability(item.assetKey || item.name, 'lighting');
-  const isShelving =
-    item.assetKey === 'open_shelving' ||
-    item.assetKey === 'shelving' ||
-    item.assetKey === 'shelf' ||
-    item.assetKey === 'pencil_cabinet' ||
-    item.name === 'open_shelving' ||
-    item.name === 'shelving' ||
-    item.name === 'shelf';
+  const presentation = item.accept(new InspectorPresenter());
+  const isLightFixture = presentation.sections.includes('luminaire');
+  const isShelving = presentation.sections.includes('shelving');
 
   const currentFinishForSection: SurfaceFinishConfig | undefined =
     activeSection === 'all'
       ? item.finish
       : item.sectionFinishes?.[activeSection] ||
-        item.sectionFinishes?.[activeSection.toLowerCase()] ||
-        item.finish;
+      item.sectionFinishes?.[activeSection.toLowerCase()] ||
+      item.finish;
 
   const handleApplyFinish = (finish: SurfaceFinishConfig) => {
     if (activeSection === 'all') {
-      planManager.setFurnitureFinish(item.id, finish);
+      editor.execute(new FinishFurniture(item.id, finish));
     } else {
-      planManager.setFurnitureSectionFinish(item.id, activeSection, finish);
+      editor.execute(new FinishFurniture(item.id, finish, activeSection));
     }
   };
 
   const handleClearFinish = () => {
     if (activeSection === 'all') {
-      planManager.setFurnitureFinish(item.id, undefined);
+      editor.execute(new FinishFurniture(item.id, undefined));
     } else {
-      planManager.setFurnitureSectionFinish(item.id, activeSection, undefined);
+      editor.execute(new FinishFurniture(item.id, undefined, activeSection));
     }
   };
 
   const handlePositionChange = (axis: 'x' | 'y' | 'z', value: number) => {
-    planManager.updateFurniture(item.id, {
-      position: {
-        ...item.position,
-        [axis]: value,
-      },
-    });
+    editor.execute(new TransformFurniture(item.id, {
+      ...item.position,
+      [axis]: value,
+    }, undefined, undefined));
   };
 
   const handleRotationChange = (deg: number) => {
     const rad = Math.PI - (deg * Math.PI) / 180;
-    planManager.updateFurniture(item.id, {
-      rotationY: rad,
-    });
+    editor.execute(new TransformFurniture(item.id, undefined, rad, undefined));
   };
 
   const handleDimensionChange = (axis: 'x' | 'y' | 'z', valueCm: number) => {
     const valueM = Math.max(0.01, valueCm / 100);
-    planManager.updateFurniture(item.id, {
-      dimensions: {
-        ...item.dimensions,
-        [axis]: valueM,
-      },
-    });
+    editor.execute(new TransformFurniture(item.id, undefined, undefined, {
+      ...item.dimensions,
+      [axis]: valueM,
+    }));
   };
 
   const handleToggleYGizmo = useCallback(() => {
@@ -134,7 +100,7 @@ export const Inspector: React.FC<InspectorProps> = ({
 
   const handleDelete = () => {
     if (confirm(`Delete ${item.displayName}?`)) {
-      planManager.deleteFurniture(item.id);
+      editor.execute(new RemoveElement(item.id));
     }
   };
 
@@ -183,11 +149,10 @@ export const Inspector: React.FC<InspectorProps> = ({
             <button
               onClick={handleToggleYGizmo}
               title={showYGizmo ? 'Hide height gizmo handle' : 'Show height (Y) drag handle on gizmo'}
-              className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border transition-colors ${
-                showYGizmo
-                  ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
-                  : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'
-              }`}
+              className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border transition-colors ${showYGizmo
+                ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
+                : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'
+                }`}
             >
               <ArrowUpDown className="w-3 h-3" />
               {showYGizmo ? 'Y-drag ON' : 'Y-drag'}
@@ -307,13 +272,12 @@ export const Inspector: React.FC<InspectorProps> = ({
               type="button"
               onClick={() => {
                 const currentLids = !!item.hasLids;
-                planManager.setFurnitureHasLids(item.id, !currentLids);
+                editor.execute(new ConfigureShelving(item.id, !currentLids));
               }}
-              className={`px-2.5 py-0.5 rounded text-[11px] font-semibold border transition-all ${
-                item.hasLids
-                  ? 'bg-sky-500/20 border-sky-500/50 text-sky-300 shadow-sm'
-                  : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'
-              }`}
+              className={`px-2.5 py-0.5 rounded text-[11px] font-semibold border transition-all ${item.hasLids
+                ? 'bg-sky-500/20 border-sky-500/50 text-sky-300 shadow-sm'
+                : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'
+                }`}
             >
               {item.hasLids ? '🚪 Lids ON' : 'Open Shelving'}
             </button>
@@ -338,13 +302,12 @@ export const Inspector: React.FC<InspectorProps> = ({
               type="button"
               onClick={() => {
                 const currentEnabled = item.lightConfig?.enabled !== false;
-                planManager.setFurnitureLightConfig(item.id, { enabled: !currentEnabled });
+                editor.execute(new ConfigureLuminaire(item.id, { enabled: !currentEnabled }));
               }}
-              className={`px-2.5 py-0.5 rounded text-[11px] font-semibold border transition-all ${
-                item.lightConfig?.enabled !== false
-                  ? 'bg-amber-500/20 border-amber-500/50 text-amber-300 shadow-sm'
-                  : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'
-              }`}
+              className={`px-2.5 py-0.5 rounded text-[11px] font-semibold border transition-all ${item.lightConfig?.enabled !== false
+                ? 'bg-amber-500/20 border-amber-500/50 text-amber-300 shadow-sm'
+                : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'
+                }`}
             >
               {item.lightConfig?.enabled !== false ? '💡 ON' : 'OFF'}
             </button>
@@ -366,7 +329,7 @@ export const Inspector: React.FC<InspectorProps> = ({
               value={item.lightConfig?.intensity ?? 1.0}
               onChange={(e) => {
                 const val = parseFloat(e.target.value);
-                planManager.setFurnitureLightConfig(item.id, { intensity: val });
+                editor.execute(new ConfigureLuminaire(item.id, { intensity: val }));
               }}
               className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-400"
             />
@@ -387,12 +350,11 @@ export const Inspector: React.FC<InspectorProps> = ({
                   <button
                     key={preset.label}
                     type="button"
-                    onClick={() => planManager.setFurnitureLightConfig(item.id, { color: preset.color })}
-                    className={`py-1 px-1 rounded text-center border transition-all ${
-                      isSelected
-                        ? 'border-amber-400 bg-amber-500/20 text-amber-200 font-semibold shadow-sm'
-                        : 'border-slate-700 bg-slate-800/80 text-slate-300 hover:border-slate-600'
-                    }`}
+                    onClick={() => editor.execute(new ConfigureLuminaire(item.id, { color: preset.color }))}
+                    className={`py-1 px-1 rounded text-center border transition-all ${isSelected
+                      ? 'border-amber-400 bg-amber-500/20 text-amber-200 font-semibold shadow-sm'
+                      : 'border-slate-700 bg-slate-800/80 text-slate-300 hover:border-slate-600'
+                      }`}
                   >
                     <div className="text-[10px] leading-tight font-mono">{preset.label}</div>
                     <div className="text-[9px] text-slate-400">{preset.name}</div>
@@ -407,7 +369,7 @@ export const Inspector: React.FC<InspectorProps> = ({
               <input
                 type="color"
                 value={item.lightConfig?.color || '#fff2dc'}
-                onChange={(e) => planManager.setFurnitureLightConfig(item.id, { color: e.target.value })}
+                onChange={(e) => editor.execute(new ConfigureLuminaire(item.id, { color: e.target.value }))}
                 className="w-6 h-6 rounded border border-slate-700 bg-transparent cursor-pointer"
               />
               <span className="text-[11px] font-mono text-slate-400">
@@ -443,14 +405,12 @@ export const Inspector: React.FC<InspectorProps> = ({
               <button
                 type="button"
                 onClick={() => {
-                  setActiveSection('all');
-                  planManager.setSelectedFurniture(item, 'all');
+                  editor.selection.select('furniture', item, 'all');
                 }}
-                className={`py-1 px-2.5 rounded text-[11px] font-medium border transition-colors ${
-                  activeSection === 'all'
-                    ? 'bg-sky-500/20 border-sky-500 text-sky-300'
-                    : 'bg-slate-800/80 border-slate-700 text-slate-400 hover:text-slate-200'
-                }`}
+                className={`py-1 px-2.5 rounded text-[11px] font-medium border transition-colors ${activeSection === 'all'
+                  ? 'bg-sky-500/20 border-sky-500 text-sky-300'
+                  : 'bg-slate-800/80 border-slate-700 text-slate-400 hover:text-slate-200'
+                  }`}
               >
                 All Parts
                 {item.finish && (
@@ -468,14 +428,12 @@ export const Inspector: React.FC<InspectorProps> = ({
                     key={sec}
                     type="button"
                     onClick={() => {
-                      setActiveSection(sec);
-                      planManager.setSelectedFurniture(item, sec);
+                      editor.selection.select('furniture', item, sec);
                     }}
-                    className={`py-1 px-2.5 rounded text-[11px] font-medium border transition-colors ${
-                      isActive
-                        ? 'bg-sky-500/20 border-sky-500 text-sky-300'
-                        : 'bg-slate-800/80 border-slate-700 text-slate-400 hover:text-slate-200'
-                    }`}
+                    className={`py-1 px-2.5 rounded text-[11px] font-medium border transition-colors ${isActive
+                      ? 'bg-sky-500/20 border-sky-500 text-sky-300'
+                      : 'bg-slate-800/80 border-slate-700 text-slate-400 hover:text-slate-200'
+                      }`}
                   >
                     {sec}
                     {hasCustomFinish && (
@@ -495,31 +453,31 @@ export const Inspector: React.FC<InspectorProps> = ({
           onClearFinish={handleClearFinish}
           defaultTab={
             currentFinishForSection?.type === 'metal' ||
-            currentFinishForSection?.type === 'porcelain' ||
-            activeSection.toLowerCase() === 'metal' ||
-            activeSection.toLowerCase() === 'ceramic' ||
-            activeSection.toLowerCase() === 'faucet' ||
-            activeSection.toLowerCase() === 'handle' ||
-            activeSection.toLowerCase() === 'holder' ||
-            activeSection.toLowerCase() === 'cistern' ||
-            activeSection.toLowerCase() === 'lid' ||
-            activeSection.toLowerCase() === 'bowl' ||
-            activeSection.toLowerCase() === 'seat' ||
-            activeSection.toLowerCase() === 'basin' ||
-            activeSection.toLowerCase() === 'flush button' ||
-            activeSection.toLowerCase() === 'hooks' ||
-            activeSection.toLowerCase() === 'hook' ||
-            activeSection.toLowerCase() === 'rail' ||
-            activeSection.toLowerCase() === 'bar' ||
-            activeSection.toLowerCase() === 'mounts' ||
-            activeSection.toLowerCase() === 'mount' ||
-            activeSection.toLowerCase() === 'arms' ||
-            activeSection.toLowerCase() === 'light bar' ||
-            activeSection.toLowerCase() === 'bezel' ||
-            activeSection.toLowerCase() === 'grille' ||
-            activeSection.toLowerCase() === 'fan blades' ||
-            activeSection.toLowerCase() === 'fan hub' ||
-            activeSection.toLowerCase() === 'housing'
+              currentFinishForSection?.type === 'porcelain' ||
+              activeSection.toLowerCase() === 'metal' ||
+              activeSection.toLowerCase() === 'ceramic' ||
+              activeSection.toLowerCase() === 'faucet' ||
+              activeSection.toLowerCase() === 'handle' ||
+              activeSection.toLowerCase() === 'holder' ||
+              activeSection.toLowerCase() === 'cistern' ||
+              activeSection.toLowerCase() === 'lid' ||
+              activeSection.toLowerCase() === 'bowl' ||
+              activeSection.toLowerCase() === 'seat' ||
+              activeSection.toLowerCase() === 'basin' ||
+              activeSection.toLowerCase() === 'flush button' ||
+              activeSection.toLowerCase() === 'hooks' ||
+              activeSection.toLowerCase() === 'hook' ||
+              activeSection.toLowerCase() === 'rail' ||
+              activeSection.toLowerCase() === 'bar' ||
+              activeSection.toLowerCase() === 'mounts' ||
+              activeSection.toLowerCase() === 'mount' ||
+              activeSection.toLowerCase() === 'arms' ||
+              activeSection.toLowerCase() === 'light bar' ||
+              activeSection.toLowerCase() === 'bezel' ||
+              activeSection.toLowerCase() === 'grille' ||
+              activeSection.toLowerCase() === 'fan blades' ||
+              activeSection.toLowerCase() === 'fan hub' ||
+              activeSection.toLowerCase() === 'housing'
               ? 'metal'
               : currentFinishForSection?.type === 'fabric' ||
                 activeSection.toLowerCase() === 'fabric' ||
@@ -532,8 +490,8 @@ export const Inspector: React.FC<InspectorProps> = ({
                 activeSection.toLowerCase() === 'headboard' ||
                 item.category === 'seating' ||
                 item.category === 'bed'
-              ? 'fabric'
-              : undefined
+                ? 'fabric'
+                : undefined
           }
         />
       </div>

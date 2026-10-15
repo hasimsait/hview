@@ -1,4 +1,4 @@
-import { expect, type Page, type BrowserContext } from '@playwright/test';
+import { expect, type BrowserContext, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { rawPlan } from '../unit/fixtures';
 
@@ -13,11 +13,9 @@ export function workflowPlan() {
 // and edits still use real browser pointer/keyboard events, not service setters.
 export async function objectPoint(page: Page) {
   return page.evaluate(async () => {
-    const containerPath = '/src/core/di/container.ts';
-    const tokensPath = '/src/core/di/tokens.ts';
-    const { defaultContainer } = await import(containerPath);
-    const { TOKENS } = await import(tokensPath);
-    const scene = defaultContainer.resolve(TOKENS.SceneService);
+    const runtimePath = '/src/main.tsx';
+    const { runtime } = await import(runtimePath);
+    const scene = runtime.scene;
     const object = scene.getScene().getObjectByName('furnitureGroup').children.find((o: any) => o.userData.id === 'sofa');
     if (!object) throw new Error('sofa mesh missing');
     const point = object.position.clone(); point.y += 0.4;

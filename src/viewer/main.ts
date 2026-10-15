@@ -1,18 +1,22 @@
-import * as THREE from 'three';
-import { PlanDocument, FurnitureEntity, OpeningEntity, WallEntity, RoomEntity, SurfaceFinishConfig } from '@core/types/plan';
-import { intersectVisibleObjects } from '@services/interaction/VisibleRaycast';
-import { ThreeSceneService } from '@services/rendering/ThreeSceneService';
-import { PlanParserService } from '@services/plan/PlanParserService';
-import { AssetRegistryService } from '@services/rendering/AssetRegistryService';
-import { SurfaceFinishService } from '@services/rendering/SurfaceFinishService';
+import { FurnitureEntity,OpeningEntity,PlanDocument,RoomEntity,SurfaceFinishConfig,WallEntity } from '@core/types/plan';
 import { TileCatalogService } from '@services/tile-catalog/TileCatalogService';
+import * as THREE from 'three';
+import { PlanCodec } from '../domain/codec/PlanCodec';
+import { Column } from '../domain/elements/Column';
+import { Furniture } from '../domain/elements/Furniture';
+import { Opening } from '../domain/elements/Opening';
+import { Room } from '../domain/elements/Room';
+import { Wall } from '../domain/elements/Wall';
+import { FurnitureMeshBuilder } from "../engine/assets/FurnitureMeshBuilder";
+import { SurfaceMaterialFactory } from "../engine/materials/SurfaceMaterialFactory";
+import { SceneEngine } from '../engine/SceneEngine';
 
 export class StandaloneViewerApp {
-  private sceneService: ThreeSceneService;
-  private planParser: PlanParserService;
-  private assetRegistry: AssetRegistryService;
+  private sceneService: SceneEngine;
+  private planParser: PlanCodec;
+  private assetRegistry: FurnitureMeshBuilder;
   private tileCatalog: TileCatalogService;
-  private surfaceFinish: SurfaceFinishService;
+  private surfaceFinish: SurfaceMaterialFactory;
 
   private currentPlan: PlanDocument | null = null;
   private isNightLighting = false;
@@ -40,15 +44,14 @@ export class StandaloneViewerApp {
   private btnReset!: HTMLElement;
 
   // Raycasting for tap-to-inspect
-  private raycaster = new THREE.Raycaster();
   private pointerDownPos = { x: 0, y: 0, time: 0 };
 
   constructor() {
-    this.assetRegistry = new AssetRegistryService();
     this.tileCatalog = new TileCatalogService();
-    this.surfaceFinish = new SurfaceFinishService(this.tileCatalog);
-    this.planParser = new PlanParserService(this.assetRegistry);
-    this.sceneService = new ThreeSceneService(this.assetRegistry, this.surfaceFinish);
+    this.surfaceFinish = new SurfaceMaterialFactory(this.tileCatalog);
+    this.assetRegistry = new FurnitureMeshBuilder(undefined, this.surfaceFinish.textures);
+    this.planParser = new PlanCodec(this.assetRegistry.catalog);
+    this.sceneService = new SceneEngine(this.assetRegistry, this.surfaceFinish);
   }
 
   public init(): void {
@@ -158,7 +161,7 @@ export class StandaloneViewerApp {
     }
 
     try {
-      this.currentPlan = this.planParser.parse(rawData);
+      this.currentPlan = this.planParser.decode(rawData);
       this.sceneService.renderPlan(this.currentPlan);
       this.buildRoomBar(this.currentPlan.rooms);
     } catch (err) {
@@ -166,7 +169,7 @@ export class StandaloneViewerApp {
     }
   }
 
-  private buildRoomBar(rooms: RoomEntity[]): void {
+  private buildRoomBar(rooms: readonly RoomEntity[]): void {
     this.roomBarEl.innerHTML = '';
 
     // "Overview (All)" Chip
@@ -258,7 +261,6 @@ export class StandaloneViewerApp {
 
   private handleInspectTap(event: PointerEvent): void {
     const camera = this.sceneService.getCamera();
-    const scene = this.sceneService.getScene();
     const dom = this.sceneService.getDomElement();
     if (!dom || !camera || !this.currentPlan) return;
 
@@ -266,98 +268,16 @@ export class StandaloneViewerApp {
     const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
-    this.raycaster.setFromCamera(new THREE.Vector2(x, y), camera);
-
-    // Candidate root groups in scene
-    const wallsGroup = scene.getObjectByName('wallsGroup');
-    const openingsGroup = scene.getObjectByName('openingsGroup');
-    const furnitureGroup = scene.getObjectByName('furnitureGroup');
-    const fixturesGroup = scene.getObjectByName('fixturesGroup');
-    const floorsGroup = scene.getObjectByName('floorsGroup');
-
-    const candidates: THREE.Object3D[] = [];
-    if (openingsGroup?.visible) candidates.push(...openingsGroup.children);
-    if (furnitureGroup?.visible) candidates.push(...furnitureGroup.children);
-    if (fixturesGroup?.visible) candidates.push(...fixturesGroup.children);
-    if (wallsGroup?.visible) candidates.push(...wallsGroup.children);
-    if (floorsGroup?.visible) candidates.push(...floorsGroup.children);
-
-    const hits = intersectVisibleObjects(this.raycaster, candidates);
-
-    for (const hit of hits) {
-      if (hit.object instanceof THREE.LineSegments) continue;
-      if (this.sceneService.isPointForegroundOccluded(hit.point)) continue;
-
+    const picked = this.sceneService.pick(new THREE.Vector2(x, y));
+    const element = picked && this.currentPlan.get(picked.target.id);
+    if (element && picked) {
       this.triggerTapAnimation(event.clientX, event.clientY);
-
-      // Check door / window opening
-      let curr: THREE.Object3D | null = hit.object;
-      let foundOpening: { opening: OpeningEntity; wall: WallEntity } | null = null;
-      while (curr && curr !== openingsGroup && curr !== scene) {
-        if (curr.userData?.isDoor && curr.userData?.opening && curr.userData?.wall) {
-          foundOpening = { opening: curr.userData.opening, wall: curr.userData.wall };
-          break;
-        }
-        curr = curr.parent;
-      }
-      if (foundOpening) {
-        this.showOpeningSpec(foundOpening.opening, foundOpening.wall);
-        return;
-      }
-
-      // Check furniture / fixture
-      let foundFurniture: FurnitureEntity | null = null;
-      curr = hit.object;
-      while (curr && curr !== furnitureGroup && curr !== fixturesGroup && curr !== scene) {
-        if (curr.userData?.entity) {
-          foundFurniture = curr.userData.entity as FurnitureEntity;
-          break;
-        }
-        curr = curr.parent;
-      }
-      if (foundFurniture) {
-        this.showFurnitureSpec(foundFurniture);
-        return;
-      }
-
-      // Check wall
-      let foundWall: WallEntity | null = null;
-      let isBaseboard = false;
-      curr = hit.object;
-      while (curr && curr !== wallsGroup && curr !== scene) {
-        if (curr.userData?.wall) {
-          foundWall = curr.userData.wall as WallEntity;
-          isBaseboard = hit.object.userData?.section === 'baseboard' || curr.userData?.section === 'baseboard';
-          break;
-        }
-        curr = curr.parent;
-      }
-      if (foundWall) {
-        this.showWallSpec(foundWall, isBaseboard);
-        return;
-      }
-
-      // Check floor
-      let foundRoomId: string | null = null;
-      curr = hit.object;
-      while (curr && curr !== floorsGroup && curr !== scene) {
-        if (curr.userData?.type === 'floor' && curr.userData?.roomId) {
-          foundRoomId = curr.userData.roomId;
-          break;
-        }
-        if (curr.userData?.type === 'room' && curr.userData?.id) {
-          foundRoomId = curr.userData.id;
-          break;
-        }
-        curr = curr.parent;
-      }
-      if (foundRoomId) {
-        const room = this.currentPlan.rooms?.find((r) => r.id === foundRoomId);
-        if (room) {
-          this.showFloorSpec(room);
-          return;
-        }
-      }
+      if (element instanceof Furniture) this.showFurnitureSpec(element);
+      else if (element instanceof Opening) this.showOpeningSpec(element, this.currentPlan.requireWall(element.wallId));
+      else if (element instanceof Wall) this.showWallSpec(element, picked.target.subtarget === 'baseboard');
+      else if (element instanceof Column) this.showWallSpec(element.wallShape(this.currentPlan.totalHeight), false);
+      else if (element instanceof Room) this.showFloorSpec(element);
+      return;
     }
 
     // Tapped empty space
@@ -546,7 +466,7 @@ export class StandaloneViewerApp {
     return 'Main Living Area';
   }
 
-  private isPointInPolygon(point: { x: number; y: number }, vs: { x: number; y: number }[]): boolean {
+  private isPointInPolygon(point: { x: number; y: number }, vs: readonly { x: number; y: number }[]): boolean {
     let inside = false;
     for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
       const xi = vs[i].x, yi = vs[i].y;
@@ -558,7 +478,7 @@ export class StandaloneViewerApp {
     return inside;
   }
 
-  private calculatePolygonArea(polygon: { x: number; y: number }[]): number {
+  private calculatePolygonArea(polygon: readonly { x: number; y: number }[]): number {
     if (!polygon || polygon.length < 3) return 0;
     let area = 0;
     for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {

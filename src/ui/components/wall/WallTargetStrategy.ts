@@ -1,5 +1,8 @@
-import { WallEntity, FurnitureEntity, SurfaceFinishConfig } from '@core/types/plan';
-import { IPlanManagerService, WallSide } from '@core/types/services';
+import { FurnitureEntity,SurfaceFinishConfig,WallEntity } from '@core/types/plan';
+import { WallSide } from '@core/types/services';
+import { FinishFurniture } from '../../../application/commands/FurnitureCommands';
+import { FinishWall } from '../../../application/commands/StructuralCommands';
+import type { EditorSession } from '../../../application/EditorSession';
 
 export interface IWallTargetStrategy {
   id: string;
@@ -8,13 +11,13 @@ export interface IWallTargetStrategy {
   wallSide?: WallSide;
   getFinish(wall: WallEntity, recess?: FurnitureEntity | null): SurfaceFinishConfig | undefined;
   applyFinish(
-    planManager: IPlanManagerService,
+    editor: EditorSession,
     wall: WallEntity,
     finish: SurfaceFinishConfig,
     recess?: FurnitureEntity | null
   ): void;
   resetFinish(
-    planManager: IPlanManagerService,
+    editor: EditorSession,
     wall: WallEntity,
     recess?: FurnitureEntity | null
   ): void;
@@ -37,12 +40,12 @@ export class SideATargetStrategy implements IWallTargetStrategy {
     return wall.finishSideA || wall.finish;
   }
 
-  applyFinish(planManager: IPlanManagerService, wall: WallEntity, finish: SurfaceFinishConfig): void {
-    planManager.setWallFinish(wall.id, finish, 'A');
+  applyFinish(editor: EditorSession, wall: WallEntity, finish: SurfaceFinishConfig): void {
+    editor.execute(new FinishWall(wall.id, finish, 'A'));
   }
 
-  resetFinish(planManager: IPlanManagerService, wall: WallEntity): void {
-    planManager.setWallFinish(wall.id, DEFAULT_PLASTER_FINISH, 'A');
+  resetFinish(editor: EditorSession, wall: WallEntity): void {
+    editor.execute(new FinishWall(wall.id, DEFAULT_PLASTER_FINISH, 'A'));
   }
 }
 
@@ -56,12 +59,12 @@ export class SideBTargetStrategy implements IWallTargetStrategy {
     return wall.finishSideB || wall.finish;
   }
 
-  applyFinish(planManager: IPlanManagerService, wall: WallEntity, finish: SurfaceFinishConfig): void {
-    planManager.setWallFinish(wall.id, finish, 'B');
+  applyFinish(editor: EditorSession, wall: WallEntity, finish: SurfaceFinishConfig): void {
+    editor.execute(new FinishWall(wall.id, finish, 'B'));
   }
 
-  resetFinish(planManager: IPlanManagerService, wall: WallEntity): void {
-    planManager.setWallFinish(wall.id, DEFAULT_PLASTER_FINISH, 'B');
+  resetFinish(editor: EditorSession, wall: WallEntity): void {
+    editor.execute(new FinishWall(wall.id, DEFAULT_PLASTER_FINISH, 'B'));
   }
 }
 
@@ -75,12 +78,12 @@ export class EdgesTargetStrategy implements IWallTargetStrategy {
     return wall.finishEdges || wall.finish;
   }
 
-  applyFinish(planManager: IPlanManagerService, wall: WallEntity, finish: SurfaceFinishConfig): void {
-    planManager.setWallFinish(wall.id, finish, 'edges');
+  applyFinish(editor: EditorSession, wall: WallEntity, finish: SurfaceFinishConfig): void {
+    editor.execute(new FinishWall(wall.id, finish, 'edges'));
   }
 
-  resetFinish(planManager: IPlanManagerService, wall: WallEntity): void {
-    planManager.setWallFinish(wall.id, DEFAULT_PLASTER_FINISH, 'edges');
+  resetFinish(editor: EditorSession, wall: WallEntity): void {
+    editor.execute(new FinishWall(wall.id, DEFAULT_PLASTER_FINISH, 'edges'));
   }
 }
 
@@ -94,12 +97,12 @@ export class EdgeStartTargetStrategy implements IWallTargetStrategy {
     return wall.finishEdgeStart || wall.finishEdges || wall.finish;
   }
 
-  applyFinish(planManager: IPlanManagerService, wall: WallEntity, finish: SurfaceFinishConfig): void {
-    planManager.setWallFinish(wall.id, finish, 'edge_start');
+  applyFinish(editor: EditorSession, wall: WallEntity, finish: SurfaceFinishConfig): void {
+    editor.execute(new FinishWall(wall.id, finish, 'edge_start'));
   }
 
-  resetFinish(planManager: IPlanManagerService, wall: WallEntity): void {
-    planManager.setWallFinish(wall.id, DEFAULT_PLASTER_FINISH, 'edge_start');
+  resetFinish(editor: EditorSession, wall: WallEntity): void {
+    editor.execute(new FinishWall(wall.id, DEFAULT_PLASTER_FINISH, 'edge_start'));
   }
 }
 
@@ -113,12 +116,12 @@ export class EdgeEndTargetStrategy implements IWallTargetStrategy {
     return wall.finishEdgeEnd || wall.finishEdges || wall.finish;
   }
 
-  applyFinish(planManager: IPlanManagerService, wall: WallEntity, finish: SurfaceFinishConfig): void {
-    planManager.setWallFinish(wall.id, finish, 'edge_end');
+  applyFinish(editor: EditorSession, wall: WallEntity, finish: SurfaceFinishConfig): void {
+    editor.execute(new FinishWall(wall.id, finish, 'edge_end'));
   }
 
-  resetFinish(planManager: IPlanManagerService, wall: WallEntity): void {
-    planManager.setWallFinish(wall.id, DEFAULT_PLASTER_FINISH, 'edge_end');
+  resetFinish(editor: EditorSession, wall: WallEntity): void {
+    editor.execute(new FinishWall(wall.id, DEFAULT_PLASTER_FINISH, 'edge_end'));
   }
 }
 
@@ -132,12 +135,12 @@ export class EdgeTopTargetStrategy implements IWallTargetStrategy {
     return wall.finishEdgeTop || wall.finishEdges || wall.finish;
   }
 
-  applyFinish(planManager: IPlanManagerService, wall: WallEntity, finish: SurfaceFinishConfig): void {
-    planManager.setWallFinish(wall.id, finish, 'edge_top');
+  applyFinish(editor: EditorSession, wall: WallEntity, finish: SurfaceFinishConfig): void {
+    editor.execute(new FinishWall(wall.id, finish, 'edge_top'));
   }
 
-  resetFinish(planManager: IPlanManagerService, wall: WallEntity): void {
-    planManager.setWallFinish(wall.id, DEFAULT_PLASTER_FINISH, 'edge_top');
+  resetFinish(editor: EditorSession, wall: WallEntity): void {
+    editor.execute(new FinishWall(wall.id, DEFAULT_PLASTER_FINISH, 'edge_top'));
   }
 }
 
@@ -151,12 +154,12 @@ export class BothSidesTargetStrategy implements IWallTargetStrategy {
     return wall.finishSideA || wall.finishSideB || wall.finish;
   }
 
-  applyFinish(planManager: IPlanManagerService, wall: WallEntity, finish: SurfaceFinishConfig): void {
-    planManager.setWallFinish(wall.id, finish, 'both');
+  applyFinish(editor: EditorSession, wall: WallEntity, finish: SurfaceFinishConfig): void {
+    editor.execute(new FinishWall(wall.id, finish, 'both'));
   }
 
-  resetFinish(planManager: IPlanManagerService, wall: WallEntity): void {
-    planManager.setWallFinish(wall.id, DEFAULT_PLASTER_FINISH, 'both');
+  resetFinish(editor: EditorSession, wall: WallEntity): void {
+    editor.execute(new FinishWall(wall.id, DEFAULT_PLASTER_FINISH, 'both'));
   }
 }
 
@@ -167,35 +170,27 @@ export class RecessWallTargetStrategy implements IWallTargetStrategy {
 
   getFinish(_wall: WallEntity, recess?: FurnitureEntity | null): SurfaceFinishConfig | undefined {
     if (!recess?.sectionFinishes) return undefined;
-    return (
-      recess.sectionFinishes['recess_wall'] ||
-      recess.sectionFinishes['girinti_wall'] ||
-      recess.sectionFinishes['Recess Wall'] ||
-      recess.sectionFinishes['Girinti Wall']
-    );
+    return recess.sectionFinishes.recess_wall;
   }
 
   applyFinish(
-    planManager: IPlanManagerService,
+    editor: EditorSession,
     _wall: WallEntity,
     finish: SurfaceFinishConfig,
     recess?: FurnitureEntity | null
   ): void {
     if (!recess) return;
-    planManager.setFurnitureSectionFinish(recess.id, 'recess_wall', finish);
-    if (recess.sectionFinishes?.['girinti_wall']) {
-      planManager.setFurnitureSectionFinish(recess.id, 'girinti_wall', finish);
-    }
+    editor.execute(new FinishFurniture(recess.id, finish, 'recess_wall'));
+
   }
 
   resetFinish(
-    planManager: IPlanManagerService,
+    editor: EditorSession,
     _wall: WallEntity,
     recess?: FurnitureEntity | null
   ): void {
     if (!recess) return;
-    planManager.setFurnitureSectionFinish(recess.id, 'recess_wall', undefined);
-    planManager.setFurnitureSectionFinish(recess.id, 'girinti_wall', undefined);
+    editor.execute(new FinishFurniture(recess.id, undefined, 'recess_wall'));
   }
 }
 
@@ -206,34 +201,26 @@ export class RecessCornersTargetStrategy implements IWallTargetStrategy {
 
   getFinish(_wall: WallEntity, recess?: FurnitureEntity | null): SurfaceFinishConfig | undefined {
     if (!recess?.sectionFinishes) return undefined;
-    return (
-      recess.sectionFinishes['sides'] ||
-      recess.sectionFinishes['Sides'] ||
-      recess.sectionFinishes['corners'] ||
-      recess.sectionFinishes['Corners'] ||
-      recess.sectionFinishes['recess_sides']
-    );
+    return recess.sectionFinishes.sides;
   }
 
   applyFinish(
-    planManager: IPlanManagerService,
+    editor: EditorSession,
     _wall: WallEntity,
     finish: SurfaceFinishConfig,
     recess?: FurnitureEntity | null
   ): void {
     if (!recess) return;
-    planManager.setFurnitureSectionFinish(recess.id, 'sides', finish);
-    planManager.setFurnitureSectionFinish(recess.id, 'corners', finish);
+    editor.execute(new FinishFurniture(recess.id, finish, 'sides'));
   }
 
   resetFinish(
-    planManager: IPlanManagerService,
+    editor: EditorSession,
     _wall: WallEntity,
     recess?: FurnitureEntity | null
   ): void {
     if (!recess) return;
-    planManager.setFurnitureSectionFinish(recess.id, 'sides', undefined);
-    planManager.setFurnitureSectionFinish(recess.id, 'corners', undefined);
+    editor.execute(new FinishFurniture(recess.id, undefined, 'sides'));
   }
 }
 
@@ -247,12 +234,12 @@ export class BaseboardTargetStrategy implements IWallTargetStrategy {
     return wall.finishBaseboard || wall.finishEdges || wall.finish;
   }
 
-  applyFinish(planManager: IPlanManagerService, wall: WallEntity, finish: SurfaceFinishConfig): void {
-    planManager.setWallFinish(wall.id, finish, 'baseboard');
+  applyFinish(editor: EditorSession, wall: WallEntity, finish: SurfaceFinishConfig): void {
+    editor.execute(new FinishWall(wall.id, finish, 'baseboard'));
   }
 
-  resetFinish(planManager: IPlanManagerService, wall: WallEntity): void {
-    planManager.setWallFinish(wall.id, DEFAULT_PLASTER_FINISH, 'baseboard');
+  resetFinish(editor: EditorSession, wall: WallEntity): void {
+    editor.execute(new FinishWall(wall.id, DEFAULT_PLASTER_FINISH, 'baseboard'));
   }
 }
 

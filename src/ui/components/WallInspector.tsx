@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { WallEntity, SurfaceFinishConfig, WallFrameStyle } from '@core/types/plan';
-import { useService } from '@ui/context/DIContext';
-import { TOKENS } from '@core/di/tokens';
-import { IPlanManagerService, ISceneService } from '@core/types/services';
+import { SurfaceFinishConfig,WallEntity,WallFrameStyle } from '@core/types/plan';
+import { useRuntime,useSelection } from '@ui/context/RuntimeContext';
+import { Focus,Layers,MapPin,RotateCw,Sparkles,X } from 'lucide-react';
+import React,{ useEffect,useState } from 'react';
+import { ApplyRoomFinish,ChangeWallMaterial,FinishWall,FrameWall } from '../../application/commands/StructuralCommands';
+import { wallRecesses as queryRecesses } from '../../application/queries/WallQueries';
 import { SurfaceFinishPicker } from './SurfaceFinishPicker';
-import { X, Focus, Sparkles, Layers, MapPin, RotateCw } from 'lucide-react';
-import { getWallTargetStrategy } from './wall/WallTargetStrategy';
 import { WallFrameControls } from './wall/WallFrameControls';
 import { WallRecessSection } from './wall/WallRecessSection';
+import { WallRoomApplicator } from './wall/WallRoomApplicator';
 import { WallSideSelector } from './wall/WallSideSelector';
 import { WallSplitControls } from './wall/WallSplitControls';
-import { WallRoomApplicator } from './wall/WallRoomApplicator';
+import { getWallTargetStrategy } from './wall/WallTargetStrategy';
 
 interface WallInspectorProps {
   wall: WallEntity | null;
@@ -18,28 +18,20 @@ interface WallInspectorProps {
 }
 
 export const WallInspector: React.FC<WallInspectorProps> = ({ wall, onClose }) => {
-  const planManager = useService<IPlanManagerService>(TOKENS.PlanManagerService);
-  const sceneService = useService<ISceneService>(TOKENS.SceneService);
+  const runtime = useRuntime();
+  const editor = runtime.editor;
+  const sceneService = runtime.scene;
 
-  const [activeTarget, setActiveTarget] = useState<string>('A');
+  const selection = useSelection();
+  const activeTarget = selection?.kind === 'wall' && selection.id === wall?.id ? selection.subtarget ?? 'A' : 'A';
   const [selectedRoomToApply, setSelectedRoomToApply] = useState<string>('');
 
-  const wallRecesses = wall ? planManager.getWallRecesses?.(wall.id) || [] : [];
+  const wallRecesses = wall ? queryRecesses(editor.getSnapshot(), wall.id) || [] : [];
   const primaryRecess = wallRecesses[0] || null;
 
   useEffect(() => {
-    const unsub = planManager.onWallSelectionChange((_selectedWall, side) => {
-      if (side) {
-        setActiveTarget(side);
-      }
-    });
-    return () => unsub();
-  }, [planManager]);
-
-  useEffect(() => {
     if (!wall) return;
-    const currentSide = planManager.getSelectedWallSide?.() || 'A';
-    setActiveTarget(currentSide);
+    const currentSide = activeTarget;
 
     // Auto-select room based on active side
     if (currentSide === 'A' && wall.roomSideA) {
@@ -49,11 +41,11 @@ export const WallInspector: React.FC<WallInspectorProps> = ({ wall, onClose }) =
     } else if (wall.roomIds && wall.roomIds.length > 0) {
       setSelectedRoomToApply(wall.roomIds[0]);
     }
-  }, [wall, planManager]);
+  }, [wall?.id, activeTarget]);
 
   if (!wall) return null;
 
-  const plan = planManager.getPlan();
+  const plan = editor.getSnapshot();
   const dx = wall.p2.x - wall.p1.x;
   const dy = wall.p2.y - wall.p1.y;
   const wallLength = Math.hypot(dx, dy);
@@ -78,9 +70,7 @@ export const WallInspector: React.FC<WallInspectorProps> = ({ wall, onClose }) =
   const currentFinishForSide = currentStrategy.getFinish(wall, primaryRecess);
 
   const handleTargetChange = (targetId: string) => {
-    setActiveTarget(targetId);
-    const side = getWallTargetStrategy(targetId).wallSide;
-    if (side) planManager.setSelectedWall(wall, side);
+    editor.selection.select('wall', wall, targetId);
     if (targetId === 'A' && wall.roomSideA) {
       setSelectedRoomToApply(wall.roomSideA);
     } else if (targetId === 'B' && wall.roomSideB) {
@@ -89,37 +79,37 @@ export const WallInspector: React.FC<WallInspectorProps> = ({ wall, onClose }) =
   };
 
   const handleApplyFinish = (finish: SurfaceFinishConfig) => {
-    currentStrategy.applyFinish(planManager, wall, finish, primaryRecess);
+    currentStrategy.applyFinish(editor, wall, finish, primaryRecess);
   };
 
   const handleResetFinish = () => {
-    currentStrategy.resetFinish(planManager, wall, primaryRecess);
+    currentStrategy.resetFinish(editor, wall, primaryRecess);
   };
 
   const handleApplyToRoom = () => {
     if (!currentFinishForSide || !selectedRoomToApply) return;
-    planManager.setRoomWallFinish(selectedRoomToApply, currentFinishForSide);
+    editor.execute(new ApplyRoomFinish(selectedRoomToApply, currentFinishForSide));
   };
 
   const handleFrameStyleChange = (style: WallFrameStyle) => {
-    planManager.setWallFrame(wall.id, style, wall.frameColor || '#18181b');
+    editor.execute(new FrameWall(wall.id, style, wall.frameColor || '#18181b'));
   };
 
   const handleFrameColorChange = (hex: string) => {
     const currentStyle = wall.frameStyle || 'none';
-    planManager.setWallFrame(wall.id, currentStyle === 'none' ? 'perimeter' : currentStyle, hex);
+    editor.execute(new FrameWall(wall.id, currentStyle === 'none' ? 'perimeter' : currentStyle, hex));
   };
 
   const handleToggleGlassWall = () => {
     const isGlass = wall.material === 'a_glass' || wall.material === 'glass';
     const nextMat = isGlass ? 'standard' : 'a_glass';
-    planManager.setWallMaterial(wall.id, nextMat);
+    editor.execute(new ChangeWallMaterial(wall.id, nextMat));
     if (!isGlass && !wall.finish && !wall.finishSideA) {
-      planManager.setWallFinish(wall.id, {
+      editor.execute(new FinishWall(wall.id, {
         type: 'glass',
         variant: 'frosted_mica',
         color: '#f8fafc',
-      });
+      }));
     }
   };
 
@@ -179,7 +169,7 @@ export const WallInspector: React.FC<WallInspectorProps> = ({ wall, onClose }) =
         wallLength={wallLength}
         wallRecesses={wallRecesses}
         activeTarget={activeTarget}
-        planManager={planManager}
+        editor={editor}
         sceneService={sceneService}
         onSelectTarget={handleTargetChange}
       />
@@ -246,7 +236,7 @@ export const WallInspector: React.FC<WallInspectorProps> = ({ wall, onClose }) =
       <WallSplitControls
         wall={wall}
         wallLength={wallLength}
-        planManager={planManager}
+        editor={editor}
         sceneService={sceneService}
       />
 

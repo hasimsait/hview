@@ -1,6 +1,6 @@
-import React from 'react';
 import { SurfaceFinishConfig } from '@core/types/plan';
 import { Check } from 'lucide-react';
+import React from 'react';
 
 interface WallRoomApplicatorProps {
   rooms: { id: string; name: string }[];

@@ -1,3 +1,6 @@
+import postcss from 'postcss';
+import tailwindcss from 'tailwindcss';
+import autoprefixer from 'autoprefixer';
 import { createExportTemplates, EXPORT_TEMPLATES_ID, escapeScriptJson, setScriptContent } from '../src/services/export/StandaloneHtml';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -7,7 +10,7 @@ import * as esbuild from 'esbuild';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-async function buildStandaloneViewer() {
+export async function buildStandaloneArtifacts() {
   console.log('🚀 Building standalone iPad 3D viewer...');
 
   const rootDir = path.resolve(__dirname, '..');
@@ -16,7 +19,7 @@ async function buildStandaloneViewer() {
   const tilesJsonPath = path.join(rootDir, 'public', 'textures', 'tiles', 'tiles.json');
   const publicDir = path.join(rootDir, 'public');
   const distDir = path.join(rootDir, 'dist');
-  const templateOutputPath = path.join(publicDir, 'ipad_viewer_template.html');
+  const templateOutputPath = path.join(distDir, 'ipad_viewer_template.html');
   const distOutputPath = path.join(distDir, 'ipad_viewer.html');
 
   if (!fs.existsSync(distDir)) {
@@ -195,7 +198,6 @@ ${bundledJs}
 
   // Write template for browser-side export service
   fs.writeFileSync(templateOutputPath, htmlTemplate, 'utf-8');
-  fs.writeFileSync(path.join(distDir, 'ipad_viewer_template.html'), htmlTemplate, 'utf-8');
   console.log(`✅ Template written to: ${templateOutputPath}`);
 
   // 6. Generate pre-built standalone HTML file with current sample.plan
@@ -231,15 +233,11 @@ ${bundledJs}
   const editorBundledJs = editorBuildResult.outputFiles[0].text;
   console.log(`✅ Full Editor JS bundled: ${(editorBundledJs.length / 1024).toFixed(1)} KB`);
 
-  // Find compiled Tailwind CSS from dist/assets
-  let tailwindCss = '';
-  const assetsDir = path.join(distDir, 'assets');
-  if (fs.existsSync(assetsDir)) {
-    const cssFiles = fs.readdirSync(assetsDir).filter((f) => f.endsWith('.css'));
-    if (cssFiles.length > 0) {
-      tailwindCss = fs.readFileSync(path.join(assetsDir, cssFiles[0]), 'utf-8');
-    }
-  }
+  // Compile the editor's styles from source for both hosted and offline exports.
+  const cssSource = path.join(rootDir, 'src/ui/styles/index.css');
+  const styles = await postcss([tailwindcss({ config: path.join(rootDir, 'tailwind.config.js') }), autoprefixer()])
+    .process(fs.readFileSync(cssSource, 'utf8'), { from: cssSource });
+  const tailwindCss = styles.css;
 
   const editorShell = `<!DOCTYPE html>
 <html lang="en" class="h-full bg-slate-950 text-slate-100">
@@ -294,9 +292,8 @@ ${editorBundledJs}
     editorShell, EXPORT_TEMPLATES_ID, escapeScriptJson(JSON.stringify(templates)),
   );
 
-  const editorTemplateOutputPath = path.join(publicDir, 'hview_editor_template.html');
+  const editorTemplateOutputPath = path.join(distDir, 'hview_editor_template.html');
   fs.writeFileSync(editorTemplateOutputPath, fullEditorHtmlTemplate, 'utf-8');
-  fs.writeFileSync(path.join(distDir, 'hview_editor_template.html'), fullEditorHtmlTemplate, 'utf-8');
 
   const fullEditorDistPath = path.join(distDir, 'hview_editor.html');
   const fullEditorHtml = setScriptContent(fullEditorHtmlTemplate, 'plan-data', escapeScriptJson(samplePlanJson));
@@ -304,7 +301,7 @@ ${editorBundledJs}
   console.log(`🎉 Standalone FULL Editor generated: ${fullEditorDistPath} (${(fullEditorHtml.length / 1024 / 1024).toFixed(2)} MB)`);
 }
 
-buildStandaloneViewer().catch((err) => {
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) buildStandaloneArtifacts().catch((err) => {
   console.error('❌ Build failed:', err);
   process.exit(1);
 });

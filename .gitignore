@@ -54,3 +54,7 @@ scratch/
 .tempmediaStorage/
 .system_generated/
 work/
+
+# Standalone templates are generated from source into dist/.
+public/hview_editor_template.html
+public/ipad_viewer_template.html

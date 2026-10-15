@@ -1,4 +1,4 @@
-import { WallEntity, SurfaceFinishConfig } from '@core/types/plan';
+import { SurfaceFinishConfig,WallEntity } from '@core/types/plan';
 
 export interface RecessPreset {
   id: string;

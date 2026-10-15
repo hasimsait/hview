@@ -1,27 +1,37 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useService } from '@ui/context/DIContext';
-import { TOKENS } from '@core/di/tokens';
-import { IPlanManagerService, ISceneService, ViewMode, ViewportSettings, IPlanPersistenceService, AssetDefinition, PlanSaveStatus } from '@core/types/services';
-import { FurnitureEntity, OpeningEntity, WallEntity, RoomEntity } from '@core/types/plan';
-import { Header } from '@ui/components/Header';
-import { Viewport3D } from '@ui/components/Viewport3D';
-import { Inspector } from '@ui/components/Inspector';
-import { DoorInspector } from '@ui/components/DoorInspector';
-import { WallInspector } from '@ui/components/WallInspector';
-import { FloorInspector } from '@ui/components/FloorInspector';
+import { AssetDefinition,PlanSaveStatus,ViewMode,ViewportSettings } from '@core/types/services';
 import { AssetReplacementModal } from '@ui/components/AssetReplacementModal';
+import { DoorInspector } from '@ui/components/DoorInspector';
 import { ErrorBoundary } from '@ui/components/ErrorBoundary';
+import { FloorInspector } from '@ui/components/FloorInspector';
+import { Header } from '@ui/components/Header';
+import { Inspector } from '@ui/components/Inspector';
 import { SavingOverlay } from '@ui/components/SavingOverlay';
-import { restoreInitialPlan } from '@services/plan/PlanBootstrap';
+import { Viewport3D } from '@ui/components/Viewport3D';
+import { WallInspector } from '@ui/components/WallInspector';
+import { useDocument,useRuntime,useSelection } from '@ui/context/RuntimeContext';
+import React,{ useEffect,useRef,useState } from 'react';
+import { AddFurniture } from '../application/commands/FurnitureCommands';
+import { Column } from '../domain/elements/Column';
+import { Furniture } from '../domain/elements/Furniture';
+import { Opening,WindowOpening } from '../domain/elements/Opening';
+import { Room } from '../domain/elements/Room';
+import { Wall } from '../domain/elements/Wall';
+import type { FurnitureCategory } from '../domain/model/PlanData';
+import { ColumnInspector } from './components/ColumnInspector';
+import { WindowInspector } from './components/WindowInspector';
 
 export const App: React.FC = () => {
-  const planManager = useService<IPlanManagerService>(TOKENS.PlanManagerService);
-  const sceneService = useService<ISceneService>(TOKENS.SceneService);
+  const runtime = useRuntime();
+  const editor = runtime.editor;
+  const sceneService = runtime.scene;
 
-  const [selectedItem, setSelectedItem] = useState<FurnitureEntity | null>(null);
-  const [selectedOpening, setSelectedOpening] = useState<{ opening: OpeningEntity; wall: WallEntity } | null>(null);
-  const [selectedWall, setSelectedWall] = useState<WallEntity | null>(null);
-  const [selectedRoom, setSelectedRoom] = useState<RoomEntity | null>(null);
+  const document = useDocument();
+  const selection = useSelection();
+  const selected = selection && document ? document.get(selection.id) : null;
+  const selectedItem = selected instanceof Furniture ? selected : null;
+  const selectedWall = selected instanceof Wall ? selected : null;
+  const selectedRoom = selected instanceof Room ? selected : null;
+  const selectedOpening = selected instanceof Opening && document ? { opening: selected, wall: document.requireWall(selected.wallId) } : null;
   const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false);
   const [isAddAssetModalOpen, setIsAddAssetModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('perspective');
@@ -35,12 +45,11 @@ export const App: React.FC = () => {
   const [chandelierIntensity, setChandelierIntensity] = useState<number>(1.0);
   const [loading, setLoading] = useState<boolean>(true);
   const [saveRequested, setSaveRequested] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<PlanSaveStatus>(planManager.getSaveStatus());
+  const [saveStatus, setSaveStatus] = useState<PlanSaveStatus>(runtime.storage.getSaveStatus());
   const saveInProgress = useRef(false);
   const isSaving = saveRequested || saveStatus === 'saving';
-  const persistenceService = useService<IPlanPersistenceService>(TOKENS.PlanPersistenceService);
 
-  useEffect(() => planManager.onSaveStatusChange(setSaveStatus), [planManager]);
+  useEffect(() => runtime.storage.onSaveStatusChange(setSaveStatus), [editor]);
 
   const handleSave = async () => {
     if (saveInProgress.current || isSaving) return;
@@ -49,7 +58,7 @@ export const App: React.FC = () => {
     try {
       // Paint the lock before serialization or synchronous offline storage.
       await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
-      await planManager.saveCurrentPlan();
+      await runtime.documents.save();
     } finally {
       saveInProgress.current = false;
       setSaveRequested(false);
@@ -60,7 +69,7 @@ export const App: React.FC = () => {
   useEffect(() => {
     async function loadInitialPlan() {
       try {
-        await restoreInitialPlan(planManager, persistenceService);
+        await runtime.documents.restore();
       } catch (err) {
         console.error('Failed to load initial plan:', err);
       } finally {
@@ -69,29 +78,7 @@ export const App: React.FC = () => {
     }
     loadInitialPlan();
 
-    const unsubscribeSelection = planManager.onSelectionChange((item) => {
-      setSelectedItem(item);
-    });
-
-    const unsubscribeOpeningSelection = planManager.onOpeningSelectionChange((selected) => {
-      setSelectedOpening(selected);
-    });
-
-    const unsubscribeWallSelection = planManager.onWallSelectionChange((wall) => {
-      setSelectedWall(wall);
-    });
-
-    const unsubscribeRoomSelection = planManager.onRoomSelectionChange?.((room) => {
-      setSelectedRoom(room);
-    });
-
-    return () => {
-      unsubscribeSelection();
-      unsubscribeOpeningSelection();
-      unsubscribeWallSelection();
-      unsubscribeRoomSelection?.();
-    };
-  }, [planManager]);
+  }, [editor]);
 
   const handleViewModeChange = (mode: ViewMode) => {
     setViewMode(mode);
@@ -145,7 +132,7 @@ export const App: React.FC = () => {
     const mount = asset.placement?.mount ?? (asset.category === 'decor' ? 'wall' : 'floor');
 
     if (mount === 'ceiling') {
-      const planTotalH = planManager.getPlan()?.totalHeight || 2.7;
+      const planTotalH = editor.getSnapshot()?.totalHeight || 2.7;
       const offset = asset.placement?.ceilingOffset ?? (dims.y + 0.05);
       elevation = Math.max(2.1, planTotalH - offset);
       offsetDist = Math.max(0.15, dims.z / 2);
@@ -178,20 +165,24 @@ export const App: React.FC = () => {
     // Associated room
     const roomId = wall.roomSideA || wall.roomSideB || wall.roomIds?.[0];
 
-    const newEntity = planManager.addFurniture({
+    const id = crypto.randomUUID();
+    editor.execute(new AddFurniture({
+      id,
       name: asset.key,
       displayName: asset.name,
-      category: asset.category as any,
+      category: asset.category as FurnitureCategory,
       position,
       rotationY,
       dimensions: { ...dims },
       assetKey: asset.key,
       roomId,
       visible: true,
-    });
+    }));
+
+    editor.selection.set({ kind: 'furniture', id });
 
     // Seamlessly focus camera directly onto the newly added object so the user doesn't end up looking for it
-    sceneService.focusOnObject(newEntity.id, {
+    sceneService.focusOnObject(id, {
       frameDistance: 1.9,
       viewDirection: normal,
     });
@@ -232,23 +223,26 @@ export const App: React.FC = () => {
             <Inspector
               item={selectedItem}
               onOpenReplaceModal={() => setIsReplaceModalOpen(true)}
-              onClose={() => planManager.setSelectedFurniture(null)}
+              onClose={() => editor.selection.select('furniture', null)}
             />
           )}
 
           {/* Selected Door Inspector with Flip Controls */}
-          {selectedOpening && (
+          {selected instanceof WindowOpening && <WindowInspector window={selected} onClose={() => editor.selection.set(null)} />}
+          {selectedOpening && !(selected instanceof WindowOpening) && (
             <DoorInspector
               selected={selectedOpening}
-              onClose={() => planManager.setSelectedOpening(null)}
+              onClose={() => editor.selection.select('opening', null)}
             />
           )}
+
+          {selected instanceof Column && <ColumnInspector column={selected} onClose={() => editor.selection.set(null)} />}
 
           {/* Selected Wall Inspector with Finishes, Wood Paneling, Tiles & Glass */}
           {selectedWall && (
             <WallInspector
               wall={selectedWall}
-              onClose={() => planManager.setSelectedWall(null)}
+              onClose={() => editor.selection.select('wall', null)}
             />
           )}
 
@@ -256,7 +250,7 @@ export const App: React.FC = () => {
           {selectedRoom && (
             <FloorInspector
               room={selectedRoom}
-              onClose={() => planManager.setSelectedRoom(null)}
+              onClose={() => editor.selection.select('room', null)}
             />
           )}
         </ErrorBoundary>

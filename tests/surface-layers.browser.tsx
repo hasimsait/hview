@@ -1,8 +1,8 @@
-import * as THREE from 'three';
 import { useState } from 'react';
-import { createRoot } from 'react-dom/client';
 import { flushSync } from 'react-dom';
-import { SurfaceFinishService } from '../src/services/rendering/SurfaceFinishService';
+import { createRoot } from 'react-dom/client';
+import * as THREE from 'three';
+import { SurfaceMaterialFactory } from "../src/engine/materials/SurfaceMaterialFactory";
 import { SurfaceLayerControl } from '../src/ui/components/SurfaceLayerControl';
 
 const results: string[] = [];
@@ -15,7 +15,7 @@ try {
   document.body.appendChild(renderer.domElement);
   const scene = new THREE.Scene();
   scene.add(new THREE.AmbientLight(0xffffff, 4));
-  const service = new SurfaceFinishService();
+  const service = new SurfaceMaterialFactory();
   service.setForegroundMode('off');
   const definitions = [
     { color: '#ff0000', layer: 0, x: -1, y: 0, w: 2, h: 4 },
@@ -25,9 +25,11 @@ try {
   ];
   const meshes = definitions.map((definition) => {
     const mesh = new THREE.Mesh(new THREE.PlaneGeometry(definition.w, definition.h),
-      service.getMaterial({ type: definition.color === '#0000ff' ? 'tile' : 'paint',
+      service.getMaterial({
+        type: definition.color === '#0000ff' ? 'tile' : 'paint',
         variant: definition.color === '#0000ff' ? 'square' : undefined,
-        groutWidth: 0, color: definition.color, layer: definition.layer }, { side: THREE.DoubleSide }));
+        groutWidth: 0, color: definition.color, layer: definition.layer
+      }, { side: THREE.DoubleSide }));
     mesh.position.set(definition.x, definition.y, 0);
     return mesh;
   });

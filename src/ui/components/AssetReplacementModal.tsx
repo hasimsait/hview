@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
 import { FurnitureEntity } from '@core/types/plan';
-import { useService } from '@ui/context/DIContext';
-import { TOKENS } from '@core/di/tokens';
-import { IAssetRegistryService, IPlanManagerService, AssetDefinition } from '@core/types/services';
-import { X, Search, Check, Box } from 'lucide-react';
+import { AssetDefinition } from '@core/types/services';
+import { useRuntime } from '@ui/context/RuntimeContext';
+import { Box,Check,Search,X } from 'lucide-react';
+import React,{ useState } from 'react';
+import { ReplaceFurniture } from '../../application/commands/FurnitureCommands';
 
 interface AssetReplacementModalProps {
   item?: FurnitureEntity | null;
@@ -31,15 +31,16 @@ export const AssetReplacementModal: React.FC<AssetReplacementModalProps> = ({
   mode = 'replace',
   onSelectAsset,
 }) => {
-  const assetRegistry = useService<IAssetRegistryService>(TOKENS.AssetRegistryService);
-  const planManager = useService<IPlanManagerService>(TOKENS.PlanManagerService);
+  const runtime = useRuntime();
+  const assetRegistry = runtime.catalog;
+  const editor = runtime.editor;
 
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   if (!isOpen) return null;
 
-  const allAssets = assetRegistry.getAllAssets();
+  const allAssets = assetRegistry.all();
   const filteredAssets = allAssets.filter((asset) => {
     const matchesCategory =
       selectedCategory === 'all' || asset.category.toLowerCase() === selectedCategory.toLowerCase();
@@ -55,7 +56,7 @@ export const AssetReplacementModal: React.FC<AssetReplacementModalProps> = ({
       onSelectAsset?.(asset);
       onClose();
     } else if (item) {
-      planManager.replaceFurnitureAsset(item.id, asset.key);
+      editor.execute(new ReplaceFurniture(item.id, asset.key));
       onClose();
     }
   };
@@ -105,11 +106,10 @@ export const AssetReplacementModal: React.FC<AssetReplacementModalProps> = ({
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`px-3 py-1 text-xs rounded-full whitespace-nowrap transition-colors ${
-                  selectedCategory === cat.id
-                    ? 'bg-sky-500 text-white font-medium'
-                    : 'bg-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-700'
-                }`}
+                className={`px-3 py-1 text-xs rounded-full whitespace-nowrap transition-colors ${selectedCategory === cat.id
+                  ? 'bg-sky-500 text-white font-medium'
+                  : 'bg-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-700'
+                  }`}
               >
                 {cat.label}
               </button>
@@ -125,11 +125,10 @@ export const AssetReplacementModal: React.FC<AssetReplacementModalProps> = ({
               <button
                 key={asset.key}
                 onClick={() => handleSelectAsset(asset)}
-                className={`flex flex-col text-left p-3 rounded-xl border transition-all ${
-                  isCurrent
-                    ? 'bg-sky-500/10 border-sky-500/50 shadow-md ring-1 ring-sky-500/30'
-                    : 'bg-slate-800/40 border-slate-800 hover:border-slate-700 hover:bg-slate-800/80'
-                }`}
+                className={`flex flex-col text-left p-3 rounded-xl border transition-all ${isCurrent
+                  ? 'bg-sky-500/10 border-sky-500/50 shadow-md ring-1 ring-sky-500/30'
+                  : 'bg-slate-800/40 border-slate-800 hover:border-slate-700 hover:bg-slate-800/80'
+                  }`}
               >
                 <div className="w-full h-20 rounded-lg bg-slate-800 flex items-center justify-center mb-2.5 text-slate-400">
                   <Box className="w-8 h-8 opacity-70 text-sky-400" />

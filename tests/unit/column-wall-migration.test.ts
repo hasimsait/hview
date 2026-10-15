@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { ColumnEntity, PlanDocument } from '../../src/core/types/plan';
-import { migrateColumnWalls } from '../../src/services/plan/ColumnWallMigration';
+import { migrateColumnWalls } from '../../src/domain/codec/LegacyColumnMigration';
+import type { ColumnData as ColumnEntity, PlanData as PlanDocument } from '../../src/domain/model/PlanData';
 
 const paint = (color: string) => ({ type: 'paint' as const, color });
 const inherited = ['#111111', '#222222', '#333333', '#444444'].map(paint);
@@ -15,8 +15,10 @@ function tinySpace(): PlanDocument {
   }));
   return {
     version: 3, totalHeight: 3, walls, columns: [], furniture: [], rawPlan: {},
-    rooms: [{ id: 'small', name: 'Chimney', area: 0.36, height: 2.8, polygon,
-      rawRoom: { edges: walls.map(wall => ({ pid: wall.id })) } }],
+    rooms: [{
+      id: 'small', name: 'Chimney', area: 0.36, height: 2.8, polygon,
+      rawRoom: { edges: walls.map(wall => ({ pid: wall.id })) }
+    }],
   };
 }
 
@@ -31,15 +33,19 @@ function storedColumn(plan: PlanDocument): ColumnEntity {
 describe('legacy column wall migration', () => {
   it('fills a stored chimney from its perimeter and retains saved finishes', () => {
     const plan = tinySpace();
-    plan.columns = [{ ...storedColumn(plan), type: 'chimney', width: 0.1, depth: 0.1,
-      worldPos: { x: 1, y: 0, z: 1 }, finishFront: paint('#abcdef'), finish: paint('#fedcba') }];
+    plan.columns = [{
+      ...storedColumn(plan), type: 'chimney', width: 0.1, depth: 0.1,
+      worldPos: { x: 1, y: 0, z: 1 }, finishFront: paint('#abcdef'), finish: paint('#fedcba')
+    }];
     migrateColumnWalls(plan, false);
     expect(plan.columns).toEqual([]);
     expect(plan.walls).toHaveLength(1);
     const wall = plan.walls[0];
-    expect(wall).toMatchObject({ id: 'small', isColumn: true, height: 2.8,
+    expect(wall).toMatchObject({
+      id: 'small', isColumn: true, height: 2.8,
       finish: paint('#fedcba'), finishSideA: paint('#abcdef'), finishSideB: inherited[0],
-      finishEdgeStart: inherited[3], finishEdgeEnd: inherited[1] });
+      finishEdgeStart: inherited[3], finishEdgeEnd: inherited[1]
+    });
     expect(wall.p1.x).toBeCloseTo(0.95);
     expect(wall.p2.x).toBeCloseTo(1.65);
     expect(wall.p1.y).toBeCloseTo(1.3);
@@ -84,10 +90,14 @@ describe('legacy column wall migration', () => {
   it('prefers explicitly saved face finishes over the perimeter finishes', () => {
     const plan = tinySpace();
     const saved = paint('#abcdef');
-    plan.columns = [{ ...storedColumn(plan), finishFront: saved, finishBack: saved,
-      finishLeft: saved, finishRight: saved }];
+    plan.columns = [{
+      ...storedColumn(plan), finishFront: saved, finishBack: saved,
+      finishLeft: saved, finishRight: saved
+    }];
     migrateColumnWalls(plan, false);
-    expect(plan.walls[0]).toMatchObject({ finishSideA: saved, finishSideB: saved,
-      finishEdgeStart: saved, finishEdgeEnd: saved });
+    expect(plan.walls[0]).toMatchObject({
+      finishSideA: saved, finishSideB: saved,
+      finishEdgeStart: saved, finishEdgeEnd: saved
+    });
   });
 });

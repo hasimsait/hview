@@ -1,8 +1,9 @@
+import { ViewMode } from '@core/types/services';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { ViewMode } from '@core/types/services';
 
 export interface CameraNavigationOptions {
+  onInput?: () => void;
   moveSpeed?: number;      // Walking speed in meters/second (default: 2.8)
   boostMultiplier?: number;// Speed multiplier when Shift is held (default: 2.5)
   rotateSpeed?: number;    // Rotation speed in radians/second (default: 1.6)
@@ -10,6 +11,8 @@ export interface CameraNavigationOptions {
 }
 
 export class CameraNavigationController {
+  private readonly onInput: () => void;
+  get hasActiveInput(): boolean { return this.active && Object.values(this.keys).some(Boolean); }
   private keys: Record<string, boolean> = {};
   private active = false;
   private moveSpeed: number;
@@ -33,6 +36,7 @@ export class CameraNavigationController {
     private getViewMode: () => ViewMode,
     options: CameraNavigationOptions = {}
   ) {
+    this.onInput = options.onInput ?? (() => { });
     this.moveSpeed = options.moveSpeed ?? 2.8;
     this.boostMultiplier = options.boostMultiplier ?? 2.5;
     this.rotateSpeed = options.rotateSpeed ?? 1.6;
@@ -97,6 +101,7 @@ export class CameraNavigationController {
     if (isNavKey) {
       this.keys[code] = true;
       this.keys[key] = true;
+      this.onInput();
 
       // Prevent default page scroll on Arrow keys and Space
       if (

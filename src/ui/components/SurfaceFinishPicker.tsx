@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { SurfaceFinishConfig, TileLayoutPattern } from '@core/types/plan';
+import { SurfaceFinishConfig,TileLayoutPattern } from '@core/types/plan';
+import type { TileEntry } from '@core/types/services';
 import { preserveSurfaceLayer } from '@core/types/surfaceLayer';
+import { useRuntime } from '@ui/context/RuntimeContext';
+import { Check,Disc,EyeOff,Grid,Layers,Paintbrush,Palette,Pipette,RotateCcw,RotateCw,Search,Sparkles } from 'lucide-react';
+import React,{ useEffect,useState } from 'react';
 import { SurfaceLayerControl } from './SurfaceLayerControl';
-import { Paintbrush, Layers, Grid, Sparkles, Check, RotateCcw, RotateCw, Disc, EyeOff, Palette, Pipette, Search } from 'lucide-react';
-import { useService } from '@ui/context/useService';
-import { TOKENS } from '@core/di/tokens';
-import type { ITileCatalogService, TileEntry } from '@core/types/services';
 // Fast Refresh enabled: component only exports SurfaceFinishPicker
 
 const TILE_LAYOUT_PATTERNS: { id: TileLayoutPattern; label: string; description: string }[] = [
@@ -625,18 +624,19 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
   showCeilingsTab = false,
   defaultTab,
 }) => {
+  const runtime = useRuntime();
   const onSelectFinish = (finish: SurfaceFinishConfig) => selectFinish(preserveSurfaceLayer(finish, currentFinish));
   const [activeTab, setActiveTab] = useState<TabType>(
     defaultTab ||
-      (currentFinish?.type === 'metal' || currentFinish?.type === 'porcelain'
-        ? 'metal'
-        : currentFinish?.type === 'fabric'
+    (currentFinish?.type === 'metal' || currentFinish?.type === 'porcelain'
+      ? 'metal'
+      : currentFinish?.type === 'fabric'
         ? 'fabric'
         : currentFinish?.type === 'tile'
-        ? 'tile'
-        : currentFinish?.type === 'wood' || currentFinish?.type === 'lambri'
-        ? 'lambri'
-        : 'paint')
+          ? 'tile'
+          : currentFinish?.type === 'wood' || currentFinish?.type === 'lambri'
+            ? 'lambri'
+            : 'paint')
   );
   const [selectedFabricCategory, setSelectedFabricCategory] = useState<string>('velvet_reds');
   const [selectedPaletteCategory, setSelectedPaletteCategory] = useState<string>('all');
@@ -663,7 +663,7 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
   }, [currentFinish]);
 
   // Tile catalog — loaded async from public/textures/tiles/tiles.json
-  const tileCatalogService = useService<ITileCatalogService>(TOKENS.TileCatalogService);
+  const tileCatalogService = runtime.tiles;
   const [tileEntries, setTileEntries] = useState<TileEntry[]>(() => tileCatalogService.getAll());
 
   useEffect(() => {
@@ -738,11 +738,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
         <button
           type="button"
           onClick={() => onSelectFinish({ type: 'invisible', color: 'invisible' })}
-          className={`flex-1 flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs font-medium transition-all ${
-            isInvisible
-              ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/50 shadow-sm'
-              : 'text-slate-300 hover:text-white hover:bg-slate-800 border border-transparent'
-          }`}
+          className={`flex-1 flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs font-medium transition-all ${isInvisible
+            ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/50 shadow-sm'
+            : 'text-slate-300 hover:text-white hover:bg-slate-800 border border-transparent'
+            }`}
         >
           <div className="flex items-center gap-2">
             <EyeOff className="w-3.5 h-3.5 text-indigo-400" />
@@ -760,11 +759,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('paint')}
-          className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
-            activeTab === 'paint'
-              ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-          }`}
+          className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${activeTab === 'paint'
+            ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30'
+            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+            }`}
         >
           <Paintbrush className="w-3 h-3" />
           Paint & Plaster
@@ -773,11 +771,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('lambri')}
-          className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
-            activeTab === 'lambri'
-              ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-          }`}
+          className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${activeTab === 'lambri'
+            ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+            }`}
         >
           <Layers className="w-3 h-3" />
           Wood & Parquet
@@ -786,11 +783,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('tile')}
-          className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
-            activeTab === 'tile'
-              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-          }`}
+          className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${activeTab === 'tile'
+            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+            }`}
         >
           <Grid className="w-3 h-3" />
           Tile & Marble
@@ -799,11 +795,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('glass')}
-          className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
-            activeTab === 'glass'
-              ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-          }`}
+          className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${activeTab === 'glass'
+            ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+            }`}
         >
           <Sparkles className="w-3 h-3" />
           Glass
@@ -812,11 +807,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('metal')}
-          className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
-            activeTab === 'metal'
-              ? 'bg-zinc-500/20 text-zinc-300 border border-zinc-500/30'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-          }`}
+          className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${activeTab === 'metal'
+            ? 'bg-zinc-500/20 text-zinc-300 border border-zinc-500/30'
+            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+            }`}
         >
           <Disc className="w-3 h-3 text-zinc-400" />
           Metal &amp; Fixtures
@@ -825,11 +819,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('fabric')}
-          className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
-            activeTab === 'fabric'
-              ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-          }`}
+          className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${activeTab === 'fabric'
+            ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+            }`}
         >
           <Sparkles className="w-3 h-3 text-rose-400" />
           Velvet &amp; Fabric
@@ -839,11 +832,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('ceiling')}
-            className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
-              activeTab === 'ceiling'
-                ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-            }`}
+            className={`flex shrink-0 whitespace-nowrap items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${activeTab === 'ceiling'
+              ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+              }`}
           >
             <Grid className="w-3 h-3" />
             Ceiling
@@ -890,11 +882,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                     key={cat.id}
                     type="button"
                     onClick={() => setSelectedPaletteCategory(cat.id)}
-                    className={`px-1.5 py-0.5 rounded text-[9px] font-medium transition-colors ${
-                      selectedPaletteCategory === cat.id
-                        ? 'bg-sky-500/20 text-sky-400 border border-sky-500/40'
-                        : 'bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800'
-                    }`}
+                    className={`px-1.5 py-0.5 rounded text-[9px] font-medium transition-colors ${selectedPaletteCategory === cat.id
+                      ? 'bg-sky-500/20 text-sky-400 border border-sky-500/40'
+                      : 'bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800'
+                      }`}
                   >
                     {cat.name}
                   </button>
@@ -941,11 +932,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                             roughness: 0.85,
                           });
                         }}
-                        className={`flex items-center gap-1.5 p-1.5 rounded-lg border text-left transition-all ${
-                          active
-                            ? 'border-sky-500 bg-sky-500/10 shadow-sm'
-                            : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
-                        }`}
+                        className={`flex items-center gap-1.5 p-1.5 rounded-lg border text-left transition-all ${active
+                          ? 'border-sky-500 bg-sky-500/10 shadow-sm'
+                          : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
+                          }`}
                         title={`${p.name} (${p.hex})`}
                       >
                         <div
@@ -1021,11 +1011,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                         roughness: pl.roughness,
                       })
                     }
-                    className={`flex items-center gap-2 p-2 rounded-lg border text-left transition-all ${
-                      active
-                        ? 'border-sky-500 bg-sky-500/10'
-                        : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
-                    }`}
+                    className={`flex items-center gap-2 p-2 rounded-lg border text-left transition-all ${active
+                      ? 'border-sky-500 bg-sky-500/10'
+                      : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
+                      }`}
                   >
                     <div
                       className="w-5 h-5 rounded border border-slate-700 shadow-inner shrink-0"
@@ -1068,11 +1057,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                         roughness: w.roughness,
                       })
                     }
-                    className={`flex items-center gap-2.5 p-2 rounded-lg border text-left transition-all ${
-                      active
-                        ? 'border-amber-500 bg-amber-500/15 shadow-sm'
-                        : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
-                    }`}
+                    className={`flex items-center gap-2.5 p-2 rounded-lg border text-left transition-all ${active
+                      ? 'border-amber-500 bg-amber-500/15 shadow-sm'
+                      : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
+                      }`}
                   >
                     <div
                       className="w-10 h-10 rounded-md border border-slate-700 shadow-inner shrink-0 bg-cover bg-center overflow-hidden"
@@ -1112,11 +1100,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                         roughness: p.roughness,
                       })
                     }
-                    className={`flex items-center gap-2 p-2 rounded-lg border text-left transition-all ${
-                      active
-                        ? 'border-amber-500 bg-amber-500/15'
-                        : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
-                    }`}
+                    className={`flex items-center gap-2 p-2 rounded-lg border text-left transition-all ${active
+                      ? 'border-amber-500 bg-amber-500/15'
+                      : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
+                      }`}
                   >
                     <div
                       className="w-6 h-6 rounded border border-slate-700 shadow-inner shrink-0 flex items-center justify-center font-bold text-[8px] text-slate-900"
@@ -1214,11 +1201,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                           roughness: 0.55,
                         });
                       }}
-                      className={`flex items-center gap-1.5 p-1.5 rounded border text-left transition-all ${
-                        active
-                          ? 'border-amber-400 bg-amber-500/20 text-amber-200'
-                          : 'border-slate-800 hover:border-slate-700 bg-slate-900/60 text-slate-300'
-                      }`}
+                      className={`flex items-center gap-1.5 p-1.5 rounded border text-left transition-all ${active
+                        ? 'border-amber-400 bg-amber-500/20 text-amber-200'
+                        : 'border-slate-800 hover:border-slate-700 bg-slate-900/60 text-slate-300'
+                        }`}
                       title={slat.name}
                     >
                       <div
@@ -1263,11 +1249,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                           roughness: 0.55,
                         });
                       }}
-                      className={`flex flex-col items-center gap-1 p-1 rounded border text-center transition-all ${
-                        active
-                          ? 'border-amber-400 bg-amber-500/20 shadow-sm'
-                          : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
-                      }`}
+                      className={`flex flex-col items-center gap-1 p-1 rounded border text-center transition-all ${active
+                        ? 'border-amber-400 bg-amber-500/20 shadow-sm'
+                        : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
+                        }`}
                       title={`${b.name} (${b.subtitle})`}
                     >
                       <div
@@ -1361,11 +1346,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                     if (first) onSelectFinish({ type: 'tile', variant: first.id, color: first.color, roughness: first.roughness, rotation: 0 });
                   }
                 }}
-                className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors ${
-                  (currentFinish?.rotation || 0) === 0
-                    ? 'bg-emerald-600 text-white shadow-sm'
-                    : 'bg-slate-800 text-slate-400 hover:text-white'
-                }`}
+                className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors ${(currentFinish?.rotation || 0) === 0
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'bg-slate-800 text-slate-400 hover:text-white'
+                  }`}
                 title="Horizontal layout (brick layout, long side parallel to ground)"
               >
                 Horizontal (0°)
@@ -1380,11 +1364,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                     if (first) onSelectFinish({ type: 'tile', variant: first.id, color: first.color, roughness: first.roughness, rotation: 90 });
                   }
                 }}
-                className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors ${
-                  (currentFinish?.rotation || 0) === 90
-                    ? 'bg-emerald-600 text-white shadow-sm'
-                    : 'bg-slate-800 text-slate-400 hover:text-white'
-                }`}
+                className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors ${(currentFinish?.rotation || 0) === 90
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'bg-slate-800 text-slate-400 hover:text-white'
+                  }`}
                 title="Vertical layout (upright layout)"
               >
                 Vertical (90°)
@@ -1446,11 +1429,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                         }
                       }
                     }}
-                    className={`px-1.5 py-1 rounded text-[10px] font-medium transition-colors text-center truncate ${
-                      isSelected
-                        ? 'bg-amber-600 text-white shadow-sm'
-                        : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'
-                    }`}
+                    className={`px-1.5 py-1 rounded text-[10px] font-medium transition-colors text-center truncate ${isSelected
+                      ? 'bg-amber-600 text-white shadow-sm'
+                      : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'
+                      }`}
                     title={p.description}
                   >
                     {p.label}
@@ -1499,11 +1481,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                         }
                       }
                     }}
-                    className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors ${
-                      currentGroutWidth === opt.value
-                        ? 'bg-sky-600 text-white shadow-sm'
-                        : 'bg-slate-800 text-slate-400 hover:text-white'
-                    }`}
+                    className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors ${currentGroutWidth === opt.value
+                      ? 'bg-sky-600 text-white shadow-sm'
+                      : 'bg-slate-800 text-slate-400 hover:text-white'
+                      }`}
                     title={`${opt.label} grout width`}
                   >
                     {opt.label}
@@ -1580,11 +1561,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                       key={gc.id}
                       type="button"
                       onClick={() => handleGroutColorChange(gc.hex)}
-                      className={`flex items-center gap-1.5 p-1 rounded border text-left transition-all ${
-                        isSelected
-                          ? 'border-sky-500 bg-sky-500/20 shadow-sm ring-1 ring-sky-500/50'
-                          : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
-                      }`}
+                      className={`flex items-center gap-1.5 p-1 rounded border text-left transition-all ${isSelected
+                        ? 'border-sky-500 bg-sky-500/20 shadow-sm ring-1 ring-sky-500/50'
+                        : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
+                        }`}
                       title={`${gc.name} (${gc.hex})`}
                     >
                       <div
@@ -1634,11 +1614,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                         groutColor: currentGroutColor,
                       });
                     }}
-                    className={`flex items-center gap-2.5 p-2 rounded-lg border text-left transition-all ${
-                      active
-                        ? 'border-emerald-500 bg-emerald-500/10'
-                        : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
-                    }`}
+                    className={`flex items-center gap-2.5 p-2 rounded-lg border text-left transition-all ${active
+                      ? 'border-emerald-500 bg-emerald-500/10'
+                      : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
+                      }`}
                   >
                     {/* Swatch: real image (textures[0]) or colour square for procedural */}
                     <div
@@ -1646,10 +1625,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                       style={
                         swatchUrl
                           ? {
-                              backgroundImage: `url(${swatchUrl})`,
-                              backgroundSize: 'cover',
-                              backgroundPosition: 'center',
-                            }
+                            backgroundImage: `url(${swatchUrl})`,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                          }
                           : { backgroundColor: t.color }
                       }
                     >
@@ -1672,8 +1651,8 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                         {t.textures.length === 0
                           ? 'Procedural / synthetic tile pattern'
                           : t.textures.length > 1
-                          ? `${t.textures.length} variants · wet-area architectural tile`
-                          : 'Wet-area architectural tile & grout grid'}
+                            ? `${t.textures.length} variants · wet-area architectural tile`
+                            : 'Wet-area architectural tile & grout grid'}
                       </div>
                     </div>
                     {active && <Check className="w-4 h-4 text-emerald-400 shrink-0" />}
@@ -1706,11 +1685,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                       roughness: 0.1,
                     })
                   }
-                  className={`flex items-center gap-2.5 p-2 rounded-lg border text-left transition-all ${
-                    active
-                      ? 'border-cyan-500 bg-cyan-500/10'
-                      : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
-                  }`}
+                  className={`flex items-center gap-2.5 p-2 rounded-lg border text-left transition-all ${active
+                    ? 'border-cyan-500 bg-cyan-500/10'
+                    : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
+                    }`}
                 >
                   <div
                     className="w-7 h-7 rounded border border-cyan-400/40 shadow-inner shrink-0 flex items-center justify-center text-[10px] text-cyan-200 bg-cyan-500/20 backdrop-blur-sm"
@@ -1755,11 +1733,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                         metalness: m.metalness,
                       })
                     }
-                    className={`flex items-center gap-2 p-1.5 rounded-lg border text-left transition-all ${
-                      active
-                        ? 'border-sky-500 bg-sky-500/10 shadow-sm ring-1 ring-sky-500/30'
-                        : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
-                    }`}
+                    className={`flex items-center gap-2 p-1.5 rounded-lg border text-left transition-all ${active
+                      ? 'border-sky-500 bg-sky-500/10 shadow-sm ring-1 ring-sky-500/30'
+                      : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
+                      }`}
                   >
                     <div
                       className="w-6 h-6 rounded-md border border-slate-700/80 shadow-sm shrink-0 flex items-center justify-center"
@@ -1802,11 +1779,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                         metalness: p.metalness,
                       })
                     }
-                    className={`flex items-center gap-2 p-1.5 rounded-lg border text-left transition-all ${
-                      active
-                        ? 'border-sky-500 bg-sky-500/10 shadow-sm ring-1 ring-sky-500/30'
-                        : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
-                    }`}
+                    className={`flex items-center gap-2 p-1.5 rounded-lg border text-left transition-all ${active
+                      ? 'border-sky-500 bg-sky-500/10 shadow-sm ring-1 ring-sky-500/30'
+                      : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
+                      }`}
                   >
                     <div
                       className="w-6 h-6 rounded-md border border-slate-700/80 shadow-sm shrink-0 flex items-center justify-center"
@@ -1849,11 +1825,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                       roughness: c.roughness,
                     })
                   }
-                  className={`flex items-center gap-2.5 p-2 rounded-lg border text-left transition-all ${
-                    active
-                      ? 'border-purple-500 bg-purple-500/10'
-                      : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
-                  }`}
+                  className={`flex items-center gap-2.5 p-2 rounded-lg border text-left transition-all ${active
+                    ? 'border-purple-500 bg-purple-500/10'
+                    : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
+                    }`}
                 >
                   <div
                     className="w-7 h-7 rounded border border-slate-700 shadow-inner shrink-0 flex items-center justify-center text-[10px] text-purple-300"
@@ -1904,11 +1879,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                         scale: item.scale || (isLinenItem ? 3.5 : 1.0),
                       });
                     }}
-                    className={`flex items-center gap-2.5 p-2 rounded-lg border text-left transition-all ${
-                      active
-                        ? 'border-rose-500 bg-rose-500/10 shadow-sm ring-1 ring-rose-500/30'
-                        : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
-                    }`}
+                    className={`flex items-center gap-2.5 p-2 rounded-lg border text-left transition-all ${active
+                      ? 'border-rose-500 bg-rose-500/10 shadow-sm ring-1 ring-rose-500/30'
+                      : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
+                      }`}
                   >
                     <div
                       className="w-10 h-10 rounded-md border border-slate-700/80 shadow-md shrink-0 bg-cover bg-center overflow-hidden"
@@ -1945,11 +1919,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                   key={cat.id}
                   type="button"
                   onClick={() => setSelectedFabricCategory(cat.id)}
-                  className={`px-1.5 py-0.5 rounded text-[9px] font-medium transition-colors ${
-                    selectedFabricCategory === cat.id
-                      ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
-                      : 'bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800'
-                  }`}
+                  className={`px-1.5 py-0.5 rounded text-[9px] font-medium transition-colors ${selectedFabricCategory === cat.id
+                    ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                    : 'bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800'
+                    }`}
                 >
                   {cat.name}
                 </button>
@@ -1977,11 +1950,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                         scale: currentFinish?.scale || 1.0,
                       });
                     }}
-                    className={`flex items-center gap-2 p-1.5 rounded-lg border text-left transition-all ${
-                      active
-                        ? 'border-rose-500 bg-rose-500/10 shadow-sm ring-1 ring-rose-500/30'
-                        : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
-                    }`}
+                    className={`flex items-center gap-2 p-1.5 rounded-lg border text-left transition-all ${active
+                      ? 'border-rose-500 bg-rose-500/10 shadow-sm ring-1 ring-rose-500/30'
+                      : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
+                      }`}
                     title={`${col.name} (${col.hex})`}
                   >
                     <div
@@ -2025,11 +1997,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                       scale: 1.0,
                     });
                   }}
-                  className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-[10px] font-medium border transition-all ${
-                    (currentFinish.mappingMode || (currentFinish.variant?.includes('linen') ? 'tiled' : 'stretched')) === 'stretched'
-                      ? 'border-rose-500 bg-rose-500/20 text-rose-300 shadow-sm'
-                      : 'border-slate-800 bg-slate-900/60 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-                  }`}
+                  className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-[10px] font-medium border transition-all ${(currentFinish.mappingMode || (currentFinish.variant?.includes('linen') ? 'tiled' : 'stretched')) === 'stretched'
+                    ? 'border-rose-500 bg-rose-500/20 text-rose-300 shadow-sm'
+                    : 'border-slate-800 bg-slate-900/60 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                    }`}
                 >
                   <Layers className="w-3 h-3" />
                   Stretched (Fitted)
@@ -2044,11 +2015,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                       scale: currentFinish.scale || (isLinen ? 3.5 : 2.0),
                     });
                   }}
-                  className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-[10px] font-medium border transition-all ${
-                    (currentFinish.mappingMode || (currentFinish.variant?.includes('linen') ? 'tiled' : 'stretched')) === 'tiled'
-                      ? 'border-rose-500 bg-rose-500/20 text-rose-300 shadow-sm'
-                      : 'border-slate-800 bg-slate-900/60 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-                  }`}
+                  className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-[10px] font-medium border transition-all ${(currentFinish.mappingMode || (currentFinish.variant?.includes('linen') ? 'tiled' : 'stretched')) === 'tiled'
+                    ? 'border-rose-500 bg-rose-500/20 text-rose-300 shadow-sm'
+                    : 'border-slate-800 bg-slate-900/60 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                    }`}
                 >
                   <Grid className="w-3 h-3" />
                   Tiled (Repeating)
@@ -2084,11 +2054,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                               scale: preset.value,
                             });
                           }}
-                          className={`py-1 px-1 rounded text-[8.5px] font-medium border text-center transition-all ${
-                            isPresetActive
-                              ? 'border-rose-500/60 bg-rose-500/20 text-rose-200 font-semibold'
-                              : 'border-slate-800 bg-slate-900/40 text-slate-400 hover:text-slate-300 hover:border-slate-700'
-                          }`}
+                          className={`py-1 px-1 rounded text-[8.5px] font-medium border text-center transition-all ${isPresetActive
+                            ? 'border-rose-500/60 bg-rose-500/20 text-rose-200 font-semibold'
+                            : 'border-slate-800 bg-slate-900/40 text-slate-400 hover:text-slate-300 hover:border-slate-700'
+                            }`}
                         >
                           {preset.label}
                         </button>

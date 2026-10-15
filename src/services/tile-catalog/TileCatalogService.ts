@@ -1,5 +1,5 @@
-import * as THREE from 'three';
 import { TileLayoutPattern } from '@core/types/plan';
+import * as THREE from 'three';
 
 // ---------------------------------------------------------------------------
 // Public types (re-exported from services.ts)
@@ -94,7 +94,7 @@ export class TileCatalogService implements ITileCatalogService {
     //   30x60  → scaleX = 1/0.60, scaleY = 1/0.30
     //   60x60  → scaleX = 1/0.60, scaleY = 1/0.60
     const horizontal = Math.max(wm, hm);
-    const vertical   = Math.min(wm, hm);
+    const vertical = Math.min(wm, hm);
     return new THREE.Vector2(1 / horizontal, 1 / vertical);
   }
 
@@ -119,7 +119,7 @@ export class TileCatalogService implements ITileCatalogService {
   onCatalogLoaded(cb: (entries: TileEntry[]) => void): () => void {
     if (this.loaded) {
       cb(this.entries);
-      return () => {};
+      return () => { };
     }
     this.listeners.push(cb);
     return () => {

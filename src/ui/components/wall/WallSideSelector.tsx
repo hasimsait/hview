@@ -1,6 +1,6 @@
-import React from 'react';
-import { WallEntity, RoomEntity } from '@core/types/plan';
+import { RoomEntity,WallEntity } from '@core/types/plan';
 import { Split } from 'lucide-react';
+import React from 'react';
 import { WALL_TARGET_STRATEGIES } from './WallTargetStrategy';
 
 interface WallSideSelectorProps {
@@ -44,19 +44,18 @@ export const WallSideSelector: React.FC<WallSideSelectorProps> = ({
             id === 'A' && roomA
               ? ` (${roomA.name})`
               : id === 'B' && roomB
-              ? ` (${roomB.name})`
-              : '';
+                ? ` (${roomB.name})`
+                : '';
 
           return (
             <button
               key={id}
               type="button"
               onClick={() => onSelectTarget(id)}
-              className={`px-2 py-1.5 rounded text-[11px] font-medium transition-all text-center truncate ${
-                isSelected
-                  ? 'bg-sky-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-              }`}
+              className={`px-2 py-1.5 rounded text-[11px] font-medium transition-all text-center truncate ${isSelected
+                ? 'bg-sky-600 text-white shadow-sm'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                }`}
               title={strat.title}
             >
               {strat.label}
@@ -83,11 +82,10 @@ export const WallSideSelector: React.FC<WallSideSelectorProps> = ({
               key={id}
               type="button"
               onClick={() => onSelectTarget(id)}
-              className={`px-2 py-1.5 rounded text-[10px] font-medium transition-all text-center truncate ${
-                isSelected
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-              }`}
+              className={`px-2 py-1.5 rounded text-[10px] font-medium transition-all text-center truncate ${isSelected
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                }`}
               title={strat.title}
             >
               {strat.label}
@@ -115,11 +113,10 @@ export const WallSideSelector: React.FC<WallSideSelectorProps> = ({
                   key={id}
                   type="button"
                   onClick={() => onSelectTarget(id)}
-                  className={`px-2 py-1.5 rounded text-[11px] font-semibold transition-all text-center truncate ${
-                    isSelected
-                      ? 'bg-amber-600 text-white shadow-sm'
-                      : 'text-amber-300 hover:text-white hover:bg-amber-500/20 border border-amber-500/40 bg-amber-500/10'
-                  }`}
+                  className={`px-2 py-1.5 rounded text-[11px] font-semibold transition-all text-center truncate ${isSelected
+                    ? 'bg-amber-600 text-white shadow-sm'
+                    : 'text-amber-300 hover:text-white hover:bg-amber-500/20 border border-amber-500/40 bg-amber-500/10'
+                    }`}
                   title={strat.title}
                 >
                   {strat.label}
