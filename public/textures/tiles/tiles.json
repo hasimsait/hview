@@ -64,6 +64,20 @@
     ]
   },
   {
+    "id": "caramel_ripple_gloss_20x10",
+    "name": "20x10 Caramel Ripple Gloss Tile",
+    "widthCm": 20,
+    "heightCm": 10,
+    "color": "#ffffff",
+    "roughness": 0.18,
+    "metalness": 0,
+    "defaultGroutWidth": 1,
+    "defaultPattern": "running_bond",
+    "textures": [
+      "/textures/tiles/caramel_ripple_gloss_20x10.jpg"
+    ]
+  },
+  {
     "id": "graniser_orea_bone_40x80",
     "name": "40x80 Orea Bone Matte Tile",
     "widthCm": 40,
