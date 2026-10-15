@@ -1,8 +1,10 @@
 import type { AssetDefinition } from './AssetDefinition';
 import { CURATED_ASSETS } from './CuratedAssets';
+import { IKEA_ACCESSORIES } from './IkeaAccessories';
 
 export const DEFAULT_ASSETS: readonly AssetDefinition[] = [
   ...CURATED_ASSETS,
+  ...IKEA_ACCESSORIES,
   // Beds
   {
     key: 'bed_double',

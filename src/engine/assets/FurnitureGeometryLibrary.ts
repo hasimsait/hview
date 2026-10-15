@@ -4,8 +4,10 @@ import * as Bathroom from "./builders/BathroomBuilders";
 import * as Furniture from "./builders/FurnitureBuilders";
 import * as Lighting from "./builders/LightingBuilders";
 import * as Catalogue from './builders/CatalogueBuilders';
+import { buildIkeaAccessory } from './builders/IkeaAccessoryBuilder';
 
 export const FURNITURE_GEOMETRY: Readonly<Record<AssetRecipeId, AssetBuilderFn>> = {
+  ikea_accessory: buildIkeaAccessory,
   angled_range_hood: Catalogue.buildAngledHood,
   gas_cooktop: Catalogue.buildGasCooktop,
   built_in_oven: Catalogue.buildBuiltInOven,

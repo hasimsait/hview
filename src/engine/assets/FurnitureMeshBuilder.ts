@@ -142,6 +142,14 @@ export class FurnitureMeshBuilder {
       h,
       d,
       materials: this.materials,
+      definition: this.catalog.get(key),
+      coloredMaterial: (color, base) => {
+        const material = base.clone();
+        material.color.set(color);
+        material.transparent = true;
+        applyBasicOcclusionShader(material, this.occlusionUniforms, 0.6);
+        return material;
+      },
       recessHostThickness,
     };
 

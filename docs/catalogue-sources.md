@@ -16,6 +16,8 @@ These editable procedural models use retailer dimensions and visual references. 
 
 ## IKEA bookcases
 
+The expanded accessory catalogue and all 136 additional product references are listed in [IKEA accessory references](ikea-accessories.md).
+
 | Item | Dimensions | Source |
 | --- | --- | --- |
 | HEMNES, white stain/light brown | 90 × 37 × 197 | [IKEA 60413502](https://www.ikea.com.tr/en/product/hemnes-white-stain-light-brown-90x197-cm-bookcase-60413502) |

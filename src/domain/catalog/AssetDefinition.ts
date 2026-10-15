@@ -1,5 +1,6 @@
 import type { Vector3D } from '../model/PlanData';
 import type { AssetRecipeId } from './AssetRecipes';
+import type { AccessoryModel } from './AccessoryModel';
 
 export interface AssetPlacement {
   mount: 'floor' | 'wall' | 'ceiling' | 'surface';
@@ -32,7 +33,9 @@ export interface AssetDefinition {
   capabilities?: AssetCapabilities;
   aliases?: string[];
   recipe?: AssetRecipeId;
-  source?: { retailer: string; url?: string; productCode?: string; dimensions: 'listed' | 'estimated' | 'reference' };
+  accessory?: AccessoryModel;
+  collection?: string;
+  source?: { retailer: string; url?: string; productCode?: string; dimensions: 'listed' | 'estimated' | 'reference'; dimensionNotes?: string };
 }
 
 export type FurnitureBehavior = 'standard' | 'luminaire' | 'shelving' | 'basin' | 'recess';

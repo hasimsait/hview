@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type { Furniture } from '../../../domain/elements/Furniture';
+import type { AssetDefinition } from '../../../domain/catalog/AssetDefinition';
 
 export interface ProceduralMaterials {
   whitePaint: THREE.MeshStandardMaterial;
@@ -33,6 +34,8 @@ export interface AssetBuildContext {
   h: number;
   d: number;
   materials: ProceduralMaterials;
+  definition?: AssetDefinition;
+  coloredMaterial?: (color: string, material: THREE.MeshStandardMaterial) => THREE.MeshStandardMaterial;
   recessHostThickness?: number;
 }
 
