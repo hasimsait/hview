@@ -207,6 +207,7 @@ export class FurnitureMeshBuilder {
     parent.traverse((child) => {
       const mesh = child as THREE.Mesh;
       if (mesh.isMesh && mesh.geometry) {
+        if (mesh instanceof THREE.InstancedMesh || mesh.userData.skipOutline) return;
         // Skip small light bulbs / spheres and smooth curved hoses
         if (mesh.geometry.type === 'SphereGeometry' || mesh.geometry.type === 'TubeGeometry') return;
         const edges = new THREE.EdgesGeometry(mesh.geometry, 28);

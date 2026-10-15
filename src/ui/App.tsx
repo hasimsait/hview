@@ -173,6 +173,15 @@ export const App: React.FC = () => {
     sceneService.updateSettings({ showFixtures: nextVal });
   };
 
+  // Selecting a newly added or replaced electrical fitting makes its bucket visible.
+  // The manual Sockets toggle still works while the same fitting remains selected.
+  useEffect(() => {
+    if (selectedItem?.category === 'fixture') {
+      setShowFixtures(true);
+      sceneService.updateSettings({ showFixtures: true });
+    }
+  }, [selectedItem?.id, selectedItem?.assetKey, selectedItem?.category, sceneService]);
+
   const handleUpdateLighting = (settings: Partial<ViewportSettings>) => {
     if (settings.globalLighting !== undefined) setGlobalLighting(settings.globalLighting);
     if (settings.globalLightIntensity !== undefined) setGlobalLightIntensity(settings.globalLightIntensity);

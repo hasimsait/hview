@@ -23,6 +23,7 @@ const CATEGORIES = [
   { id: 'bed', label: 'Beds' },
   { id: 'kitchen', label: 'Kitchen' },
   { id: 'appliance', label: 'Appliances' },
+  { id: 'fixture', label: 'Sockets & Switches' },
 ];
 
 const searchable = (value: string) => value.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase();

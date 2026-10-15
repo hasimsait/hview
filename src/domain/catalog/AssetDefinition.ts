@@ -34,6 +34,12 @@ export interface AssetDefinition {
   aliases?: string[];
   recipe?: AssetRecipeId;
   accessory?: AccessoryModel;
+  electrical?: {
+    series: 'karre' | 'bubble';
+    control: 'single_switch' | 'double_switch' | 'socket' | 'double_socket';
+    frameColor: string;
+    insertColor: string;
+  };
   collection?: string;
   source?: { retailer: string; url?: string; productCode?: string; dimensions: 'listed' | 'estimated' | 'reference'; dimensionNotes?: string };
 }

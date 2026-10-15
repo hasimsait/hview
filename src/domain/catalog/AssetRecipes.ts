@@ -3,6 +3,9 @@ import type { FurnitureBehavior } from './AssetDefinition';
 export interface AssetRecipe { readonly id: string; readonly aliases: readonly string[]; readonly behavior: FurnitureBehavior; }
 
 export const ASSET_RECIPES = [
+  { id: 'electrical_fitting', aliases: [], behavior: 'standard' },
+  { id: 'robot_vacuum', aliases: [], behavior: 'standard' },
+  { id: 'air_purifier', aliases: [], behavior: 'standard' },
   { id: 'ikea_accessory', aliases: [], behavior: 'standard' },
   { id: 'angled_range_hood', aliases: [], behavior: 'standard' },
   { id: 'gas_cooktop', aliases: [], behavior: 'standard' },
