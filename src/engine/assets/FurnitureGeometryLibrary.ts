@@ -12,9 +12,11 @@ import { buildAirPurifier, buildRobotVacuum } from './builders/HouseholdBuilders
 import { buildArchitecturalFinish } from './builders/ArchitecturalFinishBuilder';
 import { buildLightingComponent } from './builders/LightingComponentBuilder';
 import { buildFloorDrain } from './builders/FloorDrainBuilder';
+import { buildHouseholdDetail } from './builders/HouseholdDetailBuilder';
 import { buildSoftFurnishing } from './builders/SoftFurnishingBuilder';
 
 export const FURNITURE_GEOMETRY: Readonly<Record<AssetRecipeId, AssetBuilderFn>> = {
+  household_detail: buildHouseholdDetail,
   soft_furnishing: buildSoftFurnishing,
   lighting_component: buildLightingComponent,
   floor_drain: buildFloorDrain,

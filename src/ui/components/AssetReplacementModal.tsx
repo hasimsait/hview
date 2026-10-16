@@ -17,6 +17,8 @@ const CATEGORIES = [
   { id: 'all', label: 'All' },
   { id: 'architecture', label: 'Architectural Finishes' },
   { id: 'lighting', label: 'Lighting' },
+  { id: 'household', label: 'Everyday Objects' },
+  { id: 'practical', label: 'Practical Details' },
   { id: 'textiles', label: 'Soft Furnishings' },
   { id: 'bathroom', label: 'Bathroom & Accessories' },
   { id: 'decor', label: 'Decor & Lighting' },
@@ -57,6 +59,8 @@ export const AssetReplacementModal: React.FC<AssetReplacementModalProps> = ({
     if (collectionFilter !== 'all' && asset.collection !== collectionFilter) return false;
     const matchesCategory =
       selectedCategory === 'all' || (selectedCategory === 'lighting' ? !!asset.capabilities?.lighting
+        : selectedCategory === 'household' ? !!asset.householdDetail && !asset.householdDetail.practical
+        : selectedCategory === 'practical' ? !!asset.householdDetail?.practical
         : selectedCategory === 'textiles' ? !!asset.softFurnishing || /^(Rugs|Cushions)$/.test(asset.collection ?? '') : asset.category.toLowerCase() === selectedCategory.toLowerCase());
     const query = searchable(searchQuery.trim());
     const matchesSearch = [asset.name, asset.description, asset.key, asset.collection, asset.source?.retailer, asset.source?.productCode]

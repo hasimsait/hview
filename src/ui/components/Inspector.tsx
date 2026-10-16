@@ -46,7 +46,7 @@ export const Inspector: React.FC<InspectorProps> = ({
   const isShelving = presentation.sections.includes('shelving');
   const definition = runtime.catalog.get(item.assetKey);
   const resizable = definition?.capabilities?.resizable !== false;
-  const dimensionStep = definition?.floorDrain || definition?.lightingComponent || definition?.architecturalFinish || definition?.softFurnishing ? .1 : 1;
+  const dimensionStep = definition?.householdDetail || definition?.floorDrain || definition?.lightingComponent || definition?.architecturalFinish || definition?.softFurnishing ? .1 : 1;
 
   const currentFinishForSection: SurfaceFinishConfig | undefined =
     activeSection === 'all'
@@ -141,6 +141,8 @@ export const Inspector: React.FC<InspectorProps> = ({
         </button>
       </div>
 
+      {definition?.householdDetail?.practical && <p className="pt-3 text-[10px] text-slate-400">Dimensions describe the occupied space, including connectors. Cable and hose dimensions describe the route footprint, not their total length.</p>}
+
       {/* Transform Coordinates */}
       <div className="py-3 border-b border-slate-800 space-y-3">
         <div>
@@ -167,7 +169,7 @@ export const Inspector: React.FC<InspectorProps> = ({
               <span className="text-[10px] text-slate-500 uppercase">X (Horiz.)</span>
               <input
                 type="number"
-                step="0.05"
+                step={definition?.householdDetail?.practical ? .001 : .05}
                 value={parseFloat(item.position.x.toFixed(3))}
                 onChange={(e) => handlePositionChange('x', parseFloat(e.target.value) || 0)}
                 className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100 font-mono focus:outline-none focus:border-sky-500"
@@ -177,7 +179,7 @@ export const Inspector: React.FC<InspectorProps> = ({
               <span className="text-[10px] text-slate-500 uppercase text-emerald-500/80">Y (Elev.)</span>
               <input
                 type="number"
-                step="0.05"
+                step={definition?.householdDetail?.practical ? .001 : .05}
                 min="0"
                 value={parseFloat(item.position.y.toFixed(3))}
                 onChange={(e) => handlePositionChange('y', parseFloat(e.target.value) || 0)}
@@ -188,7 +190,7 @@ export const Inspector: React.FC<InspectorProps> = ({
               <span className="text-[10px] text-slate-500 uppercase">Z (Depth)</span>
               <input
                 type="number"
-                step="0.05"
+                step={definition?.householdDetail?.practical ? .001 : .05}
                 value={parseFloat(item.position.z.toFixed(3))}
                 onChange={(e) => handlePositionChange('z', parseFloat(e.target.value) || 0)}
                 className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100 font-mono focus:outline-none focus:border-sky-500"
