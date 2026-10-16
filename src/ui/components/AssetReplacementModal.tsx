@@ -16,6 +16,7 @@ interface AssetReplacementModalProps {
 const CATEGORIES = [
   { id: 'all', label: 'All' },
   { id: 'architecture', label: 'Architectural Finishes' },
+  { id: 'lighting', label: 'Lighting' },
   { id: 'bathroom', label: 'Bathroom & Accessories' },
   { id: 'decor', label: 'Decor & Lighting' },
   { id: 'storage', label: 'Storage' },
@@ -54,7 +55,7 @@ export const AssetReplacementModal: React.FC<AssetReplacementModalProps> = ({
     if (sourceFilter !== 'all' && asset.source?.retailer !== sourceFilter) return false;
     if (collectionFilter !== 'all' && asset.collection !== collectionFilter) return false;
     const matchesCategory =
-      selectedCategory === 'all' || asset.category.toLowerCase() === selectedCategory.toLowerCase();
+      selectedCategory === 'all' || (selectedCategory === 'lighting' ? !!asset.capabilities?.lighting : asset.category.toLowerCase() === selectedCategory.toLowerCase());
     const query = searchable(searchQuery.trim());
     const matchesSearch = [asset.name, asset.description, asset.key, asset.collection, asset.source?.retailer, asset.source?.productCode]
       .some(value => value && searchable(value).includes(query));

@@ -40,19 +40,19 @@ test('mobile editor opens and re-exports offline, then redraws after GPU restora
     expect(await page.evaluate(() => Boolean(window.__EMBEDDED_TEXTURES__))).toBe(false);
     const metrics = await page.evaluate(() => {
       const scene = (window as any).__testRuntime.scene;
-      let outlines = 0, pointLights = 0;
-      scene.getScene().traverseVisible((o: any) => { if (o.name === 'celOutline') outlines++; if (o.isPointLight) pointLights++; });
-      return { pixelRatio: scene.renderer.getPixelRatio(), shadows: scene.renderer.shadowMap.enabled, outlines, pointLights, calls: scene.renderer.info.render.calls };
+      let outlines = 0, fixtureLights = 0;
+      scene.getScene().traverseVisible((o: any) => { if (o.name === 'celOutline') outlines++; if (o.userData.isFixtureLight) fixtureLights++; });
+      return { pixelRatio: scene.renderer.getPixelRatio(), shadows: scene.renderer.shadowMap.enabled, outlines, fixtureLights, calls: scene.renderer.info.render.calls };
     });
     expect(metrics.pixelRatio).toBeLessThanOrEqual(1.25);
-    expect(metrics.shadows).toBe(false); expect(metrics.outlines).toBe(0); expect(metrics.pointLights).toBe(0);
+    expect(metrics.shadows).toBe(false); expect(metrics.outlines).toBe(0); expect(metrics.fixtureLights).toBeGreaterThan(0); expect(metrics.fixtureLights).toBeLessThanOrEqual(4);
     expect(metrics.calls).toBeLessThan(1200);
 
-    // Night lighting keeps a bounded set of real lights and follows room focus.
+    // Night lighting keeps a bounded set of real lights and follows the camera.
     await page.evaluate(() => (window as any).__testRuntime.scene.updateSettings({ globalLighting: false }));
     await page.waitForFunction(() => {
       const scene = (window as any).__testRuntime.scene;
-      let count = 0; scene.getScene().traverseVisible((o: any) => { if (o.isPointLight) count++; });
+      let count = 0; scene.getScene().traverseVisible((o: any) => { if (o.userData.isFixtureLight) count++; });
       return count > 0 && count <= 4 && !scene.preparing;
     });
     await page.evaluate(() => {
@@ -62,7 +62,7 @@ test('mobile editor opens and re-exports offline, then redraws after GPU restora
     });
     await page.waitForFunction(() => {
       const scene = (window as any).__testRuntime.scene;
-      return scene.lightTarget.distanceToSquared(scene.getControls().target) < 0.01;
+      return scene.lightTarget.distanceToSquared(scene.getCamera().position) < 0.01;
     });
     await page.evaluate(() => (window as any).__testRuntime.scene.updateSettings({ globalLighting: true }));
 

@@ -12,6 +12,7 @@ import type { FurnitureMeshBuilder } from './assets/FurnitureMeshBuilder';
 import { PlanCameraFocus } from './camera/PlanCameraFocus';
 import { WallMeshBuilder } from "./geometry/WallMeshBuilder";
 import { SceneLighting } from './lighting/SceneLighting';
+import { isFixtureLight, type FixtureLight } from './lighting/FixtureLight';
 import { FurnitureAppearance } from './materials/FurnitureAppearance';
 import { PlanSceneGraph } from './nodes/PlanSceneGraph';
 import { SceneNodeFactory } from './nodes/SceneNodeFactory';
@@ -31,7 +32,7 @@ export interface SceneStatus { readonly state: 'loading' | 'ready' | 'recovering
 
 export class SceneEngine implements ISceneService {
   private readonly mobile = mobileRendering();
-  private mobileLights: THREE.PointLight[] = [];
+  private mobileLights: FixtureLight[] = [];
   private readonly lightTarget = new THREE.Vector3(Infinity, Infinity, Infinity);
   private status: SceneStatus = { state: 'loading', message: 'Preparing 3D view…' };
   private readonly statusListeners = new Set<() => void>();
@@ -320,25 +321,31 @@ export class SceneEngine implements ISceneService {
   }
 
   private limitFixtureLights(): void {
-    const lights: THREE.PointLight[] = [];
+    const lights: FixtureLight[] = [];
     this.scene.traverseVisible(object => {
-      if (object instanceof THREE.PointLight && object.userData.isFixtureLight && object.intensity > 0) lights.push(object);
+      if (isFixtureLight(object) && object.intensity > 0) lights.push(object);
     });
-    // Sunlight already illuminates the daylight view. At night, retain the four
-    // closest enabled fixtures; their controls and emissive bulbs stay intact.
-    const daylight = this.settings.globalLighting && this.settings.globalLightIntensity > 0.001;
+    // Keep actual fixture output in daylight as well as at night. Bound the
+    // shader light count on phones and follow the camera during house tours.
     this.mobileLights = lights;
-    if (daylight) lights.forEach(light => { light.visible = false; });
-    else this.updateFixtureLightBudget(true);
+    this.updateFixtureLightBudget(true);
   }
 
   private updateFixtureLightBudget(force = false): void {
-    if (!this.mobile || (this.settings.globalLighting && this.settings.globalLightIntensity > 0.001)) return;
-    const target = this.controls?.target ?? this.activeCamera.position;
+    if (!this.mobile) return;
+    const target = this.activeCamera.position;
     if (!force && this.lightTarget.distanceToSquared(target) < 0.01) return;
     this.lightTarget.copy(target);
-    const distances = new Map(this.mobileLights.map(light => [light, light.getWorldPosition(new THREE.Vector3()).distanceToSquared(target)]));
-    this.mobileLights.sort((a, b) => distances.get(a)! - distances.get(b)!);
+    // Prefer sources that can contribute most here, so a nearby weak spot does
+    // not displace a chandelier that supplies most of the room's light.
+    const contributions = new Map(this.mobileLights.map(light => {
+      const distance2 = light.getWorldPosition(new THREE.Vector3()).distanceToSquared(target);
+      const distance = 'distance' in light ? light.distance : 0;
+      const cutoff = distance > 0 ? Math.max(0, 1 - (distance2 / distance ** 2) ** 2) ** 2 : 1;
+      const strength = light instanceof THREE.RectAreaLight ? light.intensity * light.width * light.height : light.intensity;
+      return [light, strength * cutoff / Math.max(.25, distance2)] as const;
+    }));
+    this.mobileLights.sort((a, b) => contributions.get(b)! - contributions.get(a)!);
     this.mobileLights.forEach((light, index) => { light.visible = index < 4; });
   }
 

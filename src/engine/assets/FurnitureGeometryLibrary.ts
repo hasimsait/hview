@@ -10,8 +10,12 @@ import { buildFurnitureProduct } from './builders/FurnitureProductBuilder';
 import { buildElectricalFitting } from './builders/ElectricalBuilders';
 import { buildAirPurifier, buildRobotVacuum } from './builders/HouseholdBuilders';
 import { buildArchitecturalFinish } from './builders/ArchitecturalFinishBuilder';
+import { buildLightingComponent } from './builders/LightingComponentBuilder';
+import { buildFloorDrain } from './builders/FloorDrainBuilder';
 
 export const FURNITURE_GEOMETRY: Readonly<Record<AssetRecipeId, AssetBuilderFn>> = {
+  lighting_component: buildLightingComponent,
+  floor_drain: buildFloorDrain,
   architectural_finish: buildArchitecturalFinish,
   retail_furniture: buildFurnitureProduct,
   bathroom_accessory: buildBathroomAccessory,

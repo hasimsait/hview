@@ -5,8 +5,12 @@ import { ELECTRICAL_ASSETS } from './ElectricalAssets';
 import { HOUSEHOLD_APPLIANCES } from './HouseholdAppliances';
 import { POPULAR_PRODUCTS } from './PopularProducts';
 import { ARCHITECTURAL_FINISHES } from './ArchitecturalFinishes';
+import { LIGHTING_COMPONENTS } from './LightingComponents';
+import { FLOOR_DRAINS } from './FloorDrains';
 
 export const DEFAULT_ASSETS: readonly AssetDefinition[] = [
+  ...LIGHTING_COMPONENTS,
+  ...FLOOR_DRAINS,
   ...ARCHITECTURAL_FINISHES,
   ...CURATED_ASSETS,
   ...IKEA_ACCESSORIES,
@@ -345,7 +349,7 @@ export const DEFAULT_ASSETS: readonly AssetDefinition[] = [
     key: 'chandelier',
     name: 'Pendant Chandelier',
     category: 'decor',
-    description: 'Ceiling pendant light with soft glow',
+    description: 'Ring chandelier with warm glowing globes and room illumination',
     defaultDimensions: { x: 0.6, y: 0.6, z: 0.6 },
     placement: { mount: 'ceiling', ceilingOffset: 0.55 },
     capabilities: {
@@ -361,7 +365,7 @@ export const DEFAULT_ASSETS: readonly AssetDefinition[] = [
     key: 'chandelier_cascading',
     name: 'Cascading Chandelier',
     category: 'decor',
-    description: 'Multi-tier concentric glowing brass chandelier',
+    description: 'Multi-tier glowing brass chandelier with warm room illumination',
     defaultDimensions: { x: 0.7, y: 0.8, z: 0.7 },
     placement: { mount: 'ceiling', ceilingOffset: 0.55 },
     capabilities: {

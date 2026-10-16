@@ -4,6 +4,8 @@ import type { AccessoryModel } from './AccessoryModel';
 import type { BathroomModel } from './BathroomModel';
 import type { FurnitureProductModel } from './FurnitureProductModel';
 import type { ArchitecturalFinishModel } from './ArchitecturalFinishes';
+import type { LightingComponentModel } from './LightingComponents';
+import type { FloorDrainModel } from './FloorDrains';
 
 export interface AssetPlacement {
   mount: 'floor' | 'wall' | 'ceiling' | 'surface';
@@ -40,6 +42,8 @@ export interface AssetDefinition {
   bathroom?: BathroomModel;
   furnitureProduct?: FurnitureProductModel;
   architecturalFinish?: ArchitecturalFinishModel;
+  lightingComponent?: LightingComponentModel;
+  floorDrain?: FloorDrainModel;
   electrical?: {
     series: 'karre' | 'bubble';
     control: 'single_switch' | 'double_switch' | 'socket' | 'double_socket';

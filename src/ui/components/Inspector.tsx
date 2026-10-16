@@ -44,7 +44,9 @@ export const Inspector: React.FC<InspectorProps> = ({
   const presentation = item.accept(new InspectorPresenter());
   const isLightFixture = presentation.sections.includes('luminaire');
   const isShelving = presentation.sections.includes('shelving');
-  const resizable = runtime.catalog.get(item.assetKey)?.capabilities?.resizable !== false;
+  const definition = runtime.catalog.get(item.assetKey);
+  const resizable = definition?.capabilities?.resizable !== false;
+  const dimensionStep = definition?.floorDrain || definition?.lightingComponent || definition?.architecturalFinish ? .1 : 1;
 
   const currentFinishForSection: SurfaceFinishConfig | undefined =
     activeSection === 'all'
@@ -82,7 +84,7 @@ export const Inspector: React.FC<InspectorProps> = ({
   };
 
   const handleDimensionChange = (axis: 'x' | 'y' | 'z', valueCm: number) => {
-    const valueM = Math.max(0.01, valueCm / 100);
+    const valueM = Math.max(dimensionStep / 100, valueCm / 100);
     editor.execute(new TransformFurniture(item.id, undefined, undefined, {
       ...item.dimensions,
       [axis]: valueM,
@@ -226,8 +228,8 @@ export const Inspector: React.FC<InspectorProps> = ({
             <span className="text-[10px] text-slate-500 uppercase">Width (X)</span>
             <input
               type="number"
-              step="1"
-              min="1"
+              step={dimensionStep}
+              min={dimensionStep}
               max="1000"
               disabled={!resizable}
               value={+(item.dimensions.x * 100).toFixed(2)}
@@ -239,8 +241,8 @@ export const Inspector: React.FC<InspectorProps> = ({
             <span className="text-[10px] text-slate-500 uppercase">Height (Y)</span>
             <input
               type="number"
-              step="1"
-              min="1"
+              step={dimensionStep}
+              min={dimensionStep}
               max="1000"
               disabled={!resizable}
               value={+(item.dimensions.y * 100).toFixed(2)}
@@ -252,8 +254,8 @@ export const Inspector: React.FC<InspectorProps> = ({
             <span className="text-[10px] text-slate-500 uppercase">Depth (Z)</span>
             <input
               type="number"
-              step="1"
-              min="1"
+              step={dimensionStep}
+              min={dimensionStep}
               max="1000"
               disabled={!resizable}
               value={+(item.dimensions.z * 100).toFixed(2)}
