@@ -5,15 +5,16 @@ function fitting(key: string, name: string, series: 'karre' | 'bubble', control:
   const socket = control.includes('socket'), double = control === 'double_socket';
   return {
     key, name, category: 'fixture', collection: socket ? 'Electrical sockets' : 'Electrical switches', recipe: 'electrical_fitting',
-    description: `${series === 'bubble' ? 'Glossy rounded Bubble frame' : 'Square Karre frame'} with ${socket ? 'recessed earthed socket wells, pin holes and grounding contacts' : control === 'double_switch' ? 'two separate rocker switches' : 'a single rocker switch'}. Frame and insert finishes are independently editable.`,
-    defaultDimensions: { x: series === 'bubble' ? .1 : double ? .1254 : .082, y: series === 'bubble' ? .1 : double ? .0816 : .082, z: series === 'bubble' ? .024 : socket ? .02 : .014 },
-    placement: { mount: 'wall', defaultElevation: socket ? .3 : 1.1, wallOffset: (series === 'bubble' ? .024 : socket ? .02 : .014) / 2 + .001 },
+    description: `${series === 'bubble' ? 'Thin, circular 10 cm Bubble frame' : 'Square Karre frame'} with ${socket ? 'recessed earthed socket wells, pin holes and grounding contacts' : control === 'double_switch' ? 'two separate rocker switches' : 'a single rocker switch'}. Frame and insert finishes are independently editable.`,
+    defaultDimensions: { x: series === 'bubble' ? .1 : double ? .1254 : .082, y: series === 'bubble' ? .1 : double ? .0816 : .082, z: series === 'bubble' ? .025 : socket ? .02 : .014 },
+    placement: { mount: 'wall', defaultElevation: socket ? .3 : 1.1, wallOffset: (series === 'bubble' ? .025 : socket ? .02 : .014) / 2 + .001 },
+    capabilities: series === 'bubble' ? { resizable: false } : undefined,
     electrical: { series, control, frameColor, insertColor },
     source: {
       retailer: series === 'karre' ? 'VIKO' : 'VRC', dimensions: 'estimated',
       url: series === 'karre' ? `${viko}${socket ? 'sockets' : 'switches'}` : control === 'socket'
         ? 'https://www.trendyol.com/vrc-ticaret/ozel-tasarim-bubble-serisi-dis-krem-ic-haki-dekoratif-priz-a-kalite-plastik-mekanizma-dahildir-p-1164465592' : undefined,
-      dimensionNotes: series === 'bubble' ? 'Photo-based planning model: estimated 10 cm diameter and 2.4 cm visible projection.'
+      dimensionNotes: series === 'bubble' ? 'Circular 10 × 10 cm face with an estimated 2.5 cm visible wall projection, excluding the concealed mechanism.'
         : double ? 'Published face size 12.54 × 8.16 cm; visible wall projection estimated at 2 cm, excluding the concealed mechanism.'
           : 'Approximate 8.2 cm square face; visible wall projection is estimated, excluding the concealed mechanism.',
     },

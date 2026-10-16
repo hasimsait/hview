@@ -44,6 +44,7 @@ export const Inspector: React.FC<InspectorProps> = ({
   const presentation = item.accept(new InspectorPresenter());
   const isLightFixture = presentation.sections.includes('luminaire');
   const isShelving = presentation.sections.includes('shelving');
+  const resizable = runtime.catalog.get(item.assetKey)?.capabilities?.resizable !== false;
 
   const currentFinishForSection: SurfaceFinishConfig | undefined =
     activeSection === 'all'
@@ -228,7 +229,8 @@ export const Inspector: React.FC<InspectorProps> = ({
               step="1"
               min="1"
               max="1000"
-              value={Math.round(item.dimensions.x * 100)}
+              disabled={!resizable}
+              value={+(item.dimensions.x * 100).toFixed(2)}
               onChange={(e) => handleDimensionChange('x', parseFloat(e.target.value) || 1)}
               className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100 font-mono focus:outline-none focus:border-amber-500"
             />
@@ -240,7 +242,8 @@ export const Inspector: React.FC<InspectorProps> = ({
               step="1"
               min="1"
               max="1000"
-              value={Math.round(item.dimensions.y * 100)}
+              disabled={!resizable}
+              value={+(item.dimensions.y * 100).toFixed(2)}
               onChange={(e) => handleDimensionChange('y', parseFloat(e.target.value) || 1)}
               className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100 font-mono focus:outline-none focus:border-amber-500"
             />
@@ -252,13 +255,14 @@ export const Inspector: React.FC<InspectorProps> = ({
               step="1"
               min="1"
               max="1000"
-              value={Math.round(item.dimensions.z * 100)}
+              disabled={!resizable}
+              value={+(item.dimensions.z * 100).toFixed(2)}
               onChange={(e) => handleDimensionChange('z', parseFloat(e.target.value) || 1)}
               className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100 font-mono focus:outline-none focus:border-amber-500"
             />
           </div>
         </div>
-        <p className="text-[10px] text-slate-500 mt-1.5">Editing rebuilds the 3D mesh at new size.</p>
+        <p className="text-[10px] text-slate-500 mt-1.5">{resizable ? 'Editing rebuilds the 3D mesh at new size.' : 'Fixed product dimensions.'}</p>
       </div>
 
       {/* Shelving Tiers & Front Lids / Cabinet Doors */}

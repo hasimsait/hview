@@ -10,7 +10,7 @@ import type { FurnitureCategory } from '../../src/domain/model/PlanData';
 import { FurnitureMeshBuilder } from '../../src/engine/assets/FurnitureMeshBuilder';
 import { ResourcePool } from '../../src/engine/resources/ResourcePool';
 import { EditorSession } from '../../src/application/EditorSession';
-import { AddFurniture, FinishFurniture, ReplaceFurniture } from '../../src/application/commands/FurnitureCommands';
+import { AddFurniture, FinishFurniture, ReplaceFurniture, TransformFurniture } from '../../src/application/commands/FurnitureCommands';
 import { rawPlan } from './fixtures';
 
 const catalog = new AssetCatalog(), codec = new PlanCodec(catalog), builder = new FurnitureMeshBuilder(catalog);
@@ -64,6 +64,57 @@ describe('electrical fittings and household appliances', () => {
     expect(frame.material).not.toBe(insert.material);
     const double = builder.build(item(ELECTRICAL_ASSETS.find(a => a.key === 'vrc_bubble_double_switch_burgundy')!));
     expect(double.children.filter(c => c.userData.section.includes('Rocker'))).toHaveLength(2);
+  });
+
+  it('restores all saved Bubble variants to thin 10 cm circles in legacy and canonical plans', () => {
+    const bubble = ELECTRICAL_ASSETS.filter(asset => asset.electrical?.series === 'bubble');
+    const old = bubble.map(asset => ({ ...item(asset).toData(), dimensions: { x: .15, y: .1, z: .1 },
+      sectionFinishes: { frame: { type: 'paint' as const, color: '#663344' } } }));
+    const raw = rawPlan();
+    const canonical = { schemaVersion: 1, document: { version: 3, totalHeight: 3,
+      elements: old.map(data => ({ kind: 'furniture.standard', data })) } };
+    const legacy = { plan: { ...raw.plan, items: Object.fromEntries(old.map(data => [data.id,
+      { name: data.assetKey, assetKey: data.assetKey, dimensions: data.dimensions, position: data.position,
+        pc: { x: 100, y: 200 }, rotationY: data.rotationY, sectionFinishes: data.sectionFinishes }])) } };
+    for (const input of [legacy, canonical]) {
+      const doc = codec.decode(input);
+      for (const original of old) {
+        const corrected = doc.requireFurniture(original.id);
+        expect(corrected.dimensions).toEqual({ x: .1, y: .1, z: .025 });
+        expect(corrected.rotationY).toBe(original.rotationY);
+        expect(corrected.position.y).toBe(original.position.y);
+        expect(corrected.sectionFinishes?.frame.color).toBe('#663344');
+        const normal = new THREE.Vector3(Math.sin(original.rotationY), 0, Math.cos(original.rotationY));
+        const back = new THREE.Vector3().copy(corrected.position).addScaledVector(normal, -.025 / 2);
+        const oldBack = new THREE.Vector3().copy(original.position).addScaledVector(normal, -.1 / 2);
+        expect(back.distanceTo(oldBack)).toBeLessThan(1e-9);
+        const frame = builder.build(corrected).children.find(child => child.userData.section === 'Frame') as THREE.Mesh;
+        const bounds = new THREE.Box3().setFromObject(frame), size = bounds.getSize(new THREE.Vector3());
+        expect(size.x).toBeCloseTo(.1, 5); expect(size.y).toBeCloseTo(.1, 5);
+        expect(size.z).toBeCloseTo(.025, 5);
+        // A circular annular face fits within a 5 cm radius at every vertex.
+        const vertices = frame.geometry.attributes.position;
+        for (let i = 0; i < vertices.count; i++) expect(Math.hypot(vertices.getX(i), vertices.getY(i))).toBeLessThanOrEqual(.050001);
+      }
+      const reloaded = codec.decode(codec.encode(doc));
+      for (const corrected of doc.furniture) expect(reloaded.requireFurniture(corrected.id).toData()).toEqual(corrected.toData());
+    }
+  });
+
+  it('replaces rectangular outlets with fixed Bubble proportions and keeps movement, finishes and undo available', () => {
+    const editor = new EditorSession(codec.factory); editor.load(codec.decode(rawPlan()));
+    const asset = ELECTRICAL_ASSETS[3];
+    const original = { ...item(asset).toData(), dimensions: { x: .15, y: .1, z: .1 } };
+    editor.execute(new AddFurniture(original));
+    editor.execute(new ReplaceFurniture(original.id, 'vrc_bubble_double_switch_burgundy'));
+    expect(editor.getDocument().requireFurniture(original.id).dimensions).toEqual({ x: .1, y: .1, z: .025 });
+    editor.execute(new TransformFurniture(original.id, { x: 2, y: 1.2, z: 3 }, .4, { x: .15, y: .1, z: .1 }));
+    const moved = editor.getDocument().requireFurniture(original.id);
+    expect(moved.position).toEqual({ x: 2, y: 1.2, z: 3 });
+    expect(moved.rotationY).toBe(.4);
+    expect(moved.dimensions).toEqual({ x: .1, y: .1, z: .025 });
+    editor.undo(); editor.undo();
+    expect(editor.getDocument().requireFurniture(original.id).toData()).toEqual(original);
   });
 
   it('upgrades the old cabinet-shaped appliances in legacy and canonical plans while retaining identity and placement', () => {

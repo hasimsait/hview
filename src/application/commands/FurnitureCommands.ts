@@ -20,8 +20,10 @@ export class ConfigureLuminaire implements EditorCommand {
 export class TransformFurniture implements EditorCommand {
   readonly label = 'Transform furniture';
   constructor(private readonly id: string, private readonly position?: Vector3D, private readonly rotationY?: number, private readonly dimensions?: Vector3D) { }
-  execute(document: PlanDocument): PlanDocument {
-    return document.transformFurniture(this.id, this.position, this.rotationY, this.dimensions);
+  execute(document: PlanDocument, { factory }: CommandContext): PlanDocument {
+    const item = document.requireFurniture(this.id);
+    const dimensions = factory.catalog.get(item.assetKey)?.capabilities?.resizable === false ? undefined : this.dimensions;
+    return document.transformFurniture(this.id, this.position, this.rotationY, dimensions);
   }
 }
 export class ReplaceFurniture implements EditorCommand {
@@ -39,7 +41,10 @@ export class ReplaceFurniture implements EditorCommand {
       category: (definition?.category as FurnitureData['category']) ?? data.category,
       sectionFinishes: undefined,
     });
-    return document.replaceFurniture(this.id, replacement);
+    // Fixed-size wall fittings use the factory's corrected dimensions and wall
+    // offset instead of retaining the previous housing's size and position.
+    return definition?.capabilities?.resizable === false
+      ? document.replace(replacement) : document.replaceFurniture(this.id, replacement);
   }
 }
 export class AddFurniture implements EditorCommand {

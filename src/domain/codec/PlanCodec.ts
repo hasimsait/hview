@@ -41,7 +41,7 @@ export class PlanCodec {
           case 'room': return this.factory.room(entry.data);
           case 'furniture.standard': {
             const key = this.factory.catalog.canonicalKey(entry.data.assetKey);
-            return this.factory.catalog.behavior(key) === 'recess' || key === 'robot_vacuum' || key === 'air_purifier'
+            return this.factory.catalog.behavior(key) === 'recess' || key === 'robot_vacuum' || key === 'air_purifier' || this.factory.catalog.get(key)?.capabilities?.resizable === false
               ? this.factory.furniture(entry.data) : new StandardFurniture(entry.data);
           }
           case 'furniture.recess': return new WallRecess(entry.data);

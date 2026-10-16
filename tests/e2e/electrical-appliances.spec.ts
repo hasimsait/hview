@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-import { workflowPlan } from './workflow-helpers';
+import { workflowPlan, numberField } from './workflow-helpers';
 import { ELECTRICAL_ASSETS } from '../../src/domain/catalog/ElectricalAssets';
 import { escapeScriptJson, packStandaloneHtml, setScriptContent, standaloneBlockText } from '../../src/services/export/StandaloneHtml';
 
@@ -95,6 +95,29 @@ test('offline exports contain the new fittings and automatically upgraded vacuum
     expect.objectContaining({ id: 'purifier', assetKey: 'air_purifier' }),
     expect.objectContaining({ assetKey: 'vrc_bubble_single_switch_burgundy', displayName: 'VRC Bubble Single Rocker Switch — Burgundy' }),
   ]));
+});
+
+test('replacing a thick rectangular socket gives a thin circular Bubble fitting and persists its dimensions', async ({ page }) => {
+  await choose(page, 'VIKO Karre Double Earthed Socket — White');
+  await numberField(page, 'Width (X)').fill('15');
+  await numberField(page, 'Height (Y)').fill('10');
+  await numberField(page, 'Depth (Z)').fill('10');
+  await expect.poll(async () => (await state(page)).find(item => item.assetKey === 'viko_karre_double_socket_white')?.dimensions)
+    .toEqual({ x: .15, y: .1, z: .1 });
+  await page.getByRole('button', { name: 'Replace Asset', exact: true }).click();
+  await page.getByPlaceholder('Search assets (e.g. towel, fan, sconce, bed, sink)...').fill('VRC Bubble Double Rocker Switch — Burgundy');
+  await page.getByRole('button').filter({ has: page.getByRole('heading', { name: 'VRC Bubble Double Rocker Switch — Burgundy', exact: true }) }).click();
+  const corrected = (await state(page)).find(item => item.assetKey === 'vrc_bubble_double_switch_burgundy')!;
+  expect(corrected.dimensions).toEqual({ x: .1, y: .1, z: .025 });
+  for (const [label, value] of [['Width (X)', '10'], ['Height (Y)', '10'], ['Depth (Z)', '2.5']]) {
+    await expect(numberField(page, label)).toHaveValue(value);
+    await expect(numberField(page, label)).toBeDisabled();
+  }
+  await page.getByRole('button', { name: 'Save .plan', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: 'Saving plan' })).toBeHidden();
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Move', exact: true })).toBeVisible();
+  expect((await state(page)).find(item => item.id === corrected.id)).toMatchObject({ assetKey: 'vrc_bubble_double_switch_burgundy', dimensions: { x: .1, y: .1, z: .025 } });
 });
 
 test('electrical reference gallery and household appliances render without shader errors', async ({ page, request }, testInfo) => {
