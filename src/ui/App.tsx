@@ -215,7 +215,7 @@ export const App: React.FC = () => {
       if (mount === 'ceiling') {
         const offset = asset.placement?.ceilingOffset ?? (dims.y + 0.05);
         elevation = Math.max(0, planTotalH - offset);
-        offsetDist = Math.max(0.15, dims.z / 2);
+        offsetDist = asset.placement?.wallOffset ?? Math.max(0.15, dims.z / 2);
       } else if (mount === 'surface') {
         elevation = asset.placement?.defaultElevation ?? 0.9;
         offsetDist = dims.z / 2 + 0.04;

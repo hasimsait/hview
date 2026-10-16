@@ -3,6 +3,7 @@ import type { AssetRecipeId } from './AssetRecipes';
 import type { AccessoryModel } from './AccessoryModel';
 import type { BathroomModel } from './BathroomModel';
 import type { FurnitureProductModel } from './FurnitureProductModel';
+import type { ArchitecturalFinishModel } from './ArchitecturalFinishes';
 
 export interface AssetPlacement {
   mount: 'floor' | 'wall' | 'ceiling' | 'surface';
@@ -38,6 +39,7 @@ export interface AssetDefinition {
   accessory?: AccessoryModel;
   bathroom?: BathroomModel;
   furnitureProduct?: FurnitureProductModel;
+  architecturalFinish?: ArchitecturalFinishModel;
   electrical?: {
     series: 'karre' | 'bubble';
     control: 'single_switch' | 'double_switch' | 'socket' | 'double_socket';

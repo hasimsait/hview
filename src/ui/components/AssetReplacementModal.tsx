@@ -15,6 +15,7 @@ interface AssetReplacementModalProps {
 
 const CATEGORIES = [
   { id: 'all', label: 'All' },
+  { id: 'architecture', label: 'Architectural Finishes' },
   { id: 'bathroom', label: 'Bathroom & Accessories' },
   { id: 'decor', label: 'Decor & Lighting' },
   { id: 'storage', label: 'Storage' },
@@ -147,7 +148,7 @@ export const AssetReplacementModal: React.FC<AssetReplacementModalProps> = ({
             const Icon = /plant|Vases/.test(collection) ? Flower2 : /lamp/.test(collection) ? Lamp
               : /Mirror|frame/.test(collection) ? Frame : collection === 'Clocks' ? Clock
                 : collection === 'Trolleys' ? ShoppingCart : collection === 'Kitchen accessories' ? Utensils
-                  : asset.category === 'bathroom' ? Bath : /Rug|Cushion/.test(collection) ? Layers
+                  : asset.category === 'architecture' ? Layers : asset.category === 'bathroom' ? Bath : /Rug|Cushion/.test(collection) ? Layers
                     : /Storage|Basket|organiser/.test(collection) ? Archive : Box;
             const isCurrent = mode !== 'add' && item && asset.key.toLowerCase() === item.assetKey.toLowerCase();
             return (

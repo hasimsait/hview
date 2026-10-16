@@ -3,6 +3,7 @@ import type { FurnitureBehavior } from './AssetDefinition';
 export interface AssetRecipe { readonly id: string; readonly aliases: readonly string[]; readonly behavior: FurnitureBehavior; }
 
 export const ASSET_RECIPES = [
+  { id: 'architectural_finish', aliases: [], behavior: 'standard' },
   { id: 'retail_furniture', aliases: [], behavior: 'standard' },
   { id: 'bathroom_accessory', aliases: [], behavior: 'standard' },
   { id: 'electrical_fitting', aliases: [], behavior: 'standard' },

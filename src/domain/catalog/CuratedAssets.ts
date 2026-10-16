@@ -24,7 +24,7 @@ export const CURATED_ASSETS: readonly AssetDefinition[] = [
     source: { retailer: 'Image reference', dimensions: 'estimated' },
   },
   {
-    key: 'curtain_pelmet', name: 'Decorative Ceiling Cornice / Curtain Pelmet', category: 'decor', recipe: 'curtain_pelmet',
+    key: 'curtain_pelmet', name: 'Decorative Ceiling Cornice / Curtain Pelmet', category: 'architecture', recipe: 'curtain_pelmet', collection: 'Curtain pelmets',
     description: 'Paintable ceiling framing with a stepped cove profile, 12 cm high and 12 cm deep, for concealing curtain rails.',
     defaultDimensions: { x: 1.6, y: 0.12, z: 0.12 }, placement: { mount: 'ceiling', ceilingOffset: 0.12 },
     source: { retailer: 'Image reference', dimensions: 'reference' },

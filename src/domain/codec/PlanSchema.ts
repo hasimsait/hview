@@ -46,7 +46,7 @@ export const columnSchema = z.object({
   finish, finishFront: finish, finishBack: finish, finishLeft: finish, finishRight: finish,
 }).passthrough();
 export const furnitureSchema = z.object({
-  id, name: z.string(), displayName: z.string(), category: z.enum(['bed', 'seating', 'table', 'storage', 'kitchen', 'bathroom', 'decor', 'appliance', 'fixture']),
+  id, name: z.string(), displayName: z.string(), category: z.enum(['architecture', 'bed', 'seating', 'table', 'storage', 'kitchen', 'bathroom', 'decor', 'appliance', 'fixture']),
   assetKey: id, position: vector, rotationY: number, dimensions, roomId: id.optional(), customModelUrl: z.string().optional(),
   visible: z.boolean().optional(), hasLids: z.boolean().optional(), shelfCount: number.int().min(Shelving.minShelves).max(Shelving.maxShelves).optional(), recessHostId: id.optional(),
   finish, sectionFinishes: z.record(finishSchema).optional(),

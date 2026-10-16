@@ -129,6 +129,7 @@ export interface RoomData {
 }
 
 export type FurnitureCategory =
+  | 'architecture'
   | 'bed'
   | 'seating'
   | 'table'

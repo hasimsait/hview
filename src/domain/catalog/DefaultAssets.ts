@@ -4,8 +4,10 @@ import { IKEA_ACCESSORIES } from './IkeaAccessories';
 import { ELECTRICAL_ASSETS } from './ElectricalAssets';
 import { HOUSEHOLD_APPLIANCES } from './HouseholdAppliances';
 import { POPULAR_PRODUCTS } from './PopularProducts';
+import { ARCHITECTURAL_FINISHES } from './ArchitecturalFinishes';
 
 export const DEFAULT_ASSETS: readonly AssetDefinition[] = [
+  ...ARCHITECTURAL_FINISHES,
   ...CURATED_ASSETS,
   ...IKEA_ACCESSORIES,
   ...ELECTRICAL_ASSETS,
