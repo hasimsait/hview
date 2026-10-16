@@ -26,11 +26,22 @@ export interface CabinetContent {
   finish?: SurfaceFinishConfig;
   sectionFinishes?: Record<string, SurfaceFinishConfig>;
 }
+export interface CabinetHinge {
+  type: 'pivot' | 'straight-arm' | 'half-cranked' | 'fully-cranked';
+  /** Planning travel in metres, inward from the hinged edge and outward from the front. */
+  travel: number;
+}
+export const CABINET_HINGE_TYPES: Record<CabinetHinge['type'], string> = {
+  pivot: 'Fixed pivot',
+  'straight-arm': 'Concealed — straight arm',
+  'half-cranked': 'Concealed — half-cranked arm',
+  'fully-cranked': 'Concealed — fully cranked arm',
+};
 export interface CabinetLayout {
   version: 1;
   panelThickness: number;
   backThickness: number;
-  doors: { count: 0 | 1 | 2; hinge: 'left' | 'right'; angles: [number, number] };
+  doors: { count: 0 | 1 | 2; hinge: 'left' | 'right'; angles: [number, number]; hinges?: [CabinetHinge, CabinetHinge] };
   panels: CabinetPanel[];
   contents: CabinetContent[];
 }
@@ -41,6 +52,13 @@ export function validateCabinet(layout: CabinetLayout): CabinetLayout {
   for (const [key, value] of [['Panel', layout.panelThickness], ['Back', layout.backThickness]] as const) if (positive(value, `${key} thickness`) > .1) throw new Error('Cabinet panels must be at most 100 mm thick');
   if (![0, 1, 2].includes(layout.doors?.count) || !['left', 'right'].includes(layout.doors.hinge) || layout.doors.angles?.length !== 2) throw new Error('Cabinets have zero, one or two doors');
   layout.doors.angles.forEach(angle => { if (finite(angle, 'Door angle') < 0 || angle > 170) throw new Error('Cabinet door angles must be between 0 and 170'); });
+  if (layout.doors.hinges !== undefined) {
+    if (!Array.isArray(layout.doors.hinges) || layout.doors.hinges.length !== 2) throw new Error('Cabinet needs two hinge settings');
+    for (const hinge of layout.doors.hinges) {
+      if (!hinge || !Object.hasOwn(CABINET_HINGE_TYPES, hinge.type)) throw new Error('Invalid cabinet hinge type');
+      if (finite(hinge.travel, 'Hinge travel') < 0 || hinge.travel > .05) throw new Error('Hinge travel must be between 0 and 50 mm');
+    }
+  }
   if (!Array.isArray(layout.panels) || !Array.isArray(layout.contents) || layout.panels.length > 256 || layout.contents.length > 256) throw new Error('Cabinet layout is too large');
   const ids = new Set<string>(['left', 'right', 'bottom', 'top', 'base', 'shell_left', 'shell_right', 'shell_base', 'shell_top', 'shell_back', 'door_0', 'door_1']);
   for (const p of [...layout.panels, ...layout.contents]) { identifier(p.id); if (ids.has(p.id)) throw new Error('Duplicate cabinet part'); ids.add(p.id); if (p.finish) SurfaceFinish.optional(p.finish); if ('sectionFinishes' in p && p.sectionFinishes) Object.values(p.sectionFinishes).forEach(finish => SurfaceFinish.optional(finish)); if (typeof p.name !== 'string') throw new Error('Cabinet part needs a name'); }
@@ -56,6 +74,19 @@ export function validateCabinet(layout: CabinetLayout): CabinetLayout {
     if (o.supportId !== undefined && o.supportId !== 'base' && !layout.panels.some(p => p.id === o.supportId && p.kind === 'shelf')) throw new Error('Missing cabinet support');
   }
   return layout;
+}
+export function cabinetHinge(c: CabinetLayout, index: number): CabinetHinge {
+  return c.doors.hinges?.[index] ?? { type: 'pivot', travel: 0 };
+}
+/** A clearance-planning path, not a manufacturer-specific linkage simulation.
+ * Arm crank affects installation geometry, not a universal travel distance.
+ * All concealed arm styles therefore use the user's measured travel.
+ */
+export function cabinetDoorPose(size: Vector3D, c: CabinetLayout, index: number, degrees = c.doors.angles[index]): { position: Vector3D; rotationY: number } {
+  const left = c.doors.count === 2 ? index === 0 : c.doors.hinge === 'left', sign = left ? 1 : -1;
+  const hinge = cabinetHinge(c, index), angle = degrees * Math.PI / 180;
+  const travel = hinge.type === 'pivot' ? 0 : hinge.travel * Math.sin(Math.min(Math.PI / 2, angle));
+  return { position: { x: sign * (-size.x / 2 + .002 + travel), y: 0, z: size.z / 2 - c.panelThickness / 2 + travel }, rotationY: -sign * angle };
 }
 export function interior(size: Vector3D, c: CabinetLayout): Vector3D {
   return { x: size.x - c.panelThickness * 2, y: size.y - c.panelThickness * 2, z: size.z - c.backThickness - (c.doors.count ? c.panelThickness : 0) };

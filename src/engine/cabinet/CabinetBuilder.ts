@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import type { AssetBuildContext } from '../assets/builders/AssetBuildContext';
 import { StandardFurniture, type Furniture } from '../../domain/elements/Furniture';
-import { defaultCabinet, footprint, interiorOrigin, resolveContent, resolvePanel, type CabinetBox } from '../../domain/cabinet/CabinetLayout';
+import { cabinetDoorPose, defaultCabinet, footprint, interiorOrigin, resolveContent, resolvePanel, type CabinetBox } from '../../domain/cabinet/CabinetLayout';
 
 export function buildCabinet(c: AssetBuildContext, buildContent?: (entity: Furniture) => THREE.Object3D): void {
   const layout = c.entity.cabinet ?? defaultCabinet(c.entity.toData(), c.definition?.cabinetDoors ?? 2), t = layout.panelThickness, b = layout.backThickness;
@@ -24,8 +24,8 @@ export function buildCabinet(c: AssetBuildContext, buildContent?: (entity: Furni
   for (let index = 0; index < count; index++) {
     const left = count === 2 ? index === 0 : layout.doors.hinge === 'left', width = (c.w - .004) / count - .002;
     const pivot = new THREE.Group(); pivot.name = `cabinet_door_${index}`; pivot.userData = { cabinetDoor: index, cabinetPart: `door_${index}`, swingSign: left ? -1 : 1 };
-    pivot.position.set(left ? -c.w / 2 + .002 : c.w / 2 - .002, 0, c.d / 2 - t / 2);
-    pivot.rotation.y = (left ? -1 : 1) * layout.doors.angles[index] * Math.PI / 180;
+    const pose = cabinetDoorPose(c.entity.dimensions, layout, index);
+    pivot.position.set(pose.position.x, pose.position.y, pose.position.z); pivot.rotation.y = pose.rotationY;
     const leaf = new THREE.Mesh(new THREE.BoxGeometry(width, c.h - .004, t), body); leaf.position.set((left ? 1 : -1) * width / 2, c.h / 2, 0);
     leaf.userData = { section: `Door ${index + 1}`, cabinetPart: `door_${index}`, cabinetDoor: index, isSwingLeaf: true }; leaf.castShadow = leaf.receiveShadow = true; pivot.add(leaf);
     const handle = new THREE.Mesh(new THREE.BoxGeometry(.012, Math.min(.128, c.h / 3), .025), c.materials.metalChrome);

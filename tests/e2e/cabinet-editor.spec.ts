@@ -96,6 +96,34 @@ test('cabinet doors swing independently, turn red for an obstacle and leave ordi
   await page.getByLabel('Cabinet door 2 angle', { exact: true }).fill('70'); expect((await snapshot(page))!.data.cabinet.doors.angles).toEqual([91, 70]);
 });
 
+test('concealed hinge travel clears a flush enclosure and collision checks follow opening and closing paths', async ({ page, request }) => {
+  const raw = fixture();
+  Object.assign(raw.plan.items, { enclosure: { name: 'cube', assetKey: 'detail_books', dimensions: { x: .1, y: 1.9, z: .6 }, position: { x: 1.65, y: 0, z: 2.5 }, pc: { x: 165, y: 250 }, rotationY: 0 } });
+  await request.post('/api/save-plan', { data: raw }); await page.evaluate(() => localStorage.clear()); await page.reload(); await ready(page); await selectCabinet(page);
+  const angle = page.getByLabel('Cabinet door 1 angle', { exact: true }), type = page.getByLabel('Cabinet door 1 hinge type', { exact: true });
+  await angle.fill('90'); expect((await snapshot(page))!.doorCollision).toBe(true);
+  await type.selectOption('half-cranked');
+  const travel = page.getByLabel('Cabinet door 1 hinge travel (mm)', { exact: true });
+  await expect(travel).toHaveValue('20'); expect((await snapshot(page))!.doorCollision).toBe(false); expect((await snapshot(page))!.red).toEqual([]);
+  // Rechecking at the same angle must use the new hardware path.
+  await travel.fill('2'); expect((await snapshot(page))!.doorCollision).toBe(true); expect((await snapshot(page))!.red).toContain('door_0');
+  await travel.fill('20'); expect((await snapshot(page))!.doorCollision).toBe(false);
+  await angle.fill('0'); expect((await snapshot(page))!.doorCollision).toBe(false);
+  await angle.fill('90'); expect((await snapshot(page))!.doorCollision).toBe(false);
+  // The final closed pose is clear, but the fixed-pivot closing arc is not.
+  await type.selectOption('pivot'); expect((await snapshot(page))!.doorCollision).toBe(true);
+  await angle.fill('0'); expect((await snapshot(page))!.doorCollision).toBe(true);
+  await type.selectOption('fully-cranked'); expect((await snapshot(page))!.doorCollision).toBe(false);
+  await angle.fill('90'); expect((await snapshot(page))!.doorCollision).toBe(false);
+  await page.getByRole('button', { name: 'Edit layout', exact: true }).click();
+  await expect.poll(async () => (await snapshot(page, true))?.status).toBe('ready');
+  await expect(page.getByLabel('Cabinet door 1 hinge type', { exact: true })).toHaveValue('fully-cranked');
+  await page.getByLabel('Cabinet door 1 hinge travel (mm)', { exact: true }).fill('25');
+  await page.getByRole('button', { name: 'Done', exact: true }).click();
+  expect((await snapshot(page))!.data.cabinet.doors.hinges[0]).toEqual({ type: 'fully-cranked', travel: .025 });
+  expect((await snapshot(page))!.data.cabinet.doors.angles).toEqual([90, 0]);
+});
+
 test('offline editor saves a cabinet layout and iPad displays the same contents and working doors', async ({ page, context, request }, info) => {
   const template = await (await request.get('/hview_editor_template.html')).text(), html = packStandaloneHtml(setScriptContent(template, 'plan-data', escapeScriptJson(JSON.stringify(fixture()))));
   const url = 'http://127.0.0.1:3100/__offline__/cabinet.html';
@@ -104,6 +132,8 @@ test('offline editor saves a cabinet layout and iPad displays the same contents 
   await expect.poll(async () => (await snapshot(page))?.status).toBe('ready');
   await selectCabinet(page); await page.getByRole('button', { name: 'Edit layout', exact: true }).click(); await expect.poll(async () => (await snapshot(page, true))?.status).toBe('ready');
   await page.getByRole('button', { name: 'Shelf 1', exact: true }).click(); await chooseObject(page, 'Toilet Paper Roll');
+  await page.getByLabel('Cabinet door 1 hinge type', { exact: true }).selectOption('fully-cranked');
+  await page.getByLabel('Cabinet door 1 hinge travel (mm)', { exact: true }).fill('25');
   await page.getByRole('button', { name: 'Done', exact: true }).click(); await page.getByLabel('Cabinet door 1 angle', { exact: true }).fill('105');
   const expected = (await snapshot(page))!.data.cabinet, downloading = page.waitForEvent('download'); await page.getByRole('button', { name: 'Full Editor (.html)', exact: true }).click();
   const path = info.outputPath('cabinet-offline.html'); await (await downloading).saveAs(path);

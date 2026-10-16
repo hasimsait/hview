@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { describe, expect, it } from 'vitest';
-import { cabinetIssues, defaultCabinet, footprint, interior, interiorOrigin, moveCabinetPart, penetrates, removeCabinetPart, resolveContent, resolvePanel, settleContent, shelfClearances, splitDivider, validateCabinet, type CabinetContent, type CabinetLayout, type CabinetPanel } from '../../src/domain/cabinet/CabinetLayout';
+import { cabinetDoorPose, cabinetIssues, defaultCabinet, footprint, interior, interiorOrigin, moveCabinetPart, penetrates, removeCabinetPart, resolveContent, resolvePanel, settleContent, shelfClearances, splitDivider, validateCabinet, type CabinetContent, type CabinetLayout, type CabinetPanel, type CabinetHinge } from '../../src/domain/cabinet/CabinetLayout';
 import { AssetCatalog } from '../../src/domain/catalog/AssetCatalog';
 import { PlanCodec } from '../../src/domain/codec/PlanCodec';
 import { LegacyPlanWriter } from '../../src/domain/codec/LegacyPlanWriter';
@@ -100,6 +100,7 @@ describe('cabinet layout and fit rules', () => {
   });
   it('retains invalid contents, linked panels, independent finishes and angles in both saved formats', () => {
     const c = layout(); c.panels = [shelf('shelf', 2.2, { finish: { type: 'paint', color: '#778899' } })]; c.contents = [detergent('shelf')]; c.doors.angles = [76, 0];
+    c.doors.hinges = [{ type: 'fully-cranked', travel: .02 }, { type: 'straight-arm', travel: .03 }];
     const editor = new EditorSession(codec.factory); editor.load(new PlanDocument([entity()])); editor.execute(new ConfigureCabinet('cabinet', c));
     for (const raw of [codec.encode(editor.getDocument()), new LegacyPlanWriter().encode(editor.getDocument())]) expect(codec.decode(raw).requireFurniture('cabinet').cabinet).toEqual(c);
     editor.undo(); expect(editor.getDocument().requireFurniture('cabinet').cabinet?.panels).toHaveLength(0); editor.redo(); expect(editor.getDocument().requireFurniture('cabinet').cabinet).toEqual(c);
@@ -113,9 +114,51 @@ describe('cabinet layout and fit rules', () => {
     expect(() => validateCabinet({ ...layout(), panels: [shelf('shell_left', .4)] })).toThrow('Duplicate');
     expect(cabinetIssues(layout(), { x: .01, y: .01, z: .01 }).has('shell_left')).toBe(true);
   });
+  it('validates hinge settings while allowing older layouts without them', () => {
+    expect(validateCabinet(layout()).doors.hinges).toBeUndefined();
+    for (const bad of [null, [], [{ type: 'pivot', travel: 0 }], [{ type: 'unknown', travel: .02 }, { type: 'pivot', travel: 0 }], [{ type: 'half-cranked', travel: -.001 }, { type: 'pivot', travel: 0 }], [{ type: 'straight-arm', travel: .051 }, { type: 'pivot', travel: 0 }], [{ type: 'fully-cranked', travel: NaN }, { type: 'pivot', travel: 0 }]]) {
+      const c = layout(); c.doors.hinges = bad as [CabinetHinge, CabinetHinge]; expect(() => validateCabinet(c)).toThrow();
+    }
+  });
 });
 
 describe('cabinet rendering and collision feedback', () => {
+  it('keeps the closed position and independently translates mirrored concealed hinges', () => {
+    const c = layout(); c.doors.count = 2; c.doors.hinges = [{ type: 'half-cranked', travel: .02 }, { type: 'fully-cranked', travel: .03 }];
+    const closed = [cabinetDoorPose(size, c, 0), cabinetDoorPose(size, c, 1)];
+    const legacy = layout(); legacy.doors.count = 2;
+    expect(closed).toEqual([cabinetDoorPose(size, legacy, 0), cabinetDoorPose(size, legacy, 1)]);
+    c.doors.angles = [90, 90]; const root = builder.build(entity(c));
+    const left = root.getObjectByName('cabinet_door_0')!, right = root.getObjectByName('cabinet_door_1')!;
+    expect(left.position.x - closed[0].position.x).toBeCloseTo(.02); expect(left.position.z - closed[0].position.z).toBeCloseTo(.02);
+    expect(right.position.x - closed[1].position.x).toBeCloseTo(-.03); expect(right.position.z - closed[1].position.z).toBeCloseTo(.03);
+    expect(left.rotation.y).toBeCloseTo(-Math.PI / 2); expect(right.rotation.y).toBeCloseTo(Math.PI / 2);
+    c.doors.angles = [45, 0]; expect(cabinetDoorPose(size, c, 1)).toEqual(closed[1]);
+    expect(cabinetDoorPose(size, c, 0).position.x - closed[0].position.x).toBeCloseTo(.02 * Math.sin(Math.PI / 4));
+  });
+  it('clears a flush neighbouring enclosure on either side with 20 mm travel, but reports insufficient travel', () => {
+    const feedback = new CollisionFeedback(), obstacle = new THREE.Mesh(new THREE.BoxGeometry(.1, size.y, .6));
+    for (const side of ['left', 'right'] as const) {
+      const c = layout(); c.doors.hinge = side;
+      obstacle.position.set((side === 'left' ? -1 : 1) * (size.x / 2 + .05), size.y / 2, size.z / 2 + .3); obstacle.updateMatrixWorld(true);
+      for (const type of ['straight-arm', 'half-cranked', 'fully-cranked'] as const) {
+        c.doors.hinges = [{ type, travel: .02 }, { type: 'pivot', travel: 0 }];
+        const root = builder.build(entity(c)), pivot = root.getObjectByName('cabinet_door_0')!, leaf = meshes(pivot).find(m => m.userData.isSwingLeaf)!;
+        for (let angle = 0; angle <= 90; angle += 2) {
+          const pose = cabinetDoorPose(size, c, 0, angle); pivot.position.set(pose.position.x, pose.position.y, pose.position.z); pivot.rotation.y = pose.rotationY; root.updateMatrixWorld(true);
+          expect(feedback.intersects(leaf, obstacle), `${side}, ${type}, ${angle} degrees`).toBe(false);
+          for (const shell of meshes(root).filter(m => m.userData.cabinetPart?.startsWith('shell_'))) expect(feedback.intersects(leaf, shell)).toBe(false);
+        }
+      }
+      c.doors.hinges![0].travel = .002; c.doors.angles[0] = 90;
+      const insufficient = builder.build(entity(c)); insufficient.updateMatrixWorld(true);
+      expect(feedback.intersects(meshes(insufficient).find(m => m.userData.isSwingLeaf)!, obstacle)).toBe(true);
+      c.doors.hinges = undefined;
+      const fixed = builder.build(entity(c)); fixed.updateMatrixWorld(true);
+      expect(feedback.intersects(meshes(fixed).find(m => m.userData.isSwingLeaf)!, obstacle)).toBe(true);
+    }
+    feedback.dispose(); obstacle.geometry.dispose();
+  });
   it('opens each door independently about its actual hinge without moving the shell or contents', () => {
     const c = layout(); c.doors.count = 2; c.contents = [detergent()];
     const closed = builder.build(entity(c)), open = builder.build(entity({ ...c, doors: { ...c.doors, angles: [90, 0] } }));

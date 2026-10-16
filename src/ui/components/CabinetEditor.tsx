@@ -13,6 +13,7 @@ import { createElementId } from '../../platform/ElementId';
 import { RuntimeContext, useDocument, useRuntime } from '../context/RuntimeContext';
 import { AssetReplacementModal } from './AssetReplacementModal';
 import { Inspector } from './Inspector';
+import { CabinetHingeControls } from './CabinetHingeControls';
 import { Viewport3D } from './Viewport3D';
 
 export function CabinetEditor({ cabinet, onClose }: { cabinet: Furniture; onClose: () => void }) {
@@ -120,6 +121,7 @@ function CabinetWorkspace({ original, onCancel, onDone }: { original: Furniture;
         <label className="block">Back thickness (mm)<input aria-label="Back thickness (mm)" className="w-full bg-slate-800 p-1" type="number" min="1" max="100" step="1" value={+(layout.backThickness * 1000).toFixed(2)} onChange={e => { const n = +e.target.value / 1000; if (n > 0 && n <= .1) update({ ...layout, backThickness: n }); }} /></label>
         <label className="block">Doors<select aria-label="Cabinet door count" className="w-full bg-slate-800 p-1" value={layout.doors.count} onChange={e => update({ ...layout, doors: { ...layout.doors, count: +e.target.value as 0 | 1 | 2 } })}><option value="0">Open cabinet</option><option value="1">One door</option><option value="2">Two doors</option></select></label>
         {layout.doors.count === 1 && <label className="block">Hinge side<select aria-label="Cabinet hinge side" className="w-full bg-slate-800 p-1" value={layout.doors.hinge} onChange={e => update({ ...layout, doors: { ...layout.doors, hinge: e.target.value as 'left' | 'right' } })}><option value="left">Left</option><option value="right">Right</option></select></label>}
+        <CabinetHingeControls layout={layout} onChange={next => update(next, 'Configure cabinet hinge')} />
         <p role="status" className={issues.size ? 'text-red-300' : 'text-emerald-300'}>{issues.size ? `${issues.size} parts need attention` : 'No collisions or unsupported objects'}</p>
         <div className="space-y-1" aria-label="Cabinet parts">{[...layout.panels, ...layout.contents].map(p => <button key={p.id} aria-label={p.name} aria-pressed={p.id === selected} className={`block w-full rounded border p-2 text-left ${p.id === selected ? 'border-sky-400 bg-sky-900/40' : 'border-slate-700'} ${issues.has(p.id) ? 'text-red-300' : ''}`} onClick={() => select(p.id)}>{p.name}{issues.has(p.id) && <small className="block">{issues.get(p.id)!.join(', ')}</small>}</button>)}</div>
       </aside>

@@ -17,6 +17,7 @@ import React,{ useCallback,useState } from 'react';
 import { ConfigureLuminaire,ConfigureShelving,FinishFurniture,RemoveElement,TransformFurniture,SetWindowCoveringOpen } from '../../application/commands/FurnitureCommands';
 import { cabinetDoorCount } from '../../domain/catalog/Cabinets';
 import { defaultCabinet } from '../../domain/cabinet/CabinetLayout';
+import { CabinetHingeControls } from './CabinetHingeControls';
 import { ConfigureCabinet } from '../../application/commands/CabinetCommands';
 import type { Vector3D } from '../../domain/model/PlanData';
 import { Furniture,Shelving } from '../../domain/elements/Furniture';
@@ -174,6 +175,7 @@ export const Inspector: React.FC<InspectorProps> = ({
         {Array.from({ length: item.cabinet?.doors.count ?? legacyDoors ?? 0 }, (_, index) => <div key={index} className="block"><span className="flex items-center justify-between">Door {index + 1}: {Math.round(item.cabinet?.doors.angles[index] ?? 0)}°<button type="button" className="rounded bg-slate-700 px-2 py-1" onClick={() => setDoorAngle(index, (item.cabinet?.doors.angles[index] ?? 0) > 0 ? 0 : 110)}>{(item.cabinet?.doors.angles[index] ?? 0) > 0 ? 'Close' : 'Open'} door {index + 1}</button></span>
           <input aria-label={`Cabinet door ${index + 1} angle`} type="range" min="0" max="170" step="1" value={item.cabinet?.doors.angles[index] ?? 0} className="w-full accent-sky-400" onChange={event => setDoorAngle(index, +event.target.value)} />
         </div>)}
+        <CabinetHingeControls layout={item.cabinet ?? defaultCabinet(item.toData(), legacyDoors ?? 2)} onChange={layout => editor.execute(new ConfigureCabinet(item.id, layout, 'Configure cabinet hinge'))} />
       </div>}
       {/* Transform Coordinates */}
       <div className="py-3 border-b border-slate-800 space-y-3">
