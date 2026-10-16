@@ -305,6 +305,7 @@ export class LegacyPlanReader {
           sectionFinishes: it.sectionFinishes || undefined,
           lightConfig: it.lightConfig || undefined,
           windowCoveringOpen: it.windowCoveringOpen,
+          cabinet: it.cabinet,
           hasLids: it.hasLids !== undefined ? !!it.hasLids : undefined,
           shelfCount: it.shelfCount,
           recessHostId: it.recessHostId,

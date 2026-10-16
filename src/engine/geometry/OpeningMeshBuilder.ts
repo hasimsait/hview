@@ -230,6 +230,7 @@ export class OpeningMeshBuilder {
       leafMesh.position.set(-doorLeafW / 2, doorLeafH / 2, 0);
     }
     leafMesh.castShadow = true;
+    leafMesh.userData.isSwingLeaf = true;
     doorPivot.add(leafMesh);
 
     // Door handles on both sides of the leaf (near latch edge)
@@ -263,6 +264,7 @@ export class OpeningMeshBuilder {
     }
 
     this.pivots.set(parent, doorPivot);
+    doorPivot.userData.swingSign = hingeOnLeft ? (swingSide === 'r' ? -1 : 1) : (swingSide === 'r' ? 1 : -1);
     doorPivot.rotation.y = swingAngle;
     parent.add(doorPivot);
   }

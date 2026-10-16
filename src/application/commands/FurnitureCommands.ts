@@ -49,7 +49,7 @@ export class ReplaceFurniture implements EditorCommand {
       ...data, assetKey: key, customModelUrl: this.customModelUrl,
       displayName: key.replace(/_/g, ' ').replace(/\b\w/g, character => character.toUpperCase()),
       category: (definition?.category as FurnitureData['category']) ?? data.category,
-      sectionFinishes: undefined,
+      sectionFinishes: undefined, cabinet: undefined,
     });
     // Fixed-size wall fittings use the factory's corrected dimensions and wall
     // offset instead of retaining the previous housing's size and position.

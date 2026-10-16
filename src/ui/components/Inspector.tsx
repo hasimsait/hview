@@ -15,20 +15,36 @@ X,
 } from 'lucide-react';
 import React,{ useCallback,useState } from 'react';
 import { ConfigureLuminaire,ConfigureShelving,FinishFurniture,RemoveElement,TransformFurniture,SetWindowCoveringOpen } from '../../application/commands/FurnitureCommands';
+import { cabinetDoorCount } from '../../domain/catalog/Cabinets';
+import { defaultCabinet } from '../../domain/cabinet/CabinetLayout';
+import { ConfigureCabinet } from '../../application/commands/CabinetCommands';
+import type { Vector3D } from '../../domain/model/PlanData';
 import { Furniture,Shelving } from '../../domain/elements/Furniture';
 import { InspectorPresenter } from '../inspection/InspectorPresenter';
 import { SurfaceFinishPicker } from './SurfaceFinishPicker';
 
+export interface InteriorInspectorAdapter {
+  transform: (position?: Vector3D, rotation?: number, dimensions?: Vector3D) => void;
+  finish: (finish?: SurfaceFinishConfig, section?: string) => void;
+  remove: () => void;
+  sections: string[];
+  section: string;
+  selectSection: (section: string) => void;
+  panel?: boolean;
+}
 interface InspectorProps {
   item: Furniture | null;
   onOpenReplaceModal: () => void;
   onClose: () => void;
+  onEditLayout?: () => void;
+  interior?: InteriorInspectorAdapter;
+  className?: string;
 }
 
 export const Inspector: React.FC<InspectorProps> = ({
   item,
   onOpenReplaceModal,
-  onClose,
+  onClose, onEditLayout, interior, className,
 }) => {
   const runtime = useRuntime();
   const editor = runtime.editor;
@@ -37,16 +53,20 @@ export const Inspector: React.FC<InspectorProps> = ({
   const selection = useSelection();
 
   const [showYGizmo, setShowYGizmo] = useState(false);
-  const availableSections = item ? sceneService.getFurnitureSections(item.id) : [];
-  const activeSection = selection?.kind === 'furniture' && selection.id === item?.id ? selection.subtarget ?? 'all' : 'all';
+  const availableSections = interior?.sections ?? (item ? sceneService.getFurnitureSections(item.id) : []);
+  const activeSection = interior?.section ?? (selection?.kind === 'furniture' && selection.id === item?.id ? selection.subtarget ?? 'all' : 'all');
 
   if (!item) return null;
   const presentation = item.accept(new InspectorPresenter());
   const isLightFixture = presentation.sections.includes('luminaire');
   const isShelving = presentation.sections.includes('shelving');
   const definition = runtime.catalog.get(item.assetKey);
+  const legacyDoors = item.hasLids && cabinetDoorCount(definition) === 0 ? (item.dimensions.x >= .7 ? 2 : 1) : cabinetDoorCount(definition);
+  const setDoorAngle = (index: number, angle: number) => {
+    const layout = structuredClone(item.cabinet ?? defaultCabinet(item.toData(), legacyDoors ?? 2)); layout.doors.angles[index] = angle; editor.execute(new ConfigureCabinet(item.id, layout, 'Open cabinet door'));
+  };
   const resizable = definition?.capabilities?.resizable !== false;
-  const dimensionStep = definition?.householdDetail || definition?.floorDrain || definition?.lightingComponent || definition?.architecturalFinish || definition?.softFurnishing ? .1 : 1;
+  const dimensionStep = interior ? .1 : definition?.householdDetail || definition?.floorDrain || definition?.lightingComponent || definition?.architecturalFinish || definition?.softFurnishing ? .1 : 1;
 
   const currentFinishForSection: SurfaceFinishConfig | undefined =
     activeSection === 'all'
@@ -56,6 +76,7 @@ export const Inspector: React.FC<InspectorProps> = ({
       item.finish;
 
   const handleApplyFinish = (finish: SurfaceFinishConfig) => {
+    if (interior) return interior.finish(finish, activeSection === 'all' ? undefined : activeSection);
     if (activeSection === 'all') {
       editor.execute(new FinishFurniture(item.id, finish));
     } else {
@@ -64,6 +85,7 @@ export const Inspector: React.FC<InspectorProps> = ({
   };
 
   const handleClearFinish = () => {
+    if (interior) return interior.finish(undefined, activeSection === 'all' ? undefined : activeSection);
     if (activeSection === 'all') {
       editor.execute(new FinishFurniture(item.id, undefined));
     } else {
@@ -72,6 +94,7 @@ export const Inspector: React.FC<InspectorProps> = ({
   };
 
   const handlePositionChange = (axis: 'x' | 'y' | 'z', value: number) => {
+    if (interior) return interior.transform({ ...item.position, [axis]: value });
     editor.execute(new TransformFurniture(item.id, {
       ...item.position,
       [axis]: value,
@@ -80,11 +103,13 @@ export const Inspector: React.FC<InspectorProps> = ({
 
   const handleRotationChange = (deg: number) => {
     const rad = Math.PI - (deg * Math.PI) / 180;
+    if (interior) return interior.transform(undefined, rad);
     editor.execute(new TransformFurniture(item.id, undefined, rad, undefined));
   };
 
   const handleDimensionChange = (axis: 'x' | 'y' | 'z', valueCm: number) => {
     const valueM = Math.max(dimensionStep / 100, valueCm / 100);
+    if (interior) return interior.transform(undefined, undefined, { ...item.dimensions, [axis]: valueM });
     editor.execute(new TransformFurniture(item.id, undefined, undefined, {
       ...item.dimensions,
       [axis]: valueM,
@@ -102,6 +127,7 @@ export const Inspector: React.FC<InspectorProps> = ({
   }, [showYGizmo, interactionService]);
 
   const handleDelete = () => {
+    if (interior) return interior.remove();
     if (confirm(`Delete ${item.displayName}?`)) {
       editor.execute(new RemoveElement(item.id));
     }
@@ -110,7 +136,7 @@ export const Inspector: React.FC<InspectorProps> = ({
   const currentDeg = Math.round(((180 - (item.rotationY * 180) / Math.PI) % 360 + 360) % 360);
 
   return (
-    <div className="absolute right-4 top-4 w-80 max-h-[calc(100%-2rem)] overflow-y-auto bg-slate-900/95 backdrop-blur-md border border-slate-800 rounded-xl shadow-2xl p-4 text-xs z-30 animate-in fade-in slide-in-from-right-2 duration-200">
+    <div className={className ?? "absolute right-4 top-4 w-80 max-h-[calc(100%-2rem)] overflow-y-auto bg-slate-900/95 backdrop-blur-md border border-slate-800 rounded-xl shadow-2xl p-4 text-xs z-30 animate-in fade-in slide-in-from-right-2 duration-200"}>
       {/* Header */}
       <div className="flex items-start justify-between pb-3 border-b border-slate-800">
         <div>
@@ -143,13 +169,19 @@ export const Inspector: React.FC<InspectorProps> = ({
 
       {definition?.householdDetail?.practical && <p className="pt-3 text-[10px] text-slate-400">Dimensions describe the occupied space, including connectors. Cable and hose dimensions describe the route footprint, not their total length.</p>}
 
+      {!interior && (item.cabinet || cabinetDoorCount(definition) !== undefined) && <div className="py-3 space-y-2 border-b border-slate-800">
+        <button className="w-full rounded bg-sky-600 p-2 font-semibold" onClick={onEditLayout}>Edit layout</button>
+        {Array.from({ length: item.cabinet?.doors.count ?? legacyDoors ?? 0 }, (_, index) => <div key={index} className="block"><span className="flex items-center justify-between">Door {index + 1}: {Math.round(item.cabinet?.doors.angles[index] ?? 0)}°<button type="button" className="rounded bg-slate-700 px-2 py-1" onClick={() => setDoorAngle(index, (item.cabinet?.doors.angles[index] ?? 0) > 0 ? 0 : 110)}>{(item.cabinet?.doors.angles[index] ?? 0) > 0 ? 'Close' : 'Open'} door {index + 1}</button></span>
+          <input aria-label={`Cabinet door ${index + 1} angle`} type="range" min="0" max="170" step="1" value={item.cabinet?.doors.angles[index] ?? 0} className="w-full accent-sky-400" onChange={event => setDoorAngle(index, +event.target.value)} />
+        </div>)}
+      </div>}
       {/* Transform Coordinates */}
       <div className="py-3 border-b border-slate-800 space-y-3">
         <div>
           <div className="flex items-center justify-between mb-1.5">
             <label className="text-slate-400 flex items-center gap-1.5 font-medium">
               <Move className="w-3.5 h-3.5 text-sky-400" />
-              Position (meters)
+              {interior ? 'Position from left / support / back (m)' : 'Position (meters)'}
             </label>
             {/* Height gizmo toggle */}
             <button
@@ -169,7 +201,7 @@ export const Inspector: React.FC<InspectorProps> = ({
               <span className="text-[10px] text-slate-500 uppercase">X (Horiz.)</span>
               <input
                 type="number"
-                step={definition?.householdDetail?.practical ? .001 : .05}
+                step={interior || definition?.householdDetail?.practical ? .001 : .05}
                 value={parseFloat(item.position.x.toFixed(3))}
                 onChange={(e) => handlePositionChange('x', parseFloat(e.target.value) || 0)}
                 className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100 font-mono focus:outline-none focus:border-sky-500"
@@ -179,7 +211,7 @@ export const Inspector: React.FC<InspectorProps> = ({
               <span className="text-[10px] text-slate-500 uppercase text-emerald-500/80">Y (Elev.)</span>
               <input
                 type="number"
-                step={definition?.householdDetail?.practical ? .001 : .05}
+                step={interior || definition?.householdDetail?.practical ? .001 : .05}
                 min="0"
                 value={parseFloat(item.position.y.toFixed(3))}
                 onChange={(e) => handlePositionChange('y', parseFloat(e.target.value) || 0)}
@@ -190,7 +222,7 @@ export const Inspector: React.FC<InspectorProps> = ({
               <span className="text-[10px] text-slate-500 uppercase">Z (Depth)</span>
               <input
                 type="number"
-                step={definition?.householdDetail?.practical ? .001 : .05}
+                step={interior || definition?.householdDetail?.practical ? .001 : .05}
                 value={parseFloat(item.position.z.toFixed(3))}
                 onChange={(e) => handlePositionChange('z', parseFloat(e.target.value) || 0)}
                 className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100 font-mono focus:outline-none focus:border-sky-500"
@@ -199,7 +231,7 @@ export const Inspector: React.FC<InspectorProps> = ({
           </div>
         </div>
 
-        <div>
+        {!interior?.panel && <div>
           <div className="flex justify-between items-center mb-1.5">
             <label className="text-slate-400 flex items-center gap-1.5 font-medium">
               <RotateCw className="w-3.5 h-3.5 text-sky-400" />
@@ -216,7 +248,7 @@ export const Inspector: React.FC<InspectorProps> = ({
             onChange={(e) => handleRotationChange(parseInt(e.target.value))}
             className="w-full accent-sky-500 bg-slate-800 cursor-pointer"
           />
-        </div>
+        </div>}
       </div>
 
       {/* Dimensions — Editable */}
@@ -270,7 +302,7 @@ export const Inspector: React.FC<InspectorProps> = ({
       </div>
 
       {/* Shelving Tiers & Front Lids / Cabinet Doors */}
-      {isShelving && item instanceof Shelving && (
+      {isShelving && item instanceof Shelving && !item.cabinet && !interior && (
         <div className="pt-3 border-t border-slate-800 space-y-2.5">
           <div className="flex items-center justify-between">
             <label className="text-[10px] uppercase font-semibold text-slate-400 flex items-center gap-1.5">
@@ -448,7 +480,7 @@ export const Inspector: React.FC<InspectorProps> = ({
               <button
                 type="button"
                 onClick={() => {
-                  editor.selection.select('furniture', item, 'all');
+                  if (interior) interior.selectSection('all'); else editor.selection.select('furniture', item, 'all');
                 }}
                 className={`py-1 px-2.5 rounded text-[11px] font-medium border transition-colors ${activeSection === 'all'
                   ? 'bg-sky-500/20 border-sky-500 text-sky-300'
@@ -471,7 +503,7 @@ export const Inspector: React.FC<InspectorProps> = ({
                     key={sec}
                     type="button"
                     onClick={() => {
-                      editor.selection.select('furniture', item, sec);
+                      if (interior) interior.selectSection(sec); else editor.selection.select('furniture', item, sec);
                     }}
                     className={`py-1 px-2.5 rounded text-[11px] font-medium border transition-colors ${isActive
                       ? 'bg-sky-500/20 border-sky-500 text-sky-300'
@@ -500,13 +532,13 @@ export const Inspector: React.FC<InspectorProps> = ({
 
       {/* Action Buttons */}
       <div className="pt-3 space-y-2">
-        <button
+        {!interior?.panel && <button
           onClick={onOpenReplaceModal}
           className="w-full py-2 px-3 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-medium flex items-center justify-center gap-2 transition-colors shadow-sm"
         >
           <Replace className="w-3.5 h-3.5" />
           Replace Asset
-        </button>
+        </button>}
 
         <button
           onClick={handleDelete}

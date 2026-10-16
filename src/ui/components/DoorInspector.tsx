@@ -233,6 +233,7 @@ export const DoorInspector: React.FC<DoorInspectorProps> = ({ selected, onClose 
           </label>
           <div className="flex items-center gap-1.5">
             <input
+              aria-label="Door opening angle"
               type="number"
               min="0"
               max="180"

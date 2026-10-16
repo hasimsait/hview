@@ -1,3 +1,4 @@
+import { validateCabinet, type CabinetLayout } from '../cabinet/CabinetLayout';
 import { z } from 'zod';
 import { Shelving } from '../elements/Furniture';
 import { WINDOW_DRESSING_STYLES } from '../model/WindowDressing';
@@ -54,6 +55,7 @@ export const furnitureSchema = z.object({
   finish, sectionFinishes: z.record(finishSchema).optional(),
   lightConfig: z.object({ enabled: z.boolean().optional(), intensity: number.min(0).max(3).optional(), color: z.string().optional() }).optional(),
   windowCoveringOpen: number.min(0).max(1).optional(),
+  cabinet: z.custom<CabinetLayout>(value => { try { validateCabinet(value as CabinetLayout); return true; } catch { return false; } }, 'Invalid cabinet layout').optional(),
   rawItem: z.unknown().optional(),
 }).passthrough();
 export const legacyDocumentSchema = z.object({

@@ -10,11 +10,13 @@ interface AssetReplacementModalProps {
   isOpen: boolean;
   onClose: () => void;
   mode?: 'replace' | 'add';
+  filterAsset?: (asset: AssetDefinition) => boolean;
   onSelectAsset?: (asset: AssetDefinition) => void;
 }
 
 const CATEGORIES = [
   { id: 'all', label: 'All' },
+  { id: 'cabinets', label: 'Cabinets' },
   { id: 'architecture', label: 'Architectural Finishes' },
   { id: 'lighting', label: 'Lighting' },
   { id: 'household', label: 'Everyday Objects' },
@@ -38,7 +40,7 @@ export const AssetReplacementModal: React.FC<AssetReplacementModalProps> = ({
   isOpen,
   onClose,
   mode = 'replace',
-  onSelectAsset,
+  onSelectAsset, filterAsset,
 }) => {
   const runtime = useRuntime();
   const assetRegistry = runtime.catalog;
@@ -55,10 +57,12 @@ export const AssetReplacementModal: React.FC<AssetReplacementModalProps> = ({
   const sources = [...new Set(allAssets.flatMap(asset => asset.source ? [asset.source.retailer] : []))].sort();
   const collections = [...new Set(allAssets.flatMap(asset => asset.collection ? [asset.collection] : []))].sort();
   const filteredAssets = allAssets.filter((asset) => {
+    if (filterAsset && !filterAsset(asset)) return false;
     if (sourceFilter !== 'all' && asset.source?.retailer !== sourceFilter) return false;
     if (collectionFilter !== 'all' && asset.collection !== collectionFilter) return false;
     const matchesCategory =
       selectedCategory === 'all' || (selectedCategory === 'lighting' ? !!asset.capabilities?.lighting
+        : selectedCategory === 'cabinets' ? asset.cabinetDoors !== undefined
         : selectedCategory === 'household' ? !!asset.householdDetail && !asset.householdDetail.practical
         : selectedCategory === 'practical' ? !!asset.householdDetail?.practical
         : selectedCategory === 'textiles' ? !!asset.softFurnishing || /^(Rugs|Cushions)$/.test(asset.collection ?? '') : asset.category.toLowerCase() === selectedCategory.toLowerCase());

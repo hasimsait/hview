@@ -20,6 +20,7 @@ import type { FurnitureCategory } from '../domain/model/PlanData';
 import { isPointInPolygon } from '../domain/model/WallTopology';
 import { isOpaquePlanSource } from '../services/plan/PlanRequest';
 import { createElementId } from '../platform/ElementId';
+import { CabinetEditor } from './components/CabinetEditor';
 import { ColumnInspector } from './components/ColumnInspector';
 import { WindowInspector } from './components/WindowInspector';
 import { useViewportFullscreen } from '@ui/hooks/useViewportFullscreen';
@@ -37,6 +38,7 @@ export const App: React.FC = () => {
   const selectedWall = selected instanceof Wall ? selected : null;
   const selectedRoom = selected instanceof Room ? selected : null;
   const selectedOpening = selected instanceof Opening && document ? { opening: selected, wall: document.requireWall(selected.wallId) } : null;
+  const [editingCabinet, setEditingCabinet] = useState<Furniture | null>(null);
   const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false);
   const [isAddAssetModalOpen, setIsAddAssetModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('perspective');
@@ -90,7 +92,7 @@ export const App: React.FC = () => {
   // Global keyboard shortcuts for Undo, Redo, and Save
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (isSaving) return;
+      if (isSaving || editingCabinet) return;
       const mod = event.metaKey || event.ctrlKey;
       if (!mod) return;
       const key = event.key.toLowerCase();
@@ -126,7 +128,7 @@ export const App: React.FC = () => {
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [editor, isSaving]);
+  }, [editor, isSaving, editingCabinet]);
 
   // Load plan automatically on initial launch
   useEffect(() => {
@@ -279,6 +281,7 @@ export const App: React.FC = () => {
 
   return (
     <div className="app-shell relative flex flex-col w-full overflow-hidden bg-slate-950 text-slate-100">
+      <div className="contents" inert={!!editingCabinet}>
       {/* Top Header */}
       <Header
         isViewportFullscreen={isViewportFullscreen}
@@ -307,14 +310,15 @@ export const App: React.FC = () => {
 
       {/* Main 3D Canvas Area */}
       <main className="flex-1 min-h-0 relative w-full">
-        <Viewport3D disabled={isSaving} hideControls={isViewportFullscreen} />
+        <Viewport3D disabled={isSaving || !!editingCabinet} hideControls={isViewportFullscreen} />
 
         {/* Inspector Drawers wrapped in ErrorBoundary */}
         <ErrorBoundary>
           {/* Selected Furniture Inspector */}
-          {selectedItem && (
+          {selectedItem && !editingCabinet && (
             <Inspector
               item={selectedItem}
+              onEditLayout={() => setEditingCabinet(selectedItem)}
               onOpenReplaceModal={() => setIsReplaceModalOpen(true)}
               onClose={() => editor.selection.select('furniture', null)}
             />
@@ -376,6 +380,8 @@ export const App: React.FC = () => {
         mode="add"
         onSelectAsset={handleAddAsset}
       />
+      </div>
+      {editingCabinet && <CabinetEditor cabinet={editingCabinet} onClose={() => setEditingCabinet(null)} />}
       {isSaving && <SavingOverlay />}
     </div>
   );

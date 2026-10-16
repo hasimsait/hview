@@ -1,4 +1,5 @@
 // Serialization and import input shapes. These are never the editable document.
+import type { CabinetLayout } from '../cabinet/CabinetLayout';
 import type { WindowDressingConfig } from './WindowDressing';
 export interface Point2D {
   x: number;
@@ -169,6 +170,7 @@ export interface FurnitureData {
   sectionFinishes?: Record<string, SurfaceFinishConfig>;
   lightConfig?: LightFixtureConfig;
   windowCoveringOpen?: number;
+  cabinet?: CabinetLayout;
   rawItem?: any;
 }
 

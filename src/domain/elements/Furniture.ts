@@ -1,3 +1,4 @@
+import { validateCabinet, type CabinetLayout } from '../cabinet/CabinetLayout';
 import { Dimensions } from '../model/Dimensions';
 import { finite,immutable } from '../model/Immutable';
 import type { FurnitureData,LightFixtureConfig,SurfaceFinishConfig,Vector3D } from '../model/PlanData';
@@ -14,6 +15,7 @@ export abstract class Furniture extends PlanElement {
 
   protected constructor(data: FurnitureData) {
     super(data.id);
+    if (data.cabinet) validateCabinet(data.cabinet);
     this.size = new Dimensions(data.dimensions);
     this.transform = new Transform(data.position, data.rotationY);
     if (!data.assetKey) throw new Error('Furniture needs an asset key');
@@ -36,6 +38,8 @@ export abstract class Furniture extends PlanElement {
   get hasLids() { return this.state.hasLids; }
   get lightConfig(): Readonly<LightFixtureConfig> | undefined { return this.state.lightConfig; }
   get windowCoveringOpen() { return this.state.windowCoveringOpen; }
+  get cabinet() { return this.state.cabinet; }
+  withCabinet(cabinet: CabinetLayout): Furniture { return this.recreate({ ...this.state, cabinet: validateCabinet(cabinet) }); }
   get rawItem() { return this.state.rawItem; }
 
   protected abstract recreate(data: FurnitureData): Furniture;

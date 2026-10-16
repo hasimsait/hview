@@ -90,6 +90,8 @@ export class LegacyPlanWriter {
       }
 
       // Shelving lids / doors
+      if (item.cabinet) rawItem.cabinet = structuredClone(item.cabinet);
+      else delete rawItem.cabinet;
       if (item.windowCoveringOpen !== undefined) rawItem.windowCoveringOpen = item.windowCoveringOpen;
       else delete rawItem.windowCoveringOpen;
       if (item.hasLids !== undefined) {

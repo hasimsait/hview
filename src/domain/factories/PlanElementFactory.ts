@@ -1,3 +1,4 @@
+import { defaultCabinet } from '../cabinet/CabinetLayout';
 import { AssetCatalog } from '../catalog/AssetCatalog';
 import { Column } from '../elements/Column';
 import { BasinCabinet,Luminaire,Shelving,StandardFurniture,type Furniture } from '../elements/Furniture';
@@ -31,7 +32,7 @@ export class PlanElementFactory {
       z: data.position.z + Math.cos(data.rotationY) * depthShift,
     } : data.position;
     const appliance = key === 'robot_vacuum' || key === 'air_purifier';
-    const input = { ...data, dimensions, position, category: appliance ? 'appliance' as const : data.category, displayName: this.catalog.get(key)?.source ? this.catalog.get(key)!.name : data.displayName, assetKey: key, lightConfig: behavior === 'luminaire' ? data.lightConfig : undefined, hasLids: behavior === 'shelving' ? data.hasLids : undefined, shelfCount: behavior === 'shelving' ? data.shelfCount : undefined, recessHostId: behavior === 'recess' ? data.recessHostId : undefined };
+    const input = { ...data, cabinet: data.cabinet ?? (definition?.cabinetDoors !== undefined ? defaultCabinet(data, definition.cabinetDoors) : undefined), dimensions, position, category: appliance ? 'appliance' as const : data.category, displayName: this.catalog.get(key)?.source ? this.catalog.get(key)!.name : data.displayName, assetKey: key, lightConfig: behavior === 'luminaire' ? data.lightConfig : undefined, hasLids: behavior === 'shelving' ? data.hasLids : undefined, shelfCount: behavior === 'shelving' ? data.shelfCount : undefined, recessHostId: behavior === 'recess' ? data.recessHostId : undefined };
     const constructors = { standard: StandardFurniture, luminaire: Luminaire, shelving: Shelving, basin: BasinCabinet, recess: WallRecess };
     return new constructors[behavior](input);
   }

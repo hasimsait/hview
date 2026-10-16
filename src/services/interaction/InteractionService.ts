@@ -18,6 +18,9 @@ export class InteractionService implements IInteractionService {
   private gizmoMode: 'translate' | 'rotate' = 'translate';
   private gizmoShowY = false;
   private enabled = true;
+  private cabinetMode: { id: string; select: (part: string | null) => void; move: (part: string, position: THREE.Vector3, rotation: number) => void } | null = null;
+  private cabinetPart: string | null = null;
+  private cabinetAxes: 'x' | 'y' | 'xyz' = 'xyz';
 
   private subscriptions: (() => void)[] = [];
   private pointerDownPos = { x: 0, y: 0 };
@@ -41,7 +44,13 @@ export class InteractionService implements IInteractionService {
       this.sceneService.getCamera(),
       domElement
     );
-    this.transformControls.addEventListener('change', () => this.sceneService?.invalidate());
+    this.transformControls.addEventListener('change', () => {
+      this.sceneService?.invalidate();
+      if (!this.cabinetMode && this.transformControls?.dragging && this.selectedTarget?.kind === 'opening') this.sceneService?.checkDoorCollision(this.selectedTarget.id);
+    });
+    this.transformControls.addEventListener('objectChange', () => {
+      if (this.cabinetMode && this.cabinetPart && this.selectedObject) this.sceneService?.previewCabinetPart(this.cabinetMode.id, this.cabinetPart, this.selectedObject.position.clone(), this.selectedObject.rotation.y);
+    });
     this.transformControls.setMode(this.gizmoMode);
     this.transformControls.showY = false; // Only translate in X and Z on the floor!
     this.transformControls.space = 'world'; // World coordinates for reliable floor translation
@@ -49,8 +58,12 @@ export class InteractionService implements IInteractionService {
 
     const controls = this.sceneService.getControls();
     this.transformControls.addEventListener('dragging-changed', (event) => {
+      if (event.value && !this.cabinetMode && this.selectedTarget?.kind === 'furniture') this.sceneService?.clearCollisionFeedback();
       if (controls) {
         controls.enabled = this.enabled && !event.value;
+      }
+      if (this.enabled && !event.value && this.cabinetMode && this.cabinetPart && this.selectedObject) {
+        this.cabinetMode.move(this.cabinetPart, this.selectedObject.position.clone(), this.selectedObject.rotation.y); return;
       }
       // When dragging finishes, ensure final coordinates are committed via SelectionModel / selectedTarget
       if (this.enabled && !event.value && this.selectedObject && this.editor) {
@@ -73,7 +86,7 @@ export class InteractionService implements IInteractionService {
     domElement.addEventListener('pointerup', this.boundPointerUp);
 
     const updateSelection = () => {
-      if (!this.editor || this.transformControls?.dragging) return;
+      if (!this.editor || this.transformControls?.dragging || this.cabinetMode) return;
       this.handleExternalSelection(selectedFurniture(this.editor));
       this.handleExternalOpeningSelection(selectedOpening(this.editor));
       this.handleExternalWallSelection(selectedWall(this.editor));
@@ -86,10 +99,18 @@ export class InteractionService implements IInteractionService {
     }));
   }
 
+  setCabinetEditor(mode: typeof this.cabinetMode): void { this.cabinetMode = mode; this.clearGizmoAttachment(); }
+  attachCabinetPart(id: string, part: string | null, axes: 'x' | 'y' | 'xyz' = 'xyz'): void {
+    this.cabinetPart = part; this.cabinetAxes = axes;
+    const target = part ? this.sceneService?.getCabinetPart(id, part) : undefined;
+    if (!target || !this.transformControls) { this.clearGizmoAttachment(); return; }
+    this.selectedObject = target; this.selectedTarget = { kind: 'furniture', id }; this.transformControls.attach(target); this.setGizmoMode(this.gizmoMode);
+  }
   setEnabled(enabled: boolean): void {
     this.enabled = enabled;
     if (this.transformControls) {
       this.transformControls.enabled = enabled;
+      this.transformControls.getHelper().visible = enabled;
       if (!enabled) {
         this.transformControls.dragging = false;
         this.transformControls.axis = null;
@@ -114,6 +135,10 @@ export class InteractionService implements IInteractionService {
   setGizmoMode(mode: 'translate' | 'rotate'): void {
     this.gizmoMode = mode;
     if (this.transformControls) {
+      if (this.cabinetMode) {
+        this.transformControls.setMode(this.cabinetAxes === 'xyz' ? mode : 'translate'); this.transformControls.space = 'local';
+        this.transformControls.showX = this.cabinetAxes !== 'y'; this.transformControls.showY = mode === 'translate' || this.cabinetAxes === 'y'; this.transformControls.showZ = this.cabinetAxes === 'xyz' && mode === 'translate'; return;
+      }
       if (this.selectedTarget?.kind === 'opening') {
         this.transformControls.setMode('rotate');
         this.transformControls.space = 'local';
@@ -180,6 +205,7 @@ export class InteractionService implements IInteractionService {
     this.mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
 
     const picked = this.sceneService.pick(this.mouse);
+    if (this.cabinetMode) { this.cabinetMode.select(picked?.target.id === this.cabinetMode.id && typeof picked.hit.object.userData.cabinetPart === 'string' ? picked.hit.object.userData.cabinetPart : null); return; }
     this.editor.selection.set(picked?.target ?? null);
   }
 

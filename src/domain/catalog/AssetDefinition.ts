@@ -54,6 +54,7 @@ export interface AssetDefinition {
     frameColor: string;
     insertColor: string;
   };
+  cabinetDoors?: 0 | 1 | 2;
   collection?: string;
   source?: {
     retailer: string; url?: string; productCode?: string;

@@ -37,7 +37,9 @@ export class FurnitureAppearance {
         let secFinish: SurfaceFinishConfig | undefined = section ? entity.sectionFinishes?.[section] : undefined;
         if (!secFinish && isRecess && section) secFinish = entity.inheritedFinish(section, this.recessHost(entity));
 
-        const activeFinish = secFinish ?? (
+        const content = child.userData.cabinetContent as import('../../domain/cabinet/CabinetLayout').CabinetContent | undefined;
+        const panel = child.userData.cabinetPanel as import('../../domain/cabinet/CabinetLayout').CabinetPanel | undefined;
+        const activeFinish = content ? (section ? content.sectionFinishes?.[section] : undefined) ?? content.finish : panel?.finish ?? secFinish ?? (
           child.userData.isLightEmissive || sec === 'Diffuser' || sec === 'Lens' || sec === 'Bulb'
             ? undefined
             : entity.finish

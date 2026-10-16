@@ -26,11 +26,15 @@ import { CeilingMeshBuilder } from "./geometry/CeilingMeshBuilder";
 import { FloorMeshBuilder } from "./geometry/FloorMeshBuilder";
 import { OpeningMeshBuilder } from "./geometry/OpeningMeshBuilder";
 import { SurfaceMaterialFactory } from "./materials/SurfaceMaterialFactory";
+import { CollisionFeedback } from './cabinet/CollisionFeedback';
+import { cabinetIssues, footprint, interiorOrigin, moveCabinetPart, resolveContent, resolvePanel } from '../domain/cabinet/CabinetLayout';
 import { mobileRendering } from './RenderQuality';
 
 export interface SceneStatus { readonly state: 'loading' | 'ready' | 'recovering' | 'error'; readonly message: string; }
 
 export class SceneEngine implements ISceneService {
+  private readonly collisionFeedback = new CollisionFeedback();
+  private cabinetEditingId: string | null = null;
   private readonly mobile = mobileRendering();
   private mobileLights: FixtureLight[] = [];
   private readonly lightTarget = new THREE.Vector3(Infinity, Infinity, Infinity);
@@ -252,6 +256,7 @@ export class SceneEngine implements ISceneService {
   }
 
   dispose(): void {
+    this.collisionFeedback.dispose();
     this.disposed = true; this.preparationVersion++;
     this.graph.dispose(); this.ceilingLease?.dispose(); this.paletteLease.dispose();
     this.finishService.dispose();
@@ -290,8 +295,17 @@ export class SceneEngine implements ISceneService {
     // Transforms and saves retain their programs. Do not walk the entire scene
     // through the compiler on every drag event.
     if (!change.previous || change.label === 'Load document' || change.added.length > 0) this.needsPreparation = true;
+    this.collisionFeedback.clear();
     this.currentPlan = change.document;
     this.graph.reconcile(change.document);
+    if (this.cabinetEditingId) this.checkCabinetLayout();
+    else for (const id of change.updated) {
+      const now = change.document.get(id), before = change.previous?.get(id);
+      if (now instanceof Opening && before instanceof Opening && now.openAngle !== before.openAngle) this.checkDoorCollision(id, undefined, (before.openAngle ?? 40) * Math.PI / 180);
+      if (now instanceof Furniture && before instanceof Furniture && now.cabinet) now.cabinet.doors.angles.forEach((angle, index) => {
+        if (angle !== (before.cabinet?.doors.angles[index] ?? 0)) this.checkDoorCollision(id, index, (before.cabinet?.doors.angles[index] ?? 0) * Math.PI / 180);
+      });
+    }
     if (!change.previous || change.previous.rooms.length !== change.document.rooms.length || change.document.rooms.some((room, index) => room !== change.previous!.rooms[index])) this.ceilingsDirty = true;
     this.applyVisibilitySettings(); this.applyLightingSettings();
     if (!change.previous || change.label === 'Load document') this.fitPlanInView();
@@ -966,6 +980,62 @@ export class SceneEngine implements ISceneService {
     return this.controls;
   }
 
+  previewCabinetPart(id: string, part: string, centre: THREE.Vector3, rotation: number): void {
+    const item = this.currentPlan?.get(id); if (!(item instanceof Furniture) || !item.cabinet || this.cabinetEditingId !== id) return;
+    const c = moveCabinetPart(item.cabinet, item.dimensions, part, centre, rotation, false), origin = interiorOrigin(item.dimensions, c);
+    for (const p of c.panels) {
+      const object = this.getCabinetPart(id, p.id); if (!object) continue;
+      const box = resolvePanel(c, item.dimensions, p), previous = resolvePanel(item.cabinet, item.dimensions, item.cabinet.panels.find(s => s.id === p.id)!);
+      object.position.set(origin.x + box.position.x + box.dimensions.x / 2, origin.y + box.position.y + box.dimensions.y / 2, origin.z + box.position.z + box.dimensions.z / 2);
+      object.scale.set(box.dimensions.x / previous.dimensions.x, box.dimensions.y / previous.dimensions.y, box.dimensions.z / previous.dimensions.z);
+    }
+    for (const o of c.contents) {
+      const object = this.getCabinetPart(id, o.id); if (!object) continue;
+      const box = resolveContent(c, item.dimensions, o), f = footprint(o.dimensions, o.rotationY);
+      object.position.set(origin.x + box.position.x + f.x / 2, origin.y + box.position.y, origin.z + box.position.z + f.z / 2); object.rotation.y = o.rotationY;
+    }
+    this.collisionFeedback.clear();
+    for (const part of cabinetIssues(c, item.dimensions).keys()) { const object = this.getCabinetPart(id, part); if (object) this.collisionFeedback.mark(object); }
+    this.invalidate();
+  }
+  clearCollisionFeedback(): void { this.collisionFeedback.clear(); this.invalidate(); }
+  setCabinetEditing(id: string | null): void { this.cabinetEditingId = id; this.collisionFeedback.clear(); if (id) this.checkCabinetLayout(); this.invalidate(); }
+  getCabinetPart(id: string, part: string): THREE.Object3D | undefined {
+    const root = this.getRenderObject(id);
+    return root?.getObjectByName(`cabinet_part_${part}`) ?? root?.getObjectByName(`cabinet_content_${part}`) ?? (part.startsWith('door_') ? root?.getObjectByName(`cabinet_door_${part.slice(5)}`) : undefined);
+  }
+  private checkCabinetLayout(): void {
+    const item = this.currentPlan?.get(this.cabinetEditingId!);
+    if (!(item instanceof Furniture) || !item.cabinet) return;
+    const issues = cabinetIssues(item.cabinet, item.dimensions), root = this.getRenderObject(item.id);
+    if (root) root.userData.cabinetIssues = Object.fromEntries(issues);
+    for (const id of issues.keys()) { const part = this.getCabinetPart(item.id, id); if (part) this.collisionFeedback.mark(part); }
+  }
+  checkDoorCollision(id: string, door?: number, previousAngle?: number): boolean {
+    if (this.cabinetEditingId) return false;
+    this.collisionFeedback.clear();
+    const root = this.getRenderObject(id), pivot = door === undefined ? this.getTransformTarget(id) : root?.getObjectByName(`cabinet_door_${door}`);
+    if (!root || !pivot) return false;
+    let leaf: THREE.Mesh | undefined;
+    pivot.traverse(o => { if (o instanceof THREE.Mesh && (o.userData.isSwingLeaf || o.name.startsWith('doorLeaf_'))) leaf = o; });
+    if (!leaf) return false;
+    const final = pivot.rotation.y;
+    // Opening angles are unsigned in the document; hinge orientation supplies sign.
+    const from = previousAngle === undefined ? final : (pivot.userData.swingSign ?? Math.sign(final || 1)) * previousAngle;
+    const steps = Math.max(1, Math.ceil(Math.abs(final - from) / (Math.PI / 90)));
+    const obstacles = this.picking.getCandidates().filter((o): o is THREE.Mesh => o instanceof THREE.Mesh && o !== leaf && !pivot.getObjectById(o.id));
+    let collides = false; this.scene.updateMatrixWorld(true);
+    for (let step = 1; step <= steps && !collides; step++) {
+      pivot.rotation.y = from + (final - from) * step / steps; pivot.updateWorldMatrix(true, true);
+      for (const other of obstacles) {
+        let visible = true; for (let p: THREE.Object3D | null = other; p; p = p.parent) if (!p.visible) visible = false;
+        if (visible && this.collisionFeedback.intersects(leaf, other, ['wall', 'column'].includes(this.picking.resolve(other)?.kind ?? ''))) { collides = true; break; }
+      }
+    }
+    pivot.rotation.y = final; pivot.updateWorldMatrix(true, true);
+    if (collides) this.collisionFeedback.mark(pivot);
+    root.userData.doorCollision = collides; this.invalidate(); return collides;
+  }
   getRenderObject(id: string): THREE.Group | undefined { return this.graph.get(id)?.group; }
   getTransformTarget(id: string): THREE.Object3D | undefined {
     const node = this.graph.get(id);

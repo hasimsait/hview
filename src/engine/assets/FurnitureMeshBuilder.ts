@@ -7,6 +7,7 @@ import { TextureSource } from '../materials/TextureSource';
 import { AssetBuildContext,ProceduralMaterials } from "./builders/AssetBuildContext";
 import { FURNITURE_GEOMETRY } from "./FurnitureGeometryLibrary";
 import { mobileRendering } from '../RenderQuality';
+import { buildCabinet } from '../cabinet/CabinetBuilder';
 import { createTextileMaterial } from '../materials/TextileMaterial';
 
 export class FurnitureMeshBuilder {
@@ -157,7 +158,8 @@ export class FurnitureMeshBuilder {
     };
 
     // Strategy Pattern: dispatch directly to the registered builder
-    FURNITURE_GEOMETRY[this.catalog.recipe(key)](context);
+    if (entity.cabinet || this.catalog.recipe(key) === 'modular_cabinet') buildCabinet(context, content => this.build(content));
+    else FURNITURE_GEOMETRY[this.catalog.recipe(key)](context);
 
     // Universal fallback: ensure every paintable mesh has a readable section name and local metric bounds
     group.traverse((child) => {
@@ -210,7 +212,7 @@ export class FurnitureMeshBuilder {
     parent.traverse((child) => {
       const mesh = child as THREE.Mesh;
       if (mesh.isMesh && mesh.geometry) {
-        if (mesh instanceof THREE.InstancedMesh || mesh.userData.skipOutline) return;
+        if (mesh instanceof THREE.InstancedMesh || mesh.userData.skipOutline || mesh.children.some(child => child.name === 'celOutline')) return;
         // Skip small light bulbs / spheres and smooth curved hoses
         if (mesh.geometry.type === 'SphereGeometry' || mesh.geometry.type === 'TubeGeometry') return;
         const edges = new THREE.EdgesGeometry(mesh.geometry, 28);
