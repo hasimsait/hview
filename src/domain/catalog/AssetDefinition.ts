@@ -58,9 +58,7 @@ export interface AssetDefinition {
   collection?: string;
   source?: {
     retailer: string; url?: string; productCode?: string;
-    dimensions: 'listed' | 'estimated' | 'reference'; dimensionNotes?: string;
-    dimensionSources?: string[];
-    popularity?: { category: string; rank: number; checkedAt: string };
+    dimensions?: 'listed' | 'estimated' | 'reference'; dimensionNotes?: string;
   };
 }
 

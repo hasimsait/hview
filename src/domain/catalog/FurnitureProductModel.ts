@@ -5,11 +5,11 @@ export type FurnitureProductKind = 'bookcase' | 'desk' | 'wardrobe' | 'coffee_ta
 
 export interface FurnitureProductModel {
   kind: FurnitureProductKind;
-  style: string;
-  color: string;
-  accentColor: string;
-  fabricColor: string;
-  material: 'paint' | 'wood' | 'fabric';
+  style?: string;
+  color?: string;
+  accentColor?: string;
+  fabricColor?: string;
+  material?: 'paint' | 'wood' | 'fabric';
   shelves?: number;
   columns?: number;
   doors?: number;
@@ -17,6 +17,4 @@ export interface FurnitureProductModel {
   seats?: number;
   mirrored?: boolean;
   ringBack?: boolean;
-  mattressWidth?: number;
-  mattressLength?: number;
 }

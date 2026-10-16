@@ -7,11 +7,11 @@ import { accessoryParts } from './IkeaAccessoryBuilder';
 export function buildFurnitureProduct(c: AssetBuildContext): void {
   const model = c.definition?.furnitureProduct;
   if (!model) throw new Error(`Missing furniture product model for ${c.entity.assetKey}`);
-  const p = accessoryParts(c);
+  const p = accessoryParts(c), style = model.style ?? 'plain';
   const colored = (color: string, base = c.materials.whitePaint) => c.coloredMaterial?.(color, base) ?? base;
   const bases = { paint: c.materials.whitePaint, wood: c.materials.woodLight, fabric: c.materials.fabricLight };
-  const body = colored(model.color, bases[model.material]), accent = colored(model.accentColor);
-  const fabric = colored(model.fabricColor, c.materials.fabricLight);
+  const body = colored(model.color ?? '#f1efea', bases[model.material ?? 'paint']), accent = colored(model.accentColor ?? '#44464a');
+  const fabric = colored(model.fabricColor ?? '#9b9e9d', c.materials.fabricLight);
   const v = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
   const rod = (a: number[], b: number[], r = .018, mat: THREE.Material = accent, section = 'Frame') =>
     p.rod(v(a[0], a[1], a[2]), v(b[0], b[1], b[2]), r, mat, section);
@@ -31,17 +31,17 @@ export function buildFurnitureProduct(c: AssetBuildContext): void {
   const door = (x: number, y: number, w: number, h: number, mirrored = false) => {
     p.box(x, y, .44, w, h, .045, body, 'Doors');
     if (mirrored) p.box(x, y, .467, w * .82, h * .91, .006, c.materials.mirrorNonReflective, 'Mirror');
-    if (model.style === 'country') {
+    if (style === 'country') {
       p.box(x, y, .467, w * .78, h * .76, .008, body, 'Door Panels');
     }
-    handle(x + w * .3, y, model.style === 'country');
+    handle(x + w * .3, y, style === 'country');
   };
   const drawers = (count: number, x = 0, bottom = .16, top = .88, width = .93) => {
     const height = (top - bottom) / count;
     for (let i = 0; i < count; i++) {
       const y = bottom + height * (i + .5);
       p.box(x, y, .44, width, height - .012, .045, body, 'Drawers');
-      handle(x, y, model.style === 'country');
+      handle(x, y, style === 'country');
     }
   };
   const cushion = (x: number, y: number, z: number, w: number, h: number, d: number, section: string, mat: THREE.Material = fabric) => {
@@ -51,7 +51,7 @@ export function buildFurnitureProduct(c: AssetBuildContext): void {
     geo.computeVertexNormals(); p.add(geo, mat, section, x, y, z);
   };
   const seating = () => {
-    const sleeper = model.style === 'sleeper', metal = model.style === 'metal';
+    const sleeper = style === 'sleeper', metal = style === 'metal';
     feet(sleeper ? .16 : .23);
     p.box(0, .29, 0, .92, .15, .88, metal ? accent : body, 'Seat Frame');
     const count = model.seats ?? 1, total = sleeper ? .92 : .79, width = total / count;
@@ -59,7 +59,7 @@ export function buildFurnitureProduct(c: AssetBuildContext): void {
       const x = -total / 2 + width * (i + .5);
       cushion(x, .44, .07, width - .018, .18, .74, 'Seat');
       cushion(x, .72, -.32, width - .012, .48, .26, 'Backrest');
-      if (model.style === 'tufted') for (const y of [.64, .78]) for (const dx of [-width * .2, width * .2]) {
+      if (style === 'tufted') for (const y of [.64, .78]) for (const dx of [-width * .2, width * .2]) {
         p.add(new THREE.SphereGeometry(.012, 8, 6), accent, 'Tufting', x + dx, y, -.18);
       }
     }
@@ -76,7 +76,7 @@ export function buildFurnitureProduct(c: AssetBuildContext): void {
   const builders: Record<FurnitureProductKind, () => void> = {
     bookcase: () => {
       const shelves = model.shelves ?? 5, columns = model.columns ?? 1;
-      if (model.style === 'metal') {
+      if (style === 'metal') {
         for (const x of [-.475, .475]) for (const z of [-.465, .465]) rod([x, .025, z], [x, .975, z], .014, accent, 'Metal Frame');
       } else {
         for (const x of [-.485, .485]) p.box(x, .5, 0, .03, 1, 1, body, 'Sides');
@@ -87,15 +87,15 @@ export function buildFurnitureProduct(c: AssetBuildContext): void {
     },
     desk: () => {
       p.box(0, .96, 0, 1, .06, 1, body, 'Desktop');
-      feet(.93, .45, model.style === 'plain' ? body : accent);
-      if (model.style === 'metal' || model.style === 'gaming') {
+      feet(.93, .45, style === 'plain' ? body : accent);
+      if (style === 'metal' || style === 'gaming') {
         for (const z of [-.4, .4]) rod([-.43, .15, z], [.43, .88, z], .012, accent, 'Braces');
       }
-      if (model.style === 'shelf') {
+      if (style === 'shelf') {
         for (const x of [.2, .46]) p.box(x, .47, 0, .025, .89, .95, body, 'Shelf Supports');
         for (const y of [.06, .48]) p.box(.33, y, 0, .28, .03, .94, body, 'Side Shelves');
       }
-      if (model.style === 'gaming') {
+      if (style === 'gaming') {
         p.box(0, .77, -.43, .86, .13, .05, accent, 'Rear Brace');
         p.ring(.05, .01, accent, 'Cup Holder', .41, .9, .32);
       }
@@ -107,17 +107,17 @@ export function buildFurnitureProduct(c: AssetBuildContext): void {
       if (model.drawers) drawers(model.drawers, 0, .1, .265);
     },
     coffee_table: () => {
-      feet(.92, .37, model.style === 'retro' || model.style === 'round' ? c.materials.woodLight : accent);
-      if (model.style === 'round') p.cylinder(0, .95, 0, .5, .08, body, 'Tabletop');
+      feet(.92, .37, style === 'retro' || style === 'round' ? c.materials.woodLight : accent);
+      if (style === 'round') p.cylinder(0, .95, 0, .5, .08, body, 'Tabletop');
       else p.box(0, .95, 0, 1, .08, 1, body, 'Tabletop');
-      if (model.style === 'storage') {
+      if (style === 'storage') {
         p.box(0, .26, 0, .92, .055, .92, body, 'Lower Shelf');
         for (const x of [-.43, .43]) p.box(x, .58, 0, .035, .61, .92, body, 'Sides');
       }
     },
     sofa: seating, armchair: seating,
     tv_stand: () => {
-      feet(.25, .42, model.style === 'retro' ? c.materials.woodLight : accent);
+      feet(.25, .42, style === 'retro' ? c.materials.woodLight : accent);
       carcass(.25, .975);
       for (const x of [-.35, .35]) door(x, .61, .27, .65);
       for (const x of [-.2, .2]) p.box(x, .61, 0, .018, .68, .92, body, 'Dividers');
@@ -125,13 +125,13 @@ export function buildFurnitureProduct(c: AssetBuildContext): void {
     },
     bedside: () => { feet(.12); carcass(.12, .98); drawers(model.drawers ?? 2, 0, .17, .94); },
     shoe_cabinet: () => {
-      if (model.style === 'open') {
+      if (style === 'open') {
         for (const x of [-.475, .475]) for (const z of [-.46, .46]) rod([x, .02, z], [x, .98, z], .018, body, 'Uprights');
         const n = model.shelves ?? 5;
         for (let i = 0; i < n; i++) p.box(0, .04 + i * .9 / (n - 1), 0, .98, .035, .96, body, 'Shoe Shelves');
       } else {
         carcass(.04, .98);
-        if (model.style === 'tilt') drawers(model.drawers || 1, 0, .08, .94);
+        if (style === 'tilt') drawers(model.drawers || 1, 0, .08, .94);
         else for (let i = 0; i < (model.doors ?? 2); i++) door(-.47 + .94 * (i + .5) / (model.doors ?? 2), .51, .94 / (model.doors ?? 2) - .012, .88);
       }
     },
@@ -143,18 +143,18 @@ export function buildFurnitureProduct(c: AssetBuildContext): void {
     sideboard: () => {
       feet(.18); carcass(.18, .98); const n = model.doors ?? 4;
       for (let i = 0; i < n; i++) door(-.47 + .94 * (i + .5) / n, .58, .94 / n - .008, .75);
-      if (model.style === 'ribbed') for (let i = 0; i < 40; i++) p.box(-.46 + i * .92 / 39, .58, .467, .008, .69, .008, body, 'Fluted Fronts');
+      if (style === 'ribbed') for (let i = 0; i < 40; i++) p.box(-.46 + i * .92 / 39, .58, .467, .008, .69, .008, body, 'Fluted Fronts');
       if (model.drawers) drawers(model.drawers, 0, .55, .94, .29);
     },
     dining_chair: () => {
-      feet(.49, .38, model.style === 'metal' ? colored('#c6a66d') : accent);
+      feet(.49, .38, style === 'metal' ? colored('#c6a66d') : accent);
       cushion(0, .52, .05, .96, .12, .86, 'Seat');
       cushion(0, .79, -.31, .9, .42, .18, 'Backrest');
       for (const x of [-.34, .34]) rod([x, .35, -.35], [x, .82, -.35], .025, accent, 'Back Supports');
       if (model.ringBack) p.ring(.11, .012, colored('#c6a66d'), 'Back Ring', 0, .78, -.44, true);
     },
     floor_lamp: () => {
-      const tripod = model.style.startsWith('tripod'), arc = model.style === 'arc', spiral = model.style === 'spiral';
+      const tripod = style.startsWith('tripod'), arc = style === 'arc', spiral = style === 'spiral';
       const shadeX = arc ? .17 : 0;
       if (tripod) for (let i = 0; i < 3; i++) {
         const angle = i * Math.PI * 2 / 3;
@@ -166,7 +166,7 @@ export function buildFurnitureProduct(c: AssetBuildContext): void {
           : arc ? [v(-.2, .04, 0), v(-.2, .7, 0), v(-.1, .95, 0), v(.2, .91, 0)] : [v(0, .04, 0), v(0, .78, 0)];
         p.add(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(curve), 48, .012, 8, false), body, 'Stem');
       }
-      if (model.style === 'tripod_shelf') p.cylinder(0, .42, 0, .3, .025, body, 'Table Shelf');
+      if (style === 'tripod_shelf') p.cylinder(0, .42, 0, .3, .025, body, 'Table Shelf');
       p.lathe([[.31, .75], [.25, .99], [.225, .99], [.285, .75]], fabric, 'Shade', shadeX);
       const bulb = p.cylinder(shadeX, .81, 0, .1, .1, c.materials.warmLightGlow, 'Bulb');
       bulb.userData.isLightEmissive = true;
@@ -185,7 +185,7 @@ export function buildFurnitureProduct(c: AssetBuildContext): void {
       p.box(0, .09, .49, .96, .1, .015, body, 'Service Panel');
     },
     bed: () => {
-      const metal = model.style !== 'wood', folding = model.style === 'folding', daybed = model.style === 'daybed';
+      const metal = style !== 'wood', folding = style === 'folding', daybed = style === 'daybed';
       feet(folding ? .48 : .26, .46, metal ? accent : body);
       p.box(0, folding ? .5 : .3, 0, .97, .06, .97, metal ? accent : body, 'Bed Frame');
       cushion(0, folding ? .75 : .46, 0, .92, folding ? .4 : .25, .94, 'Mattress', c.materials.fabricLight);

@@ -28,7 +28,7 @@ async function choose(page: Page, code: string) {
   await page.getByLabel('Catalogue source', { exact: true }).selectOption('Popular Products');
   await page.getByLabel('Accessory type', { exact: true }).selectOption('all');
   await page.getByPlaceholder('Search assets (e.g. towel, fan, sconce, bed, sink)...').fill(code);
-  const asset = POPULAR_PRODUCTS.find(a => a.source?.productCode === code)!;
+  const asset = POPULAR_PRODUCTS.find(a => a.key === `popular_${code}`)!;
   await page.getByRole('button').filter({ has: page.getByRole('heading', { name: asset.name, exact: true }) }).click();
 }
 async function state(page: Page): Promise<FurnitureData[]> {
@@ -38,7 +38,7 @@ async function state(page: Page): Promise<FurnitureData[]> {
   });
 }
 
-test('mobile catalogue filters popular products, shows dated popularity and flags conflicting measurements', async ({ page }, testInfo) => {
+test('mobile catalogue filters furniture and shows only names and planning dimensions', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole('button', { name: 'Add Asset', exact: true }).click();
   await page.getByLabel('Catalogue source', { exact: true }).selectOption('Popular Products');
@@ -48,9 +48,8 @@ test('mobile catalogue filters popular products, shows dated popularity and flag
   const search = page.getByPlaceholder('Search assets (e.g. towel, fan, sconce, bed, sink)...');
   await search.fill('23749091');
   const card = page.getByRole('button').filter({ has: page.getByRole('heading', { name: 'Metalia Novado Four-Door Two-Drawer Wardrobe — White', exact: true }) });
-  await expect(card).toContainText('#1 in Wardrobes · 2026-10-16');
-  await expect(card).toContainText('Conflicting product listing specifications');
-  await expect(card).toContainText('Approx.');
+  await expect(card).toContainText('120 × 44 × 174 cm (W × D × H)');
+  await expect(card).not.toContainText(/2026-10-16|specifications|Approx\.|#1 in/);
   await page.screenshot({ path: testInfo.outputPath('popular-products-mobile-catalogue.png') });
   await card.click();
   expect((await state(page))[0]).toMatchObject({ assetKey: 'popular_23749091', position: { y: 0 } });
@@ -96,7 +95,7 @@ test('popular furniture families render together without shader errors', async (
   const articles = ['49050602', '2090364621', '2481365267', '873387540', '229668286', '1516436014', '2210182939', '747347649', '322079372', '2360973753', '2444190412', '2553797835', '2499665783', '2503594608', '348012422'];
   const items: Record<string, object> = {};
   articles.forEach((code, i) => {
-    const asset = POPULAR_PRODUCTS.find(a => a.source?.productCode === code)!;
+    const asset = POPULAR_PRODUCTS.find(a => a.key === `popular_${code}`)!;
     items[code] = { name: asset.key, assetKey: asset.key, dimensions: asset.defaultDimensions,
       pc: { x: 150 + i % 5 * 260, y: 150 + Math.floor(i / 5) * 260 }, angle: 180, f0offset: 0 };
   });

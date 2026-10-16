@@ -18,27 +18,22 @@ const item = (asset: AssetDefinition) => codec.factory.furniture({ id: asset.key
   category: asset.category as FurnitureCategory, displayName: asset.name, position: { x: 0, y: 0, z: 0 }, rotationY: 0, dimensions: asset.defaultDimensions });
 
 describe('Popular Products catalogue', () => {
-  it('keeps 83 unique reference product identities and dated category ranks across 14 collections', () => {
+  it('keeps 83 unique editable assets across 14 collections', () => {
     expect(POPULAR_PRODUCTS).toHaveLength(83);
     expect(new Set(POPULAR_PRODUCTS.map(a => a.key)).size).toBe(83);
     expect(new Set(POPULAR_PRODUCTS.map(a => a.collection)).size).toBe(14);
     for (const asset of POPULAR_PRODUCTS) {
       expect(catalog.get(asset.key)).toEqual(asset);
-      expect(asset.source?.url).toBeUndefined();
-      expect(asset.source?.retailer).toBe('Popular Products');
-      expect(asset.source?.popularity).toMatchObject({ category: asset.collection, checkedAt: '2026-10-16' });
-      expect(asset.source!.popularity!.rank).toBeGreaterThan(0);
-      expect(asset.source!.popularity!.rank).toBeLessThanOrEqual(15);
+      expect(asset.source).toEqual({ retailer: 'Popular Products' });
       expect(asset.name).not.toMatch(/kitaplık|rafli|koltuk|sehpa|gardırop|beyaz|ceviz|çalışma|çekmece|sandalye|lambader|[ıİşŞğĞ]/);
-      expect(asset.description).not.toMatch(/en popüler|ölçü|fiyat/i);
-      expect(asset.source?.dimensionNotes!.length).toBeGreaterThan(20);
+      expect(asset.description).toBeUndefined();
       expect(catalog.recipe(asset.key)).toBe('retail_furniture');
     }
     expect(catalog.all().filter(a => a.key === 'retail_furniture')).toHaveLength(0);
   });
 
   it.each([POPULAR_PRODUCTS[0], POPULAR_PRODUCTS.find(a => a.capabilities?.lighting)!])('migrates earlier product prefixes for $name without changing saved identity or dimensions', asset => {
-    const original = item(asset), oldKey = `archived_${asset.source!.productCode}`;
+    const original = item(asset), oldKey = `archived_${asset.key.slice('popular_'.length)}`;
     const raw = rawPlan();
     Object.assign(raw.plan.items, { imported: { name: oldKey, assetKey: oldKey, dimensions: original.dimensions, pc: { x: 100, y: 100 } } });
     expect(codec.decode(raw).requireFurniture('imported').assetKey).toBe(asset.key);
@@ -50,14 +45,13 @@ describe('Popular Products catalogue', () => {
     expect(restored instanceof Luminaire).toBe(original instanceof Luminaire);
   });
 
-  it('flags conflicting specifications and distinguishes mattress size from bed footprint', () => {
-    const byCode = (id: string) => POPULAR_PRODUCTS.find(a => a.source?.productCode === id)!;
-    expect(byCode('23749091')).toMatchObject({ source: { dimensions: 'estimated', dimensionNotes: expect.stringContaining('Conflicting') } });
-    expect(byCode('63214012')).toMatchObject({ defaultDimensions: { x: .39, z: .2, y: 1.6 }, source: { dimensions: 'listed' } });
+  it('preserves dimensions, wall placement and overall bed footprints', () => {
+    const byCode = (id: string) => POPULAR_PRODUCTS.find(a => a.key === `popular_${id}`)!;
+    expect(byCode('23749091').defaultDimensions).toEqual({ x: 1.2, z: .44, y: 1.74 });
+    expect(byCode('63214012')).toMatchObject({ defaultDimensions: { x: .39, z: .2, y: 1.6 } });
     expect(byCode('14359445')).toMatchObject({ defaultDimensions: { x: .56, z: .2, y: 1.08 } });
     expect(byCode('84595046').placement).toMatchObject({ mount: 'wall', defaultElevation: .15 });
     expect(byCode('2216361840').defaultDimensions.x).toBeGreaterThan(1.6);
-    expect(byCode('2216361840').source?.dimensions).toBe('estimated');
   });
 
   it.each(POPULAR_PRODUCTS)('$name builds paintable component geometry inside its planning envelope', asset => {
