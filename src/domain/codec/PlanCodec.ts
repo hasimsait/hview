@@ -30,6 +30,11 @@ export class PlanCodec {
       if (raw.schemaVersion !== 1) throw new Error(`Unsupported HView schema version: ${raw.schemaVersion}`);
       const { document } = envelopeSchema.parse(raw);
       const elements = document.elements.map((entry): PlanElement => {
+        // Renamed product references retain their saved element ID, transform and behavior.
+        if (entry.kind === 'furniture.standard' || entry.kind === 'furniture.luminaire' || entry.kind === 'furniture.shelving' || entry.kind === 'furniture.basin' || entry.kind === 'furniture.recess') {
+          const key = this.factory.catalog.canonicalKey(entry.data.assetKey);
+          if (key !== entry.data.assetKey && key.startsWith('popular_')) return this.factory.furniture({ ...entry.data, assetKey: key });
+        }
         switch (entry.kind) {
           case 'wall': return this.factory.wall(entry.data);
           case 'column': return this.factory.column(entry.data);

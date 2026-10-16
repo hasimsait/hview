@@ -3,12 +3,14 @@ import { CURATED_ASSETS } from './CuratedAssets';
 import { IKEA_ACCESSORIES } from './IkeaAccessories';
 import { ELECTRICAL_ASSETS } from './ElectricalAssets';
 import { HOUSEHOLD_APPLIANCES } from './HouseholdAppliances';
+import { POPULAR_PRODUCTS } from './PopularProducts';
 
 export const DEFAULT_ASSETS: readonly AssetDefinition[] = [
   ...CURATED_ASSETS,
   ...IKEA_ACCESSORIES,
   ...ELECTRICAL_ASSETS,
   ...HOUSEHOLD_APPLIANCES,
+  ...POPULAR_PRODUCTS,
   // Beds
   {
     key: 'bed_double',

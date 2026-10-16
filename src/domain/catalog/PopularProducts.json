@@ -1,0 +1,2125 @@
+[
+  {
+    "id": "63214012",
+    "name": "Dekorister Cansu D Five-Shelf Bookcase — White",
+    "category": "storage",
+    "collection": "Bookcases",
+    "size": [
+      39,
+      20,
+      160
+    ],
+    "model": {
+      "kind": "bookcase",
+      "style": "plain",
+      "shelves": 5,
+      "columns": 1,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 1,
+    "popularityCategory": "Bookcases",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "listed",
+    "dimensionNotes": "Manufacturer lists width 39 cm, depth 20 cm and height 160 cm.",
+    "dimensionSources": [
+      "https://www.dekorister.com.tr/urun/cansu-d-5-rafli-kitaplik-beyaz"
+    ]
+  },
+  {
+    "id": "14359445",
+    "name": "Remaks Three-Shelf Bookcase — White",
+    "category": "storage",
+    "collection": "Bookcases",
+    "size": [
+      56,
+      20,
+      108
+    ],
+    "model": {
+      "kind": "bookcase",
+      "style": "plain",
+      "shelves": 3,
+      "columns": 1,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 2,
+    "popularityCategory": "Bookcases",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "listed",
+    "dimensionNotes": "Product listing labels height 108 cm, width 56 cm and depth 20 cm; product listing gives the same three extents in a different order.",
+    "dimensionSources": [
+      "https://www.trendyol.com/remaks/3-rafli-kitaplik-kutuphane-hareketli-rafli-dekoratif-kitaplik-beyaz-p-959488549"
+    ]
+  },
+  {
+    "id": "14801412",
+    "name": "Remaks Five-Shelf Bookcase — White",
+    "category": "storage",
+    "collection": "Bookcases",
+    "size": [
+      56,
+      20,
+      169
+    ],
+    "model": {
+      "kind": "bookcase",
+      "style": "plain",
+      "shelves": 5,
+      "columns": 1,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 3,
+    "popularityCategory": "Bookcases",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning dimensions are estimates for the five-shelf model; exact extents are not supplied by product listing."
+  },
+  {
+    "id": "45453458",
+    "name": "Adore Max KTP-150-BY-1 Five-Shelf Bookcase — White",
+    "category": "storage",
+    "collection": "Bookcases",
+    "size": [
+      60,
+      30,
+      150
+    ],
+    "model": {
+      "kind": "bookcase",
+      "style": "plain",
+      "shelves": 5,
+      "columns": 1,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 4,
+    "popularityCategory": "Bookcases",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning extents are estimates; model code is not treated as a dimension."
+  },
+  {
+    "id": "49050602",
+    "name": "Remaks Ten-Compartment Bookcase — White",
+    "category": "storage",
+    "collection": "Bookcases",
+    "size": [
+      93,
+      20,
+      169
+    ],
+    "model": {
+      "kind": "bookcase",
+      "style": "plain",
+      "shelves": 5,
+      "columns": 2,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 5,
+    "popularityCategory": "Bookcases",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "product listing lists 169 × 20 × 93 cm without axis labels. Planning interpretation is W 93 × D 20 × H 169 cm; this axis assignment is estimated."
+  },
+  {
+    "id": "679745933",
+    "name": "Evdemo Oertha Bookcase — Walnut",
+    "category": "storage",
+    "collection": "Bookcases",
+    "size": [
+      60,
+      25,
+      170
+    ],
+    "model": {
+      "kind": "bookcase",
+      "style": "metal",
+      "shelves": 5,
+      "columns": 2,
+      "color": "#795a41",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "wood"
+    },
+    "popularityRank": 6,
+    "popularityCategory": "Bookcases",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2429113936",
+    "name": "Evdemo Meta Metal-Frame Desk — Pine / White",
+    "category": "table",
+    "collection": "Desks",
+    "size": [
+      120,
+      60,
+      75
+    ],
+    "model": {
+      "kind": "desk",
+      "style": "metal",
+      "color": "#a78963",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "wood"
+    },
+    "popularityRank": 1,
+    "popularityCategory": "Desks",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2300878202",
+    "name": "Evdemo Leo Desk with Side Shelves — Pine",
+    "category": "table",
+    "collection": "Desks",
+    "size": [
+      120,
+      50,
+      73
+    ],
+    "model": {
+      "kind": "desk",
+      "style": "shelf",
+      "color": "#a78963",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "wood"
+    },
+    "popularityRank": 2,
+    "popularityCategory": "Desks",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2090364621",
+    "name": "Evdemo Milenyum Gaming Desk — Black",
+    "category": "table",
+    "collection": "Desks",
+    "size": [
+      112,
+      69,
+      78
+    ],
+    "model": {
+      "kind": "desk",
+      "style": "gaming",
+      "color": "#f1efea",
+      "accentColor": "#25282b",
+      "fabricColor": "#34373a",
+      "material": "paint"
+    },
+    "popularityRank": 3,
+    "popularityCategory": "Desks",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "listed",
+    "dimensionNotes": "Manufacturer lists width 112 cm, depth 69 cm and height 78 cm.",
+    "dimensionSources": [
+      "https://www.evdemo.com.tr/milenyum-profesyonel-oyuncu-masasi-siyah.html?manufacturer_id=1"
+    ]
+  },
+  {
+    "id": "2144170376",
+    "name": "Moonlife Yagmur Compact Desk — White",
+    "category": "table",
+    "collection": "Desks",
+    "size": [
+      75,
+      35,
+      73
+    ],
+    "model": {
+      "kind": "desk",
+      "style": "plain",
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 4,
+    "popularityCategory": "Desks",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2378989044",
+    "name": "Evdemo Leo Desk with Side Shelves — White",
+    "category": "table",
+    "collection": "Desks",
+    "size": [
+      120,
+      50,
+      73
+    ],
+    "model": {
+      "kind": "desk",
+      "style": "shelf",
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 5,
+    "popularityCategory": "Desks",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "519412067",
+    "name": "Kenzlife KIMI070 Compact Desk — White",
+    "category": "table",
+    "collection": "Desks",
+    "size": [
+      70,
+      45,
+      75
+    ],
+    "model": {
+      "kind": "desk",
+      "style": "plain",
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 6,
+    "popularityCategory": "Desks",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "23749091",
+    "name": "Metalia Novado Four-Door Two-Drawer Wardrobe — White",
+    "category": "storage",
+    "collection": "Wardrobes",
+    "size": [
+      120,
+      44,
+      174
+    ],
+    "model": {
+      "kind": "wardrobe",
+      "style": "plain",
+      "doors": 4,
+      "drawers": 2,
+      "mirrored": false,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 1,
+    "popularityCategory": "Wardrobes",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Conflicting product listing specifications: labelled extents 120 × 45 × 175 cm versus 130 × 51 × 180 cm. The 120 × 44 × 174 cm planning size follows the linked retailer variant; verify the exact edition.",
+    "dimensionSources": [
+      "https://www.vivense.com/novay-4-kapili-2-cekmeceli-gardrop-dolap-modeli.html"
+    ]
+  },
+  {
+    "id": "2481365267",
+    "name": "Metalia GM 177 Modena Mirrored Three-Door Wardrobe — White",
+    "category": "storage",
+    "collection": "Wardrobes",
+    "size": [
+      90,
+      44,
+      175
+    ],
+    "model": {
+      "kind": "wardrobe",
+      "style": "plain",
+      "doors": 3,
+      "drawers": 2,
+      "mirrored": true,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 2,
+    "popularityCategory": "Wardrobes",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "listed",
+    "dimensionNotes": "Manufacturer-operated Metalia offer labels width 90 cm, depth 44 cm and height 175 cm. Mirror follows the named product variant; product listing mirror flag conflicts.",
+    "dimensionSources": [
+      "https://www.koctas.com.tr/metalia-gm-177-modena-3-kapi-2-cekmeceli-aynali-siyah-kulplu-beyaz-gardirop/p/5000571697"
+    ]
+  },
+  {
+    "id": "2481365252",
+    "name": "Metalia GM 069 Delux Six-Door Two-Drawer Wardrobe — White",
+    "category": "storage",
+    "collection": "Wardrobes",
+    "size": [
+      180,
+      45,
+      180
+    ],
+    "model": {
+      "kind": "wardrobe",
+      "style": "plain",
+      "doors": 6,
+      "drawers": 2,
+      "mirrored": false,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 3,
+    "popularityCategory": "Wardrobes",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2481365253",
+    "name": "Metalia GM 070-A Novado Four-Door Wardrobe — White / Black Handles",
+    "category": "storage",
+    "collection": "Wardrobes",
+    "size": [
+      120,
+      44,
+      175
+    ],
+    "model": {
+      "kind": "wardrobe",
+      "style": "plain",
+      "doors": 4,
+      "drawers": 2,
+      "mirrored": false,
+      "color": "#f1efea",
+      "accentColor": "#25282b",
+      "fabricColor": "#34373a",
+      "material": "paint"
+    },
+    "popularityRank": 4,
+    "popularityCategory": "Wardrobes",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "listed",
+    "dimensionNotes": "product listing labelled width 120 cm, depth 44 cm and height 175 cm agree with its combined dimension field."
+  },
+  {
+    "id": "2481365258",
+    "name": "Metalia GM 081 Favorite Mirrored Six-Door Wardrobe — White",
+    "category": "storage",
+    "collection": "Wardrobes",
+    "size": [
+      180,
+      48,
+      180
+    ],
+    "model": {
+      "kind": "wardrobe",
+      "style": "plain",
+      "doors": 6,
+      "drawers": 0,
+      "mirrored": true,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 5,
+    "popularityCategory": "Wardrobes",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning dimensions are estimates. Product title describes six doors but product listing specifications say four; geometry follows the named six-door variant."
+  },
+  {
+    "id": "2481365438",
+    "name": "Metalia GM 308 Ece Three-Door Three-Drawer Wardrobe — White",
+    "category": "storage",
+    "collection": "Wardrobes",
+    "size": [
+      90,
+      44,
+      175
+    ],
+    "model": {
+      "kind": "wardrobe",
+      "style": "plain",
+      "doors": 3,
+      "drawers": 3,
+      "mirrored": false,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 9,
+    "popularityCategory": "Wardrobes",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "873387540",
+    "name": "Variant Eylul Coffee Table — Cream",
+    "category": "table",
+    "collection": "Coffee tables",
+    "size": [
+      105,
+      60,
+      35
+    ],
+    "model": {
+      "kind": "coffee_table",
+      "style": "storage",
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#d6ccba",
+      "material": "paint"
+    },
+    "popularityRank": 1,
+    "popularityCategory": "Coffee tables",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "listed",
+    "dimensionNotes": "Manufacturer lists width 105 cm, depth 60 cm and height 35 cm.",
+    "dimensionSources": [
+      "https://www.variantmobilya.com/urun/eylul-orta-sehpa-krem"
+    ]
+  },
+  {
+    "id": "336903977",
+    "name": "Remaks Retro Coffee Table — White",
+    "category": "table",
+    "collection": "Coffee tables",
+    "size": [
+      100,
+      55,
+      42
+    ],
+    "model": {
+      "kind": "coffee_table",
+      "style": "retro",
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 3,
+    "popularityCategory": "Coffee tables",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2165286734",
+    "name": "Zuesse Tokyo Coffee Table — Walnut",
+    "category": "table",
+    "collection": "Coffee tables",
+    "size": [
+      100,
+      55,
+      42
+    ],
+    "model": {
+      "kind": "coffee_table",
+      "style": "round",
+      "color": "#795a41",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "wood"
+    },
+    "popularityRank": 4,
+    "popularityCategory": "Coffee tables",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "39867526",
+    "name": "Dekorister Golden Coffee Table — White / Walnut",
+    "category": "table",
+    "collection": "Coffee tables",
+    "size": [
+      100,
+      55,
+      42
+    ],
+    "model": {
+      "kind": "coffee_table",
+      "style": "storage",
+      "color": "#795a41",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "wood"
+    },
+    "popularityRank": 5,
+    "popularityCategory": "Coffee tables",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "535002087",
+    "name": "Moonlife Manolya Coffee Table — White",
+    "category": "table",
+    "collection": "Coffee tables",
+    "size": [
+      100,
+      55,
+      42
+    ],
+    "model": {
+      "kind": "coffee_table",
+      "style": "retro",
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 6,
+    "popularityCategory": "Coffee tables",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "47089538",
+    "name": "Dekorister Erica Coffee Table — White / Walnut",
+    "category": "table",
+    "collection": "Coffee tables",
+    "size": [
+      100,
+      55,
+      42
+    ],
+    "model": {
+      "kind": "coffee_table",
+      "style": "storage",
+      "color": "#795a41",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "wood"
+    },
+    "popularityRank": 7,
+    "popularityCategory": "Coffee tables",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "229668286",
+    "name": "Evdemo Ada Two-Seater Sofa — Grey",
+    "category": "seating",
+    "collection": "Sofas",
+    "size": [
+      125,
+      60,
+      75
+    ],
+    "model": {
+      "kind": "sofa",
+      "style": "plain",
+      "seats": 2,
+      "color": "#9b9e9d",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "fabric"
+    },
+    "popularityRank": 1,
+    "popularityCategory": "Sofas",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2105795112",
+    "name": "Pafu Sando Two-Seater Sofa Bed — Grey",
+    "category": "seating",
+    "collection": "Sofas",
+    "size": [
+      140,
+      90,
+      80
+    ],
+    "model": {
+      "kind": "sofa",
+      "style": "sleeper",
+      "seats": 2,
+      "color": "#9b9e9d",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "fabric"
+    },
+    "popularityRank": 2,
+    "popularityCategory": "Sofas",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2376289373",
+    "name": "Kilim Dove 296652 Two-Seater Sofa — Navy",
+    "category": "seating",
+    "collection": "Sofas",
+    "size": [
+      160,
+      85,
+      85
+    ],
+    "model": {
+      "kind": "sofa",
+      "style": "plain",
+      "seats": 2,
+      "color": "#293c5a",
+      "accentColor": "#44464a",
+      "fabricColor": "#293c5a",
+      "material": "fabric"
+    },
+    "popularityRank": 3,
+    "popularityCategory": "Sofas",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2289872459",
+    "name": "Eymense Yaprak Three-Seater Sofa Bed — Anthracite",
+    "category": "seating",
+    "collection": "Sofas",
+    "size": [
+      220,
+      90,
+      85
+    ],
+    "model": {
+      "kind": "sofa",
+      "style": "tufted",
+      "seats": 3,
+      "color": "#4b4f52",
+      "accentColor": "#44464a",
+      "fabricColor": "#4b4f52",
+      "material": "fabric"
+    },
+    "popularityRank": 5,
+    "popularityCategory": "Sofas",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "1576188154",
+    "name": "Pafu Sando Single Chair Bed — Cream",
+    "category": "seating",
+    "collection": "Sofas",
+    "size": [
+      75,
+      90,
+      80
+    ],
+    "model": {
+      "kind": "sofa",
+      "style": "sleeper",
+      "seats": 1,
+      "color": "#d6ccba",
+      "accentColor": "#44464a",
+      "fabricColor": "#d6ccba",
+      "material": "fabric"
+    },
+    "popularityRank": 9,
+    "popularityCategory": "Sofas",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "66952844",
+    "name": "Gaga Albatros Metal-Frame Loveseat — Black",
+    "category": "seating",
+    "collection": "Sofas",
+    "size": [
+      132,
+      67,
+      80
+    ],
+    "model": {
+      "kind": "sofa",
+      "style": "metal",
+      "seats": 2,
+      "color": "#34373a",
+      "accentColor": "#25282b",
+      "fabricColor": "#34373a",
+      "material": "fabric"
+    },
+    "popularityRank": 10,
+    "popularityCategory": "Sofas",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "product listing lists width 132 cm and depth 67 cm. Overall height is estimated at 80 cm."
+  },
+  {
+    "id": "1516436014",
+    "name": "Pafu Sando Reclining Chair Bed — Grey",
+    "category": "seating",
+    "collection": "Armchairs",
+    "size": [
+      75,
+      90,
+      80
+    ],
+    "model": {
+      "kind": "armchair",
+      "style": "sleeper",
+      "seats": 1,
+      "color": "#9b9e9d",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "fabric"
+    },
+    "popularityRank": 1,
+    "popularityCategory": "Armchairs",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "851201965",
+    "name": "Pafu Sando Reclining Chair Bed — Teal",
+    "category": "seating",
+    "collection": "Armchairs",
+    "size": [
+      75,
+      90,
+      80
+    ],
+    "model": {
+      "kind": "armchair",
+      "style": "sleeper",
+      "seats": 1,
+      "color": "#35636b",
+      "accentColor": "#44464a",
+      "fabricColor": "#35636b",
+      "material": "fabric"
+    },
+    "popularityRank": 2,
+    "popularityCategory": "Armchairs",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2138929696",
+    "name": "Enza Home Netha 11707 Armchair — Dark Green",
+    "category": "seating",
+    "collection": "Armchairs",
+    "size": [
+      82,
+      93,
+      92
+    ],
+    "model": {
+      "kind": "armchair",
+      "style": "plain",
+      "seats": 1,
+      "color": "#365b44",
+      "accentColor": "#44464a",
+      "fabricColor": "#365b44",
+      "material": "fabric"
+    },
+    "popularityRank": 4,
+    "popularityCategory": "Armchairs",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning dimensions are estimated from the Netha family footprint; confirm this upholstery edition."
+  },
+  {
+    "id": "2357111086",
+    "name": "Pafu Sando Reclining Chair Bed — Light Brown",
+    "category": "seating",
+    "collection": "Armchairs",
+    "size": [
+      75,
+      90,
+      80
+    ],
+    "model": {
+      "kind": "armchair",
+      "style": "sleeper",
+      "seats": 1,
+      "color": "#b49a82",
+      "accentColor": "#44464a",
+      "fabricColor": "#b49a82",
+      "material": "fabric"
+    },
+    "popularityRank": 6,
+    "popularityCategory": "Armchairs",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2138926268",
+    "name": "Enza Home Netha 20202 Linen-Texture Armchair — Cream",
+    "category": "seating",
+    "collection": "Armchairs",
+    "size": [
+      82,
+      93,
+      92
+    ],
+    "model": {
+      "kind": "armchair",
+      "style": "plain",
+      "seats": 1,
+      "color": "#d6ccba",
+      "accentColor": "#44464a",
+      "fabricColor": "#d6ccba",
+      "material": "fabric"
+    },
+    "popularityRank": 7,
+    "popularityCategory": "Armchairs",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "listed",
+    "dimensionNotes": "Manufacturer lists width 820 mm, depth 930 mm and height 920 mm.",
+    "dimensionSources": [
+      "https://www.enzahome.com.tr/netha-berjer-keten-dokulu-20202-krem-1354395/"
+    ]
+  },
+  {
+    "id": "2203632673",
+    "name": "Eymense Alfa Armchair — Light Brown",
+    "category": "seating",
+    "collection": "Armchairs",
+    "size": [
+      80,
+      85,
+      90
+    ],
+    "model": {
+      "kind": "armchair",
+      "style": "plain",
+      "seats": 1,
+      "color": "#b49a82",
+      "accentColor": "#44464a",
+      "fabricColor": "#b49a82",
+      "material": "fabric"
+    },
+    "popularityRank": 9,
+    "popularityCategory": "Armchairs",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2210182939",
+    "name": "Dorpek Dale TV Stand — White",
+    "category": "storage",
+    "collection": "TV stands",
+    "size": [
+      140,
+      30,
+      43
+    ],
+    "model": {
+      "kind": "tv_stand",
+      "style": "retro",
+      "doors": 2,
+      "shelves": 2,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 1,
+    "popularityCategory": "TV stands",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "listed",
+    "dimensionNotes": "Manufacturer lists width 140 cm, depth 30 cm and height 43 cm.",
+    "dimensionSources": [
+      "https://www.dekorister.com.tr/urun/dale-tv-sehpasi-beyaz"
+    ]
+  },
+  {
+    "id": "496944802",
+    "name": "Lagomood Keyif TV Stand",
+    "category": "storage",
+    "collection": "TV stands",
+    "size": [
+      140,
+      35,
+      50
+    ],
+    "model": {
+      "kind": "tv_stand",
+      "style": "plain",
+      "doors": 2,
+      "shelves": 2,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 2,
+    "popularityCategory": "TV stands",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "120686813",
+    "name": "Vivense Penta TV Stand — Walnut, 140 cm",
+    "category": "storage",
+    "collection": "TV stands",
+    "size": [
+      140,
+      35,
+      50
+    ],
+    "model": {
+      "kind": "tv_stand",
+      "style": "retro",
+      "doors": 2,
+      "shelves": 2,
+      "color": "#795a41",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "wood"
+    },
+    "popularityRank": 3,
+    "popularityCategory": "TV stands",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "product listing title publishes width 140 cm. Depth and height are planning estimates."
+  },
+  {
+    "id": "2092150169",
+    "name": "Mert Sert Tarab TV Stand — Walnut",
+    "category": "storage",
+    "collection": "TV stands",
+    "size": [
+      140,
+      35,
+      50
+    ],
+    "model": {
+      "kind": "tv_stand",
+      "style": "plain",
+      "doors": 2,
+      "shelves": 2,
+      "color": "#795a41",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "wood"
+    },
+    "popularityRank": 4,
+    "popularityCategory": "TV stands",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "672035847",
+    "name": "Kenzlife Tokyo TV Stand",
+    "category": "storage",
+    "collection": "TV stands",
+    "size": [
+      140,
+      35,
+      50
+    ],
+    "model": {
+      "kind": "tv_stand",
+      "style": "plain",
+      "doors": 2,
+      "shelves": 2,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 5,
+    "popularityCategory": "TV stands",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2089188559",
+    "name": "Decoraktiv Trendstyle 5220s TV Stand — Natural Walnut",
+    "category": "storage",
+    "collection": "TV stands",
+    "size": [
+      180,
+      35,
+      45
+    ],
+    "model": {
+      "kind": "tv_stand",
+      "style": "plain",
+      "doors": 2,
+      "shelves": 2,
+      "color": "#795a41",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "wood"
+    },
+    "popularityRank": 6,
+    "popularityCategory": "TV stands",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "747347649",
+    "name": "Aeka AE-2022 London Two-Drawer Bedside Table — White",
+    "category": "storage",
+    "collection": "Bedside tables",
+    "size": [
+      45,
+      35,
+      50
+    ],
+    "model": {
+      "kind": "bedside",
+      "style": "plain",
+      "drawers": 2,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 1,
+    "popularityCategory": "Bedside tables",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2243627713",
+    "name": "Aeka AE-2029 Inci Two-Drawer Bedside Table — Pearl White",
+    "category": "storage",
+    "collection": "Bedside tables",
+    "size": [
+      49,
+      35,
+      50
+    ],
+    "model": {
+      "kind": "bedside",
+      "style": "plain",
+      "drawers": 2,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 2,
+    "popularityCategory": "Bedside tables",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Title gives 49 cm without an axis. Complete planning dimensions are estimated."
+  },
+  {
+    "id": "700407380",
+    "name": "Metalia GM027 One-Drawer Bedside Table — Walnut / Anthracite",
+    "category": "storage",
+    "collection": "Bedside tables",
+    "size": [
+      45,
+      35,
+      50
+    ],
+    "model": {
+      "kind": "bedside",
+      "style": "plain",
+      "drawers": 1,
+      "color": "#795a41",
+      "accentColor": "#44464a",
+      "fabricColor": "#4b4f52",
+      "material": "wood"
+    },
+    "popularityRank": 3,
+    "popularityCategory": "Bedside tables",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2576169586",
+    "name": "Adore Country Two-Drawer Bedside Table — Matt White",
+    "category": "storage",
+    "collection": "Bedside tables",
+    "size": [
+      51,
+      40,
+      53
+    ],
+    "model": {
+      "kind": "bedside",
+      "style": "country",
+      "drawers": 2,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 4,
+    "popularityCategory": "Bedside tables",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Title gives 51 × 53 × 40 cm without labels; W 51 × D 40 × H 53 cm is an estimated interpretation."
+  },
+  {
+    "id": "686107297",
+    "name": "Rabi Izel Country Bedside Table",
+    "category": "storage",
+    "collection": "Bedside tables",
+    "size": [
+      45,
+      35,
+      50
+    ],
+    "model": {
+      "kind": "bedside",
+      "style": "country",
+      "drawers": 2,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 5,
+    "popularityCategory": "Bedside tables",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2089465676",
+    "name": "Rabi Rumy-S1 Country Bedside Table",
+    "category": "storage",
+    "collection": "Bedside tables",
+    "size": [
+      45,
+      35,
+      50
+    ],
+    "model": {
+      "kind": "bedside",
+      "style": "country",
+      "drawers": 2,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 6,
+    "popularityCategory": "Bedside tables",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "155638404",
+    "name": "KZY Four-Compartment Shoe Cabinet — White",
+    "category": "storage",
+    "collection": "Shoe storage",
+    "size": [
+      60,
+      24,
+      145
+    ],
+    "model": {
+      "kind": "shoe_cabinet",
+      "style": "tilt",
+      "doors": 2,
+      "drawers": 4,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 1,
+    "popularityCategory": "Shoe storage",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "677222386",
+    "name": "Retodesign Open Shoe Rack",
+    "category": "storage",
+    "collection": "Shoe storage",
+    "size": [
+      65,
+      30,
+      90
+    ],
+    "model": {
+      "kind": "shoe_cabinet",
+      "style": "open",
+      "doors": 2,
+      "drawers": 0,
+      "shelves": 5,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 2,
+    "popularityCategory": "Shoe storage",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "84595046",
+    "name": "IKEA TRONES Wall Shoe Cabinet — White",
+    "category": "storage",
+    "collection": "Shoe storage",
+    "size": [
+      52,
+      18,
+      39
+    ],
+    "model": {
+      "kind": "shoe_cabinet",
+      "style": "tilt",
+      "doors": 2,
+      "drawers": 0,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 3,
+    "popularityCategory": "Shoe storage",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "listed",
+    "dimensionNotes": "The product listing supplies labelled product width, depth and height; converted to centimetres.",
+    "placement": {
+      "mount": "wall",
+      "defaultElevation": 0.15,
+      "wallOffset": 0.095
+    }
+  },
+  {
+    "id": "322079372",
+    "name": "Minar Drago Shoe Storage Bench — White",
+    "category": "storage",
+    "collection": "Shoe storage",
+    "size": [
+      90,
+      35,
+      45
+    ],
+    "model": {
+      "kind": "shoe_bench",
+      "style": "plain",
+      "doors": 2,
+      "drawers": 0,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 4,
+    "popularityCategory": "Shoe storage",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2403096804",
+    "name": "Bofigo Ceren Two-Door Shoe Cabinet — White",
+    "category": "storage",
+    "collection": "Shoe storage",
+    "size": [
+      60,
+      30,
+      100
+    ],
+    "model": {
+      "kind": "shoe_cabinet",
+      "style": "plain",
+      "doors": 2,
+      "drawers": 0,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 5,
+    "popularityCategory": "Shoe storage",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2144159833",
+    "name": "Moonlife Three-Door Shoe Cabinet — Walnut",
+    "category": "storage",
+    "collection": "Shoe storage",
+    "size": [
+      60,
+      30,
+      100
+    ],
+    "model": {
+      "kind": "shoe_cabinet",
+      "style": "tilt",
+      "doors": 3,
+      "drawers": 3,
+      "color": "#795a41",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "wood"
+    },
+    "popularityRank": 6,
+    "popularityCategory": "Shoe storage",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2360973753",
+    "name": "Variant Kiev Sideboard — Walnut / Cream",
+    "category": "storage",
+    "collection": "Sideboards",
+    "size": [
+      180,
+      40,
+      80
+    ],
+    "model": {
+      "kind": "sideboard",
+      "style": "plain",
+      "doors": 4,
+      "drawers": 0,
+      "color": "#795a41",
+      "accentColor": "#44464a",
+      "fabricColor": "#d6ccba",
+      "material": "wood"
+    },
+    "popularityRank": 1,
+    "popularityCategory": "Sideboards",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "716455305",
+    "name": "Mezza 1614 Elite Sideboard — White, 180 cm",
+    "category": "storage",
+    "collection": "Sideboards",
+    "size": [
+      180,
+      40,
+      80
+    ],
+    "model": {
+      "kind": "sideboard",
+      "style": "plain",
+      "doors": 4,
+      "drawers": 0,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 2,
+    "popularityCategory": "Sideboards",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Title lists width 180 cm; depth and height are planning estimates."
+  },
+  {
+    "id": "2231080551",
+    "name": "Aydinev Marsilya Sideboard",
+    "category": "storage",
+    "collection": "Sideboards",
+    "size": [
+      180,
+      40,
+      80
+    ],
+    "model": {
+      "kind": "sideboard",
+      "style": "ribbed",
+      "doors": 4,
+      "drawers": 0,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 6,
+    "popularityCategory": "Sideboards",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2231080561",
+    "name": "Aydinev Bahar Sideboard",
+    "category": "storage",
+    "collection": "Sideboards",
+    "size": [
+      180,
+      40,
+      80
+    ],
+    "model": {
+      "kind": "sideboard",
+      "style": "ribbed",
+      "doors": 4,
+      "drawers": 0,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 10,
+    "popularityCategory": "Sideboards",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2576171246",
+    "name": "Adore Milano Three-Door Two-Drawer Sideboard — Taupe / Zebrawood",
+    "category": "storage",
+    "collection": "Sideboards",
+    "size": [
+      210,
+      44,
+      80
+    ],
+    "model": {
+      "kind": "sideboard",
+      "style": "plain",
+      "doors": 3,
+      "drawers": 2,
+      "color": "#a78963",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "wood"
+    },
+    "popularityRank": 11,
+    "popularityCategory": "Sideboards",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Title gives 210 × 80 × 44 cm; width/depth/height assignment is estimated pending labelled manufacturer dimensions."
+  },
+  {
+    "id": "2231080563",
+    "name": "Aydinev Askar Sideboard",
+    "category": "storage",
+    "collection": "Sideboards",
+    "size": [
+      180,
+      40,
+      80
+    ],
+    "model": {
+      "kind": "sideboard",
+      "style": "ribbed",
+      "doors": 4,
+      "drawers": 0,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 12,
+    "popularityCategory": "Sideboards",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2444190412",
+    "name": "Evdemo Elma Dining Chair — Brown",
+    "category": "seating",
+    "collection": "Dining chairs",
+    "size": [
+      48,
+      55,
+      88
+    ],
+    "model": {
+      "kind": "dining_chair",
+      "style": "upholstered",
+      "ringBack": false,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#896a53",
+      "material": "paint"
+    },
+    "popularityRank": 2,
+    "popularityCategory": "Dining chairs",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2444190415",
+    "name": "Evdemo Elma Dining Chair — Cream",
+    "category": "seating",
+    "collection": "Dining chairs",
+    "size": [
+      48,
+      55,
+      88
+    ],
+    "model": {
+      "kind": "dining_chair",
+      "style": "upholstered",
+      "ringBack": false,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#d6ccba",
+      "material": "paint"
+    },
+    "popularityRank": 3,
+    "popularityCategory": "Dining chairs",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2225742108",
+    "name": "Canisa Bika Upholstered Dining Chair — Cream / Black Legs",
+    "category": "seating",
+    "collection": "Dining chairs",
+    "size": [
+      48,
+      55,
+      88
+    ],
+    "model": {
+      "kind": "dining_chair",
+      "style": "upholstered",
+      "ringBack": true,
+      "color": "#f1efea",
+      "accentColor": "#25282b",
+      "fabricColor": "#34373a",
+      "material": "paint"
+    },
+    "popularityRank": 9,
+    "popularityCategory": "Dining chairs",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2225742113",
+    "name": "Canisa Bika Upholstered Dining Chair — Grey / Black Legs",
+    "category": "seating",
+    "collection": "Dining chairs",
+    "size": [
+      48,
+      55,
+      88
+    ],
+    "model": {
+      "kind": "dining_chair",
+      "style": "upholstered",
+      "ringBack": true,
+      "color": "#f1efea",
+      "accentColor": "#25282b",
+      "fabricColor": "#34373a",
+      "material": "paint"
+    },
+    "popularityRank": 11,
+    "popularityCategory": "Dining chairs",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2230169728",
+    "name": "Canisa Krax Upholstered Dining Chair — Black / Gold Legs",
+    "category": "seating",
+    "collection": "Dining chairs",
+    "size": [
+      48,
+      55,
+      88
+    ],
+    "model": {
+      "kind": "dining_chair",
+      "style": "metal",
+      "ringBack": true,
+      "color": "#f1efea",
+      "accentColor": "#25282b",
+      "fabricColor": "#34373a",
+      "material": "paint"
+    },
+    "popularityRank": 14,
+    "popularityCategory": "Dining chairs",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2225693697",
+    "name": "Apliqa Helezon Spiral Floor Lamp — Aged Brass / White Shade",
+    "category": "decor",
+    "collection": "Floor lamps",
+    "size": [
+      45,
+      45,
+      160
+    ],
+    "model": {
+      "kind": "floor_lamp",
+      "style": "spiral",
+      "color": "#c3a16a",
+      "accentColor": "#44464a",
+      "fabricColor": "#f1ebdf",
+      "material": "paint"
+    },
+    "popularityRank": 1,
+    "popularityCategory": "Floor lamps",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2553797835",
+    "name": "Apliqa Liona Arc Floor Lamp — Aged Brass",
+    "category": "decor",
+    "collection": "Floor lamps",
+    "size": [
+      70,
+      40,
+      175
+    ],
+    "model": {
+      "kind": "floor_lamp",
+      "style": "arc",
+      "color": "#c3a16a",
+      "accentColor": "#44464a",
+      "fabricColor": "#f1ebdf",
+      "material": "paint"
+    },
+    "popularityRank": 2,
+    "popularityCategory": "Floor lamps",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2578247816",
+    "name": "Apliqa Modrica Arc Floor Lamp — Nickel",
+    "category": "decor",
+    "collection": "Floor lamps",
+    "size": [
+      70,
+      40,
+      175
+    ],
+    "model": {
+      "kind": "floor_lamp",
+      "style": "arc",
+      "color": "#b9c1c4",
+      "accentColor": "#44464a",
+      "fabricColor": "#f1ebdf",
+      "material": "paint"
+    },
+    "popularityRank": 3,
+    "popularityCategory": "Floor lamps",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "1294661690",
+    "name": "Homing AYD-3131 Pi Wooden Floor Lamp — Taupe Shade",
+    "category": "decor",
+    "collection": "Floor lamps",
+    "size": [
+      45,
+      45,
+      160
+    ],
+    "model": {
+      "kind": "floor_lamp",
+      "style": "tripod",
+      "color": "#795c42",
+      "accentColor": "#44464a",
+      "fabricColor": "#b3a391",
+      "material": "wood"
+    },
+    "popularityRank": 4,
+    "popularityCategory": "Floor lamps",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "348012422",
+    "name": "Lumexx Tripod Floor Lamp with Shelf — Walnut / Mustard Shade",
+    "category": "decor",
+    "collection": "Floor lamps",
+    "size": [
+      45,
+      45,
+      160
+    ],
+    "model": {
+      "kind": "floor_lamp",
+      "style": "tripod_shelf",
+      "color": "#795c42",
+      "accentColor": "#44464a",
+      "fabricColor": "#caa14a",
+      "material": "wood"
+    },
+    "popularityRank": 5,
+    "popularityCategory": "Floor lamps",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "515210825",
+    "name": "Apliqa Klara Floor Lamp — Black",
+    "category": "decor",
+    "collection": "Floor lamps",
+    "size": [
+      45,
+      45,
+      160
+    ],
+    "model": {
+      "kind": "floor_lamp",
+      "style": "plain",
+      "color": "#292c2e",
+      "accentColor": "#25282b",
+      "fabricColor": "#f1ebdf",
+      "material": "paint"
+    },
+    "popularityRank": 6,
+    "popularityCategory": "Floor lamps",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Planning width, depth and height are estimates; adjust to the exact product before checking clearances."
+  },
+  {
+    "id": "2570456173",
+    "name": "Altus AL CM 71045R Washing Machine",
+    "category": "appliance",
+    "collection": "Washing machines",
+    "size": [
+      60,
+      60,
+      85
+    ],
+    "model": {
+      "kind": "washer",
+      "style": "plain",
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 1,
+    "popularityCategory": "Washing machines",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "The product listing has no labelled dimensions for this model; cabinet extents are planning estimates."
+  },
+  {
+    "id": "2499665783",
+    "name": "Bosch WGA242X3TR Washing Machine",
+    "category": "appliance",
+    "collection": "Washing machines",
+    "size": [
+      59.8,
+      58.8,
+      84.8
+    ],
+    "model": {
+      "kind": "washer",
+      "style": "plain",
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 2,
+    "popularityCategory": "Washing machines",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "listed",
+    "dimensionNotes": "The product listing supplies labelled product width, depth and height; converted to centimetres."
+  },
+  {
+    "id": "2580356604",
+    "name": "Arcelik 10121 Washing Machine",
+    "category": "appliance",
+    "collection": "Washing machines",
+    "size": [
+      60,
+      60,
+      85
+    ],
+    "model": {
+      "kind": "washer",
+      "style": "plain",
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 3,
+    "popularityCategory": "Washing machines",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "The product listing has no labelled dimensions for this model; cabinet extents are planning estimates."
+  },
+  {
+    "id": "2501696410",
+    "name": "Profilo CGA242X3TR Washing Machine",
+    "category": "appliance",
+    "collection": "Washing machines",
+    "size": [
+      59.7,
+      58.8,
+      84.5
+    ],
+    "model": {
+      "kind": "washer",
+      "style": "plain",
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 4,
+    "popularityCategory": "Washing machines",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "listed",
+    "dimensionNotes": "The product listing supplies labelled product width, depth and height; converted to centimetres."
+  },
+  {
+    "id": "2580352920",
+    "name": "Bosch WGA25203TR Washing Machine",
+    "category": "appliance",
+    "collection": "Washing machines",
+    "size": [
+      60,
+      60,
+      85
+    ],
+    "model": {
+      "kind": "washer",
+      "style": "plain",
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 5,
+    "popularityCategory": "Washing machines",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "The product listing has no labelled dimensions for this model; cabinet extents are planning estimates."
+  },
+  {
+    "id": "2492345071",
+    "name": "Altus AL CM 81050 Washing Machine",
+    "category": "appliance",
+    "collection": "Washing machines",
+    "size": [
+      60.0,
+      54.6,
+      84.5
+    ],
+    "model": {
+      "kind": "washer",
+      "style": "plain",
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 6,
+    "popularityCategory": "Washing machines",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "listed",
+    "dimensionNotes": "The product listing supplies labelled product width, depth and height; converted to centimetres."
+  },
+  {
+    "id": "2503594608",
+    "name": "Argimo Kamelya Metal Daybed with Trundle — Black, 90 × 200 cm",
+    "category": "bed",
+    "collection": "Beds",
+    "size": [
+      98,
+      208,
+      90
+    ],
+    "model": {
+      "kind": "bed",
+      "style": "daybed",
+      "mattressWidth": 90,
+      "mattressLength": 200,
+      "color": "#f1efea",
+      "accentColor": "#25282b",
+      "fabricColor": "#34373a",
+      "material": "paint"
+    },
+    "popularityRank": 1,
+    "popularityCategory": "Beds",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Published mattress size 90 × 200 cm; outside frame footprint and overall height are planning estimates. Shown in the open/use position."
+  },
+  {
+    "id": "495626775",
+    "name": "Niron XL Folding Guest Bed — 90 × 200 cm",
+    "category": "bed",
+    "collection": "Beds",
+    "size": [
+      98,
+      208,
+      45
+    ],
+    "model": {
+      "kind": "bed",
+      "style": "folding",
+      "mattressWidth": 90,
+      "mattressLength": 200,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 3,
+    "popularityCategory": "Beds",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Published mattress size 90 × 200 cm; outside frame footprint and overall height are planning estimates. Shown in the open/use position."
+  },
+  {
+    "id": "2216361840",
+    "name": "Metalia GM 305 Double Bed Frame — Walnut / Black, 160 × 200 cm",
+    "category": "bed",
+    "collection": "Beds",
+    "size": [
+      168,
+      208,
+      90
+    ],
+    "model": {
+      "kind": "bed",
+      "style": "wood",
+      "mattressWidth": 160,
+      "mattressLength": 200,
+      "color": "#795a41",
+      "accentColor": "#25282b",
+      "fabricColor": "#34373a",
+      "material": "wood"
+    },
+    "popularityRank": 4,
+    "popularityCategory": "Beds",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Published mattress size 160 × 200 cm; outside frame footprint and overall height are planning estimates. Shown in the open/use position."
+  },
+  {
+    "id": "1757105824",
+    "name": "Metalia Gozde Single Bed Frame — Black, 90 × 190 cm",
+    "category": "bed",
+    "collection": "Beds",
+    "size": [
+      98,
+      198,
+      90
+    ],
+    "model": {
+      "kind": "bed",
+      "style": "metal",
+      "mattressWidth": 90,
+      "mattressLength": 190,
+      "color": "#f1efea",
+      "accentColor": "#25282b",
+      "fabricColor": "#34373a",
+      "material": "paint"
+    },
+    "popularityRank": 5,
+    "popularityCategory": "Beds",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Published mattress size 90 × 190 cm; outside frame footprint and overall height are planning estimates. Shown in the open/use position."
+  },
+  {
+    "id": "1757105882",
+    "name": "Metalia Gozde Single Bed Frame — White, 90 × 190 cm",
+    "category": "bed",
+    "collection": "Beds",
+    "size": [
+      98,
+      198,
+      90
+    ],
+    "model": {
+      "kind": "bed",
+      "style": "metal",
+      "mattressWidth": 90,
+      "mattressLength": 190,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 6,
+    "popularityCategory": "Beds",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Published mattress size 90 × 190 cm; outside frame footprint and overall height are planning estimates. Shown in the open/use position."
+  },
+  {
+    "id": "2179989427",
+    "name": "Iron Folding Guest Bed — 80 × 190 cm",
+    "category": "bed",
+    "collection": "Beds",
+    "size": [
+      88,
+      198,
+      45
+    ],
+    "model": {
+      "kind": "bed",
+      "style": "folding",
+      "mattressWidth": 80,
+      "mattressLength": 190,
+      "color": "#f1efea",
+      "accentColor": "#44464a",
+      "fabricColor": "#9b9e9d",
+      "material": "paint"
+    },
+    "popularityRank": 7,
+    "popularityCategory": "Beds",
+    "checkedAt": "2026-10-16",
+    "dimensionStatus": "estimated",
+    "dimensionNotes": "Published mattress size 80 × 190 cm; outside frame footprint and overall height are planning estimates. Shown in the open/use position."
+  }
+]

@@ -126,7 +126,7 @@ export class FurnitureMeshBuilder {
   }
 
   build(entity: Furniture, recessHostThickness?: number): THREE.Object3D {
-    const key = entity.assetKey;
+    const key = this.catalog.canonicalKey(entity.assetKey);
     const w = entity.dimensions.x;
     const h = entity.dimensions.y;
     const d = entity.dimensions.z;

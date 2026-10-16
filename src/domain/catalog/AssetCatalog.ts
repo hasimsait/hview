@@ -45,7 +45,12 @@ export class AssetCatalog {
   all(): readonly AssetDefinition[] { return [...this.definitions.values()]; }
   canonicalKey(key: string): string {
     const clean = key.toLowerCase().trim();
-    return this.definitions.has(clean) ? clean : this.aliases.get(clean) ?? clean;
+    if (this.definitions.has(clean)) return clean;
+    const alias = this.aliases.get(clean); if (alias) return alias;
+    // Older imported catalogues used a source prefix plus this stable numeric reference.
+    const reference = clean.match(/^[a-z]+_([0-9]+)$/)?.[1];
+    const product = `popular_${reference}`;
+    return reference && this.definitions.has(product) ? product : clean;
   }
 
   /** Historical fuzzy names are interpreted only by the legacy import adapter. */

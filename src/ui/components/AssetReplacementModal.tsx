@@ -181,6 +181,9 @@ export const AssetReplacementModal: React.FC<AssetReplacementModalProps> = ({
                   {[asset.defaultDimensions.x, asset.defaultDimensions.z, asset.defaultDimensions.y].map(n => +(n * 100).toFixed(1)).join(' × ')} cm (W × D × H)
                 </p>
                 {asset.source?.dimensionNotes && <p className="text-[10px] text-amber-200/80 mb-1">{asset.source.dimensionNotes}</p>}
+                {asset.source?.popularity && <p className="text-[10px] text-slate-400 mb-1">
+                  #{asset.source.popularity.rank} in {asset.source.popularity.category} · {asset.source.popularity.checkedAt}
+                </p>}
                 {asset.description && (
                   <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
                     {asset.description}

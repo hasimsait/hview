@@ -2,6 +2,7 @@ import type { Vector3D } from '../model/PlanData';
 import type { AssetRecipeId } from './AssetRecipes';
 import type { AccessoryModel } from './AccessoryModel';
 import type { BathroomModel } from './BathroomModel';
+import type { FurnitureProductModel } from './FurnitureProductModel';
 
 export interface AssetPlacement {
   mount: 'floor' | 'wall' | 'ceiling' | 'surface';
@@ -36,6 +37,7 @@ export interface AssetDefinition {
   recipe?: AssetRecipeId;
   accessory?: AccessoryModel;
   bathroom?: BathroomModel;
+  furnitureProduct?: FurnitureProductModel;
   electrical?: {
     series: 'karre' | 'bubble';
     control: 'single_switch' | 'double_switch' | 'socket' | 'double_socket';
@@ -43,7 +45,12 @@ export interface AssetDefinition {
     insertColor: string;
   };
   collection?: string;
-  source?: { retailer: string; url?: string; productCode?: string; dimensions: 'listed' | 'estimated' | 'reference'; dimensionNotes?: string };
+  source?: {
+    retailer: string; url?: string; productCode?: string;
+    dimensions: 'listed' | 'estimated' | 'reference'; dimensionNotes?: string;
+    dimensionSources?: string[];
+    popularity?: { category: string; rank: number; checkedAt: string };
+  };
 }
 
 export type FurnitureBehavior = 'standard' | 'luminaire' | 'shelving' | 'basin' | 'recess';
