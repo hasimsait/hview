@@ -3,6 +3,7 @@ import { finite,immutable,positive } from '../model/Immutable';
 import type { CurtainState,OpeningData,SurfaceFinishConfig } from '../model/PlanData';
 import { SurfaceFinish } from '../model/SurfaceFinish';
 import { PlanElement,type PlanElementVisitor } from './PlanElement';
+import { validateWindowDressing, type WindowDressingConfig } from '../model/WindowDressing';
 
 function requestedDoorAngle(degrees: number): number {
   return Math.max(0, Math.min(180, Math.round(finite(degrees, 'Door angle'))));
@@ -19,6 +20,7 @@ export abstract class Opening extends PlanElement {
     if (data.frameColor !== undefined && !/^#[0-9a-fA-F]{6}$/.test(data.frameColor)) throw new Error('Frame color must be a six-digit hex color');
     if (data.curtainState !== undefined && !['visible', 'hidden', 'removed'].includes(data.curtainState)) throw new Error('Invalid curtain state');
     if (data.pelmetState !== undefined && !['visible', 'hidden', 'removed'].includes(data.pelmetState)) throw new Error('Invalid cornice state');
+    if (data.windowDressing) validateWindowDressing(data.windowDressing);
     this.state = immutable({ ...data, finish: SurfaceFinish.optional(data.finish) });
   }
   get displayName() { return this.type.replace('_', ' '); }
@@ -94,6 +96,8 @@ export class WindowOpening extends Opening {
   get topElevation() { return this.floorHeight + this.height; }
   get curtainState(): CurtainState { return this.state.curtainState ?? 'visible'; }
   get pelmetState(): CurtainState { return this.state.pelmetState ?? 'visible'; }
+  get windowDressing() { return this.state.windowDressing; }
+  withWindowDressing(windowDressing?: WindowDressingConfig): WindowOpening { return new WindowOpening({ ...this.state, windowDressing }); }
   withPelmetState(pelmetState: CurtainState): WindowOpening { return new WindowOpening({ ...this.state, pelmetState }); }
   withCurtainState(curtainState: CurtainState): WindowOpening { return new WindowOpening({ ...this.state, curtainState }); }
   protected recreate(data: OpeningData) { return new WindowOpening(data); }

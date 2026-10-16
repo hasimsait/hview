@@ -6,6 +6,7 @@ import type { FurnitureProductModel } from './FurnitureProductModel';
 import type { ArchitecturalFinishModel } from './ArchitecturalFinishes';
 import type { LightingComponentModel } from './LightingComponents';
 import type { FloorDrainModel } from './FloorDrains';
+import type { SoftFurnishingModel } from './SoftFurnishings';
 
 export interface AssetPlacement {
   mount: 'floor' | 'wall' | 'ceiling' | 'surface';
@@ -44,6 +45,7 @@ export interface AssetDefinition {
   architecturalFinish?: ArchitecturalFinishModel;
   lightingComponent?: LightingComponentModel;
   floorDrain?: FloorDrainModel;
+  softFurnishing?: SoftFurnishingModel;
   electrical?: {
     series: 'karre' | 'bubble';
     control: 'single_switch' | 'double_switch' | 'socket' | 'double_socket';

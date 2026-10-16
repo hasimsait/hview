@@ -53,7 +53,13 @@ export class FurnitureAppearance {
             projection: 'local',
             side: isRecess ? THREE.DoubleSide : undefined,
           });
-          child.material = mat;
+          if (child.userData.isTextile && !(mat as THREE.Material & { isInvisible?: boolean }).isInvisible) {
+            const textile = mat.clone(); textile.side = THREE.DoubleSide;
+            if ('defines' in mat) (textile as THREE.ShaderMaterial).defines = { ...(mat as THREE.ShaderMaterial).defines };
+            textile.onBeforeCompile = mat.onBeforeCompile; textile.customProgramCacheKey = mat.customProgramCacheKey;
+            if (child.userData.isSheer) { textile.opacity = .28; textile.transparent = true; textile.depthWrite = false; }
+            child.material = textile;
+          } else child.material = mat;
           child.visible = !(mat as any).isInvisible && mat.visible !== false;
         } else if (this.resources.original(child)) {
           child.material = this.resources.original(child)!;

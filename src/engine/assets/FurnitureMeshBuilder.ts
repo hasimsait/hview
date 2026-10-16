@@ -7,6 +7,7 @@ import { TextureSource } from '../materials/TextureSource';
 import { AssetBuildContext,ProceduralMaterials } from "./builders/AssetBuildContext";
 import { FURNITURE_GEOMETRY } from "./FurnitureGeometryLibrary";
 import { mobileRendering } from '../RenderQuality';
+import { createTextileMaterial } from '../materials/TextileMaterial';
 
 export class FurnitureMeshBuilder {
   private readonly outlines = !mobileRendering();
@@ -26,6 +27,7 @@ export class FurnitureMeshBuilder {
     fabricBlue: new THREE.MeshStandardMaterial({ color: 0x3d5a80, roughness: 0.8 }),
     fabricDark: new THREE.MeshStandardMaterial({ color: 0x2b2d42, roughness: 0.9 }),
     fabricBeige: new THREE.MeshStandardMaterial({ color: 0xc8b8a6, roughness: 0.85 }),
+    softFabric: createTextileMaterial(),
     metalChrome: new THREE.MeshStandardMaterial({ color: 0xf1f5f9, metalness: 0.96, roughness: 0.06 }),
     metalBlack: new THREE.MeshStandardMaterial({ color: 0x18181b, metalness: 0.15, roughness: 0.70 }),
     metalBrass: new THREE.MeshStandardMaterial({ color: 0xebd48e, metalness: 0.92, roughness: 0.08 }),
@@ -60,6 +62,7 @@ export class FurnitureMeshBuilder {
       this.materials.woodLight, this.materials.woodDark,
       this.materials.fabricLight, this.materials.fabricBlue,
       this.materials.fabricDark, this.materials.fabricBeige,
+      this.materials.softFabric,
       this.materials.metalChrome, this.materials.metalBlack, this.materials.metalBrass,
       this.materials.ceramicWhite, this.materials.graniteCounter,
       this.materials.mirror, this.materials.mirrorNonReflective,
@@ -166,7 +169,7 @@ export class FurnitureMeshBuilder {
           }
         }
         const isFabric =
-          child.userData.section === 'Fabric' ||
+          child.userData.isTextile || child.userData.section === 'Fabric' ||
           child.userData.section === 'Seat' ||
           child.userData.section === 'Backrest' ||
           child.userData.section === 'Armrests' ||

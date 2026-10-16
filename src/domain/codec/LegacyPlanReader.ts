@@ -123,6 +123,7 @@ export class LegacyPlanReader {
               finish: h.finish || undefined,
               frameColor: h.frameColor || undefined,
               curtainState: h.curtainState,
+              windowDressing: h.windowDressing,
               pelmetState: h.pelmetState,
               rawOpening: h,
             });
@@ -303,6 +304,7 @@ export class LegacyPlanReader {
           finish: it.finish || undefined,
           sectionFinishes: it.sectionFinishes || undefined,
           lightConfig: it.lightConfig || undefined,
+          windowCoveringOpen: it.windowCoveringOpen,
           hasLids: it.hasLids !== undefined ? !!it.hasLids : undefined,
           shelfCount: it.shelfCount,
           recessHostId: it.recessHostId,

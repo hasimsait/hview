@@ -191,7 +191,7 @@ export const App: React.FC = () => {
   };
 
   const handleAddAsset = (asset: AssetDefinition) => {
-    const dims = asset.defaultDimensions || { x: 0.6, y: 0.6, z: 0.6 };
+    const dims = { ...(asset.defaultDimensions || { x: 0.6, y: 0.6, z: 0.6 }) };
     const mount = asset.placement?.mount ?? (asset.category === 'decor' ? 'wall' : 'floor');
     const wallHit = sceneService.getWallInCameraView();
 
@@ -202,6 +202,8 @@ export const App: React.FC = () => {
 
     const planSnapshot = editor.getSnapshot();
     const planTotalH = planSnapshot?.totalHeight || 2.7;
+    if (asset.softFurnishing?.kind === 'curtain') dims.y = Math.max(.1, planTotalH - .025);
+    const ceilingOffset = asset.softFurnishing?.kind === 'curtain' ? dims.y : asset.placement?.ceilingOffset ?? dims.y + .05;
     let position: { x: number; y: number; z: number };
     let rotationY = 0;
     let roomId: string | undefined;
@@ -213,8 +215,7 @@ export const App: React.FC = () => {
       let offsetDist = asset.placement?.wallOffset ?? 0.01;
 
       if (mount === 'ceiling') {
-        const offset = asset.placement?.ceilingOffset ?? (dims.y + 0.05);
-        elevation = Math.max(0, planTotalH - offset);
+        elevation = Math.max(0, planTotalH - ceilingOffset);
         offsetDist = asset.placement?.wallOffset ?? Math.max(0.15, dims.z / 2);
       } else if (mount === 'surface') {
         elevation = asset.placement?.defaultElevation ?? 0.9;
@@ -247,7 +248,7 @@ export const App: React.FC = () => {
       const z = target?.z ?? 0;
       const elevation =
         mount === 'ceiling'
-          ? Math.max(0, planTotalH - (asset.placement?.ceilingOffset ?? dims.y + 0.05))
+          ? Math.max(0, planTotalH - ceilingOffset)
           : mount === 'surface' ? (asset.placement?.defaultElevation ?? 0.9) : 0.0;
       position = { x, y: elevation, z };
       roomId = planSnapshot?.rooms.find((r) => isPointInPolygon({ x, y: z }, r.polygon))?.id;

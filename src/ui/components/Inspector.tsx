@@ -14,7 +14,7 @@ Trash2,
 X,
 } from 'lucide-react';
 import React,{ useCallback,useState } from 'react';
-import { ConfigureLuminaire,ConfigureShelving,FinishFurniture,RemoveElement,TransformFurniture } from '../../application/commands/FurnitureCommands';
+import { ConfigureLuminaire,ConfigureShelving,FinishFurniture,RemoveElement,TransformFurniture,SetWindowCoveringOpen } from '../../application/commands/FurnitureCommands';
 import { Furniture,Shelving } from '../../domain/elements/Furniture';
 import { InspectorPresenter } from '../inspection/InspectorPresenter';
 import { SurfaceFinishPicker } from './SurfaceFinishPicker';
@@ -46,7 +46,7 @@ export const Inspector: React.FC<InspectorProps> = ({
   const isShelving = presentation.sections.includes('shelving');
   const definition = runtime.catalog.get(item.assetKey);
   const resizable = definition?.capabilities?.resizable !== false;
-  const dimensionStep = definition?.floorDrain || definition?.lightingComponent || definition?.architecturalFinish ? .1 : 1;
+  const dimensionStep = definition?.floorDrain || definition?.lightingComponent || definition?.architecturalFinish || definition?.softFurnishing ? .1 : 1;
 
   const currentFinishForSection: SurfaceFinishConfig | undefined =
     activeSection === 'all'
@@ -322,6 +322,15 @@ export const Inspector: React.FC<InspectorProps> = ({
         </div>
       )}
 
+      {(definition?.softFurnishing?.kind === 'curtain' || definition?.softFurnishing?.kind === 'blind') && (
+        <section aria-label="Window covering" className="pt-3 border-t border-slate-800 space-y-2">
+          <label className="text-xs text-slate-300">{definition.softFurnishing.kind === 'blind' ? 'Raise blind' : 'Open curtains'}
+            <input aria-label="Window covering opening" type="range" min="0" max="1" step="0.05" value={item.windowCoveringOpen ?? (definition.softFurnishing.kind === 'blind' ? .25 : .65)}
+              onChange={event => editor.execute(new SetWindowCoveringOpen(item.id, +event.target.value))} className="mt-2 w-full accent-sky-500" />
+          </label>
+          <p className="text-[10px] text-slate-400">{Math.round((item.windowCoveringOpen ?? (definition.softFurnishing.kind === 'blind' ? .25 : .65)) * 100)}% open</p>
+        </section>
+      )}
       {/* Light Fixture Controls (when inspecting a chandelier, spotlight, or sconce) */}
       {isLightFixture && (
         <div className="pt-3 border-t border-slate-800 space-y-3">

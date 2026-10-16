@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { Shelving } from '../elements/Furniture';
+import { WINDOW_DRESSING_STYLES } from '../model/WindowDressing';
 
 const number = z.number().finite();
 const positive = number.positive();
@@ -24,6 +25,7 @@ export const openingSchema = z.object({
   finish, frameColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
   pelmetState: z.enum(['visible', 'hidden', 'removed']).optional(),
   curtainState: z.enum(['visible', 'hidden', 'removed']).optional(), rawOpening: z.unknown().optional(),
+  windowDressing: z.object({ style: z.enum(WINDOW_DRESSING_STYLES), openness: number.min(0).max(1).optional(), color: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(), liningColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional() }).optional(),
 }).passthrough();
 export const wallSchema = z.object({
   id, p1: point, p2: point, thickness: positive, height: positive, material: z.string(), openings: z.array(openingSchema),
@@ -51,6 +53,7 @@ export const furnitureSchema = z.object({
   visible: z.boolean().optional(), hasLids: z.boolean().optional(), shelfCount: number.int().min(Shelving.minShelves).max(Shelving.maxShelves).optional(), recessHostId: id.optional(),
   finish, sectionFinishes: z.record(finishSchema).optional(),
   lightConfig: z.object({ enabled: z.boolean().optional(), intensity: number.min(0).max(3).optional(), color: z.string().optional() }).optional(),
+  windowCoveringOpen: number.min(0).max(1).optional(),
   rawItem: z.unknown().optional(),
 }).passthrough();
 export const legacyDocumentSchema = z.object({

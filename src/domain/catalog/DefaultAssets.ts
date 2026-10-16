@@ -7,8 +7,10 @@ import { POPULAR_PRODUCTS } from './PopularProducts';
 import { ARCHITECTURAL_FINISHES } from './ArchitecturalFinishes';
 import { LIGHTING_COMPONENTS } from './LightingComponents';
 import { FLOOR_DRAINS } from './FloorDrains';
+import { SOFT_FURNISHINGS } from './SoftFurnishings';
 
 export const DEFAULT_ASSETS: readonly AssetDefinition[] = [
+  ...SOFT_FURNISHINGS,
   ...LIGHTING_COMPONENTS,
   ...FLOOR_DRAINS,
   ...ARCHITECTURAL_FINISHES,

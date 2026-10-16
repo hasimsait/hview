@@ -1,4 +1,5 @@
 // Serialization and import input shapes. These are never the editable document.
+import type { WindowDressingConfig } from './WindowDressing';
 export interface Point2D {
   x: number;
   y: number;
@@ -57,6 +58,7 @@ export interface OpeningData {
   frameColor?: string;
   /** Absent on older plans means ceiling-mounted curtains are visible. */
   curtainState?: CurtainState;
+  windowDressing?: WindowDressingConfig;
   pelmetState?: CurtainState;
   rawOpening?: any;
 }
@@ -166,6 +168,7 @@ export interface FurnitureData {
    *  'wood' | 'fabric' | 'metal' | 'ceramic' | 'stone' | 'glass'  */
   sectionFinishes?: Record<string, SurfaceFinishConfig>;
   lightConfig?: LightFixtureConfig;
+  windowCoveringOpen?: number;
   rawItem?: any;
 }
 

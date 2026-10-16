@@ -1,5 +1,7 @@
 import type { OpeningEntity,WallEntity } from '@core/types/plan';
 import * as THREE from 'three';
+import { buildWindowDressing } from './WindowDressingGeometry';
+import { windowDressingDefaults } from '../../domain/model/WindowDressing';
 
 export interface CurtainMount {
   ceilingHeight?: number;
@@ -8,7 +10,8 @@ export interface CurtainMount {
 
 /** A ceiling track and two open, pleated panels, owned by their window. */
 export class CurtainMeshBuilder {
-  constructor(private readonly fabric: THREE.Material, private readonly track: THREE.Material) { }
+  constructor(private readonly fabric: THREE.Material, private readonly track: THREE.Material,
+    private readonly textile?: (color: string, sheer: boolean) => THREE.Material) { }
 
   build(window: OpeningEntity, wall: WallEntity, mount: CurtainMount = {}): THREE.Group {
     const group = new THREE.Group();
@@ -16,6 +19,18 @@ export class CurtainMeshBuilder {
     group.visible = window.curtainState !== 'hidden';
     const ceiling = mount.ceilingHeight ?? wall.height;
     const side = mount.interiorSide ?? (wall.roomSideA || !wall.roomSideB ? 1 : -1);
+    if (window.windowDressing && this.textile) {
+      const config = window.windowDressing, defaults = windowDressingDefaults(config.style);
+      const blind = ['roller', 'roman', 'venetian'].includes(config.style);
+      const bottom = blind ? Math.max(0, window.floorHeight - .04) : .025;
+      const height = blind ? Math.min(window.height + .08, Math.max(.01, ceiling - bottom)) : Math.max(.01, ceiling - bottom);
+      const fabric = this.textile(config.color ?? defaults.color, false);
+      const sheer = this.textile(config.style === 'sheer' ? config.color ?? defaults.color : config.liningColor ?? defaults.liningColor, true);
+      buildWindowDressing(group, window.width + (blind ? .06 : .3), height, config.style === 'layered' ? .22 : .12,
+        config.style, config.openness ?? defaults.openness, fabric, sheer, this.track);
+      group.position.set(0, bottom, side * (wall.thickness / 2 + .12)); group.scale.z = side;
+      return group;
+    }
     const width = window.width + 0.3;
     const top = ceiling - 0.035;
     const bottom = 0.025;

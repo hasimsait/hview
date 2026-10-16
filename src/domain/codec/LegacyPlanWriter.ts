@@ -1,5 +1,5 @@
 import { Shelving } from '../elements/Furniture';
-import { Opening } from '../elements/Opening';
+import { Opening, WindowOpening } from '../elements/Opening';
 import { WallRecess } from '../elements/WallRecess';
 import { PlanDocument } from '@core/types/plan';
 
@@ -90,6 +90,8 @@ export class LegacyPlanWriter {
       }
 
       // Shelving lids / doors
+      if (item.windowCoveringOpen !== undefined) rawItem.windowCoveringOpen = item.windowCoveringOpen;
+      else delete rawItem.windowCoveringOpen;
       if (item.hasLids !== undefined) {
         rawItem.hasLids = item.hasLids;
       } else {
@@ -206,6 +208,8 @@ export class LegacyPlanWriter {
         if (pelmetState) rawHole.pelmetState = pelmetState; else delete rawHole.pelmetState;
         const curtainState = op instanceof Opening ? op.toData().curtainState : op.curtainState;
         if (curtainState) rawHole.curtainState = curtainState; else delete rawHole.curtainState;
+        const dressing = op instanceof WindowOpening ? op.windowDressing : op instanceof Opening ? undefined : op.windowDressing;
+        if (dressing) rawHole.windowDressing = dressing; else delete rawHole.windowDressing;
         rawWall.holes[op.id] = rawHole;
       }
 

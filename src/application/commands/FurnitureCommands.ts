@@ -17,6 +17,16 @@ export class ConfigureLuminaire implements EditorCommand {
     return document.replace(document.requireLuminaire(this.id).withEmission(this.config));
   }
 }
+export class SetWindowCoveringOpen implements EditorCommand {
+  readonly label = 'Open window covering';
+  constructor(private readonly id: string, private readonly openness: number) { }
+  execute(document: PlanDocument, { factory }: CommandContext): PlanDocument {
+    const item = document.requireFurniture(this.id);
+    const kind = factory.catalog.get(item.assetKey)?.softFurnishing?.kind;
+    if (kind !== 'curtain' && kind !== 'blind') throw new Error('Expected a curtain or blind');
+    return document.replace(item.withWindowCoveringOpen(this.openness));
+  }
+}
 export class TransformFurniture implements EditorCommand {
   readonly label = 'Transform furniture';
   constructor(private readonly id: string, private readonly position?: Vector3D, private readonly rotationY?: number, private readonly dimensions?: Vector3D) { }

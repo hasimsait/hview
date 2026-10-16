@@ -3,6 +3,7 @@ import { Door,Opening,SlidingDoor,WindowOpening } from '../../domain/elements/Op
 import type { ColumnSide,CurtainState,RoomData,SurfaceFinishConfig,WallFrameStyle,WallSide } from '../../domain/model/PlanData';
 import type { PlanDocument } from '../../domain/model/PlanDocument';
 import type { EditorCommand } from './EditorCommand';
+import type { WindowDressingConfig } from '../../domain/model/WindowDressing';
 
 export class SplitWall implements EditorCommand {
   readonly label = 'Split wall';
@@ -99,6 +100,15 @@ export class SetWindowCurtains implements EditorCommand {
     const window = document.require(this.id);
     if (!(window instanceof WindowOpening)) throw new Error('Expected a window');
     return document.replace(window.withCurtainState(this.state));
+  }
+}
+export class ConfigureWindowDressing implements EditorCommand {
+  readonly label = 'Configure window dressing';
+  constructor(private readonly id: string, private readonly config?: WindowDressingConfig) { }
+  execute(document: PlanDocument): PlanDocument {
+    const window = document.require(this.id);
+    if (!(window instanceof WindowOpening)) throw new Error('Expected a window');
+    return document.replace(window.withWindowDressing(this.config));
   }
 }
 

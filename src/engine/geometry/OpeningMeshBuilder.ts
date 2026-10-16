@@ -1,5 +1,6 @@
 import { OpeningEntity,WallEntity } from '@core/types/plan';
 import * as THREE from 'three';
+import { createTextileMaterial } from '../materials/TextileMaterial';
 import { applyBasicOcclusionShader,createOcclusionUniforms } from '../materials/OcclusionShader';
 import { SurfaceMaterialFactory } from "../materials/SurfaceMaterialFactory";
 import { corniceGeometry } from './CorniceGeometry';
@@ -63,10 +64,12 @@ export class OpeningMeshBuilder {
       transparent: true,
     });
 
-    this.curtainMaterial = new THREE.MeshStandardMaterial({
-      color: 0xeee7d9, roughness: 0.95, metalness: 0, side: THREE.DoubleSide, transparent: true,
+    this.curtainMaterial = createTextileMaterial(); this.curtainMaterial.transparent = true;
+    this.curtainBuilder = new CurtainMeshBuilder(this.curtainMaterial, this.handleMaterial, (color, sheer) => {
+      const material = this.curtainMaterial.clone(); material.color.set(color);
+      material.opacity = sheer ? .28 : 1; material.depthWrite = !sheer;
+      applyBasicOcclusionShader(material, this.occlusionUniforms, .6); return material;
     });
-    this.curtainBuilder = new CurtainMeshBuilder(this.curtainMaterial, this.handleMaterial);
 
     // Apply orbit-fade shader to all opaque standard materials (glass excluded)
     for (const mat of [this.frameMaterial, this.doorMaterial, this.handleMaterial, this.sillMaterial, this.curtainMaterial]) {
@@ -131,6 +134,7 @@ export class OpeningMeshBuilder {
     };
     group.traverse((child) => {
       child.userData = {
+        ...child.userData,
         isOpening: true,
         isDoor,
         openingId: opening.id,

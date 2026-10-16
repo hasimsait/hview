@@ -35,6 +35,7 @@ async function clickMesh(page: Page, id: string, name: string) {
     const runtimePath = '/src/main.tsx';
     const { runtime } = await import(runtimePath);
     const mesh = runtime.scene.getRenderObject(id)!.getObjectByName(name)!;
+    runtime.scene.getCamera().updateMatrixWorld(true);
     const point = mesh.getWorldPosition(runtime.scene.getCamera().position.clone()).project(runtime.scene.getCamera());
     const rect = runtime.scene.getDomElement().getBoundingClientRect();
     return { x: rect.left + (point.x + 1) * rect.width / 2, y: rect.top + (1 - point.y) * rect.height / 2 };

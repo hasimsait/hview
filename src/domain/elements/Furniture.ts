@@ -4,6 +4,7 @@ import type { FurnitureData,LightFixtureConfig,SurfaceFinishConfig,Vector3D } fr
 import { SurfaceFinish } from '../model/SurfaceFinish';
 import { normalizeSectionFinishes,surfaceSection } from '../model/SurfaceSections';
 import { Transform } from '../model/Transform';
+import { validateOpenness } from '../model/WindowDressing';
 import { PlanElement,type PlanElementVisitor } from './PlanElement';
 
 export abstract class Furniture extends PlanElement {
@@ -16,6 +17,7 @@ export abstract class Furniture extends PlanElement {
     this.size = new Dimensions(data.dimensions);
     this.transform = new Transform(data.position, data.rotationY);
     if (!data.assetKey) throw new Error('Furniture needs an asset key');
+    if (data.windowCoveringOpen !== undefined) validateOpenness(data.windowCoveringOpen);
     this.state = immutable({ ...data, sectionFinishes: normalizeSectionFinishes(data.sectionFinishes, data.assetKey), finish: SurfaceFinish.optional(data.finish) });
   }
 
@@ -33,6 +35,7 @@ export abstract class Furniture extends PlanElement {
   get sectionFinishes(): Readonly<Record<string, Readonly<SurfaceFinishConfig>>> | undefined { return this.state.sectionFinishes; }
   get hasLids() { return this.state.hasLids; }
   get lightConfig(): Readonly<LightFixtureConfig> | undefined { return this.state.lightConfig; }
+  get windowCoveringOpen() { return this.state.windowCoveringOpen; }
   get rawItem() { return this.state.rawItem; }
 
   protected abstract recreate(data: FurnitureData): Furniture;
@@ -60,6 +63,7 @@ export abstract class Furniture extends PlanElement {
   }
 
   withVisibility(visible: boolean): Furniture { return this.recreate({ ...this.state, visible }); }
+  withWindowCoveringOpen(windowCoveringOpen: number): Furniture { return this.recreate({ ...this.state, windowCoveringOpen: validateOpenness(windowCoveringOpen) }); }
 
   /** Detached transport value for codecs; callers cannot edit this instance. */
   toData(): FurnitureData { return structuredClone(this.state); }

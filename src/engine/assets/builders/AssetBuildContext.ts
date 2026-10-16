@@ -13,6 +13,7 @@ export interface ProceduralMaterials {
   fabricBlue: THREE.MeshStandardMaterial;
   fabricDark: THREE.MeshStandardMaterial;
   fabricBeige: THREE.MeshStandardMaterial;
+  softFabric: THREE.MeshStandardMaterial;
   metalChrome: THREE.MeshStandardMaterial;
   metalBlack: THREE.MeshStandardMaterial;
   metalBrass: THREE.MeshStandardMaterial;
