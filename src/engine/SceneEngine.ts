@@ -28,6 +28,7 @@ import { OpeningMeshBuilder } from "./geometry/OpeningMeshBuilder";
 import { SurfaceMaterialFactory } from "./materials/SurfaceMaterialFactory";
 import { CollisionFeedback } from './cabinet/CollisionFeedback';
 import { cabinetDoorPose, cabinetHinge, cabinetIssues, footprint, interiorOrigin, moveCabinetPart, resolveContent, resolvePanel } from '../domain/cabinet/CabinetLayout';
+import { roomCeilingHeight } from '../domain/model/Ceiling';
 import { mobileRendering } from './RenderQuality';
 
 export interface SceneStatus { readonly state: 'loading' | 'ready' | 'recovering' | 'error'; readonly message: string; }
@@ -185,7 +186,8 @@ export class SceneEngine implements ISceneService {
           if (this.settings.wallCutaway && opening.floorHeight >= 1.15) return new THREE.Group();
           const wall = this.currentPlan!.requireWall(opening.wallId);
           const roomId = wall.roomSideA ?? wall.roomSideB ?? wall.roomIds?.[0];
-          const ceilingHeight = this.currentPlan!.rooms.find(room => room.id === roomId)?.height ?? wall.height;
+          const room = this.currentPlan!.rooms.find(room => room.id === roomId);
+          const ceilingHeight = room ? roomCeilingHeight(room, this.currentPlan!.totalHeight) : wall.height;
           return this.openingBuilder.buildOpening(opening, wall, { ceilingHeight });
         }
       },

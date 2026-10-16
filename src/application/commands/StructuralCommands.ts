@@ -4,6 +4,7 @@ import type { ColumnSide,CurtainState,RoomData,SurfaceFinishConfig,WallFrameStyl
 import type { PlanDocument } from '../../domain/model/PlanDocument';
 import type { EditorCommand } from './EditorCommand';
 import type { WindowDressingConfig } from '../../domain/model/WindowDressing';
+import { roomCeilingMaximum } from '../../domain/model/Ceiling';
 
 export class SplitWall implements EditorCommand {
   readonly label = 'Split wall';
@@ -54,6 +55,15 @@ export class ConfigureCeiling implements EditorCommand {
   readonly label = 'Configure ceiling';
   constructor(private readonly id: string, private readonly type: RoomData['ceilingType']) { }
   execute(document: PlanDocument): PlanDocument { return document.replace(document.requireRoom(this.id).withCeiling(this.type)); }
+}
+export class SetCeilingHeight implements EditorCommand {
+  readonly label = 'Set ceiling height';
+  constructor(private readonly id: string, private readonly height?: number) { }
+  execute(document: PlanDocument): PlanDocument {
+    const room = document.requireRoom(this.id);
+    if (this.height !== undefined && this.height > roomCeilingMaximum(room, document.totalHeight)) throw new Error('Ceiling height cannot exceed the shared maximum');
+    return document.replace(room.withCeilingHeight(this.height));
+  }
 }
 export class OpenDoor implements EditorCommand {
   readonly label = 'Open door';

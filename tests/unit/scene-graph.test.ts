@@ -8,7 +8,8 @@ import { SceneNodeFactory } from '../../src/engine/nodes/SceneNodeFactory';
 import { PickRegistry } from '../../src/engine/picking/PickRegistry';
 import { ResourcePool } from '../../src/engine/resources/ResourcePool';
 import { AddWallRecess } from '../../src/application/commands/AddWallRecess';
-import { FinishWall } from '../../src/application/commands/StructuralCommands';
+import { FinishWall, SetCeilingHeight } from '../../src/application/commands/StructuralCommands';
+import { rawPlan } from './fixtures';
 import { Wall } from '../../src/domain/elements/Wall';
 import { PlanDocument } from '../../src/domain/model/PlanDocument';
 
@@ -30,6 +31,14 @@ function fixture() {
   return { resources, picking, base, finish, palette, geometry, graph, editor, appearance, walls };
 }
 describe('retained scene node ownership', () => {
+  it('refreshes ceiling-mounted window dressings on a room height edit while retaining walls and door geometry', () => {
+    const { graph, editor, palette } = fixture(); editor.load(new PlanCodec().decode(rawPlan()));
+    const window = graph.get('window')!.group, oldDressing = window.children[0], door = graph.get('door')!.group.children[0], wall = graph.get('wall')!.group.children[0];
+    editor.execute(new SetCeilingHeight('room', 2.6));
+    expect(graph.get('window')!.group).toBe(window); expect(window.children[0]).not.toBe(oldDressing);
+    expect(graph.get('door')!.group.children[0]).toBe(door); expect(graph.get('wall')!.group.children[0]).toBe(wall);
+    graph.dispose(); palette.dispose();
+  });
   it('refreshes recess inheritance on a host finish while retaining its geometry', () => {
     const { graph, editor, appearance, palette } = fixture();
     const wall = new Wall({ id: 'wall', p1: { x: 0, y: 0 }, p2: { x: 4, y: 0 }, thickness: 0.1, height: 2.7, material: 'a_block', openings: [] }, []);

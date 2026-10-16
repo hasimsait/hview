@@ -39,7 +39,7 @@ export const wallSchema = z.object({
 }).passthrough();
 export const roomSchema = z.object({
   id, name: z.string(), area: number.nonnegative(), polygon: z.array(point).min(3), height: positive,
-  floorType: z.string().optional(), ceilingType: z.enum(['clip_in', 'gypsum', 'none']).optional(),
+  floorType: z.string().optional(), ceilingType: z.enum(['clip_in', 'gypsum', 'none']).optional(), ceilingHeight: positive.optional(),
   floorFinish: finish, wallFinish: finish, rawRoom: z.unknown().optional(),
 }).passthrough();
 export const columnSchema = z.object({

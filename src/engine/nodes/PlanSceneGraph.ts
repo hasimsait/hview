@@ -1,10 +1,11 @@
 import * as THREE from 'three';
 import { Column } from '../../domain/elements/Column';
 import { Furniture } from '../../domain/elements/Furniture';
-import { Opening } from '../../domain/elements/Opening';
+import { Opening, WindowOpening } from '../../domain/elements/Opening';
 import { Room } from '../../domain/elements/Room';
 import { Wall } from '../../domain/elements/Wall';
 import { WallRecess } from '../../domain/elements/WallRecess';
+import { roomCeilingHeight } from '../../domain/model/Ceiling';
 import type { PlanDocument } from '../../domain/model/PlanDocument';
 import { FurnitureSceneNode } from './FurnitureSceneNode';
 import type { SceneNode } from './SceneNode';
@@ -37,6 +38,10 @@ export class PlanSceneGraph {
   }
 
   reconcile(document: PlanDocument): void {
+    const changedCeilings = new Set(document.rooms.filter(room => {
+      const previous = this.nodes.get(room.id)?.model;
+      return previous instanceof Room && roomCeilingHeight(previous, document.totalHeight) !== roomCeilingHeight(room, document.totalHeight);
+    }).map(room => room.id));
     const rebuildWalls = new Set<string>();
     for (const recess of document.recesses) {
       const previous = this.nodes.get(recess.id)?.model;
@@ -152,6 +157,12 @@ export class PlanSceneGraph {
       if (node instanceof WallSceneNode || node instanceof ColumnSceneNode) {
         node.rebuild();
       }
+    }
+    for (const element of document.allElements) {
+      if (!(element instanceof WindowOpening)) continue;
+      const wall = document.requireWall(element.wallId), roomId = wall.roomSideA ?? wall.roomSideB ?? wall.roomIds?.[0];
+      const node = this.nodes.get(element.id);
+      if (roomId && changedCeilings.has(roomId) && node instanceof OpeningSceneNode) node.rebuild();
     }
   }
 

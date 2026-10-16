@@ -34,6 +34,9 @@ async function clickMesh(page: Page, id: string, name: string) {
   const point = await page.evaluate(async ({ id,name }) => {
     const runtimePath = '/src/main.tsx';
     const { runtime } = await import(runtimePath);
+    runtime.scene.invalidate();
+    await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    runtime.scene.getScene().updateMatrixWorld(true);
     const mesh = runtime.scene.getRenderObject(id)!.getObjectByName(name)!;
     runtime.scene.getCamera().updateMatrixWorld(true);
     const point = mesh.getWorldPosition(runtime.scene.getCamera().position.clone()).project(runtime.scene.getCamera());

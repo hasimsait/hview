@@ -127,6 +127,8 @@ export interface RoomData {
   floorType?: string;
   floorFinish?: SurfaceFinishConfig;
   ceilingType?: 'clip_in' | 'gypsum' | 'none';
+  /** Finished ceiling elevation above the floor, in metres. Absent uses the finish default. */
+  ceilingHeight?: number;
   wallFinish?: SurfaceFinishConfig;
   rawRoom?: any;
 }
