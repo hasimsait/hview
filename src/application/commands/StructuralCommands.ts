@@ -5,6 +5,7 @@ import type { PlanDocument } from '../../domain/model/PlanDocument';
 import type { EditorCommand } from './EditorCommand';
 import type { WindowDressingConfig } from '../../domain/model/WindowDressing';
 import { roomCeilingMaximum } from '../../domain/model/Ceiling';
+import { defaultWallCornice, type WallCorniceConfig } from '../../domain/model/WallCornice';
 
 export class SplitWall implements EditorCommand {
   readonly label = 'Split wall';
@@ -21,6 +22,19 @@ export class FinishWall implements EditorCommand {
   readonly label = 'Finish wall';
   constructor(private readonly id: string, private readonly finish: SurfaceFinishConfig, private readonly side: WallSide = 'both') { }
   execute(document: PlanDocument): PlanDocument { return document.replace(document.requireWall(this.id).withFinish(this.side, this.finish)); }
+}
+export class ConfigureWallCornice implements EditorCommand {
+  readonly label = 'Configure wall cornice';
+  constructor(private readonly id: string, private readonly cornice: WallCorniceConfig) { }
+  execute(document: PlanDocument): PlanDocument { return document.replace(document.requireWall(this.id).withCornice(this.cornice)); }
+}
+export class SetWallSkirting implements EditorCommand {
+  readonly label = 'Configure skirting boards';
+  constructor(private readonly id: string, private readonly enabled: boolean) { }
+  execute(document: PlanDocument): PlanDocument {
+    const wall = document.requireWall(this.id);
+    return document.replace(wall.withBaseboard(this.enabled ? wall.finishBaseboard ?? { type: 'paint', color: '#f3f1ea' } : undefined));
+  }
 }
 export class FinishColumn implements EditorCommand {
   readonly label = 'Finish column';
@@ -128,7 +142,8 @@ export class SetWindowPelmet implements EditorCommand {
   execute(document: PlanDocument): PlanDocument {
     const window = document.require(this.id);
     if (!(window instanceof WindowOpening)) throw new Error('Expected a window');
-    return document.replace(window.withPelmetState(this.state));
+    const wall = document.requireWall(window.wallId), cornice = wall.cornice ?? defaultWallCornice(true);
+    return document.replace(wall.withCornice({ ...cornice, profile: this.state === 'removed' ? 'none' : cornice.profile === 'none' ? 'cove' : cornice.profile, hidden: this.state === 'hidden' }));
   }
 }
 

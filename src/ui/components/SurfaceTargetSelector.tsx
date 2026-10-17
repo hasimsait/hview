@@ -51,8 +51,12 @@ export function SurfaceTargetSelector({
       }),
     },
     {
-      label: 'Ends, Edges & Sills', hint: 'two-room intercepts', tone: 'indigo',
-      targets: ['edge_start', 'edge_end', 'edge_top', 'baseboard', 'edges'].map((id) => WALL_TARGET_STRATEGIES[id]),
+      label: 'Ends, Edges & Sills', tone: 'indigo',
+      targets: ['edge_start', 'edge_end', 'edge_top', 'sill', 'edges'].map((id) => WALL_TARGET_STRATEGIES[id]),
+    },
+    {
+      label: 'Wall Framing', hint: 'full-wall trims', tone: 'indigo',
+      targets: ['baseboard', 'cornice'].map(id => WALL_TARGET_STRATEGIES[id]),
     },
   ] : [
     { label: 'Column Faces', hint: 'independent side finishes', tone: 'sky', targets: COLUMN_FACES },

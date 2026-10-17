@@ -22,7 +22,8 @@ export class WallSceneNode extends SceneNode<Wall> {
     const geometryChanged = previous.p1 !== element.p1 || previous.p2 !== element.p2 || previous.thickness !== element.thickness
       || previous.height !== element.height || openingCutSignature(previous) !== openingCutSignature(element)
       || previous.startOffset !== element.startOffset || previous.endOffset !== element.endOffset || previous.frameStyle !== element.frameStyle;
-    if (geometryChanged) this.replaceGeometry(this.builder.build(element));
+    const trimShape = (wall: Wall) => JSON.stringify(wall.cornice && { ...wall.cornice, finish: undefined });
+    if (geometryChanged || Boolean(previous.finishBaseboard) !== Boolean(element.finishBaseboard) || trimShape(previous) !== trimShape(element)) this.replaceGeometry(this.builder.build(element));
     else { this.builder.applyMaterials(this.group, element); this.refreshMaterials(); }
     this.element = element;
   }

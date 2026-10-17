@@ -70,33 +70,22 @@ describe('sourced catalogue', () => {
     expect(colors.Frame).not.toBe(colors.Top);
   });
 
-  it('places 12 cm cornices in front of rails on either interior side and keeps them independent of curtains', () => {
-    const codec = new PlanCodec();
-    const doc = codec.decode(rawPlan()), wall = doc.requireWall('wall'), window = doc.get('window') as WindowOpening;
-    const builder = new OpeningMeshBuilder();
-    for (const side of [-1, 1] as const) {
-      const model = builder.buildOpening(window, wall, { ceilingHeight: 3.2, interiorSide: side });
-      const pelmet = model.getObjectByName('curtain_pelmet_window')!;
-      const bounds = new THREE.Box3().setFromObject(pelmet);
-      const rail = new THREE.Box3().setFromObject(model.getObjectByName('curtain_track_window')!);
-      expect(bounds.max.y).toBeCloseTo(3.2, 5);
-      expect(bounds.getSize(new THREE.Vector3()).y).toBeCloseTo(.12, 5);
-      expect(bounds.getSize(new THREE.Vector3()).z).toBeCloseTo(.12, 5);
-      expect(side === 1 ? bounds.min.z > rail.max.z : bounds.max.z < rail.min.z).toBe(true);
-    }
+  it('migrates window cornices to their host wall and keeps curtain edits independent', () => {
+    const codec = new PlanCodec(), doc = codec.decode(rawPlan()), window = doc.get('window') as WindowOpening;
+    expect(doc.requireWall('wall').cornice).toMatchObject({ profile: 'cove', height: .12, depth: .12, offset: .17 });
+    expect(new OpeningMeshBuilder().buildOpening(window, doc.requireWall('wall')).getObjectByName('curtain_pelmet_window')).toBeUndefined();
     const editor = new EditorSession(codec.factory); editor.load(doc);
     editor.execute(new SetWindowCurtains(window.id, 'removed'));
-    expect(builder.buildOpening(editor.getDocument().get('window') as WindowOpening, wall).getObjectByName('curtain_pelmet_window')?.visible).toBe(true);
+    expect(editor.getDocument().requireWall('wall').cornice?.profile).toBe('cove');
     for (const state of ['hidden', 'removed'] as const) {
       editor.execute(new SetWindowPelmet(window.id, state));
       for (const encoded of [codec.encode(editor.getDocument()), new LegacyPlanWriter().encode(editor.getDocument())]) {
-        const restored = codec.decode(encoded).get('window') as WindowOpening;
-        expect(restored.pelmetState).toBe(state);
-        expect(restored.curtainState).toBe('removed');
-        const pelmet = builder.buildOpening(restored, wall).getObjectByName('curtain_pelmet_window');
-        expect(pelmet?.visible ?? null).toBe(state === 'removed' ? null : false);
+        const restored = codec.decode(encoded);
+        expect(restored.requireWall('wall').cornice).toMatchObject({ profile: state === 'removed' ? 'none' : 'cove', hidden: state === 'hidden' });
+        expect((restored.get('window') as WindowOpening).curtainState).toBe('removed');
+        expect((restored.get('window') as WindowOpening).toData().pelmetState).toBeUndefined();
       }
     }
-    editor.undo(); expect((editor.getDocument().get('window') as WindowOpening).pelmetState).toBe('hidden');
+    editor.undo(); expect(editor.getDocument().requireWall('wall').cornice?.hidden).toBe(true);
   });
 });

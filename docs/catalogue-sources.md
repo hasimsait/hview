@@ -33,6 +33,6 @@ HEMNES models include framed sides, posts/feet, crown trim, a contrasting wood t
 - Black angled glass range hood: estimated 60 × 35 × 75 cm, with a chimney and inclined canopy.
 - Black glass four-burner gas cooktop: estimated 60 × 52 × 5.5 cm, with pan supports and side controls.
 - Black built-in electric oven: estimated 59.5 × 57 × 59.5 cm, with glazed door, racks, twin knobs and steel handle.
-- Decorative ceiling cornice / curtain pelmet: the pictured **12 × 12 cm cross-section**, with a stepped cove profile. Standalone catalogue length defaults to 160 cm and is editable. Windows automatically receive a matching cornice spanning the curtain track, mounted flush with the room ceiling and in front of the rail on the interior side. Cornice and curtains have separate hide/remove controls and persist independently.
+- Decorative ceiling cornices are configured on the host wall under **Wall Framing → Top corner / cornice**. They span the whole wall at the finished ceiling height, with plain square, cove, stepped and ogee profiles. Existing window cornices migrate to one wall cornice; visibility and removal remain independent of curtains. Standalone catalogue pieces remain available for custom arrangements.
 
 The appliance photographs do not identify exact product codes, so these entries use standard-size estimates, marked “Approx.” in the catalogue. Countertop accessories and the cooktop start at 90 cm elevation and can be moved to match the plan's counters.

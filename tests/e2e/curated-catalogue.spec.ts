@@ -60,29 +60,19 @@ test('BAUHAUS and appliance filters place countertop items above the floor', asy
   expect((await items(page)).find(item => item.assetKey === 'black_four_burner_gas_cooktop')).toMatchObject({ position: { y: .9 }, dimensions: { x: .6, y: .055, z: .52 } });
 });
 
-test('cornice controls hide, remove and restore ceiling framing independently of curtains', async ({ page }) => {
-  await page.evaluate(async () => {
-    const path = '/src/main.tsx'; const { runtime } = await import(path);
-    runtime.editor.selection.set({ kind: 'opening', id: 'window' });
-  });
-  async function decor() {
-    return page.evaluate(async () => {
-      const path = '/src/main.tsx'; const { runtime } = await import(path);
-      const object = runtime.scene.getRenderObject('window')!;
-      return { cornice: object.getObjectByName('curtain_pelmet_window')?.visible ?? null, curtains: object.getObjectByName('curtains_window')?.visible ?? null };
-    });
-  }
-  expect(await decor()).toEqual({ cornice: true, curtains: true });
-  await page.getByRole('button', { name: 'Hide cornice', exact: true }).click();
-  expect(await decor()).toEqual({ cornice: false, curtains: true });
-  await page.getByRole('button', { name: 'Show cornice', exact: true }).click();
+test('wall cornice controls stay independent of window curtains', async ({ page }) => {
+  await page.evaluate(async () => { const path = '/src/main.tsx'; const { runtime } = await import(path); runtime.editor.selection.set({ kind: 'opening', id: 'window' }); });
   await page.getByRole('button', { name: 'Delete curtains', exact: true }).click();
-  expect(await decor()).toEqual({ cornice: true, curtains: null });
-  await page.getByRole('button', { name: 'Remove cornice', exact: true }).click();
-  expect(await decor()).toEqual({ cornice: null, curtains: null });
-  await page.getByRole('button', { name: 'Undo', exact: true }).click();
-  expect(await decor()).toEqual({ cornice: true, curtains: null });
-  await page.getByRole('button', { name: 'Remove cornice', exact: true }).click();
-  await page.getByRole('button', { name: 'Add cornice', exact: true }).click();
-  expect(await decor()).toEqual({ cornice: true, curtains: null });
+  await page.getByRole('button', { name: 'Edit wall-to-wall cornice', exact: true }).click();
+  const profile = page.getByLabel('Cornice profile', { exact: true }); await expect(profile).toHaveValue('cove');
+  await page.getByLabel('Cornice visible', { exact: true }).uncheck();
+  const decor = () => page.evaluate(async () => {
+    const path = '/src/main.tsx'; const { runtime } = await import(path);
+    return { profile: runtime.editor.getDocument().requireWall('wall').cornice?.profile, visible: runtime.scene.getRenderObject('wall')?.getObjectByName('cornice_wall')?.visible, curtains: runtime.scene.getRenderObject('window')?.getObjectByName('curtains_window')?.visible ?? null };
+  });
+  expect(await decor()).toEqual({ profile: 'cove', visible: false, curtains: null });
+  await page.getByLabel('Cornice visible', { exact: true }).check(); await profile.selectOption('none');
+  expect((await decor()).profile).toBe('none');
+  await page.getByRole('button', { name: 'Undo', exact: true }).click(); await expect(profile).toHaveValue('cove');
+  expect((await decor()).curtains).toBeNull();
 });

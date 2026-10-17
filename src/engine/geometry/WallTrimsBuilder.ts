@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import type { WallEntity,WallFrameStyle } from '../../core/types/plan';
 import type { WallSurfacePalette } from '../materials/WallSurfacePalette';
 import type { WallOpeningCut } from './WallMeshBuilder';
+import { corniceGeometry } from './CorniceGeometry';
 type FrameDividerGenerator = (
   innerW: number,
   innerH: number,
@@ -40,6 +41,27 @@ const FRAME_DIVIDER_STRATEGIES: Partial<Record<WallFrameStyle, FrameDividerGener
 
 export class WallTrimsBuilder {
   constructor(private readonly materials: WallSurfacePalette) { }
+  buildWallCornice(wall: WallEntity, length: number, maxHeight: number, thickness: number, angle: number, heights: Partial<Record<'A' | 'B', number>> = {}): THREE.Group {
+    const group = new THREE.Group(); group.name = `cornice_${wall.id}`;
+    const c = wall.cornice;
+    if (!c || c.profile === 'none') return group;
+    group.position.set(wall.p1.x, 0, wall.p1.y); group.rotation.y = -angle; group.visible = !c.hidden;
+    const sides: ('A' | 'B')[] = c.side === 'both' ? ['A', 'B'] : c.side === 'interior' ? [...(wall.roomSideA ? ['A' as const] : []), ...(wall.roomSideB ? ['B' as const] : [])] : [c.side];
+    if (!sides.length) sides.push('A');
+    const start = -(wall.startOffset ?? 0), end = length + (wall.endOffset ?? 0), width = end - start;
+    if (width <= .001) return group;
+    for (const side of sides) {
+      const top = Math.min(wall.height, heights[side] ?? wall.height);
+      if (top > maxHeight + .001) continue;
+      const mesh = new THREE.Mesh(corniceGeometry(width, c.height, c.depth, c.profile), this.materials.cornice(wall));
+      this.materials.register(mesh, 'cornice'); mesh.name = `wall_cornice_${wall.id}_${side}`;
+      mesh.userData = { type: 'wall', id: wall.id, wall, section: 'cornice', wallSide: side };
+      mesh.position.set((start + end) / 2, top - c.height, (side === 'A' ? 1 : -1) * (thickness / 2 + c.offset + c.depth / 2));
+      mesh.scale.z = side === 'A' ? 1 : -1; mesh.castShadow = mesh.receiveShadow = true;
+      group.add(mesh);
+    }
+    return group;
+  }
   buildWallFrame(
     wall: WallEntity,
     length: number,

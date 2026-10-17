@@ -159,6 +159,9 @@ export class PlanSceneGraph {
       }
     }
     for (const element of document.allElements) {
+      if (element instanceof Wall && element.cornice && [...(element.roomIds ?? []), element.roomSideA, element.roomSideB].some(id => id && changedCeilings.has(id))) {
+        const node = this.nodes.get(element.id); if (node instanceof WallSceneNode) node.rebuild();
+      }
       if (!(element instanceof WindowOpening)) continue;
       const wall = document.requireWall(element.wallId), roomId = wall.roomSideA ?? wall.roomSideB ?? wall.roomIds?.[0];
       const node = this.nodes.get(element.id);

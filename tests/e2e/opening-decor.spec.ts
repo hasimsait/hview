@@ -124,8 +124,8 @@ test('offline editor adds HEMNES and retains frame, curtain and cornice settings
   });
   await expect(page.getByRole('button', { name: 'Show curtains', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Delete curtains', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Show cornice', exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Remove cornice', exact: true }).click();
+  await page.getByRole('button', { name: 'Edit wall-to-wall cornice', exact: true }).click();
+  await page.getByLabel('Cornice profile', { exact: true }).selectOption('none');
   await page.getByRole('button', { name: 'Add Asset', exact: true }).click();
   await page.getByPlaceholder('Search assets (e.g. towel, fan, sconce, bed, sink)...').fill('HEMNES');
   await page.getByRole('button').filter({ has: page.getByRole('heading', { name: 'IKEA HEMNES Narrow Bookcase — White Stain', exact: true }) }).click();
@@ -149,7 +149,8 @@ test('offline editor adds HEMNES and retains frame, curtain and cornice settings
   const wall = saved.document.elements.find((element: any) => element.kind === 'wall').data;
   expect(wall.openings.find((opening: any) => opening.id === 'door').frameColor).toBe('#225588');
   expect(wall.openings.find((opening: any) => opening.id === 'window').curtainState).toBe('removed');
-  expect(wall.openings.find((opening: any) => opening.id === 'window').pelmetState).toBe('removed');
+  expect(wall.cornice.profile).toBe('none');
+  expect(wall.openings.find((opening: any) => opening.id === 'window').pelmetState).toBeUndefined();
   expect(saved.document.elements.find((element: any) => element.kind === 'furniture.shelving').data).toMatchObject({
     assetKey: 'ikea_hemnes_49_white', displayName: 'IKEA HEMNES Narrow Bookcase — White Stain',
     dimensions: { x: .49, y: 1.97, z: .37 }, shelfCount: 6,

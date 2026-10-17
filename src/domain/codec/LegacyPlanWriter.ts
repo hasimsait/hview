@@ -179,6 +179,8 @@ export class LegacyPlanWriter {
       if (wall.finishEdgeEnd) rawWall.finishEdgeEnd = wall.finishEdgeEnd; else delete rawWall.finishEdgeEnd;
       if (wall.finishEdgeTop) rawWall.finishEdgeTop = wall.finishEdgeTop; else delete rawWall.finishEdgeTop;
       if (wall.finishBaseboard) rawWall.finishBaseboard = wall.finishBaseboard; else delete rawWall.finishBaseboard;
+      if (wall.finishSill) rawWall.finishSill = wall.finishSill; else delete rawWall.finishSill;
+      if (wall.cornice) rawWall.cornice = structuredClone(wall.cornice); else delete rawWall.cornice;
       if (wall.finishEdges) rawWall.finishEdges = wall.finishEdges; else delete rawWall.finishEdges;
       delete rawWall.cavities;
       if (wall.startOffset !== undefined) rawWall.startOffset = wall.startOffset; else delete rawWall.startOffset;
@@ -206,8 +208,7 @@ export class LegacyPlanWriter {
           delete rawHole.finish;
         }
         if (op.frameColor) rawHole.frameColor = op.frameColor; else delete rawHole.frameColor;
-        const pelmetState = op instanceof Opening ? op.toData().pelmetState : op.pelmetState;
-        if (pelmetState) rawHole.pelmetState = pelmetState; else delete rawHole.pelmetState;
+        delete rawHole.pelmetState;
         const curtainState = op instanceof Opening ? op.toData().curtainState : op.curtainState;
         if (curtainState) rawHole.curtainState = curtainState; else delete rawHole.curtainState;
         const dressing = op instanceof WindowOpening ? op.windowDressing : op instanceof Opening ? undefined : op.windowDressing;

@@ -31,12 +31,12 @@ function fixture() {
   return { resources, picking, base, finish, palette, geometry, graph, editor, appearance, walls };
 }
 describe('retained scene node ownership', () => {
-  it('refreshes ceiling-mounted window dressings on a room height edit while retaining walls and door geometry', () => {
+  it('refreshes window dressings and wall cornices on a room height edit while retaining roots and door geometry', () => {
     const { graph, editor, palette } = fixture(); editor.load(new PlanCodec().decode(rawPlan()));
-    const window = graph.get('window')!.group, oldDressing = window.children[0], door = graph.get('door')!.group.children[0], wall = graph.get('wall')!.group.children[0];
+    const window = graph.get('window')!.group, oldDressing = window.children[0], door = graph.get('door')!.group.children[0], wall = graph.get('wall')!.group;
     editor.execute(new SetCeilingHeight('room', 2.6));
     expect(graph.get('window')!.group).toBe(window); expect(window.children[0]).not.toBe(oldDressing);
-    expect(graph.get('door')!.group.children[0]).toBe(door); expect(graph.get('wall')!.group.children[0]).toBe(wall);
+    expect(graph.get('door')!.group.children[0]).toBe(door); expect(graph.get('wall')!.group).toBe(wall);
     graph.dispose(); palette.dispose();
   });
   it('refreshes recess inheritance on a host finish while retaining its geometry', () => {

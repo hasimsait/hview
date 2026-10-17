@@ -23,7 +23,7 @@ All labels are English. Dimensions are adjustable planning references, not verif
 - Dimensions describe the outside of an asset. Door surrounds are U-shaped, with no bottom rail or filled centre. Their standard 7 cm trim faces leave an 80 × 210 cm opening at the default size. The trim face width remains 7 cm when resized, subject to a proportional limit for very small surrounds.
 - Panelling counts adapt to width; slats and acoustic-style backing have independent finish sections. Frames, rails, beads, sills and boards use the existing paint, wood, stone and other finish controls.
 - Use separate straight lengths around corners and doorways. Position thresholds across the doorway, align architraves around an existing opening, and set sill widths to include the required overhang.
-- These are independent catalogue objects: adding one does not replace automatic wall skirting, door frames, window curtains or the existing opening pelmets. Hide the corresponding existing finish or opening pelmet when using a custom piece in its place.
+- These are independent catalogue objects: adding one does not replace automatic wall skirting, door frames, window curtains or the wall cornice. Disable the corresponding existing finish or wall cornice when using a custom piece in its place.
 - Position, rotation, dimensions, visibility and section finishes persist through both plan formats and offline HTML export. Standard undo, duplication, hide and delete controls apply.
 
 The geometry represents visible profiles, recesses and open spaces. Pieces do not automatically cut walls, snap to openings, create mitred room corners, follow later wall edits, or maintain ceiling contact after manual height changes; reposition them using the elevation control as needed.

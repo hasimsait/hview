@@ -11,6 +11,7 @@ import { WallRoomApplicator } from './wall/WallRoomApplicator';
 import { SurfaceTargetSelector } from './SurfaceTargetSelector';
 import { WallSplitControls } from './wall/WallSplitControls';
 import { getWallTargetStrategy } from './wall/WallTargetStrategy';
+import { WallTrimControls } from './wall/WallTrimControls';
 
 interface WallInspectorProps {
   wall: WallEntity | null;
@@ -190,6 +191,7 @@ export const WallInspector: React.FC<WallInspectorProps> = ({ wall, onClose }) =
       />
 
       {/* Surface Finish Picker */}
+      <WallTrimControls wall={wall} target={activeTarget} />
       <div className="py-3">
         <div className="text-[11px] font-semibold text-slate-300 uppercase tracking-wider mb-2 flex items-center justify-between">
           <span className="flex items-center gap-1">

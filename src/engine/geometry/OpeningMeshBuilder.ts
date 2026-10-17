@@ -3,7 +3,6 @@ import * as THREE from 'three';
 import { createTextileMaterial } from '../materials/TextileMaterial';
 import { applyBasicOcclusionShader,createOcclusionUniforms } from '../materials/OcclusionShader';
 import { SurfaceMaterialFactory } from "../materials/SurfaceMaterialFactory";
-import { corniceGeometry } from './CorniceGeometry';
 import { CurtainMeshBuilder,type CurtainMount } from './CurtainMeshBuilder';
 
 export class OpeningMeshBuilder {
@@ -112,16 +111,7 @@ export class OpeningMeshBuilder {
     } else {
       this.buildWindow(group, opening, wallThick);
       if (opening.curtainState !== 'removed') group.add(this.curtainBuilder.build(opening, wall, mount));
-      if (opening.pelmetState !== 'removed') {
-        const side = mount.interiorSide ?? (wall.roomSideA || !wall.roomSideB ? 1 : -1);
-        const cornice = new THREE.Mesh(corniceGeometry(opening.width + 0.4, 0.12, 0.12), this.sillMaterial);
-        cornice.name = `curtain_pelmet_${opening.id}`;
-        cornice.position.set(0, (mount.ceilingHeight ?? wall.height) - 0.12, side * (wallThick / 2 + 0.23));
-        cornice.scale.z = side;
-        cornice.visible = opening.pelmetState !== 'hidden';
-        cornice.castShadow = cornice.receiveShadow = true;
-        group.add(cornice);
-      }
+
     }
 
     // Tag group and all descendants for raycasting and inspection

@@ -1,5 +1,5 @@
 import { Focus,X } from 'lucide-react';
-import { FinishOpening,SetWindowCurtains,SetWindowPelmet,ConfigureWindowDressing } from '../../application/commands/StructuralCommands';
+import { FinishOpening,SetWindowCurtains,ConfigureWindowDressing } from '../../application/commands/StructuralCommands';
 import type { WindowOpening } from '../../domain/elements/Opening';
 import { useRuntime } from '../context/RuntimeContext';
 import { SurfaceFinishPicker } from './SurfaceFinishPicker';
@@ -76,18 +76,7 @@ export function WindowInspector({
           )}
         </div>
       </section>
-      <section aria-label="Window ceiling cornice" className="rounded-lg border border-slate-700 p-3 space-y-3">
-        <h3 className="text-sm font-semibold text-slate-200">Ceiling cornice / curtain pelmet</h3>
-        <p className="text-xs text-slate-400">12 × 12 cm decorative framing in front of the curtain rail.</p>
-        <div className="flex flex-wrap gap-2">
-          {window.pelmetState === 'removed' ? (
-            <button className="rounded bg-sky-600 px-3 py-2 text-xs" onClick={() => editor.execute(new SetWindowPelmet(window.id, 'visible'))}>Add cornice</button>
-          ) : <>
-            <button className="rounded bg-slate-800 px-3 py-2 text-xs" onClick={() => editor.execute(new SetWindowPelmet(window.id, window.pelmetState === 'hidden' ? 'visible' : 'hidden'))}>{window.pelmetState === 'hidden' ? 'Show cornice' : 'Hide cornice'}</button>
-            <button className="rounded border border-red-900 px-3 py-2 text-xs text-red-300" onClick={() => editor.execute(new SetWindowPelmet(window.id, 'removed'))}>Remove cornice</button>
-          </>}
-        </div>
-      </section>
+      <button className="rounded border border-slate-700 px-3 py-2 text-xs text-sky-300" onClick={() => editor.selection.set({ kind: 'wall', id: window.wallId, subtarget: 'cornice' })}>Edit wall-to-wall cornice</button>
       <SurfaceFinishPicker
         currentFinish={window.finish}
         onSelectFinish={(finish) => editor.execute(new FinishOpening(window.id, finish))}

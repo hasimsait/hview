@@ -33,7 +33,8 @@ export const wallSchema = z.object({
   isColumn: z.boolean().optional(), color: z.string().optional(), roomIds: z.array(id).optional(),
   roomSideA: id.optional(), roomSideB: id.optional(), startOffset: number.optional(), endOffset: number.optional(),
   finish, finishSideA: finish, finishSideB: finish, finishEdges: finish, finishEdgeStart: finish, finishEdgeEnd: finish,
-  finishEdgeTop: finish, finishBaseboard: finish, frameColor: z.string().optional(),
+  finishEdgeTop: finish, finishBaseboard: finish, finishSill: finish, frameColor: z.string().optional(),
+  cornice: z.object({ profile: z.enum(['none', 'plain', 'cove', 'stepped', 'ogee']), height: positive.max(1), depth: positive.max(1), offset: number.min(0).max(2), side: z.enum(['interior', 'A', 'B', 'both']), hidden: z.boolean().optional(), finish }).optional(),
   frameStyle: z.enum(['none', 'perimeter', 'grid_3', 'grid_4', 'grid_2x3']).optional(),
   rawWall: z.unknown().optional(),
 }).passthrough();

@@ -149,6 +149,8 @@ export class LegacyPlanReader {
           finishEdgeEnd: w.finishEdgeEnd || undefined,
           finishEdgeTop: w.finishEdgeTop || undefined,
           finishBaseboard: w.finishBaseboard || undefined,
+          finishSill: w.finishSill || undefined,
+          cornice: w.cornice || undefined,
           finishEdges: w.finishEdges || undefined,
           startOffset: w.startOffset,
           endOffset: w.endOffset,

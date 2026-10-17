@@ -12,7 +12,7 @@ async function state(page: Page) {
     if (ceiling) ceiling.geometry.computeBoundingBox();
     return { status: scene.getStatus().state, room: plan.requireRoom('room').toData(), maximum: plan.totalHeight,
       walls: plan.walls.map((w: any) => w.height), ceiling: ceiling ? { height: ceiling.position.y, drop: ceiling.userData.drop, top: ceiling.position.y + ceiling.geometry.boundingBox.max.z } : null,
-      track: track?.position.y };
+      track: track?.position.y, cornice: scene.getScene().getObjectByName('wall_cornice_wall_A')?.position.y + (plan.requireWall('wall').cornice?.height ?? 0) };
   });
 }
 async function ready(page: Page) {
@@ -47,7 +47,7 @@ test('room ceiling drops, curtain mounts, undo and saved heights follow the fini
   await expect.poll(async () => (await state(page)).ceiling?.height).toBeCloseTo(2.85);
   await height.fill('2.6');
   const dropped = await state(page); expect(dropped.ceiling!.height).toBe(2.6); expect(dropped.ceiling!.top).toBeCloseTo(3); expect(dropped.ceiling!.drop).toBeCloseTo(.4);
-  expect(dropped.track).toBeCloseTo(2.5875); expect(dropped.maximum).toBe(3); expect(dropped.walls).toEqual([3]);
+  expect(dropped.track).toBeCloseTo(2.5875); expect(dropped.cornice).toBeCloseTo(2.6); expect(dropped.maximum).toBe(3); expect(dropped.walls).toEqual([3]);
   await height.fill('3.1'); await expect(height).toHaveValue('2.6');
   await height.fill('0'); await expect(height).toHaveValue('2.6');
   await height.blur(); await page.keyboard.press('Control+z'); await expect(height).toHaveValue('2.85');
