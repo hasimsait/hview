@@ -10,6 +10,15 @@ export function surfaceSection(label: string, assetKey?: string): string {
   return key;
 }
 
+/** A layout adds individually paintable boards and doors; older whole-cabinet finishes remain their fallback. */
+export function cabinetSurfaceFinish(section: string, sections?: Readonly<Record<string, SurfaceFinishConfig>>): SurfaceFinishConfig | undefined {
+  const key = surfaceSection(section);
+  if (sections?.[key]) return sections[key];
+  if (/^door_\d+$/.test(key)) return sections?.doors ?? sections?.lids ?? sections?.cabinet ?? sections?.body ?? sections?.frame;
+  if (['frame', 'back_panel', 'shelves', 'dividers', 'laundry_basket'].includes(key)) return sections?.cabinet ?? sections?.body ?? sections?.frame;
+  return undefined; // Worktops, handles and stored objects keep their own finishes.
+}
+
 export function normalizeSectionFinishes(sections: Record<string, SurfaceFinishConfig> | undefined, assetKey: string): Record<string, SurfaceFinishConfig> | undefined {
   if (!sections || Object.keys(sections).every(key => key === surfaceSection(key, assetKey))) return sections;
   const result: Record<string, SurfaceFinishConfig> = {};

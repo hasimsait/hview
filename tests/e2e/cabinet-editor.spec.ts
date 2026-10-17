@@ -15,7 +15,8 @@ async function snapshot(page: Page, draft = false) {
     function scan(fiber: any) { if (!fiber) return; const value = fiber.memoizedProps?.value; if (value?.editor && value?.scene && !contexts.includes(value)) contexts.push(value); scan(fiber.child); scan(fiber.sibling); }
     scan(root[key].stateNode.current); const runtime = contexts[draft ? 1 : 0];
     if (!runtime) return null;
-    const item = runtime.editor.getDocument().requireFurniture('cabinet'), mesh = runtime.scene.getRenderObject('cabinet');
+    const snapshot = runtime.editor.getSnapshot(); if (!snapshot) return null;
+    const item = snapshot.requireFurniture('cabinet'), mesh = runtime.scene.getRenderObject('cabinet');
     const red: string[] = []; mesh?.traverse((o: any) => { if (o.isMesh && o.userData.collision && o.userData.cabinetPart) red.push(o.userData.cabinetPart); });
     return { data: item.toData(), red: [...new Set(red)], issues: mesh?.userData.cabinetIssues, doorCollision: mesh?.userData.doorCollision, parts: Object.fromEntries([...(item.cabinet?.panels ?? []), ...(item.cabinet?.contents ?? [])].map((part: any) => [part.id, runtime.scene.getCabinetPart(item.id, part.id)?.position.toArray()])), count: runtime.editor.getDocument().furniture.length, camera: runtime.scene.getCamera().position.toArray(), status: runtime.scene.getStatus().state };
   }, draft);

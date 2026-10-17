@@ -8,6 +8,7 @@ import { AssetBuildContext,ProceduralMaterials } from "./builders/AssetBuildCont
 import { FURNITURE_GEOMETRY } from "./FurnitureGeometryLibrary";
 import { mobileRendering } from '../RenderQuality';
 import { buildCabinet } from '../cabinet/CabinetBuilder';
+import { buildCabinetWorktop } from './builders/WorktopBuilder';
 import { createTextileMaterial } from '../materials/TextileMaterial';
 
 export class FurnitureMeshBuilder {
@@ -158,7 +159,10 @@ export class FurnitureMeshBuilder {
     };
 
     // Strategy Pattern: dispatch directly to the registered builder
-    if (entity.cabinet || this.catalog.recipe(key) === 'modular_cabinet') buildCabinet(context, content => this.build(content));
+    if (entity.cabinet || this.catalog.recipe(key) === 'modular_cabinet') {
+      buildCabinet(context, content => this.build(content));
+      if (this.catalog.recipe(key) === 'kitchen_box') buildCabinetWorktop(context);
+    }
     else FURNITURE_GEOMETRY[this.catalog.recipe(key)](context);
 
     // Universal fallback: ensure every paintable mesh has a readable section name and local metric bounds

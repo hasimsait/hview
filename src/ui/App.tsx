@@ -226,7 +226,7 @@ export const App: React.FC = () => {
         offsetDist = asset.placement?.wallOffset ?? Math.max(0.15, dims.z / 2);
       } else if (mount === 'surface') {
         elevation = asset.placement?.defaultElevation ?? 0.9;
-        offsetDist = dims.z / 2 + 0.04;
+        offsetDist = asset.placement?.wallOffset ?? dims.z / 2 + 0.04;
       } else if (mount === 'floor') {
         elevation = 0.0;
         offsetDist = dims.z / 2 + 0.04;

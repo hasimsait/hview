@@ -8,7 +8,9 @@ import { cabinetBasket, cabinetHasDoors, cabinetLeaves } from '../../domain/cabi
 export function buildCabinet(c: AssetBuildContext, buildContent?: (entity: Furniture) => THREE.Object3D): void {
   const layout = c.entity.cabinet ?? defaultCabinet(c.entity.toData(), c.definition?.cabinetDoors ?? 2), t = layout.panelThickness, b = layout.backThickness;
   const carcassDepth = c.d - (cabinetHasDoors(layout) ? t : 0), carcassZ = cabinetHasDoors(layout) ? -t / 2 : 0;
-  const body = c.materials.whitePaint, origin = interiorOrigin(c.entity.dimensions, layout);
+  const kitchen = ['kitchen_box_door_double', 'kitchen_box_wall'].includes(c.entity.assetKey);
+  const body = kitchen ? c.materials.fabricLight : ['ward_double', 'ward_single'].includes(c.entity.assetKey) ? c.materials.woodLight : c.materials.whitePaint;
+  const origin = interiorOrigin(c.entity.dimensions, layout);
   const box = (id: string, section: string, x: number, y: number, z: number, w: number, h: number, d: number) => {
     const group = new THREE.Group(); group.name = `cabinet_part_${id}`; group.userData.cabinetPart = id;
     group.position.set(x, y, z);

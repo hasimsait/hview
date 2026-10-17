@@ -23,6 +23,7 @@ import type { Vector3D } from '../../domain/model/PlanData';
 import { Furniture,Shelving } from '../../domain/elements/Furniture';
 import { InspectorPresenter } from '../inspection/InspectorPresenter';
 import { SurfaceFinishPicker } from './SurfaceFinishPicker';
+import { cabinetSurfaceFinish } from '../../domain/model/SurfaceSections';
 
 export interface InteriorInspectorAdapter {
   transform: (position?: Vector3D, rotation?: number, dimensions?: Vector3D) => void;
@@ -71,6 +72,7 @@ export const Inspector: React.FC<InspectorProps> = ({
       ? item.finish
       : item.sectionFinishes?.[activeSection] ||
       item.sectionFinishes?.[activeSection.toLowerCase()] ||
+      (item.cabinet ? cabinetSurfaceFinish(activeSection, item.sectionFinishes) : undefined) ||
       item.finish;
 
   const handleApplyFinish = (finish: SurfaceFinishConfig) => {

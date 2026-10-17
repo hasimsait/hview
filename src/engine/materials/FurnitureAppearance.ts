@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import type { FurnitureEntity,SurfaceFinishConfig } from '../../core/types/plan';
 import { WallRecess, type RecessHost } from '../../domain/elements/WallRecess';
 import type { ViewportSettings } from '../../core/types/services';
-import { surfaceSection } from '../../domain/model/SurfaceSections';
+import { cabinetSurfaceFinish, surfaceSection } from '../../domain/model/SurfaceSections';
 import type { ResourcePool } from '../resources/ResourcePool';
 import { isFabricStretched,type SurfaceMaterialFactory } from './SurfaceMaterialFactory';
 import { isFixtureLight } from '../lighting/FixtureLight';
@@ -35,6 +35,7 @@ export class FurnitureAppearance {
         const isRecess = entity instanceof WallRecess;
         const section = sec ? surfaceSection(sec, entity.assetKey) : undefined;
         let secFinish: SurfaceFinishConfig | undefined = section ? entity.sectionFinishes?.[section] : undefined;
+        if (!secFinish && entity.cabinet && child.userData.cabinetPart && section) secFinish = cabinetSurfaceFinish(section, entity.sectionFinishes);
         if (!secFinish && isRecess && section) secFinish = entity.inheritedFinish(section, this.recessHost(entity));
 
         const content = child.userData.cabinetContent as import('../../domain/cabinet/CabinetLayout').CabinetContent | undefined;

@@ -152,6 +152,18 @@ export const DEFAULT_ASSETS: readonly AssetDefinition[] = [
 
   // Kitchen
   {
+    key: 'kitchen_worktop',
+    name: 'Kitchen Worktop',
+    category: 'kitchen',
+    collection: 'Worktops',
+    recipe: 'kitchen_worktop',
+    description: 'Independent countertop slab. Resize its width, thickness and depth, set its elevation, and choose a stone, wood or other finish.',
+    defaultDimensions: { x: 2.4, y: .04, z: .62 },
+    placement: { mount: 'surface', defaultElevation: .85, wallOffset: .311 },
+    aliases: ['counter', 'countertop', 'worktop', 'counter top', 'counter slab'],
+    capabilities: { resizable: true },
+  },
+  {
     key: 'fridge',
     name: 'Refrigerator',
     category: 'kitchen',

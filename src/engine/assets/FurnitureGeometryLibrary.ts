@@ -2,6 +2,7 @@ import type { AssetRecipeId } from '../../domain/catalog/AssetRecipes';
 import type { AssetBuilderFn } from "./builders/AssetBuildContext";
 import * as Bathroom from "./builders/BathroomBuilders";
 import * as Furniture from "./builders/FurnitureBuilders";
+import { buildWorktop } from './builders/WorktopBuilder';
 import * as Lighting from "./builders/LightingBuilders";
 import * as Catalogue from './builders/CatalogueBuilders';
 import { buildIkeaAccessory } from './builders/IkeaAccessoryBuilder';
@@ -18,6 +19,7 @@ import { buildHouseholdDetail } from './builders/HouseholdDetailBuilder';
 import { buildSoftFurnishing } from './builders/SoftFurnishingBuilder';
 
 export const FURNITURE_GEOMETRY: Readonly<Record<AssetRecipeId, AssetBuilderFn>> = {
+  kitchen_worktop: buildWorktop,
   cabinet_fit_object: buildCabinetFitObject,
   modular_cabinet: buildCabinet,
   household_detail: buildHouseholdDetail,
