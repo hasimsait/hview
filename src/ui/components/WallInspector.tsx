@@ -12,6 +12,7 @@ import { SurfaceTargetSelector } from './SurfaceTargetSelector';
 import { WallSplitControls } from './wall/WallSplitControls';
 import { getWallTargetStrategy } from './wall/WallTargetStrategy';
 import { WallTrimControls } from './wall/WallTrimControls';
+import { WallWindowControls } from './wall/WallWindowControls';
 
 interface WallInspectorProps {
   wall: WallEntity | null;
@@ -160,6 +161,8 @@ export const WallInspector: React.FC<WallInspectorProps> = ({ wall, onClose }) =
           </button>
         </div>
       </div>
+
+      <WallWindowControls key={wall.id} wall={wall} />
 
       {/* Wall Construction & Frame Controls */}
       <WallFrameControls

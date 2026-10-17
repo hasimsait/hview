@@ -4,6 +4,8 @@ import type { CurtainState,OpeningData,SurfaceFinishConfig } from '../model/Plan
 import { SurfaceFinish } from '../model/SurfaceFinish';
 import { PlanElement,type PlanElementVisitor } from './PlanElement';
 import { validateWindowDressing, type WindowDressingConfig } from '../model/WindowDressing';
+import { validateWindowGeometry, windowPosition, type WindowGeometry } from '../model/WindowGeometry';
+import type { Wall } from './Wall';
 
 function requestedDoorAngle(degrees: number): number {
   return Math.max(0, Math.min(180, Math.round(finite(degrees, 'Door angle'))));
@@ -97,6 +99,13 @@ export class WindowOpening extends Opening {
   get curtainState(): CurtainState { return this.state.curtainState ?? 'visible'; }
   get pelmetState(): CurtainState { return this.state.pelmetState ?? 'visible'; }
   get windowDressing() { return this.state.windowDressing; }
+  withGeometry(geometry: WindowGeometry, wall: Wall): WindowOpening {
+    if (wall.id !== this.wallId) throw new Error('Window geometry must use its host wall.');
+    validateWindowGeometry(wall, geometry);
+    const position = windowPosition(wall, geometry.distanceAlongWall);
+    if (geometry.width === this.width && geometry.height === this.height && geometry.floorHeight === this.floorHeight && geometry.distanceAlongWall === this.distanceAlongWall && position.x === this.position.x && position.y === this.position.y) return this;
+    return new WindowOpening({ ...this.state, ...geometry, position });
+  }
   withWindowDressing(windowDressing?: WindowDressingConfig): WindowOpening { return new WindowOpening({ ...this.state, windowDressing }); }
   withPelmetState(pelmetState: CurtainState): WindowOpening { return new WindowOpening({ ...this.state, pelmetState }); }
   withCurtainState(curtainState: CurtainState): WindowOpening { return new WindowOpening({ ...this.state, curtainState }); }

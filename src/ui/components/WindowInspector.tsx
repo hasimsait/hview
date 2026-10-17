@@ -4,6 +4,8 @@ import type { WindowOpening } from '../../domain/elements/Opening';
 import { useRuntime } from '../context/RuntimeContext';
 import { SurfaceFinishPicker } from './SurfaceFinishPicker';
 import { windowDressingDefaults, type WindowDressingStyle } from '../../domain/model/WindowDressing';
+import { WindowDimensions } from './WindowDimensions';
+import { RemoveElement } from '../../application/commands/FurnitureCommands';
 
 export function WindowInspector({
   window,
@@ -16,7 +18,7 @@ export function WindowInspector({
   const dressing = window.windowDressing, defaults = dressing ? windowDressingDefaults(dressing.style) : undefined;
   const blind = dressing && ['roller', 'roman', 'venetian'].includes(dressing.style);
   return (
-    <aside className="absolute right-4 top-4 bottom-4 w-80 overflow-auto rounded-xl bg-slate-900 border border-slate-700 p-4 space-y-4 z-20">
+    <aside className="absolute right-4 top-4 bottom-4 w-80 max-w-[calc(100%-2rem)] overflow-auto rounded-xl bg-slate-900 border border-slate-700 p-4 space-y-4 z-20">
       <div className="flex items-center justify-between">
         <h2>{window.isFrenchWindow ? 'French window' : 'Window'}</h2>
         <button onClick={onClose} aria-label="Close window inspector">
@@ -29,6 +31,11 @@ export function WindowInspector({
       <p className="text-xs text-slate-400">
         Sill: {window.floorHeight.toFixed(2)} m · Top: {window.topElevation.toFixed(2)} m
       </p>
+      <WindowDimensions window={window} />
+      <div className="flex gap-2">
+        <button type="button" className="rounded border border-slate-700 px-3 py-2 text-xs text-sky-300" onClick={() => editor.selection.set({ kind: 'wall', id: window.wallId })}>Edit host wall</button>
+        <button type="button" className="rounded border border-red-900 px-3 py-2 text-xs text-red-300" onClick={() => { editor.execute(new RemoveElement(window.id)); editor.selection.set({ kind: 'wall', id: window.wallId }); }}>Delete window</button>
+      </div>
       <section aria-label="Window curtains" className="rounded-lg border border-slate-700 p-3 space-y-3">
         <h3 className="text-sm font-semibold text-slate-200">{blind ? 'Window blind' : 'Ceiling-mounted curtains'}</h3>
         <p className="text-xs text-slate-400">{blind ? 'Fitted to the window opening.' : 'Floor-length pleated panels on a ceiling track.'}</p>
