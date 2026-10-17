@@ -1,16 +1,23 @@
 import { CABINET_HINGE_TYPES, cabinetHinge, type CabinetHinge, type CabinetLayout } from '../../domain/cabinet/CabinetLayout';
 
-export function CabinetHingeControls({ layout, onChange }: { layout: CabinetLayout; onChange: (layout: CabinetLayout) => void }) {
+import { cabinetLeafSettings, setCabinetDoorAngle, updateCabinetLeaf } from '../../domain/cabinet/CabinetFronts';
+
+export function CabinetHingeControls({ layout, onChange, showAngles = false }: { layout: CabinetLayout; onChange: (layout: CabinetLayout) => void; showAngles?: boolean }) {
   function update(index: number, hinge: CabinetHinge) {
-    const hinges: [CabinetHinge, CabinetHinge] = [{ ...cabinetHinge(layout, 0) }, { ...cabinetHinge(layout, 1) }];
-    hinges[index] = hinge;
-    onChange({ ...layout, doors: { ...layout.doors, hinges } });
+    onChange(updateCabinetLeaf(layout, index, (doors, localIndex) => {
+      const hinges: [CabinetHinge, CabinetHinge] = [{ ...(doors.hinges?.[0] ?? { type: 'pivot', travel: 0 }) }, { ...(doors.hinges?.[1] ?? { type: 'pivot', travel: 0 }) }];
+      hinges[localIndex] = hinge; return { ...doors, hinges };
+    }));
   }
+  const leaves = cabinetLeafSettings(layout);
   return <div className="space-y-2">
-    {Array.from({ length: layout.doors.count }, (_, index) => {
+    {leaves.map((leaf, index) => {
+      const tilt = leaf.section?.opening === 'tilt-out', angle = leaf.doors.angles[leaf.localIndex];
       const hinge = cabinetHinge(layout, index);
       return <div key={index} className="space-y-1">
-        <label className="block">Door {index + 1} hinge
+        {showAngles && <div><span className="flex items-center justify-between">{tilt ? 'Laundry front' : 'Door'} {index + 1}: {Math.round(angle)}°<button type="button" className="rounded bg-slate-700 px-2 py-1" onClick={() => onChange(setCabinetDoorAngle(layout, index, angle > 0 ? 0 : tilt ? 40 : 110))}>{angle > 0 ? 'Close' : 'Open'} door {index + 1}</button></span>
+          <input aria-label={`Cabinet door ${index + 1} angle`} type="range" min="0" max={tilt ? 60 : 170} step="1" value={angle} className="w-full accent-sky-400" onChange={e => onChange(setCabinetDoorAngle(layout, index, +e.target.value))} /></div>}
+        {tilt ? <p className="text-slate-400">Bottom hinge · basket tilts with the front</p> : <><label className="block">Door {index + 1} hinge
           <select aria-label={`Cabinet door ${index + 1} hinge type`} className="w-full rounded bg-slate-800 p-1" value={hinge.type} onChange={e => {
             const type = e.target.value as CabinetHinge['type'];
             update(index, { type, travel: hinge.type === 'pivot' && type !== 'pivot' ? .02 : hinge.travel });
@@ -24,9 +31,9 @@ export function CabinetHingeControls({ layout, onChange }: { layout: CabinetLayo
             const travel = +e.target.value / 1000;
             if (Number.isFinite(travel) && travel >= 0 && travel <= .05) update(index, { ...hinge, travel });
           }} />
-        </label>}
+        </label>}</>}
       </div>;
     })}
-    {layout.doors.count > 0 && <p className="text-[10px] text-slate-400">Concealed hinges move the door inward and outward as it opens. Travel is approximate; use your hinge's clearance dimensions. Arm type alone does not guarantee clearance.</p>}
+    {leaves.some(l => l.section?.opening !== 'tilt-out') && <p className="text-[10px] text-slate-400">Concealed hinges move the door inward and outward as it opens. Travel is approximate; use your hinge's clearance dimensions. Arm type alone does not guarantee clearance.</p>}
   </div>;
 }

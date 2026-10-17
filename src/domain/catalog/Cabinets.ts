@@ -7,6 +7,7 @@ export const CABINET_ASSETS: readonly AssetDefinition[] = [
   ['cabinet_tall_single', 'Single-Door Tall Cabinet', .45, 1.9, .4, 1],
   ['cabinet_wardrobe', 'Double-Door Wardrobe Cabinet', .9, 2.1, .6, 2],
   ['cabinet_open', 'Open Cabinet', .6, 1.8, .4, 0],
+  ['cabinet_laundry_tiltout', 'Tilt-Out Laundry Cabinet', .6, 1.9, .35, 2],
 ].map(([key, name, x, y, z, doors]) => ({ key: key as string, name: name as string, category: 'storage', collection: 'Modular cabinets', recipe: 'modular_cabinet', cabinetDoors: doors as 0 | 1 | 2,
   defaultDimensions: { x: x as number, y: y as number, z: z as number }, placement: { mount: String(key).includes('_wall_') ? 'wall' : 'floor', defaultElevation: String(key).includes('_wall_') ? 1.4 : 0 },
   description: 'Editable cabinet with opening doors, connected shelves, partial dividers and stored objects. Open Edit layout to customise the interior.', source: { retailer: 'Generic', dimensions: 'reference', dimensionNotes: '18 mm carcass and doors, independently adjustable back thickness. Dimensions include closed doors.' } }));

@@ -27,8 +27,9 @@ import { FloorMeshBuilder } from "./geometry/FloorMeshBuilder";
 import { OpeningMeshBuilder } from "./geometry/OpeningMeshBuilder";
 import { SurfaceMaterialFactory } from "./materials/SurfaceMaterialFactory";
 import { CollisionFeedback } from './cabinet/CollisionFeedback';
-import { cabinetDoorPose, cabinetHinge, cabinetIssues, footprint, interiorOrigin, moveCabinetPart, resolveContent, resolvePanel } from '../domain/cabinet/CabinetLayout';
+import { cabinetDoorPose, cabinetIssues, footprint, interiorOrigin, moveCabinetPart, resolveContent, resolvePanel } from '../domain/cabinet/CabinetLayout';
 import { roomCeilingHeight } from '../domain/model/Ceiling';
+import { cabinetLeaves } from '../domain/cabinet/CabinetFronts';
 import { mobileRendering } from './RenderQuality';
 
 export interface SceneStatus { readonly state: 'loading' | 'ready' | 'recovering' | 'error'; readonly message: string; }
@@ -306,12 +307,14 @@ export class SceneEngine implements ISceneService {
       if (now instanceof Opening && before instanceof Opening && now.openAngle !== before.openAngle) this.checkDoorCollision(id, undefined, (before.openAngle ?? 40) * Math.PI / 180);
       if (now instanceof Furniture && before instanceof Furniture && now.cabinet) {
         let checked = false, collides = false;
-        for (let index = 0; index < now.cabinet.doors.count; index++) {
-          const angle = now.cabinet.doors.angles[index], previous = before.cabinet?.doors.angles[index] ?? 0;
-          const hingeChanged = before.cabinet && (JSON.stringify(cabinetHinge(now.cabinet, index)) !== JSON.stringify(cabinetHinge(before.cabinet, index)) || now.cabinet.doors.hinge !== before.cabinet.doors.hinge || now.cabinet.doors.count !== before.cabinet.doors.count);
-          if (angle !== previous || hingeChanged) {
+        const previousLeaves = before.cabinet ? cabinetLeaves(before.cabinet, before.dimensions) : [];
+        for (const leaf of cabinetLeaves(now.cabinet, now.dimensions)) {
+          const old = previousLeaves.find(l => l.section?.id === leaf.section?.id && l.localIndex === leaf.localIndex), previous = old?.angle ?? 0;
+          const signature = (l: typeof leaf) => JSON.stringify([l.tilt, l.doors.hinge, l.doors.count, l.doors.hinges?.[l.localIndex], l.section?.bottom, l.section?.top, l.section?.basketDepth]);
+          const hingeChanged = old && signature(leaf) !== signature(old);
+          if (leaf.angle !== previous || hingeChanged) {
             checked = true;
-            collides = this.checkDoorCollision(id, index, (hingeChanged ? 0 : previous) * Math.PI / 180, false) || collides;
+            collides = this.checkDoorCollision(id, leaf.index, (hingeChanged ? 0 : previous) * Math.PI / 180, false) || collides;
           }
         }
         if (checked) { const root = this.getRenderObject(id); if (root) root.userData.doorCollision = collides; }
@@ -1004,6 +1007,8 @@ export class SceneEngine implements ISceneService {
       const object = this.getCabinetPart(id, o.id); if (!object) continue;
       const box = resolveContent(c, item.dimensions, o), f = footprint(o.dimensions, o.rotationY);
       object.position.set(origin.x + box.position.x + f.x / 2, origin.y + box.position.y, origin.z + box.position.z + f.z / 2); object.rotation.y = o.rotationY;
+      const offset = object.userData.cabinetClosedOffset;
+      if (offset) object.position.sub(new THREE.Vector3(offset.x, offset.y, offset.z));
     }
     this.collisionFeedback.clear();
     for (const part of cabinetIssues(c, item.dimensions).keys()) { const object = this.getCabinetPart(id, part); if (object) this.collisionFeedback.mark(object); }
@@ -1027,28 +1032,30 @@ export class SceneEngine implements ISceneService {
     if (clearFeedback) this.collisionFeedback.clear();
     const root = this.getRenderObject(id), pivot = door === undefined ? this.getTransformTarget(id) : root?.getObjectByName(`cabinet_door_${door}`);
     if (!root || !pivot) return false;
-    let leaf: THREE.Mesh | undefined;
-    pivot.traverse(o => { if (o instanceof THREE.Mesh && (o.userData.isSwingLeaf || o.name.startsWith('doorLeaf_'))) leaf = o; });
-    if (!leaf) return false;
-    const final = pivot.rotation.y, finalPosition = pivot.position.clone(), item = this.currentPlan?.get(id);
+    const moving: THREE.Mesh[] = [];
+    pivot.traverse(o => { if (o instanceof THREE.Mesh && (o.userData.isSwingLeaf || o.userData.isSwingCollider || o.userData.cabinetContent || o.name.startsWith('doorLeaf_'))) moving.push(o); });
+    if (!moving.length) return false;
+    const axis = pivot.userData.swingAxis === 'x' ? 'x' : 'y';
+    const final = pivot.rotation[axis], finalRotation = pivot.rotation.clone(), finalPosition = pivot.position.clone(), item = this.currentPlan?.get(id);
     // Opening angles are unsigned in the document; hinge orientation supplies sign.
     const from = previousAngle === undefined ? final : (pivot.userData.swingSign ?? Math.sign(final || 1)) * previousAngle;
     const steps = Math.max(1, Math.ceil(Math.abs(final - from) / (Math.PI / 90)));
-    const obstacles = this.picking.getCandidates().filter((o): o is THREE.Mesh => o instanceof THREE.Mesh && o !== leaf && !pivot.getObjectById(o.id));
+    const obstacles = this.picking.getCandidates().filter((o): o is THREE.Mesh => o instanceof THREE.Mesh && !pivot.getObjectById(o.id));
     let collides = false; this.scene.updateMatrixWorld(true);
     for (let step = 1; step <= steps && !collides; step++) {
-      pivot.rotation.y = from + (final - from) * step / steps;
+      const angle = from + (final - from) * step / steps;
+      pivot.rotation[axis] = angle;
       if (door !== undefined && item instanceof Furniture && item.cabinet) {
-        const pose = cabinetDoorPose(item.dimensions, item.cabinet, door, Math.abs(pivot.rotation.y) * 180 / Math.PI);
-        pivot.position.set(pose.position.x, pose.position.y, pose.position.z);
+        const pose = cabinetDoorPose(item.dimensions, item.cabinet, door, Math.abs(angle) * 180 / Math.PI);
+        pivot.position.set(pose.position.x, pose.position.y, pose.position.z); pivot.rotation.set(pose.rotationX, pose.rotationY, 0);
       }
       pivot.updateWorldMatrix(true, true);
       for (const other of obstacles) {
         let visible = true; for (let p: THREE.Object3D | null = other; p; p = p.parent) if (!p.visible) visible = false;
-        if (visible && this.collisionFeedback.intersects(leaf, other, ['wall', 'column'].includes(this.picking.resolve(other)?.kind ?? ''))) { collides = true; break; }
+        if (visible && moving.some(part => this.collisionFeedback.intersects(part, other, ['wall', 'column'].includes(this.picking.resolve(other)?.kind ?? '')))) { collides = true; break; }
       }
     }
-    pivot.rotation.y = final; pivot.position.copy(finalPosition); pivot.updateWorldMatrix(true, true);
+    pivot.rotation.copy(finalRotation); pivot.position.copy(finalPosition); pivot.updateWorldMatrix(true, true);
     if (collides) this.collisionFeedback.mark(pivot);
     root.userData.doorCollision = collides; this.invalidate(); return collides;
   }

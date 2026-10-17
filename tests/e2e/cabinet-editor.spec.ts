@@ -190,3 +190,59 @@ test('an existing cabinet gains an editable interior and collision checking on i
   await page.getByRole('button', { name: 'Open door 1', exact: true }).click();
   const state = (await snapshot(page))!; expect(state.data.cabinet.doors.count).toBe(1); expect(state.data.cabinet.doors.angles[0]).toBe(110); expect(state.red).toContain('door_0');
 });
+
+test('front sections split vertically with independent tilt-out baskets and a pair of upper doors', async ({ page, request }) => {
+  const raw = fixture(); raw.plan.items.cabinet.cabinet.panels = [];
+  await request.post('/api/save-plan', { data: raw }); await page.evaluate(() => localStorage.clear()); await page.reload(); await ready(page); await openLayout(page);
+  await page.getByLabel('Front split height (cm)', { exact: true }).fill('60'); await page.getByRole('button', { name: 'Split front vertically', exact: true }).click();
+  await page.getByLabel('Front split height (cm)', { exact: true }).fill('120'); await page.getByRole('button', { name: 'Split front vertically', exact: true }).click();
+  const section = page.getByLabel('Cabinet front section', { exact: true });
+  await section.selectOption({ index: 0 }); await page.getByLabel('Front section opening', { exact: true }).selectOption('tilt-out');
+  await page.getByLabel('Laundry basket depth (cm)', { exact: true }).fill('28');
+  await section.selectOption({ index: 1 }); await page.getByLabel('Front section opening', { exact: true }).selectOption('tilt-out');
+  await section.selectOption({ index: 2 }); await page.getByLabel('Front section panel count', { exact: true }).selectOption('2');
+  const draft = (await snapshot(page, true))!.data.cabinet;
+  expect(draft.frontSections.map((s: any) => [s.bottom, s.top, s.opening, s.doors.count])).toEqual([[0, .6, 'tilt-out', 1], [.6, 1.2, 'tilt-out', 1], [1.2, 'top', 'swing', 2]]);
+  expect(draft.frontSections[0].basketDepth).toBe(.28);
+  await page.getByRole('button', { name: 'Done', exact: true }).click();
+  await page.getByRole('button', { name: 'Open door 1', exact: true }).click();
+  expect((await snapshot(page))!.data.cabinet.frontSections[0].doors.angles).toEqual([40, 0]);
+  expect((await snapshot(page))!.doorCollision).toBe(false);
+  await page.getByRole('button', { name: 'Open door 4', exact: true }).click();
+  expect((await snapshot(page))!.data.cabinet.frontSections[2].doors.angles).toEqual([0, 110]);
+});
+
+test('laundry baskets carry supported objects, detect swing collisions and work in the offline iPad editor', async ({ page, request, browser }, info) => {
+  const raw = fixture(), dims = { x: .6, y: 1.9, z: .35 };
+  Object.assign(raw.plan.items.cabinet, { name: 'cabinet_laundry_tiltout', assetKey: 'cabinet_laundry_tiltout', dimensions: dims, cabinet: defaultCabinet({ dimensions: dims, assetKey: 'cabinet_laundry_tiltout' }, 2) });
+  Object.assign(raw.plan.items, { obstruction: { name: 'cube', assetKey: 'detail_books', dimensions: { x: .08, y: .08, z: .08 }, position: { x: 2.24, y: .44, z: 2.22 }, pc: { x: 224, y: 222 }, rotationY: 0 } });
+  await request.post('/api/save-plan', { data: raw }); await page.evaluate(() => localStorage.clear()); await page.reload(); await ready(page); await selectCabinet(page);
+  await page.getByRole('button', { name: 'Open door 1', exact: true }).click();
+  expect((await snapshot(page))!.doorCollision).toBe(true); expect((await snapshot(page))!.red).toContain('door_0');
+  await page.getByRole('button', { name: 'Edit layout', exact: true }).click(); await expect.poll(async () => (await snapshot(page, true))?.status).toBe('ready');
+  await page.getByRole('button', { name: 'Shelf 3', exact: true }).click(); await chooseObject(page, 'Toilet Paper Roll');
+  await page.getByLabel('Supporting shelf', { exact: true }).selectOption('basket_lower_0');
+  expect((await snapshot(page, true))!.red).toEqual([]);
+  await page.getByRole('button', { name: 'Done', exact: true }).click();
+  const expected = (await snapshot(page))!.data.cabinet;
+  const downloading = page.waitForEvent('download'); await page.getByRole('button', { name: 'Full Editor (.html)', exact: true }).click();
+  const path = info.outputPath('laundry-cabinet.html'); await (await downloading).saveAs(path);
+  const context = await browser.newContext({ viewport: { width: 1024, height: 768 }, hasTouch: true, isMobile: true });
+  const url = 'http://127.0.0.1:3100/__offline__/laundry-cabinet.html', html = readFileSync(path, 'utf8');
+  await context.route(/^https?:/, route => route.request().url() === url ? route.fulfill({ status: 200, contentType: 'text/html', body: html }) : route.abort());
+  const tablet = await context.newPage(); await tablet.goto(url); await expect.poll(async () => (await snapshot(tablet))?.status).toBe('ready');
+  expect((await snapshot(tablet))!.data.cabinet).toEqual(expected); await selectCabinet(tablet);
+  await tablet.getByRole('button', { name: 'Close door 1', exact: true }).tap(); await tablet.getByRole('button', { name: 'Open door 2', exact: true }).tap();
+  expect((await snapshot(tablet))!.data.cabinet.frontSections[1].doors.angles[0]).toBe(40);
+  await tablet.getByRole('button', { name: 'Open door 3', exact: true }).tap(); await tablet.getByRole('button', { name: 'Open door 4', exact: true }).tap();
+  await tablet.screenshot({ path: info.outputPath('ipad-tilt-out-laundry.png') }); await context.close();
+});
+
+test('catalogue adds complete flat and wider spin-mop sets to a cabinet fit check', async ({ page }) => {
+  await openLayout(page); await chooseObject(page, 'Flat Mop and Wringer Bucket Set');
+  await chooseObject(page, 'Spin Mop and Bucket Set');
+  const contents = (await snapshot(page, true))!.data.cabinet.contents;
+  expect(contents.map((o: any) => o.assetKey)).toEqual(['fit_mop_set', 'fit_spin_mop_set']);
+  expect(contents[1].dimensions.x).toBeGreaterThan(contents[0].dimensions.x); expect(contents[0].dimensions.y).toBe(1.4);
+  await page.getByRole('button', { name: 'Done', exact: true }).click();
+});

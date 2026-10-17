@@ -63,9 +63,6 @@ export const Inspector: React.FC<InspectorProps> = ({
   const isShelving = presentation.sections.includes('shelving');
   const definition = runtime.catalog.get(item.assetKey);
   const legacyDoors = item.hasLids && cabinetDoorCount(definition) === 0 ? (item.dimensions.x >= .7 ? 2 : 1) : cabinetDoorCount(definition);
-  const setDoorAngle = (index: number, angle: number) => {
-    const layout = structuredClone(item.cabinet ?? defaultCabinet(item.toData(), legacyDoors ?? 2)); layout.doors.angles[index] = angle; editor.execute(new ConfigureCabinet(item.id, layout, 'Open cabinet door'));
-  };
   const resizable = definition?.capabilities?.resizable !== false;
   const dimensionStep = interior ? .1 : definition?.householdDetail || definition?.floorDrain || definition?.lightingComponent || definition?.architecturalFinish || definition?.softFurnishing ? .1 : 1;
 
@@ -172,10 +169,7 @@ export const Inspector: React.FC<InspectorProps> = ({
 
       {!interior && (item.cabinet || cabinetDoorCount(definition) !== undefined) && <div className="py-3 space-y-2 border-b border-slate-800">
         <button className="w-full rounded bg-sky-600 p-2 font-semibold" onClick={onEditLayout}>Edit layout</button>
-        {Array.from({ length: item.cabinet?.doors.count ?? legacyDoors ?? 0 }, (_, index) => <div key={index} className="block"><span className="flex items-center justify-between">Door {index + 1}: {Math.round(item.cabinet?.doors.angles[index] ?? 0)}°<button type="button" className="rounded bg-slate-700 px-2 py-1" onClick={() => setDoorAngle(index, (item.cabinet?.doors.angles[index] ?? 0) > 0 ? 0 : 110)}>{(item.cabinet?.doors.angles[index] ?? 0) > 0 ? 'Close' : 'Open'} door {index + 1}</button></span>
-          <input aria-label={`Cabinet door ${index + 1} angle`} type="range" min="0" max="170" step="1" value={item.cabinet?.doors.angles[index] ?? 0} className="w-full accent-sky-400" onChange={event => setDoorAngle(index, +event.target.value)} />
-        </div>)}
-        <CabinetHingeControls layout={item.cabinet ?? defaultCabinet(item.toData(), legacyDoors ?? 2)} onChange={layout => editor.execute(new ConfigureCabinet(item.id, layout, 'Configure cabinet hinge'))} />
+        <CabinetHingeControls showAngles layout={item.cabinet ?? defaultCabinet(item.toData(), legacyDoors ?? 2)} onChange={layout => editor.execute(new ConfigureCabinet(item.id, layout, 'Configure cabinet doors'))} />
       </div>}
       {/* Transform Coordinates */}
       <div className="py-3 border-b border-slate-800 space-y-3">

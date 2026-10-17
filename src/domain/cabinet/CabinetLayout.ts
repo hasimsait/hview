@@ -1,6 +1,8 @@
 import type { FurnitureData, SurfaceFinishConfig, Vector3D } from '../model/PlanData';
 import { SurfaceFinish } from '../model/SurfaceFinish';
 import { finite, identifier, positive } from '../model/Immutable';
+import { cabinetBasket, cabinetHasDoors, cabinetLeafSettings, cabinetLeaves, type CabinetDoors, type CabinetFrontSection } from './CabinetFronts';
+export { cabinetDoorPose } from './CabinetFronts';
 
 /** All dimensions are metres. Interior coordinates start at inside left/base/back. */
 export interface CabinetPanel {
@@ -41,7 +43,8 @@ export interface CabinetLayout {
   version: 1;
   panelThickness: number;
   backThickness: number;
-  doors: { count: 0 | 1 | 2; hinge: 'left' | 'right'; angles: [number, number]; hinges?: [CabinetHinge, CabinetHinge] };
+  doors: CabinetDoors;
+  frontSections?: CabinetFrontSection[];
   panels: CabinetPanel[];
   contents: CabinetContent[];
 }
@@ -50,17 +53,32 @@ export const CABINET_EPSILON = .0005;
 export function validateCabinet(layout: CabinetLayout): CabinetLayout {
   if (!layout || layout.version !== 1) throw new Error('Unsupported cabinet layout');
   for (const [key, value] of [['Panel', layout.panelThickness], ['Back', layout.backThickness]] as const) if (positive(value, `${key} thickness`) > .1) throw new Error('Cabinet panels must be at most 100 mm thick');
-  if (![0, 1, 2].includes(layout.doors?.count) || !['left', 'right'].includes(layout.doors.hinge) || layout.doors.angles?.length !== 2) throw new Error('Cabinets have zero, one or two doors');
-  layout.doors.angles.forEach(angle => { if (finite(angle, 'Door angle') < 0 || angle > 170) throw new Error('Cabinet door angles must be between 0 and 170'); });
-  if (layout.doors.hinges !== undefined) {
-    if (!Array.isArray(layout.doors.hinges) || layout.doors.hinges.length !== 2) throw new Error('Cabinet needs two hinge settings');
-    for (const hinge of layout.doors.hinges) {
-      if (!hinge || !Object.hasOwn(CABINET_HINGE_TYPES, hinge.type)) throw new Error('Invalid cabinet hinge type');
-      if (finite(hinge.travel, 'Hinge travel') < 0 || hinge.travel > .05) throw new Error('Hinge travel must be between 0 and 50 mm');
+  const validateDoors = (doors: CabinetDoors, tilt = false) => {
+    if (![0, 1, 2].includes(doors?.count) || !['left', 'right'].includes(doors.hinge) || doors.angles?.length !== 2) throw new Error('Cabinets have zero, one or two doors');
+    doors.angles.forEach(angle => { if (finite(angle, 'Door angle') < 0 || angle > (tilt ? 60 : 170)) throw new Error('Invalid cabinet door angle'); });
+    if (doors.hinges !== undefined) {
+      if (!Array.isArray(doors.hinges) || doors.hinges.length !== 2) throw new Error('Cabinet needs two hinge settings');
+      for (const hinge of doors.hinges) {
+        if (!hinge || !Object.hasOwn(CABINET_HINGE_TYPES, hinge.type)) throw new Error('Invalid cabinet hinge type');
+        if (finite(hinge.travel, 'Hinge travel') < 0 || hinge.travel > .05) throw new Error('Hinge travel must be between 0 and 50 mm');
+      }
+    }
+  };
+  validateDoors(layout.doors);
+  if (layout.frontSections !== undefined) {
+    if (!Array.isArray(layout.frontSections) || !layout.frontSections.length || layout.frontSections.length > 16) throw new Error('Invalid cabinet front sections');
+    const ids = new Set<string>();
+    for (const s of layout.frontSections) {
+      identifier(s.id); if (ids.has(s.id)) throw new Error('Duplicate front section'); ids.add(s.id);
+      finite(s.bottom, 'Front bottom'); if (s.top !== 'top') finite(s.top, 'Front top');
+      if (!['swing', 'tilt-out'].includes(s.opening)) throw new Error('Invalid cabinet front opening');
+      validateDoors(s.doors, s.opening === 'tilt-out');
+      if (s.basketDepth !== undefined) positive(s.basketDepth, 'Basket depth');
     }
   }
   if (!Array.isArray(layout.panels) || !Array.isArray(layout.contents) || layout.panels.length > 256 || layout.contents.length > 256) throw new Error('Cabinet layout is too large');
   const ids = new Set<string>(['left', 'right', 'bottom', 'top', 'base', 'shell_left', 'shell_right', 'shell_base', 'shell_top', 'shell_back', 'door_0', 'door_1']);
+  for (const [index, leaf] of cabinetLeafSettings(layout).entries()) { ids.add(`door_${index}`); if (leaf.section?.opening === 'tilt-out') ids.add(`basket_${leaf.section.id}_${leaf.localIndex}`); }
   for (const p of [...layout.panels, ...layout.contents]) { identifier(p.id); if (ids.has(p.id)) throw new Error('Duplicate cabinet part'); ids.add(p.id); if (p.finish) SurfaceFinish.optional(p.finish); if ('sectionFinishes' in p && p.sectionFinishes) Object.values(p.sectionFinishes).forEach(finish => SurfaceFinish.optional(finish)); if (typeof p.name !== 'string') throw new Error('Cabinet part needs a name'); }
   for (const p of layout.panels) {
     if (!['shelf', 'divider'].includes(p.kind)) throw new Error('Invalid cabinet panel'); finite(p.at, 'Panel position');
@@ -71,25 +89,16 @@ export function validateCabinet(layout: CabinetLayout): CabinetLayout {
   for (const o of layout.contents) {
     identifier(o.assetKey); for (const axis of ['x', 'y', 'z'] as const) { positive(o.dimensions?.[axis], 'Content dimensions'); finite(o.position?.[axis], 'Content position'); }
     finite(o.rotationY, 'Content rotation');
-    if (o.supportId !== undefined && o.supportId !== 'base' && !layout.panels.some(p => p.id === o.supportId && p.kind === 'shelf')) throw new Error('Missing cabinet support');
+    if (o.supportId !== undefined && o.supportId !== 'base' && !layout.panels.some(p => p.id === o.supportId && p.kind === 'shelf') && !cabinetLeafSettings(layout).some(l => l.section?.opening === 'tilt-out' && o.supportId === `basket_${l.section.id}_${l.localIndex}`)) throw new Error('Missing cabinet support');
   }
   return layout;
 }
 export function cabinetHinge(c: CabinetLayout, index: number): CabinetHinge {
-  return c.doors.hinges?.[index] ?? { type: 'pivot', travel: 0 };
-}
-/** A clearance-planning path, not a manufacturer-specific linkage simulation.
- * Arm crank affects installation geometry, not a universal travel distance.
- * All concealed arm styles therefore use the user's measured travel.
- */
-export function cabinetDoorPose(size: Vector3D, c: CabinetLayout, index: number, degrees = c.doors.angles[index]): { position: Vector3D; rotationY: number } {
-  const left = c.doors.count === 2 ? index === 0 : c.doors.hinge === 'left', sign = left ? 1 : -1;
-  const hinge = cabinetHinge(c, index), angle = degrees * Math.PI / 180;
-  const travel = hinge.type === 'pivot' ? 0 : hinge.travel * Math.sin(Math.min(Math.PI / 2, angle));
-  return { position: { x: sign * (-size.x / 2 + .002 + travel), y: 0, z: size.z / 2 - c.panelThickness / 2 + travel }, rotationY: -sign * angle };
+  const leaf = cabinetLeafSettings(c)[index];
+  return leaf?.doors.hinges?.[leaf.localIndex] ?? { type: 'pivot', travel: 0 };
 }
 export function interior(size: Vector3D, c: CabinetLayout): Vector3D {
-  return { x: size.x - c.panelThickness * 2, y: size.y - c.panelThickness * 2, z: size.z - c.backThickness - (c.doors.count ? c.panelThickness : 0) };
+  return { x: size.x - c.panelThickness * 2, y: size.y - c.panelThickness * 2, z: size.z - c.backThickness - (cabinetHasDoors(c) ? c.panelThickness : 0) };
 }
 export function interiorOrigin(size: Vector3D, c: CabinetLayout): Vector3D { return { x: -size.x / 2 + c.panelThickness, y: c.panelThickness, z: -size.z / 2 + c.backThickness }; }
 export function endpoint(c: CabinetLayout, size: Vector3D, ref: string | number, start: boolean): number {
@@ -116,7 +125,8 @@ export function shelfClearances(c: CabinetLayout, size: Vector3D, id: string): {
 }
 export function footprint(size: Vector3D, rotationY = 0): { x: number; z: number } { return { x: Math.abs(Math.cos(rotationY)) * size.x + Math.abs(Math.sin(rotationY)) * size.z, z: Math.abs(Math.sin(rotationY)) * size.x + Math.abs(Math.cos(rotationY)) * size.z }; }
 export function resolveContent(c: CabinetLayout, size: Vector3D, o: CabinetContent): CabinetBox {
-  const support = c.panels.find(p => p.id === o.supportId), box = support ? resolvePanel(c, size, support) : undefined;
+  const support = c.panels.find(p => p.id === o.supportId);
+  const box = support ? resolvePanel(c, size, support) : supports(c, size).find(p => p.id === o.supportId);
   return { id: o.id, name: o.name, dimensions: o.dimensions, rotationY: o.rotationY, position: { x: o.position.x + (box?.position.x ?? 0), y: o.position.y + (box ? box.position.y + box.dimensions.y : 0), z: o.position.z + (box?.position.z ?? 0) } };
 }
 /** Strict penetration of upright oriented boxes. Mere contact (including shelf contact) is valid. */
@@ -138,7 +148,7 @@ function supportedOn(o: CabinetBox, surface: CabinetBox): boolean {
 }
 function supports(c: CabinetLayout, size: Vector3D): CabinetBox[] {
   const i = interior(size, c);
-  return [{ id: 'base', name: 'Base', position: { x: 0, y: -c.panelThickness, z: 0 }, dimensions: { x: Math.max(.001, i.x), y: c.panelThickness, z: Math.max(.001, i.z) } }, ...c.panels.filter(p => p.kind === 'shelf').map(p => resolvePanel(c, size, p)).filter(p => !p.invalid)];
+  return [{ id: 'base', name: 'Base', position: { x: 0, y: -c.panelThickness, z: 0 }, dimensions: { x: Math.max(.001, i.x), y: c.panelThickness, z: Math.max(.001, i.z) } }, ...c.panels.filter(p => p.kind === 'shelf').map(p => resolvePanel(c, size, p)).filter(p => !p.invalid), ...cabinetLeaves(c, size).flatMap(l => { const b = cabinetBasket(c, size, l); return b ? [b.floor] : []; })];
 }
 /** Called only on deliberate placement/movement. Loading/resizing never rearranges contents. */
 export function settleContent(c: CabinetLayout, size: Vector3D, o: CabinetContent, absolute?: Vector3D): CabinetContent {
@@ -164,7 +174,9 @@ export function cabinetIssues(c: CabinetLayout, size: Vector3D): Map<string, str
   const result = new Map<string, string[]>(), i = interior(size, c);
   const flag = (id: string, reason: string) => result.set(id, [...new Set([...(result.get(id) ?? []), reason])]);
   if (i.x <= 0 || i.y <= 0 || i.z <= 0) { flag('shell_left', 'Cabinet smaller than panel thicknesses'); flag('shell_right', 'Cabinet smaller than panel thicknesses'); }
-  const boxes = [...c.panels.map(p => resolvePanel(c, size, p)), ...c.contents.map(o => resolveContent(c, size, o))];
+  const boxes = [...c.panels.map(p => resolvePanel(c, size, p)), ...c.contents.map(o => resolveContent(c, size, o)), ...cabinetLeaves(c, size).flatMap(l => cabinetBasket(c, size, l)?.walls ?? [])];
+  for (const l of cabinetLeaves(c, size)) if (l.bottom < 0 || l.top > size.y || l.top <= l.bottom + .004) flag(`door_${l.index}`, 'Front outside cabinet height');
+  for (const a of cabinetLeaves(c, size)) for (const b of cabinetLeaves(c, size)) if (a.section?.id !== b.section?.id && Math.min(a.top, b.top) - Math.max(a.bottom, b.bottom) > CABINET_EPSILON) flag(`door_${a.index}`, 'Overlapping front sections');
   for (const box of boxes) {
     const f = footprint(box.dimensions, box.rotationY);
     if (box.invalid || box.position.x < -CABINET_EPSILON || box.position.y < -CABINET_EPSILON || box.position.z < -CABINET_EPSILON || box.position.x + f.x > i.x + CABINET_EPSILON || box.position.y + box.dimensions.y > i.y + CABINET_EPSILON || box.position.z + f.z > i.z + CABINET_EPSILON) flag(box.id, 'Outside usable interior');
@@ -175,6 +187,10 @@ export function cabinetIssues(c: CabinetLayout, size: Vector3D): Map<string, str
 }
 export function removeCabinetPart(c: CabinetLayout, size: Vector3D, id: string): CabinetLayout {
   return { ...c, panels: c.panels.filter(p => p.id !== id).map(p => ({ ...p, start: p.start === id ? endpoint(c, size, p.start, true) : p.start, end: p.end === id ? endpoint(c, size, p.end, false) : p.end })), contents: c.contents.filter(o => o.id !== id).map(o => o.supportId === id ? { ...o, supportId: undefined, position: resolveContent(c, size, o).position } : o) };
+}
+export function withCabinetFrontSections(c: CabinetLayout, size: Vector3D, frontSections: CabinetFrontSection[]): CabinetLayout {
+  const next = { ...c, frontSections }, valid = new Set(supports(next, size).map(s => s.id));
+  return { ...next, contents: c.contents.map(o => o.supportId && !valid.has(o.supportId) ? { ...o, supportId: undefined, position: resolveContent(c, size, o).position } : o) };
 }
 export function splitDivider(c: CabinetLayout, size: Vector3D, id: string): CabinetLayout {
   const p = c.panels.find(p => p.id === id); if (!p || p.kind !== 'divider') return c;
@@ -193,6 +209,16 @@ export function splitDivider(c: CabinetLayout, size: Vector3D, id: string): Cabi
 export function defaultCabinet(data: Pick<FurnitureData, 'dimensions' | 'assetKey' | 'hasLids' | 'shelfCount'>, doors: 0 | 1 | 2 = 2): CabinetLayout {
   if (data.hasLids && doors === 0) doors = data.dimensions.x >= .7 ? 2 : 1;
   const count = data.assetKey === 'open_shelving' ? Math.max(0, (data.shelfCount ?? 5) - 2) : data.shelfCount ?? (data.assetKey.includes('ward') ? 1 : 2);
-  return { version: 1, panelThickness: .018, backThickness: .006, doors: { count: doors, hinge: 'left', angles: [0, 0] },
+  const layout: CabinetLayout = { version: 1, panelThickness: .018, backThickness: .006, doors: { count: doors, hinge: 'left', angles: [0, 0] },
     panels: Array.from({ length: count }, (_, index) => ({ id: `shelf_${index + 1}`, name: `Shelf ${index + 1}`, kind: 'shelf', at: (data.dimensions.y - .036) * (index + 1) / (count + 1), start: 'left', end: 'right', depth: { mode: 'fit', value: .02 } })), contents: [] };
+  if (data.assetKey === 'cabinet_laundry_tiltout') {
+    const h = data.dimensions.y / 3;
+    layout.frontSections = [
+      { id: 'lower', bottom: 0, top: h, opening: 'tilt-out', doors: { count: 1, hinge: 'left', angles: [0, 0] } },
+      { id: 'middle', bottom: h, top: 2 * h, opening: 'tilt-out', doors: { count: 1, hinge: 'left', angles: [0, 0] } },
+      { id: 'upper', bottom: 2 * h, top: 'top', opening: 'swing', doors: { count: 2, hinge: 'left', angles: [0, 0] } },
+    ];
+    layout.panels = [h, h * 2, h * 2.5].map((height, i) => ({ id: `shelf_${i + 1}`, name: `Shelf ${i + 1}`, kind: 'shelf', at: height - .027, start: 'left', end: 'right', depth: { mode: 'fit', value: .02 } }));
+  }
+  return layout;
 }

@@ -13,6 +13,8 @@ import { createElementId } from '../../platform/ElementId';
 import { RuntimeContext, useDocument, useRuntime } from '../context/RuntimeContext';
 import { AssetReplacementModal } from './AssetReplacementModal';
 import { Inspector } from './Inspector';
+import { cabinetBasket, cabinetLeaves, setCabinetDoorAngle } from '../../domain/cabinet/CabinetFronts';
+import { CabinetFrontControls } from './CabinetFrontControls';
 import { CabinetHingeControls } from './CabinetHingeControls';
 import { Viewport3D } from './Viewport3D';
 
@@ -20,13 +22,20 @@ export function CabinetEditor({ cabinet, onClose }: { cabinet: Furniture; onClos
   const outer = useRuntime();
   const [session] = useState(() => {
     const runtime = new ApplicationRuntime();
-    const layout = structuredClone(cabinet.cabinet ?? defaultCabinet(cabinet.toData(), cabinetDoorCount(outer.catalog.get(cabinet.assetKey)) ?? 2));
-    layout.doors.angles = [115, 115];
+    let layout = structuredClone(cabinet.cabinet ?? defaultCabinet(cabinet.toData(), cabinetDoorCount(outer.catalog.get(cabinet.assetKey)) ?? 2));
+    for (const leaf of cabinetLeaves(layout, cabinet.dimensions)) layout = setCabinetDoorAngle(layout, leaf.index, leaf.tilt ? 40 : 115);
     runtime.editor.load(new PlanDocument([cabinet.withCabinet(layout).withTransform({ x: 0, y: 0, z: 0 }, 0)], Math.max(2.7, cabinet.dimensions.y)));
     return runtime;
   });
   return <RuntimeContext.Provider value={session}><CabinetWorkspace original={cabinet} onCancel={onClose} onDone={layout => {
-    const saved = structuredClone(layout); saved.doors.angles = [...(cabinet.cabinet?.doors.angles ?? [0, 0])];
+    let saved = structuredClone(layout);
+    saved.doors.angles = [0, 0];
+    for (const section of saved.frontSections ?? []) section.doors.angles = [0, 0];
+    const previous = cabinet.cabinet ? cabinetLeaves(cabinet.cabinet, cabinet.dimensions) : [];
+    for (const leaf of cabinetLeaves(saved, cabinet.dimensions)) {
+      const old = previous.find(l => l.section?.id === leaf.section?.id && l.localIndex === leaf.localIndex && l.tilt === leaf.tilt);
+      saved = setCabinetDoorAngle(saved, leaf.index, old?.angle ?? 0);
+    }
     outer.editor.execute(new ConfigureCabinet(cabinet.id, saved)); onClose();
   }} /></RuntimeContext.Provider>;
 }
@@ -119,9 +128,10 @@ function CabinetWorkspace({ original, onCancel, onDone }: { original: Furniture;
         <button className="w-full rounded bg-emerald-700 p-2" onClick={() => { setReplacing(false); setAdding(true); }}>Place object</button>
         <label className="block">Panel thickness (mm)<input aria-label="Panel thickness (mm)" className="w-full bg-slate-800 p-1" type="number" min="1" max="100" step="1" value={+(layout.panelThickness * 1000).toFixed(2)} onChange={e => { const n = +e.target.value / 1000; if (n > 0 && n <= .1) update({ ...layout, panelThickness: n }); }} /></label>
         <label className="block">Back thickness (mm)<input aria-label="Back thickness (mm)" className="w-full bg-slate-800 p-1" type="number" min="1" max="100" step="1" value={+(layout.backThickness * 1000).toFixed(2)} onChange={e => { const n = +e.target.value / 1000; if (n > 0 && n <= .1) update({ ...layout, backThickness: n }); }} /></label>
-        <label className="block">Doors<select aria-label="Cabinet door count" className="w-full bg-slate-800 p-1" value={layout.doors.count} onChange={e => update({ ...layout, doors: { ...layout.doors, count: +e.target.value as 0 | 1 | 2 } })}><option value="0">Open cabinet</option><option value="1">One door</option><option value="2">Two doors</option></select></label>
-        {layout.doors.count === 1 && <label className="block">Hinge side<select aria-label="Cabinet hinge side" className="w-full bg-slate-800 p-1" value={layout.doors.hinge} onChange={e => update({ ...layout, doors: { ...layout.doors, hinge: e.target.value as 'left' | 'right' } })}><option value="left">Left</option><option value="right">Right</option></select></label>}
-        <CabinetHingeControls layout={layout} onChange={next => update(next, 'Configure cabinet hinge')} />
+        {!layout.frontSections && <label className="block">Doors<select aria-label="Cabinet door count" className="w-full bg-slate-800 p-1" value={layout.doors.count} onChange={e => update({ ...layout, doors: { ...layout.doors, count: +e.target.value as 0 | 1 | 2 } })}><option value="0">Open cabinet</option><option value="1">One door</option><option value="2">Two doors</option></select></label>}
+        {!layout.frontSections && layout.doors.count === 1 && <label className="block">Hinge side<select aria-label="Cabinet hinge side" className="w-full bg-slate-800 p-1" value={layout.doors.hinge} onChange={e => update({ ...layout, doors: { ...layout.doors, hinge: e.target.value as 'left' | 'right' } })}><option value="left">Left</option><option value="right">Right</option></select></label>}
+        <CabinetFrontControls layout={layout} size={size} onChange={next => update(next, 'Configure cabinet fronts')} />
+        <CabinetHingeControls showAngles layout={layout} onChange={next => update(next, 'Configure cabinet hinge')} />
         <p role="status" className={issues.size ? 'text-red-300' : 'text-emerald-300'}>{issues.size ? `${issues.size} parts need attention` : 'No collisions or unsupported objects'}</p>
         <div className="space-y-1" aria-label="Cabinet parts">{[...layout.panels, ...layout.contents].map(p => <button key={p.id} aria-label={p.name} aria-pressed={p.id === selected} className={`block w-full rounded border p-2 text-left ${p.id === selected ? 'border-sky-400 bg-sky-900/40' : 'border-slate-700'} ${issues.has(p.id) ? 'text-red-300' : ''}`} onClick={() => select(p.id)}>{p.name}{issues.has(p.id) && <small className="block">{issues.get(p.id)!.join(', ')}</small>}</button>)}</div>
       </aside>
@@ -137,7 +147,7 @@ function CabinetWorkspace({ original, onCancel, onDone }: { original: Furniture;
           <label className="block">{panel.depth.mode === 'fit' ? 'Front setback (cm)' : 'Fixed depth (cm)'}<input aria-label={panel.depth.mode === 'fit' ? 'Front setback (cm)' : 'Fixed depth (cm)'} className="w-full bg-slate-800 p-1" type="number" min="0" step=".1" value={+(panel.depth.value * 100).toFixed(2)} onChange={e => editPanel({ depth: { ...panel.depth, value: Math.max(0, +e.target.value / 100) } })} /></label>
           {panel.kind === 'divider' && <button className="w-full rounded bg-sky-700 p-2" onClick={() => update(splitDivider(layout, size, panel.id), 'Split divider at shelves')}>Split divider at shelves</button>}
         </div>}
-        {content && <div className="p-3 border-b border-slate-700"><label>Supporting shelf<select aria-label="Supporting shelf" className="w-full bg-slate-800 p-1" value={content.supportId ?? 'none'} onChange={e => update({ ...layout, contents: layout.contents.map(o => o.id === content.id ? { ...o, supportId: e.target.value === 'none' ? undefined : e.target.value, position: { ...o.position, y: 0 } } : o) })}><option value="none">No attachment</option><option value="base">Cabinet base</option>{layout.panels.filter(p => p.kind === 'shelf').map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label></div>}
+        {content && <div className="p-3 border-b border-slate-700"><label>Supporting shelf<select aria-label="Supporting shelf" className="w-full bg-slate-800 p-1" value={content.supportId ?? 'none'} onChange={e => update({ ...layout, contents: layout.contents.map(o => o.id === content.id ? { ...o, supportId: e.target.value === 'none' ? undefined : e.target.value, position: { ...o.position, y: 0 } } : o) })}><option value="none">No attachment</option><option value="base">Cabinet base</option>{layout.panels.filter(p => p.kind === 'shelf').map(p => <option key={p.id} value={p.id}>{p.name}</option>)}{cabinetLeaves(layout, size).map(l => cabinetBasket(layout, size, l)?.floor).filter(Boolean).map(b => <option key={b!.id} value={b!.id}>{b!.name}</option>)}</select></label></div>}
         <Inspector item={inspected} className="w-full bg-slate-900 p-4 text-xs" onClose={() => select(null)} onOpenReplaceModal={() => { setReplacing(true); setAdding(true); }} interior={{ panel: !!panel, sections: [...sections], section, selectSection: setSection, transform, finish, remove: () => { update(removeCabinetPart(layout, size, inspected.id), 'Delete cabinet part'); select(null); } }} />
       </aside>}
     </div>

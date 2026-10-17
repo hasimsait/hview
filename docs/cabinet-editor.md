@@ -2,7 +2,7 @@
 
 Select a cabinet and choose **Edit layout**. The cabinet opens in an isolated view with its doors open. The house remains unchanged and cannot receive pointer or keyboard edits. **Done** commits the layout as one undoable house edit; **Cancel layout** discards the draft. Layout Undo/Redo and Ctrl/Cmd+Z work within the draft. The previous house camera and door angles are retained.
 
-The same application and layout editor run on desktop, iPad and in exported offline HTML. No model service, physics server or additional model downloads are needed. The catalogue includes seven rectangular modular cabinet starting points and five adjustable fit objects: a toilet-paper roll, detergent bottle, spray bottle, bucket and mop. Existing one-/two-door wardrobes, kitchen cabinets, open shelving and compatible catalogue bookcases can also be configured.
+The same application and layout editor run on desktop, iPad and in exported offline HTML. No model service, physics server or additional model downloads are needed. The catalogue includes eight modular cabinet starting points, including a tilt-out laundry cabinet, and eight adjustable fit objects. Mop options include a separate flat mop, a mop with wringer bucket and a wider spin-mop set. The sets include the mop and bucket in their combined footprint; dimensions are adjustable. Search for “Vileda” to find the mop sets. Existing one-/two-door wardrobes, kitchen cabinets, open shelving and compatible catalogue bookcases can also be configured.
 
 ## Layout editing
 
@@ -33,3 +33,13 @@ Inside layout mode, penetrating boards/contents, parts outside the usable interi
 Door controls work independently outside layout mode and include touch-friendly Open/Close buttons. Swing checks sample the traversed angles at intervals of at most two degrees and show the moving door red when it intersects an obstacle. Cabinet checks follow the same translating hinge path used to render the door, in both opening and closing directions. Changing a hinge or its travel rechecks the opening path at the current angle. Room doors retain their fixed hinge axes. Door checking uses oriented mesh bounds, with triangle checks for walls so actual doorway openings are respected. Materials are temporarily replaced for feedback and original finishes are restored afterwards.
 
 Layouts, content identities, dimensions, support attachments, finishes, independent door angles and hinge settings are included in canonical plans, legacy plans and standalone editor exports. There is no destructive cleanup of invalid layouts when saving.
+
+## Stacked fronts and laundry baskets
+
+In **Edit layout**, use **Split front vertically** to divide the cabinet into sections stacked up its height. Enter the split height from the floor in centimetres. Select each section to set its bottom/top, fit its top to the cabinet, choose zero, one or two panels across, and choose side-hinged doors or a **Tilt-out laundry basket**. Sections retain their heights through shell resizing; invalid heights and overlaps turn red. Internal shelves remain independent.
+
+The **Tilt-Out Laundry Cabinet** catalogue asset starts with two laundry baskets and an upper cupboard with two doors. Each laundry front opens independently from its bottom hinge (0–60°, Open uses 40°). The basket, front, handle and basket-supported contents tilt together. Collision checks follow all moving parts throughout opening and closing; ordinary furniture placement remains unrestricted.
+
+Set a stored object's **Supporting shelf** to a basket to place it on that basket's floor. Deliberate moves also settle onto basket floors. Removing a front or converting it to side-hinged doors detaches its contents at their closed-cabinet positions, so nothing is deleted. Basket depth is editable; oversized baskets and unsupported or penetrating contents remain visible in red. The basket is planning geometry, not a simulation of a particular manufacturer's linkage.
+
+Front sections, hinge settings, basket depths, angles and support attachments persist in both plan formats and the full offline editor on desktop and iPad.

@@ -67,7 +67,7 @@ export const AssetReplacementModal: React.FC<AssetReplacementModalProps> = ({
         : selectedCategory === 'practical' ? !!asset.householdDetail?.practical
         : selectedCategory === 'textiles' ? !!asset.softFurnishing || /^(Rugs|Cushions)$/.test(asset.collection ?? '') : asset.category.toLowerCase() === selectedCategory.toLowerCase());
     const query = searchable(searchQuery.trim());
-    const matchesSearch = [asset.name, asset.description, asset.key, asset.collection, asset.source?.retailer, asset.source?.productCode]
+    const matchesSearch = [asset.name, asset.description, asset.key, asset.collection, asset.source?.retailer, asset.source?.productCode, ...(asset.aliases ?? [])]
       .some(value => value && searchable(value).includes(query));
     return matchesCategory && matchesSearch;
   });

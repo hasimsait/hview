@@ -9,6 +9,11 @@ import { selectedFurniture,selectedOpening,selectedRoom,selectedWall } from '../
 import { SceneEngine } from '../../engine/SceneEngine';
 
 export class InteractionService implements IInteractionService {
+  private cabinetPartPosition(): THREE.Vector3 {
+    const position = this.selectedObject!.position.clone(), offset = this.selectedObject!.userData.cabinetClosedOffset;
+    return offset ? position.add(new THREE.Vector3(offset.x, offset.y, offset.z)) : position;
+  }
+
   private sceneService: SceneEngine | null = null;
   private editor: EditorSession | null = null;
   private transformControls: TransformControls | null = null;
@@ -49,7 +54,7 @@ export class InteractionService implements IInteractionService {
       if (!this.cabinetMode && this.transformControls?.dragging && this.selectedTarget?.kind === 'opening') this.sceneService?.checkDoorCollision(this.selectedTarget.id);
     });
     this.transformControls.addEventListener('objectChange', () => {
-      if (this.cabinetMode && this.cabinetPart && this.selectedObject) this.sceneService?.previewCabinetPart(this.cabinetMode.id, this.cabinetPart, this.selectedObject.position.clone(), this.selectedObject.rotation.y);
+      if (this.cabinetMode && this.cabinetPart && this.selectedObject) this.sceneService?.previewCabinetPart(this.cabinetMode.id, this.cabinetPart, this.cabinetPartPosition(), this.selectedObject.rotation.y);
     });
     this.transformControls.setMode(this.gizmoMode);
     this.transformControls.showY = false; // Only translate in X and Z on the floor!
@@ -63,7 +68,7 @@ export class InteractionService implements IInteractionService {
         controls.enabled = this.enabled && !event.value;
       }
       if (this.enabled && !event.value && this.cabinetMode && this.cabinetPart && this.selectedObject) {
-        this.cabinetMode.move(this.cabinetPart, this.selectedObject.position.clone(), this.selectedObject.rotation.y); return;
+        this.cabinetMode.move(this.cabinetPart, this.cabinetPartPosition(), this.selectedObject.rotation.y); return;
       }
       // When dragging finishes, ensure final coordinates are committed via SelectionModel / selectedTarget
       if (this.enabled && !event.value && this.selectedObject && this.editor) {
