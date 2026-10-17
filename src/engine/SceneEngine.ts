@@ -132,7 +132,8 @@ export class SceneEngine implements ISceneService {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x0f172a); // Deep modern slate
 
-    this.perspectiveCamera = new THREE.PerspectiveCamera(45, 1, 0.02, 1000);
+    // A wider view gives indoor walking enough peripheral context to judge rooms and doorways.
+    this.perspectiveCamera = new THREE.PerspectiveCamera(65, 1, 0.02, 1000);
     this.perspectiveCamera.position.set(0, 12, 16);
 
     const aspect = 1;
@@ -984,6 +985,17 @@ export class SceneEngine implements ISceneService {
 
   getScene(): THREE.Scene {
     return this.scene;
+  }
+
+  getFieldOfView(): number {
+    return this.perspectiveCamera.fov;
+  }
+
+  setFieldOfView(degrees: number): void {
+    if (!Number.isFinite(degrees)) return;
+    this.perspectiveCamera.fov = THREE.MathUtils.clamp(degrees, 40, 120);
+    this.perspectiveCamera.updateProjectionMatrix();
+    this.invalidate();
   }
 
   getCamera(): THREE.Camera {

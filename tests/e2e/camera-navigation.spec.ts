@@ -55,6 +55,20 @@ for (const offline of [false, true]) {
       await page.goto(url);
     } else await page.goto('/');
     await readyAtEyeLevel(page);
+    const beforeFov = await view(page);
+    const fov = page.getByRole('slider', { name: 'Field of view', exact: true });
+    await expect(fov).toHaveValue('65');
+    await expect(fov).toHaveAttribute('max', '120');
+    await fov.fill('120');
+    await expect.poll(() => page.evaluate(() => {
+      const root = document.getElementById('root') as any;
+      const key = Object.keys(root).find(k => k.startsWith('__reactContainer$'))!;
+      return root[key].stateNode.current.memoizedState.element.props.value.scene.getCamera().fov;
+    })).toBe(120);
+    const afterFov = await view(page);
+    expect(delta(afterFov.eye, beforeFov.eye)).toBeLessThan(1e-6);
+    expect(delta(afterFov.target, beforeFov.target)).toBeLessThan(1e-6);
+    await fov.fill('65');
     // Mouse look must turn from the same eye position as keyboard look.
     const beforeMouse = await view(page);
     const canvas = page.locator('canvas').first();
