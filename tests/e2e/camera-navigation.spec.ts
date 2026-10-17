@@ -55,6 +55,18 @@ for (const offline of [false, true]) {
       await page.goto(url);
     } else await page.goto('/');
     await readyAtEyeLevel(page);
+    // Mouse look must turn from the same eye position as keyboard look.
+    const beforeMouse = await view(page);
+    const canvas = page.locator('canvas').first();
+    const bounds = (await canvas.boundingBox())!;
+    await page.mouse.move(bounds.x + bounds.width * .5, bounds.y + bounds.height * .5);
+    await page.mouse.down();
+    await page.mouse.move(bounds.x + bounds.width * .6, bounds.y + bounds.height * .55, { steps: 8 });
+    await page.mouse.up();
+    await expect.poll(async () => delta((await view(page)).direction, beforeMouse.direction)).toBeGreaterThan(.1);
+    const afterMouse = await view(page);
+    expect(delta(afterMouse.eye, beforeMouse.eye)).toBeLessThan(1e-6);
+    expect(afterMouse.distance).toBeCloseTo(beforeMouse.distance, 6);
     const start = await view(page);
     await holdUntil(page, 'ArrowUp', async () => (await view(page)).direction[1] > .4);
     const up = await view(page);

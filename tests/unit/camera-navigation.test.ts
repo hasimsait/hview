@@ -102,3 +102,65 @@ describe('house tour camera navigation', () => {
     input.remove();
   });
 });
+
+function setupMouse() {
+  const canvas = document.createElement('canvas');
+  canvas.setPointerCapture = () => {};
+  canvas.releasePointerCapture = () => {};
+  Object.defineProperty(canvas, 'clientHeight', { value: 600 });
+  document.body.appendChild(canvas);
+  const camera = new THREE.PerspectiveCamera();
+  camera.position.set(3, 2, 5);
+  const controls = new OrbitControls(camera, canvas);
+  controls.minPolarAngle = 0.04;
+  controls.maxPolarAngle = Math.PI - 0.04;
+  controls.target.set(3, 2, 0);
+  controls.update();
+  const nav = new CameraNavigationController(camera, new THREE.OrthographicCamera(), () => controls, () => 'perspective');
+  nav.attach();
+  return { camera, controls, nav, canvas };
+}
+
+function pointer(target: EventTarget, type: string, x: number, y: number) {
+  const event = new Event(type, { bubbles: true });
+  Object.assign(event, { pointerType: 'mouse', pointerId: 1, button: 0, clientX: x, clientY: y });
+  target.dispatchEvent(event);
+}
+
+describe('camera navigation', () => {
+  it('mouse drag matches arrow yaw and pitch while preserving camera position and look distance', () => {
+    const mouse = setupMouse();
+    const keys = setupMouse();
+    const start = mouse.camera.position.clone();
+    const distance = mouse.camera.position.distanceTo(mouse.controls.target);
+    const angle = 1.6 * 0.1;
+    pointer(mouse.canvas, 'pointerdown', 0, 0);
+    pointer(window, 'pointermove', -angle * 600 / (2 * Math.PI), angle * 600 / (2 * Math.PI));
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', code: 'ArrowLeft' }));
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', code: 'ArrowUp' }));
+    keys.nav.update(0.1);
+    mouse.controls.update();
+    keys.controls.update();
+    expect(mouse.camera.position.distanceTo(start)).toBeLessThan(1e-10);
+    expect(mouse.controls.target.distanceTo(keys.controls.target)).toBeLessThan(1e-10);
+    expect(mouse.camera.position.distanceTo(mouse.controls.target)).toBeCloseTo(distance);
+    pointer(window, 'pointerup', 0, 0);
+    expect(mouse.controls.enableRotate).toBe(true);
+    mouse.nav.dispose(); keys.nav.dispose();
+    mouse.controls.dispose(); keys.controls.dispose();
+  });
+
+  it('clamps mouse pitch and restores rotation when interrupted', () => {
+    const { nav, camera, controls, canvas } = setupMouse();
+    const start = camera.position.clone();
+    pointer(canvas, 'pointerdown', 0, 0);
+    pointer(window, 'pointermove', 0, 100000);
+    controls.update();
+    const direction = controls.target.clone().sub(camera.position).normalize();
+    expect(Math.asin(direction.y)).toBeCloseTo(Math.PI / 2 - 0.04);
+    expect(camera.position.distanceTo(start)).toBeLessThan(1e-10);
+    window.dispatchEvent(new Event('blur'));
+    expect(controls.enableRotate).toBe(true);
+    nav.dispose(); controls.dispose();
+  });
+});
