@@ -63,8 +63,8 @@ export class RoomSceneNode extends SceneNode<Room> {
   constructor(element: Room, private readonly builder: RoomNodeBuilder, resources: ResourcePool, picking: PickRegistry) {
     super(element, resources, picking, { kind: 'room', id: element.id }); this.replaceGeometry(builder.build(element));
   }
-  reconcile(element: Room): void {
-    if (element.polygon !== this.element.polygon || element.name !== this.element.name || element.area !== this.element.area) this.replaceGeometry(this.builder.build(element));
+  reconcile(element: Room, contextChanged = false): void {
+    if (contextChanged || element.polygon !== this.element.polygon || element.name !== this.element.name || element.area !== this.element.area || element.railing !== this.element.railing) this.replaceGeometry(this.builder.build(element));
     else { this.builder.applyMaterials(this.group, element); this.refreshMaterials(); }
     this.element = element;
   }

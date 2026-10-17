@@ -185,7 +185,7 @@ export class SceneEngine implements ISceneService {
         return this.wallBuilder.buildWall(wall, this.settings.wallCutaway ? 1.15 : undefined, undefined, this.getRecessHolesForWall(wall), layout?.heights, layout?.cuts);
       }, applyMaterials: (root, wall) => this.wallBuilder.materials.applyMaterials(root, wall) },
       column: { build: column => this.wallBuilder.buildWall(column.wallShape(this.currentPlan!.totalHeight), this.settings.wallCutaway ? 1.15 : undefined, undefined, this.getRecessHolesForWall(column.wallShape(this.currentPlan!.totalHeight))), applyMaterials: (root, column) => this.wallBuilder.materials.applyMaterials(root, column.wallShape(this.currentPlan!.totalHeight)) },
-      room: { build: room => this.floorBuilder.buildFloor(room, this.settings.showRoomLabels), applyMaterials: (root, room) => this.floorBuilder.applyMaterials(root, room) },
+      room: { build: room => this.floorBuilder.buildFloor(room, this.settings.showRoomLabels, [...(this.currentPlan?.walls ?? []), ...(this.currentPlan?.columns.map(column => column.wallShape(this.currentPlan!.totalHeight)) ?? [])]), applyMaterials: (root, room) => this.floorBuilder.applyMaterials(root, room) },
       opening: {
         update: (root, opening) => this.openingBuilder.update(root, opening), build: opening => {
           if (this.settings.wallCutaway && opening.floorHeight >= 1.15) return new THREE.Group();

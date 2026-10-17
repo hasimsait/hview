@@ -14,6 +14,7 @@ import React,{ useEffect,useState } from 'react';
 import { ConfigureCeiling,FinishFloor,RenameRoom,SetCeilingHeight } from '../../application/commands/StructuralCommands';
 import { roomCeilingHeight, roomCeilingMaximum, roomCeilingType } from '../../domain/model/Ceiling';
 import { SurfaceFinishPicker } from './SurfaceFinishPicker';
+import { BalconyRailingControls } from './BalconyRailingControls';
 
 interface FloorInspectorProps {
   room: RoomEntity | null;
@@ -182,6 +183,8 @@ export const FloorInspector: React.FC<FloorInspectorProps> = ({ room, onClose })
             </div>
           </div>
         </div>
+
+        <BalconyRailingControls room={room} />
 
         {/* Ceiling Type Selector */}
         <div className="space-y-1.5">

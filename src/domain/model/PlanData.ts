@@ -2,6 +2,7 @@
 import type { CabinetLayout } from '../cabinet/CabinetLayout';
 import type { WindowDressingConfig } from './WindowDressing';
 import type { WallCorniceConfig } from './WallCornice';
+import type { BalconyRailingConfig } from './BalconyRailing';
 export interface Point2D {
   x: number;
   y: number;
@@ -134,6 +135,7 @@ export interface RoomData {
   ceilingHeight?: number;
   wallFinish?: SurfaceFinishConfig;
   rawRoom?: any;
+  railing?: BalconyRailingConfig;
 }
 
 export type FurnitureCategory =

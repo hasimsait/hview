@@ -2,6 +2,8 @@ import type { WallEntity } from '../../core/types/plan';
 import { roomCeilingHeight } from '../../domain/model/Ceiling';
 import type { PlanDocument } from '../../domain/model/PlanDocument';
 import type { CorniceCut, CorniceCuts } from './CorniceGeometry';
+import { wallCorniceSides as corniceSides } from '../../domain/model/WallCornice';
+export { wallCorniceSides as corniceSides } from '../../domain/model/WallCornice';
 
 type Side = 'A' | 'B';
 type Point = { x: number; y: number };
@@ -20,16 +22,6 @@ const cache = new WeakMap<PlanDocument, ReadonlyMap<string, WallCorniceLayout>>(
 const dot = (a: Point, b: Point) => a.x * b.x + a.y * b.y;
 const cross = (a: Point, b: Point) => a.x * b.y - a.y * b.x;
 const add = (p: Point, d: Point, distance: number): Point => ({ x: p.x + d.x * distance, y: p.y + d.y * distance });
-
-export function corniceSides(wall: WallEntity): Side[] {
-  const side = wall.cornice?.side;
-  if (side === 'both') return ['A', 'B'];
-  if (side === 'A' || side === 'B') return [side];
-  const sides: Side[] = [];
-  if (wall.roomSideA) sides.push('A');
-  if (wall.roomSideB) sides.push('B');
-  return sides.length ? sides : ['A'];
-}
 
 /** Plan-derived cuts only: saved dimensions and the wall body's butt joints stay untouched. */
 export function wallCorniceLayouts(plan: PlanDocument): ReadonlyMap<string, WallCorniceLayout> {

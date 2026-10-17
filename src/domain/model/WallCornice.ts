@@ -1,4 +1,4 @@
-import type { SurfaceFinishConfig } from './PlanData';
+import type { SurfaceFinishConfig, WallData } from './PlanData';
 import { finite, positive } from './Immutable';
 import { SurfaceFinish } from './SurfaceFinish';
 
@@ -14,6 +14,16 @@ export interface WallCorniceConfig {
 }
 export function defaultWallCornice(inFrontOfCurtains = false): WallCorniceConfig {
   return { profile: 'cove', height: .12, depth: .12, offset: inFrontOfCurtains ? .17 : 0, side: 'interior' };
+}
+/** Shared by the renderer and side controls, including automatic room-facing placement. */
+export function wallCorniceSides(wall: Pick<WallData, 'cornice' | 'roomSideA' | 'roomSideB'>): ('A' | 'B')[] {
+  const side = wall.cornice?.side;
+  if (side === 'both') return ['A', 'B'];
+  if (side === 'A' || side === 'B') return [side];
+  const sides: ('A' | 'B')[] = [];
+  if (wall.roomSideA) sides.push('A');
+  if (wall.roomSideB) sides.push('B');
+  return sides.length ? sides : ['A'];
 }
 export function validateWallCornice(c: WallCorniceConfig): void {
   if (!c || !Object.hasOwn(CORNICE_PROFILES, c.profile) || !['interior', 'A', 'B', 'both'].includes(c.side)) throw new Error('Invalid wall cornice');

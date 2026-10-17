@@ -226,7 +226,7 @@ export class LegacyPlanWriter {
         ...structuredClone(room.rawRoom || {}), id: room.id,
         title: room.name, name: room.name, area: room.area, height: room.height * 100,
         polygon: room.polygon.map(point => ({ x: point.x * 100, y: point.y * 100 })),
-        floorFinish: room.floorFinish, ceilingType: room.ceilingType, ceilingHeight: room.ceilingHeight === undefined ? undefined : room.ceilingHeight * 100, wallFinish: room.wallFinish
+        floorFinish: room.floorFinish, ceilingType: room.ceilingType, ceilingHeight: room.ceilingHeight === undefined ? undefined : room.ceilingHeight * 100, wallFinish: room.wallFinish, railing: room.railing
       };
     }
     planObj.rooms2 = rooms;

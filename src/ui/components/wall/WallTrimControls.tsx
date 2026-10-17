@@ -2,6 +2,7 @@ import type { WallEntity } from '../../../core/types/plan';
 import { useRuntime } from '../../context/RuntimeContext';
 import { ConfigureWallCornice, SetWallSkirting } from '../../../application/commands/StructuralCommands';
 import { CORNICE_PROFILES, defaultWallCornice, type WallCorniceConfig } from '../../../domain/model/WallCornice';
+import { CorniceSideControls } from './CorniceSideControls';
 
 export function WallTrimControls({ wall, target }: { wall: WallEntity; target: string }) {
   const { editor } = useRuntime();
@@ -19,7 +20,7 @@ export function WallTrimControls({ wall, target }: { wall: WallEntity; target: s
       {Object.entries(CORNICE_PROFILES).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
     </select></label>
     {config.profile !== 'none' && <>
-      <label className="block">Wall side<select aria-label="Cornice wall side" className="mt-1 w-full rounded bg-slate-800 p-1.5" value={config.side} onChange={e => update({ side: e.target.value as WallCorniceConfig['side'] })}><option value="interior">Room-facing sides</option><option value="A">Side A</option><option value="B">Side B</option><option value="both">Both sides</option></select></label>
+      <CorniceSideControls wall={wall} />
       {([['height', 'Height'], ['depth', 'Projection'], ['offset', 'Clearance from wall']] as const).map(([key, label]) => <label key={key} className="block">{label} (cm)<input aria-label={`Cornice ${label.toLowerCase()} (cm)`} className="mt-1 w-full rounded bg-slate-800 p-1.5" type="number" min={key === 'offset' ? 0 : .1} max={key === 'offset' ? 200 : 100} step=".1" value={+(config[key] * 100).toFixed(2)} onChange={e => {
         if (e.target.value === '') return;
         const value = +e.target.value / 100;

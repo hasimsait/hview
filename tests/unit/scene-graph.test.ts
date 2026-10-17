@@ -8,7 +8,7 @@ import { SceneNodeFactory } from '../../src/engine/nodes/SceneNodeFactory';
 import { PickRegistry } from '../../src/engine/picking/PickRegistry';
 import { ResourcePool } from '../../src/engine/resources/ResourcePool';
 import { AddWallRecess } from '../../src/application/commands/AddWallRecess';
-import { FinishWall, SetCeilingHeight } from '../../src/application/commands/StructuralCommands';
+import { ConfigureBalconyRailing, FinishWall, SetCeilingHeight } from '../../src/application/commands/StructuralCommands';
 import { rawPlan } from './fixtures';
 import { Wall } from '../../src/domain/elements/Wall';
 import { PlanDocument } from '../../src/domain/model/PlanDocument';
@@ -31,6 +31,15 @@ function fixture() {
   return { resources, picking, base, finish, palette, geometry, graph, editor, appearance, walls };
 }
 describe('retained scene node ownership', () => {
+  it('rebuilds a railing floor when a bounding wall is removed and restores it with undo', () => {
+    const { graph, editor, palette } = fixture(); editor.load(new PlanCodec().decode(rawPlan()));
+    editor.execute(new ConfigureBalconyRailing('room', { height: 1.05, color: '#30363b' }));
+    const room = graph.get('room')!.group, original = room.children[0], furniture = graph.get('sofa')!.group.children[0];
+    editor.execute(new RemoveElement('wall'));
+    expect(graph.get('room')!.group).toBe(room); expect(room.children[0]).not.toBe(original); expect(graph.get('sofa')!.group.children[0]).toBe(furniture);
+    const withoutWall = room.children[0]; editor.undo(); expect(room.children[0]).not.toBe(withoutWall);
+    graph.dispose(); palette.dispose();
+  });
   it('refreshes window dressings and wall cornices on a room height edit while retaining roots and door geometry', () => {
     const { graph, editor, palette } = fixture(); editor.load(new PlanCodec().decode(rawPlan()));
     const window = graph.get('window')!.group, oldDressing = window.children[0], door = graph.get('door')!.group.children[0], wall = graph.get('wall')!.group;

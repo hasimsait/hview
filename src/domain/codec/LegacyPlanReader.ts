@@ -216,6 +216,7 @@ export class LegacyPlanReader {
           ceilingType: r.ceilingType || undefined,
           ceilingHeight: r.ceilingHeight !== undefined ? r.ceilingHeight / 100 : undefined,
           wallFinish: r.wallFinish || undefined,
+          railing: r.railing || undefined,
           rawRoom: r,
         });
         roomIdx++;

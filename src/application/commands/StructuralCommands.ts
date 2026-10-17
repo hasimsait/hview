@@ -6,6 +6,7 @@ import type { EditorCommand } from './EditorCommand';
 import type { WindowDressingConfig } from '../../domain/model/WindowDressing';
 import { roomCeilingMaximum } from '../../domain/model/Ceiling';
 import { defaultWallCornice, type WallCorniceConfig } from '../../domain/model/WallCornice';
+import type { BalconyRailingConfig } from '../../domain/model/BalconyRailing';
 
 export class SplitWall implements EditorCommand {
   readonly label = 'Split wall';
@@ -69,6 +70,11 @@ export class ConfigureCeiling implements EditorCommand {
   readonly label = 'Configure ceiling';
   constructor(private readonly id: string, private readonly type: RoomData['ceilingType']) { }
   execute(document: PlanDocument): PlanDocument { return document.replace(document.requireRoom(this.id).withCeiling(this.type)); }
+}
+export class ConfigureBalconyRailing implements EditorCommand {
+  readonly label = 'Configure balcony railing';
+  constructor(private readonly id: string, private readonly config?: BalconyRailingConfig) { }
+  execute(document: PlanDocument): PlanDocument { return document.replace(document.requireRoom(this.id).withRailing(this.config)); }
 }
 export class SetCeilingHeight implements EditorCommand {
   readonly label = 'Set ceiling height';

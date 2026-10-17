@@ -1,11 +1,12 @@
 import { Focus,X } from 'lucide-react';
 import { FinishOpening,SetWindowCurtains,ConfigureWindowDressing } from '../../application/commands/StructuralCommands';
 import type { WindowOpening } from '../../domain/elements/Opening';
-import { useRuntime } from '../context/RuntimeContext';
+import { useDocument, useRuntime } from '../context/RuntimeContext';
 import { SurfaceFinishPicker } from './SurfaceFinishPicker';
 import { windowDressingDefaults, type WindowDressingStyle } from '../../domain/model/WindowDressing';
 import { WindowDimensions } from './WindowDimensions';
 import { RemoveElement } from '../../application/commands/FurnitureCommands';
+import { CorniceSideControls } from './wall/CorniceSideControls';
 
 export function WindowInspector({
   window,
@@ -15,6 +16,7 @@ export function WindowInspector({
   onClose: () => void;
 }) {
   const { editor, scene } = useRuntime();
+  const wall = useDocument()?.requireWall(window.wallId);
   const dressing = window.windowDressing, defaults = dressing ? windowDressingDefaults(dressing.style) : undefined;
   const blind = dressing && ['roller', 'roman', 'venetian'].includes(dressing.style);
   return (
@@ -83,7 +85,11 @@ export function WindowInspector({
           )}
         </div>
       </section>
-      <button className="rounded border border-slate-700 px-3 py-2 text-xs text-sky-300" onClick={() => editor.selection.set({ kind: 'wall', id: window.wallId, subtarget: 'cornice' })}>Edit wall-to-wall cornice</button>
+      {wall && <section aria-label="Window wall cornice" className="rounded-lg border border-slate-700 p-3 space-y-3">
+        <CorniceSideControls wall={wall} />
+        <p className="text-xs text-slate-400">Applies along the whole wall. Turn off the balcony or outside side to keep only the indoor cornice.</p>
+        <button type="button" className="rounded border border-slate-700 px-3 py-2 text-xs text-sky-300" onClick={() => editor.selection.set({ kind: 'wall', id: window.wallId, subtarget: 'cornice' })}>Edit wall-to-wall cornice</button>
+      </section>}
       <SurfaceFinishPicker
         currentFinish={window.finish}
         onSelectFinish={(finish) => editor.execute(new FinishOpening(window.id, finish))}

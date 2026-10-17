@@ -2,6 +2,9 @@ import { RoomEntity } from '@core/types/plan';
 import { ISurfaceFinishService } from '@core/types/services';
 import * as THREE from 'three';
 import { BrowserCanvasFactory,type CanvasFactory } from '../materials/CanvasFactory';
+import { buildBalconyRailing } from './BalconyRailingGeometry';
+import { openRailingRuns } from '../../domain/model/BalconyRailing';
+import type { WallEntity } from '../../core/types/plan';
 
 export class FloorMeshBuilder {
   private readonly surfaces = new WeakSet<THREE.Mesh>();
@@ -19,7 +22,7 @@ export class FloorMeshBuilder {
     this.tileTexture = this.generateTileTexture();
   }
 
-  buildFloor(room: RoomEntity, showLabels: boolean = false): THREE.Group {
+  buildFloor(room: RoomEntity, showLabels: boolean = false, walls: readonly WallEntity[] = []): THREE.Group {
     const group = new THREE.Group();
     group.name = `room_${room.id}`;
     group.userData = { type: 'room', id: room.id, name: room.name, area: room.area };
@@ -68,6 +71,7 @@ export class FloorMeshBuilder {
     mesh.receiveShadow = true;
 
     group.add(mesh);
+    if (room.railing) group.add(buildBalconyRailing(room.id, room.railing, openRailingRuns(room.polygon, walls, room.railing.edges)));
 
     // Only add room label badge if explicitly enabled and room has a meaningful name (not "none")
     const isUnnamed = !room.name || room.name.toLowerCase() === 'none' || room.name.trim() === '';
