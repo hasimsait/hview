@@ -3,11 +3,13 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import type { AssetBuilderFn } from './AssetBuildContext';
 import type { WindowDressingStyle } from '../../../domain/model/WindowDressing';
 import { buildWindowDressing } from '../../geometry/WindowDressingGeometry';
+import { buildFoldedTowel } from './TowelBuilder';
 
 /** Cloth is modelled in normalized coordinates, then baked into the chosen metric envelope. */
 export const buildSoftFurnishing: AssetBuilderFn = c => {
   const model = c.definition?.softFurnishing;
   if (!model) return;
+  if (model.kind === 'towel') { buildFoldedTowel(c); return; }
   const base = model.style === 'venetian' ? c.materials.whitePaint : c.materials.softFabric;
   const body = c.coloredMaterial?.(model.color, base) ?? base;
   const accent = c.coloredMaterial?.(model.accentColor, c.materials.softFabric) ?? c.materials.softFabric;

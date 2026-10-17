@@ -35,9 +35,9 @@ describe('soft furnishings', () => {
     for (let i = 0; i < pixels.length; i += 4) { expect(pixels[i]).toBeGreaterThan(200); expect(pixels[i + 3]).toBe(255); }
     material.dispose(); texture.dispose();
   });
-  it('registers 30 distinct items across all requested textile categories', () => {
-    expect(SOFT_FURNISHINGS).toHaveLength(30); expect(new Set(SOFT_FURNISHINGS.map(a => a.key)).size).toBe(30);
-    expect(new Set(SOFT_FURNISHINGS.map(a => a.collection)).size).toBe(8);
+  it('registers distinct items across all requested textile categories', () => {
+    expect(SOFT_FURNISHINGS).toHaveLength(34); expect(new Set(SOFT_FURNISHINGS.map(a => a.key)).size).toBe(34);
+    expect(new Set(SOFT_FURNISHINGS.map(a => a.collection)).size).toBe(9);
     for (const a of SOFT_FURNISHINGS) {
       expect(catalog.recipe(a.key)).toBe('soft_furnishing');
       expect(a.source?.dimensions).toBe('reference'); expect(a.capabilities?.resizable).toBe(true);

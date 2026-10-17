@@ -61,7 +61,7 @@ test('mobile catalogue adds layered curtains with room-height drop, editable tra
   await page.getByRole('button', { name: 'Add Asset', exact: true }).click();
   await page.getByRole('button', { name: 'Soft Furnishings', exact: true }).click();
   await page.getByLabel('Catalogue source', { exact: true }).selectOption('Generic');
-  await expect(page.getByText('30 assets available', { exact: true })).toBeVisible();
+  await expect(page.getByText('34 assets available', { exact: true })).toBeVisible();
   await page.getByLabel('Accessory type', { exact: true }).selectOption('Layered curtains');
   await page.getByRole('button').filter({ has: page.getByRole('heading', { name: 'Layered Sheer and Blackout Curtains', exact: true }) }).click();
   const curtain = (await state(page))[0];
@@ -116,13 +116,14 @@ test('offline editor adds textile families and saves window dressings in exporte
   const url = 'http://127.0.0.1:3100/__offline__/soft-furnishings.html';
   await context.route(/^https?:/, route => route.request().url() === url ? route.fulfill({ status: 200, contentType: 'text/html', body: html }) : route.abort());
   await page.goto(url); await expect(page.getByRole('button', { name: 'Move', exact: true })).toBeVisible();
-  for (const key of ['rug_border', 'cushion_velvet', 'throw_folded', 'bedding_set', 'blind_roller']) await choose(page, key);
+  for (const key of ['rug_border', 'cushion_velvet', 'throw_folded', 'bedding_set', 'towel_diamond', 'towel_chevron', 'towel_checker', 'towel_grid', 'blind_roller']) await choose(page, key);
   await page.getByLabel('Window covering opening', { exact: true }).press('End');
   const downloading = page.waitForEvent('download'); await page.getByRole('button', { name: 'Full Editor (.html)', exact: true }).click();
   const path = testInfo.outputPath('soft-furnishings.html'); await (await downloading).saveAs(path);
   const saved = JSON.parse(standaloneBlockText(readFileSync(path, 'utf8'), 'plan-data'));
   const items = saved.document.elements.filter((e: any) => e.kind === 'furniture.standard').map((e: any) => e.data);
-  expect(items).toHaveLength(5); expect(items.at(-1)).toMatchObject({ assetKey: 'textile_blind_roller', windowCoveringOpen: 1 });
+  expect(items).toHaveLength(9); expect(items.at(-1)).toMatchObject({ assetKey: 'textile_blind_roller', windowCoveringOpen: 1 });
+  expect(items.filter((item: FurnitureData) => item.assetKey.startsWith('textile_towel_'))).toHaveLength(4);
   const wall = saved.document.elements.find((e: any) => e.kind === 'wall').data;
   expect(wall.openings.find((o: any) => o.id === 'window').windowDressing).toMatchObject({ style: 'layered', openness: .4, liningColor: '#ede4d4' });
 });
@@ -138,7 +139,7 @@ test('soft furnishing catalogue renders textile geometry without shader errors',
   await page.evaluate(() => localStorage.clear()); await page.reload(); await ready(page);
   await page.evaluate(async () => { const path = '/src/main.tsx'; const { runtime } = await import(path);
     runtime.scene.updateSettings({ foregroundOcclusionMode: 'off' }); runtime.scene.getCamera().position.set(24, 19, 28); runtime.scene.getControls()!.target.set(10, .5, 9); runtime.scene.getControls()!.update(); });
-  await expect.poll(async () => (await state(page)).length).toBe(30);
+  await expect.poll(async () => (await state(page)).length).toBe(SOFT_FURNISHINGS.length);
   await page.screenshot({ path: testInfo.outputPath('soft-furnishings-gallery.png') });
   await page.evaluate(async () => { const path = '/src/main.tsx'; const { runtime } = await import(path);
     runtime.scene.getCamera().position.set(13, 5, 21); runtime.scene.getControls()!.target.set(11, 1.2, 16); runtime.scene.getControls()!.update(); });

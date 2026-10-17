@@ -2,8 +2,8 @@ import type { AssetDefinition, AssetPlacement } from './AssetDefinition';
 import type { WindowDressingStyle } from '../model/WindowDressing';
 
 export interface SoftFurnishingModel {
-  kind: 'rug' | 'cushion' | 'throw' | 'bedding' | 'curtain' | 'blind';
-  style: 'border' | 'striped' | 'geometric' | 'round' | 'runner' | 'shag' | 'jute' | 'square' | 'piped' | 'lumbar' | 'bolster' | 'draped' | 'fringed' | 'folded' | 'knitted' | 'duvet' | 'quilt' | 'pillows' | 'bed_runner' | 'bed_set' | WindowDressingStyle;
+  kind: 'rug' | 'cushion' | 'throw' | 'bedding' | 'curtain' | 'blind' | 'towel';
+  style: 'border' | 'striped' | 'geometric' | 'round' | 'runner' | 'shag' | 'jute' | 'square' | 'piped' | 'lumbar' | 'bolster' | 'draped' | 'fringed' | 'folded' | 'knitted' | 'duvet' | 'quilt' | 'pillows' | 'bed_runner' | 'bed_set' | 'diamond' | 'chevron' | 'checker' | 'grid' | WindowDressingStyle;
   color: string;
   accentColor: string;
   fabric?: 'linen' | 'velvet' | 'cotton' | 'knit' | 'jute';
@@ -47,4 +47,8 @@ export const SOFT_FURNISHINGS: readonly AssetDefinition[] = [
   textile('curtain_blackout', 'Blackout Curtain Pair — Oatmeal', 'Blackout curtains', 'curtain', 'blackout', [1.8, 2.6, .16], '#b6a78f', '#eee9df', { ...ceiling, wallOffset: .13 }, 'Opaque floor-length pleated panels with a ceiling track and open/close control.'),
   textile('curtain_velvet', 'Velvet Blackout Curtain Pair — Deep Navy', 'Blackout curtains', 'curtain', 'blackout', [1.8, 2.6, .16], '#344357', '#d8c9b1', { ...ceiling, wallOffset: .13 }, 'Heavy opaque velvet-look panels with deep folds and an open/close control.', 'velvet'),
   textile('curtain_layered', 'Layered Sheer and Blackout Curtains', 'Layered curtains', 'curtain', 'layered', [1.8, 2.6, .22], '#59685e', '#f1ecdf', { ...ceiling, wallOffset: .15 }, 'Separate translucent inner panels and opaque outer panels on twin tracks. The open/close control moves the outer pair.'),
+  textile('towel_diamond', 'Folded Hand Towel — Navy Diamonds', 'Folded towels', 'towel', 'diamond', [.3, .04, .25], '#eee8dc', '#314d70', surface(.9), 'Folded hand towel with navy diamond outlines, soft terry layers and contrasting hems. Folded size: 30 × 25 × 4 cm.'),
+  textile('towel_chevron', 'Folded Bath Towel — Terracotta Chevrons', 'Folded towels', 'towel', 'chevron', [.4, .07, .3], '#eee3d2', '#ad6048', surface(.9), 'Folded bath towel with bold terracotta zigzags, soft terry layers and contrasting hems. Folded size: 40 × 30 × 7 cm.'),
+  textile('towel_checker', 'Folded Hand Towel — Sage Checks', 'Folded towels', 'towel', 'checker', [.3, .04, .25], '#f1ecdf', '#547966', surface(.9), 'Folded hand towel with sage checkerboard squares, soft terry layers and contrasting hems. Folded size: 30 × 25 × 4 cm.'),
+  textile('towel_grid', 'Folded Washcloth — Mustard Grid', 'Folded towels', 'towel', 'grid', [.15, .02, .15], '#f4edde', '#a47b2f', surface(.9), 'Small folded washcloth with a mustard windowpane grid, soft terry layers and contrasting hems. Folded size: 15 × 15 × 2 cm.'),
 ];
