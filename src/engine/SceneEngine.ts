@@ -29,6 +29,7 @@ import { SurfaceMaterialFactory } from "./materials/SurfaceMaterialFactory";
 import { CollisionFeedback } from './cabinet/CollisionFeedback';
 import { cabinetDoorPose, cabinetIssues, footprint, interiorOrigin, moveCabinetPart, resolveContent, resolvePanel } from '../domain/cabinet/CabinetLayout';
 import { roomCeilingHeight } from '../domain/model/Ceiling';
+import { wallCorniceLayouts } from './geometry/WallCorniceLayout';
 import { cabinetLeaves } from '../domain/cabinet/CabinetFronts';
 import { mobileRendering } from './RenderQuality';
 
@@ -179,10 +180,10 @@ export class SceneEngine implements ISceneService {
     this.paletteLease = this.resources.ownTree(palette);
     const factory = new SceneNodeFactory({
       furniture: { build: element => this.furnitureBuilder.build(element, element instanceof WallRecess && element.hostId ? this.currentPlan?.requireRecessHost(element.hostId).thickness : undefined) }, appearance: this.appearance,
-      wall: { build: wall => this.wallBuilder.buildWall(wall, this.settings.wallCutaway ? 1.15 : undefined, undefined, this.getRecessHolesForWall(wall), Object.fromEntries((['A', 'B'] as const).map(side => {
-        const roomId = side === 'A' ? wall.roomSideA : wall.roomSideB, room = this.currentPlan!.rooms.find(r => r.id === roomId);
-        return [side, room ? roomCeilingHeight(room, this.currentPlan!.totalHeight) : wall.height];
-      }))), applyMaterials: (root, wall) => this.wallBuilder.materials.applyMaterials(root, wall) },
+      wall: { build: wall => {
+        const layout = wallCorniceLayouts(this.currentPlan!).get(wall.id);
+        return this.wallBuilder.buildWall(wall, this.settings.wallCutaway ? 1.15 : undefined, undefined, this.getRecessHolesForWall(wall), layout?.heights, layout?.cuts);
+      }, applyMaterials: (root, wall) => this.wallBuilder.materials.applyMaterials(root, wall) },
       column: { build: column => this.wallBuilder.buildWall(column.wallShape(this.currentPlan!.totalHeight), this.settings.wallCutaway ? 1.15 : undefined, undefined, this.getRecessHolesForWall(column.wallShape(this.currentPlan!.totalHeight))), applyMaterials: (root, column) => this.wallBuilder.materials.applyMaterials(root, column.wallShape(this.currentPlan!.totalHeight)) },
       room: { build: room => this.floorBuilder.buildFloor(room, this.settings.showRoomLabels), applyMaterials: (root, room) => this.floorBuilder.applyMaterials(root, room) },
       opening: {

@@ -1,7 +1,11 @@
 import * as THREE from 'three';
 
-/** Stepped cove profile, extruded along the width, with its bottom at y=0. */
-export function corniceGeometry(width: number, height: number, depth: number, style: 'plain' | 'cove' | 'stepped' | 'ogee' = 'cove'): THREE.BufferGeometry {
+/** Along-wall displacement of a cut at the back and front of the profile. */
+export interface CorniceCut { back: number; front: number }
+export interface CorniceCuts { start?: CorniceCut; end?: CorniceCut }
+
+/** Ceiling profile extruded along X, with its bottom at y=0. */
+export function corniceGeometry(width: number, height: number, depth: number, style: 'plain' | 'cove' | 'stepped' | 'ogee' = 'cove', cuts: CorniceCuts = {}): THREE.BufferGeometry {
   const profile = new THREE.Shape();
   profile.moveTo(0, 0);
   profile.lineTo(0, height);
@@ -29,5 +33,17 @@ export function corniceGeometry(width: number, height: number, depth: number, st
   const geometry = new THREE.ExtrudeGeometry(profile, { depth: width, bevelEnabled: false, curveSegments: 12 });
   geometry.rotateY(-Math.PI / 2);
   geometry.translate(width / 2, 0, -depth / 2);
+  if (cuts.start || cuts.end) {
+    const positions = geometry.attributes.position;
+    for (let i = 0; i < positions.count; i++) {
+      const along = (positions.getX(i) + width / 2) / width;
+      const across = THREE.MathUtils.clamp((positions.getZ(i) + depth / 2) / depth, 0, 1);
+      const start = -width / 2 + (cuts.start ? THREE.MathUtils.lerp(cuts.start.back, cuts.start.front, across) : 0);
+      const end = width / 2 + (cuts.end ? THREE.MathUtils.lerp(cuts.end.back, cuts.end.front, across) : 0);
+      positions.setX(i, THREE.MathUtils.lerp(start, end, along));
+    }
+    positions.needsUpdate = true;
+    geometry.computeVertexNormals();
+  }
   return geometry;
 }

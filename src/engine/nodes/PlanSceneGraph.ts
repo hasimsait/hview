@@ -6,6 +6,7 @@ import { Room } from '../../domain/elements/Room';
 import { Wall } from '../../domain/elements/Wall';
 import { WallRecess } from '../../domain/elements/WallRecess';
 import { roomCeilingHeight } from '../../domain/model/Ceiling';
+import { wallCorniceLayouts } from '../geometry/WallCorniceLayout';
 import type { PlanDocument } from '../../domain/model/PlanDocument';
 import { FurnitureSceneNode } from './FurnitureSceneNode';
 import type { SceneNode } from './SceneNode';
@@ -23,6 +24,7 @@ export interface SceneBuckets {
 /** Reconciles immutable elements into retained roots. Owns every node lifetime. */
 export class PlanSceneGraph {
   private readonly nodes = new Map<string, SceneNode>();
+  private corniceLayouts = new Map<string, string>();
 
   constructor(
     private readonly factory: SceneNodeFactory,
@@ -38,6 +40,9 @@ export class PlanSceneGraph {
   }
 
   reconcile(document: PlanDocument): void {
+    const layouts = new Map([...wallCorniceLayouts(document)].map(([id, layout]) => [id, JSON.stringify(layout)]));
+    const changedCornices = new Set([...new Set([...layouts.keys(), ...this.corniceLayouts.keys()])].filter(id => layouts.get(id) !== this.corniceLayouts.get(id)));
+    this.corniceLayouts = layouts;
     const changedCeilings = new Set(document.rooms.filter(room => {
       const previous = this.nodes.get(room.id)?.model;
       return previous instanceof Room && roomCeilingHeight(previous, document.totalHeight) !== roomCeilingHeight(room, document.totalHeight);
@@ -93,8 +98,10 @@ export class PlanSceneGraph {
       if (!node) {
         node = element.accept(this.factory);
         this.nodes.set(element.id, node);
+      } else if (node instanceof WallSceneNode && element instanceof Wall && changedCornices.has(element.id)) {
+        node.reconcile(element, true);
       } else if (node.model !== element) {
-        node.reconcile(element);
+        (node as SceneNode).reconcile(element);
       }
 
       const bucket =
@@ -159,9 +166,6 @@ export class PlanSceneGraph {
       }
     }
     for (const element of document.allElements) {
-      if (element instanceof Wall && element.cornice && [...(element.roomIds ?? []), element.roomSideA, element.roomSideB].some(id => id && changedCeilings.has(id))) {
-        const node = this.nodes.get(element.id); if (node instanceof WallSceneNode) node.rebuild();
-      }
       if (!(element instanceof WindowOpening)) continue;
       const wall = document.requireWall(element.wallId), roomId = wall.roomSideA ?? wall.roomSideB ?? wall.roomIds?.[0];
       const node = this.nodes.get(element.id);

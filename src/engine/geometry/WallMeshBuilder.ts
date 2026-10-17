@@ -3,6 +3,7 @@ import type { WallEntity } from '../../core/types/plan';
 import type { SurfaceMaterialFactory } from '../materials/SurfaceMaterialFactory';
 import { WallSurfacePalette } from '../materials/WallSurfacePalette';
 import { WallTrimsBuilder } from './WallTrimsBuilder';
+import type { CorniceCuts } from './CorniceGeometry';
 export interface WallOpeningCut {
   start: number;
   end: number;
@@ -138,7 +139,8 @@ export class WallMeshBuilder {
     cutawayHeight?: number,
     cutouts?: { start: number; end: number }[],
     recessHoles?: { start: number; end: number; floorHeight: number; topHeight: number }[],
-    corniceHeights?: Partial<Record<'A' | 'B', number>>
+    corniceHeights?: Partial<Record<'A' | 'B', number>>,
+    corniceCuts?: Partial<Record<'A' | 'B', CorniceCuts>>
   ): THREE.Group {
     const group = new THREE.Group();
     group.name = `wall_${wall.id}`;
@@ -254,7 +256,7 @@ export class WallMeshBuilder {
         const baseboardGroup = this.trims.buildWallBaseboard(wall, length, thickness, angle, openings);
         group.add(baseboardGroup);
       }
-      group.add(this.trims.buildWallCornice(wall, length, maxHeight, thickness, angle, corniceHeights));
+      group.add(this.trims.buildWallCornice(wall, length, maxHeight, thickness, angle, corniceHeights, corniceCuts));
       return group;
     }
 
@@ -507,7 +509,7 @@ export class WallMeshBuilder {
       const baseboardGroup = this.trims.buildWallBaseboard(wall, length, thickness, angle, openings);
       group.add(baseboardGroup);
     }
-    group.add(this.trims.buildWallCornice(wall, length, maxHeight, thickness, angle, corniceHeights));
+    group.add(this.trims.buildWallCornice(wall, length, maxHeight, thickness, angle, corniceHeights, corniceCuts));
 
     return group;
   }

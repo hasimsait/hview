@@ -17,13 +17,13 @@ export class WallSceneNode extends SceneNode<Wall> {
     super(element, resources, picking, { kind: 'wall', id: element.id });
     this.replaceGeometry(builder.build(element));
   }
-  reconcile(element: Wall): void {
+  reconcile(element: Wall, contextChanged = false): void {
     const previous = this.element;
     const geometryChanged = previous.p1 !== element.p1 || previous.p2 !== element.p2 || previous.thickness !== element.thickness
       || previous.height !== element.height || openingCutSignature(previous) !== openingCutSignature(element)
       || previous.startOffset !== element.startOffset || previous.endOffset !== element.endOffset || previous.frameStyle !== element.frameStyle;
     const trimShape = (wall: Wall) => JSON.stringify(wall.cornice && { ...wall.cornice, finish: undefined });
-    if (geometryChanged || Boolean(previous.finishBaseboard) !== Boolean(element.finishBaseboard) || trimShape(previous) !== trimShape(element)) this.replaceGeometry(this.builder.build(element));
+    if (contextChanged || geometryChanged || Boolean(previous.finishBaseboard) !== Boolean(element.finishBaseboard) || trimShape(previous) !== trimShape(element)) this.replaceGeometry(this.builder.build(element));
     else { this.builder.applyMaterials(this.group, element); this.refreshMaterials(); }
     this.element = element;
   }
