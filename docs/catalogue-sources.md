@@ -28,6 +28,8 @@ The expanded accessory catalogue and all 136 additional product references are l
 
 HEMNES models include framed sides, posts/feet, crown trim, a contrasting wood top on the wide versions, and adjustable shelves. BILLY has simple sides and a recessed plinth. Wood finishes approximate the product photographs. All support the existing shelf-count and front-lid controls.
 
+The wide two-tone HEMNES variants use natural wood on the top, shelves and smooth back panel, with a painted or dark frame. Select **Back panel**, **Shelves**, **Frame** or **Top** under **Bookcase finishes** to choose each colour or material independently. These saved finishes also carry into the cabinet layout editor. The back has no raised decorative strips to interfere with cel outlines.
+
 ## User image references
 
 - Black angled glass range hood: estimated 60 × 35 × 75 cm, with a chimney and inclined canopy.

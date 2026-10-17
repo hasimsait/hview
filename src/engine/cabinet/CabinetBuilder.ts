@@ -4,25 +4,27 @@ import { StandardFurniture, type Furniture } from '../../domain/elements/Furnitu
 import { cabinetDoorPose, defaultCabinet, footprint, interiorOrigin, resolveContent, resolvePanel, type CabinetBox } from '../../domain/cabinet/CabinetLayout';
 
 import { cabinetBasket, cabinetHasDoors, cabinetLeaves } from '../../domain/cabinet/CabinetFronts';
+import { bookcaseMaterials } from '../assets/builders/BookcaseMaterials';
 
 export function buildCabinet(c: AssetBuildContext, buildContent?: (entity: Furniture) => THREE.Object3D): void {
   const layout = c.entity.cabinet ?? defaultCabinet(c.entity.toData(), c.definition?.cabinetDoors ?? 2), t = layout.panelThickness, b = layout.backThickness;
   const carcassDepth = c.d - (cabinetHasDoors(layout) ? t : 0), carcassZ = cabinetHasDoors(layout) ? -t / 2 : 0;
   const kitchen = ['kitchen_box_door_double', 'kitchen_box_wall'].includes(c.entity.assetKey);
-  const body = kitchen ? c.materials.fabricLight : ['ward_double', 'ward_single'].includes(c.entity.assetKey) ? c.materials.woodLight : c.materials.whitePaint;
+  const bookcase = bookcaseMaterials(c);
+  const body = bookcase?.frame ?? (kitchen ? c.materials.fabricLight : ['ward_double', 'ward_single'].includes(c.entity.assetKey) ? c.materials.woodLight : c.materials.whitePaint);
   const origin = interiorOrigin(c.entity.dimensions, layout);
-  const box = (id: string, section: string, x: number, y: number, z: number, w: number, h: number, d: number) => {
+  const box = (id: string, section: string, x: number, y: number, z: number, w: number, h: number, d: number, material = body) => {
     const group = new THREE.Group(); group.name = `cabinet_part_${id}`; group.userData.cabinetPart = id;
     group.position.set(x, y, z);
-    const mesh = new THREE.Mesh(new THREE.BoxGeometry(Math.max(.001, w), Math.max(.001, h), Math.max(.001, d)), body);
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(Math.max(.001, w), Math.max(.001, h), Math.max(.001, d)), material);
     mesh.userData = { section, cabinetPart: id }; mesh.castShadow = mesh.receiveShadow = true; group.add(mesh); c.parent.add(group); return group;
   };
   box('shell_left', 'Frame', -c.w / 2 + t / 2, c.h / 2, carcassZ, t, c.h, carcassDepth);
   box('shell_right', 'Frame', c.w / 2 - t / 2, c.h / 2, carcassZ, t, c.h, carcassDepth);
   box('shell_base', 'Frame', 0, t / 2, carcassZ, c.w - 2 * t, t, carcassDepth);
-  box('shell_top', 'Frame', 0, c.h - t / 2, carcassZ, c.w - 2 * t, t, carcassDepth);
-  box('shell_back', 'Back Panel', 0, c.h / 2, -c.d / 2 + b / 2, c.w - 2 * t, c.h - 2 * t, b);
-  const addPart = (p: CabinetBox, section: string) => box(p.id, section, origin.x + p.position.x + p.dimensions.x / 2, origin.y + p.position.y + p.dimensions.y / 2, origin.z + p.position.z + p.dimensions.z / 2, p.dimensions.x, p.dimensions.y, p.dimensions.z);
+  box('shell_top', bookcase ? 'Top' : 'Frame', 0, c.h - t / 2, carcassZ, c.w - 2 * t, t, carcassDepth, bookcase?.top);
+  box('shell_back', 'Back Panel', 0, c.h / 2, -c.d / 2 + b / 2, c.w - 2 * t, c.h - 2 * t, b, bookcase?.back);
+  const addPart = (p: CabinetBox, section: string) => box(p.id, section, origin.x + p.position.x + p.dimensions.x / 2, origin.y + p.position.y + p.dimensions.y / 2, origin.z + p.position.z + p.dimensions.z / 2, p.dimensions.x, p.dimensions.y, p.dimensions.z, section === 'Shelves' ? bookcase?.shelves : undefined);
   for (const panel of layout.panels) { const group = addPart(resolvePanel(layout, c.entity.dimensions, panel), panel.kind === 'shelf' ? 'Shelves' : 'Dividers'); group.traverse(child => { child.userData.cabinetPanel = panel; }); }
   const leaves = cabinetLeaves(layout, c.entity.dimensions), pivots = new Map<string, THREE.Group>();
   for (const door of leaves) {

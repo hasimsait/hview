@@ -1,6 +1,6 @@
 # Soft furnishings
 
-**Add Asset → Soft Furnishings** includes 30 new generic, resizable items, alongside existing IKEA rugs and cushions. Filter **Source → Generic** for the new collection.
+**Add Asset → Soft Furnishings** includes 34 generic, resizable items, alongside existing IKEA rugs and cushions. Filter **Source → Generic** for the collection.
 
 | Collection | Options |
 | --- | --- |
@@ -12,12 +12,15 @@
 | Sheer curtains | Voile pair, linen-look pair |
 | Blackout curtains | Oatmeal pair, deep navy velvet pair |
 | Layered curtains | Separate sheer and blackout pairs on twin tracks |
+| Folded towels | Navy diamonds, terracotta chevrons, sage checks and mustard grid, with separate fabric, pattern and hem finishes |
 
 The geometry includes cloth folds, padded shapes, piping, bindings, fringes, contrasting cuffs and slat stacks. A locally generated warp/weft texture supplies fabric grain without external downloads. Separate finish sections let you change borders, cushions, cuffs, runners, binding, outer curtains and sheer layers independently. Sheers retain their transparency when recoloured; blackout fabric stays opaque by default.
 
 ## Window dressings
 
 Select a window and use **Window dressing** to choose standard pleated curtains, sheer, blackout, layered, roller, Roman or Venetian styles. Curtains fit the window width and run from the ceiling to just above the floor. Blinds fit around the window opening. These dressings belong to their window and rebuild when the window geometry changes.
+
+Standard, sheer and blackout curtains use deeper rounded folds, with gentle vertical variation and a slightly uneven hem. Catalogue and window-fitted curtains share the fold geometry. Each layer stays within its own depth envelope so sheer and blackout fabrics remain separate; existing dimensions, mounts, opening amounts and colours are retained.
 
 Use **Open curtains** or **Raise blind** to change opening amount from 0 to 100%. On layered curtains, this moves the outer panels while the sheer layer remains across the window. Fabric colour is editable; layered curtains also have an independent sheer colour. Curtain hide, delete and restore controls retain undo and save support. Cornices are configured separately on the host wall under Wall Framing. Changing style or colour does not restore a hidden or deleted dressing; use **Show curtains** or **Add curtains**. Older plans retain their existing standard curtains until a new style is chosen.
 

@@ -63,6 +63,8 @@ export const Inspector: React.FC<InspectorProps> = ({
   const isLightFixture = presentation.sections.includes('luminaire');
   const isShelving = presentation.sections.includes('shelving');
   const definition = runtime.catalog.get(item.assetKey);
+  const isBookcase = ['hemnes_bookcase', 'billy_bookcase'].includes(definition?.recipe ?? '') || definition?.furnitureProduct?.kind === 'bookcase';
+  const sectionLabel = (section: string) => isBookcase ? (['back', 'back_panel'].includes(section) ? 'Back panel' : section.replace(/_/g, ' ').replace(/^\w/, letter => letter.toUpperCase())) : section;
   const legacyDoors = item.hasLids && cabinetDoorCount(definition) === 0 ? (item.dimensions.x >= .7 ? 2 : 1) : cabinetDoorCount(definition);
   const resizable = definition?.capabilities?.resizable !== false;
   const dimensionStep = interior ? .1 : definition?.householdDetail || definition?.floorDrain || definition?.lightingComponent || definition?.architecturalFinish || definition?.softFurnishing ? .1 : 1;
@@ -462,7 +464,7 @@ export const Inspector: React.FC<InspectorProps> = ({
           </label>
           {activeSection !== 'all' && (
             <span className="text-[10px] text-sky-400 font-mono bg-sky-500/10 px-1.5 py-0.5 rounded border border-sky-500/20">
-              {activeSection}
+              {sectionLabel(activeSection)}
             </span>
           )}
         </div>
@@ -472,7 +474,7 @@ export const Inspector: React.FC<InspectorProps> = ({
           <div>
             <div className="text-[10px] text-slate-500 uppercase mb-1.5 flex items-center gap-1 font-medium">
               <Layers className="w-3 h-3 text-sky-400" />
-              Target Section
+              {isBookcase ? 'Bookcase finishes' : 'Target Section'}
             </div>
             <div className="flex flex-wrap gap-1">
               <button
@@ -508,7 +510,7 @@ export const Inspector: React.FC<InspectorProps> = ({
                       : 'bg-slate-800/80 border-slate-700 text-slate-400 hover:text-slate-200'
                       }`}
                   >
-                    {sec}
+                    {sectionLabel(sec)}
                     {hasCustomFinish && (
                       <span className="ml-1 inline-block w-1.5 h-1.5 rounded-full bg-amber-400" />
                     )}
@@ -516,6 +518,7 @@ export const Inspector: React.FC<InspectorProps> = ({
                 );
               })}
             </div>
+            {isBookcase && <p className="mt-2 text-[11px] text-slate-400">Choose Back panel, Shelves or Frame to change its colour or material independently.</p>}
           </div>
         )}
 

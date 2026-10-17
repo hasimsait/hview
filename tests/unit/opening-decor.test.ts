@@ -92,7 +92,8 @@ describe('door frames and window curtains', () => {
     const bounds = new THREE.Box3().setFromObject(left);
     expect(bounds.min.y).toBeCloseTo(0.025, 5);
     expect(bounds.max.z).toBeLessThan(-wall.thickness / 2);
-    expect(bounds.max.z - bounds.min.z).toBeGreaterThan(0.05);
+    expect(bounds.max.z - bounds.min.z).toBeGreaterThan(0.09);
+    expect(bounds.max.z - bounds.min.z).toBeLessThanOrEqual(.12);
     const right = group.getObjectByName('curtain_right_window')!;
     expect(left.position.x).toBeLessThan(right.position.x);
     expect(builder.buildOpening(window.withCurtainState('removed'), wall).getObjectByName('curtains_window')).toBeUndefined();

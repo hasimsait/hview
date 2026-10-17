@@ -45,10 +45,16 @@ async function windowState(page: Page) {
   });
 }
 async function selectWindow(page: Page) {
+  await page.evaluate(async () => {
+    const path = '/src/main.tsx'; const { runtime } = await import(path); runtime.scene.invalidate();
+    await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+  });
+  await ready(page);
   const point = await page.evaluate(async () => { const path = '/src/main.tsx'; const { runtime } = await import(path);
     const mesh = runtime.scene.getRenderObject('window')!.getObjectByName('curtain_left_window')!;
-    runtime.scene.getCamera().updateMatrixWorld(true);
-    const point = mesh.getWorldPosition(runtime.scene.getCamera().position.clone()).project(runtime.scene.getCamera()), rect = runtime.scene.getDomElement().getBoundingClientRect();
+    runtime.scene.getScene().updateMatrixWorld(true); runtime.scene.getCamera().updateMatrixWorld(true);
+    const vertices = (mesh as import('three').Mesh).geometry.attributes.position;
+    const point = runtime.scene.getCamera().position.clone().fromBufferAttribute(vertices, Math.floor(vertices.count / 2)).applyMatrix4(mesh.matrixWorld).project(runtime.scene.getCamera()), rect = runtime.scene.getDomElement().getBoundingClientRect();
     return { x: rect.left + (point.x + 1) * rect.width / 2, y: rect.top + (1 - point.y) * rect.height / 2 };
   });
   await page.mouse.click(point.x, point.y); await expect(page.getByLabel('Window dressing', { exact: true })).toBeVisible();

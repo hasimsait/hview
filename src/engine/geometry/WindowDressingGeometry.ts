@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type { WindowDressingStyle } from '../../domain/model/WindowDressing';
+import { pleatedCurtainGeometry } from './PleatedCurtainGeometry';
 
 /** Standalone and window-fitted dressings share metric geometry, with their bottom at zero. */
 export function buildWindowDressing(parent: THREE.Group, w: number, h: number, d: number, style: WindowDressingStyle, openness: number,
@@ -40,14 +41,10 @@ export function buildWindowDressing(parent: THREE.Group, w: number, h: number, d
   }
   const top = h - railHeight - .004, bottom = Math.min(.015, h * .015), drop = Math.max(.001, top - bottom);
   const panels = (material: THREE.Material, open: number, z: number, translucent: boolean, section: string) => {
-    const width = w * .5 * (1 - .72 * open), segments = 48;
+    const width = w * .5 * (1 - .72 * open), folds = Math.max(4, Math.min(14, Math.round(w * .5 / .13)));
     for (const direction of [-1, 1]) {
-      const geo = new THREE.PlaneGeometry(width, drop, segments, 16), pos = geo.attributes.position;
-      for (let i = 0; i < pos.count; i++) {
-        const across = pos.getX(i) / width + .5, down = .5 - pos.getY(i) / drop;
-        pos.setZ(i, Math.sin(across * Math.PI * 12 + down * .2) * d * (.14 + down * .045));
-      }
-      geo.computeVertexNormals();
+      // Each layer gets its own depth envelope so stronger folds never cross the other fabric.
+      const geo = pleatedCurtainGeometry(width, drop, d * (style === 'layered' ? .19 : .44), folds);
       add(geo, material, section, direction * (w - width) / 2, (top + bottom) / 2, z, true, translucent);
     }
   };

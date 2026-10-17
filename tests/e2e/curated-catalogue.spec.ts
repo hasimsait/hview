@@ -28,6 +28,13 @@ async function items(page: Page): Promise<import('../../src/domain/model/PlanDat
     return runtime.editor.getDocument().furniture.map((item: import('../../src/domain/elements/Furniture').Furniture) => item.toData());
   });
 }
+async function bookcaseColours(page: Page) {
+  return page.evaluate(async () => {
+    const path = '/src/main.tsx'; const { runtime } = await import(path), bookcase = runtime.editor.getDocument().furniture[0], colours: Record<string, string[]> = {};
+    runtime.scene.getRenderObject(bookcase.id)?.traverse((mesh: any) => { if (mesh.isMesh && mesh.userData.section) (colours[mesh.userData.section] ??= []).push(mesh.material.color.getHexString()); });
+    return colours;
+  });
+}
 
 test('HEMNES variants are searchable and keep IKEA sizes and shelf settings after reload', async ({ page }, testInfo) => {
   await search(page, 'HEMNES');
@@ -38,12 +45,25 @@ test('HEMNES variants are searchable and keep IKEA sizes and shelf settings afte
   await page.getByRole('spinbutton', { name: 'Shelf count', exact: true }).fill('8');
   await page.getByRole('spinbutton', { name: 'Shelf count', exact: true }).press('Tab');
   expect((await items(page))[0].shelfCount).toBe(8);
+  await page.evaluate(async () => {
+    const path = '/src/main.tsx'; const { runtime } = await import(path), p = runtime.editor.getDocument().furniture[0].position;
+    runtime.scene.updateSettings({ foregroundOcclusionMode: 'off' }); runtime.scene.getCamera().position.set(p.x + .8, p.y + 1.35, p.z + 3);
+    runtime.scene.getControls()!.target.set(p.x, p.y + 1, p.z); runtime.scene.getControls()!.update(); runtime.scene.invalidate();
+  });
   await page.screenshot({ path: testInfo.outputPath('hemnes-bookcase.png') });
+  await page.getByRole('button', { name: 'Back panel', exact: true }).click(); await page.getByTitle('White Dove (#f3f1ea)', { exact: true }).click();
+  await page.getByRole('button', { name: 'Shelves', exact: true }).click(); await page.getByTitle('Simply White (#f7f6ef)', { exact: true }).click();
+  await page.getByRole('button', { name: 'Frame', exact: true }).click(); await page.getByTitle('Alabaster (#f0ece2)', { exact: true }).click();
+  const colours = await bookcaseColours(page);
+  expect(colours['Back Panel']).toEqual(['f3f1ea']); expect(colours.Shelves.every(c => c === 'f7f6ef')).toBe(true); expect(colours.Frame.every(c => c === 'f0ece2')).toBe(true);
+  await page.getByRole('button', { name: 'Edit layout', exact: true }).click(); await page.getByRole('button', { name: 'Done', exact: true }).click();
+  const edited = await bookcaseColours(page);
+  expect(edited['Back Panel']).toEqual(['f3f1ea']); expect(edited.Shelves.every(c => c === 'f7f6ef')).toBe(true); expect(edited.Frame.every(c => c === 'f0ece2')).toBe(true);
   await page.getByRole('button', { name: 'Save .plan', exact: true }).click();
   await expect(page.getByRole('dialog', { name: 'Saving plan' })).toBeHidden();
   await page.reload();
   await expect(page.getByRole('button', { name: 'Move', exact: true })).toBeVisible();
-  expect((await items(page))[0]).toMatchObject({ displayName: 'IKEA HEMNES Bookcase — White Stain / Light Brown', shelfCount: 8 });
+  expect((await items(page))[0]).toMatchObject({ displayName: 'IKEA HEMNES Bookcase — White Stain / Light Brown', shelfCount: 8, sectionFinishes: { back_panel: { color: '#f3f1ea' }, shelves: { color: '#f7f6ef' }, frame: { color: '#f0ece2' } } });
 });
 
 test('BAUHAUS and appliance filters place countertop items above the floor', async ({ page }) => {

@@ -141,6 +141,12 @@ test('offline editor adds HEMNES and retains frame, curtain and cornice settings
   });
   expect(modelSections).toContain('Posts');
   expect(modelSections.filter(section => section === 'Shelves')).toHaveLength(6);
+  expect(modelSections.filter(section => section === 'Back Panel')).toHaveLength(1);
+  for (const section of ['Back panel', 'Shelves']) {
+    await page.getByRole('button', { name: section, exact: true }).click();
+    await page.getByRole('button', { name: 'Wood & Parquet', exact: true }).click();
+    await page.getByRole('button', { name: /Natural Scandinavian Oak/ }).click();
+  }
   const downloading = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Full Editor (.html)', exact: true }).click();
   const path = testInfo.outputPath('opening-decor.html');
@@ -154,5 +160,6 @@ test('offline editor adds HEMNES and retains frame, curtain and cornice settings
   expect(saved.document.elements.find((element: any) => element.kind === 'furniture.shelving').data).toMatchObject({
     assetKey: 'ikea_hemnes_49_white', displayName: 'IKEA HEMNES Narrow Bookcase — White Stain',
     dimensions: { x: .49, y: 1.97, z: .37 }, shelfCount: 6,
+    sectionFinishes: { back_panel: { type: 'wood', variant: 'natural_oak' }, shelves: { type: 'wood', variant: 'natural_oak' } },
   });
 });

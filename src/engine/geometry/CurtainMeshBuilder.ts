@@ -2,6 +2,7 @@ import type { OpeningEntity,WallEntity } from '@core/types/plan';
 import * as THREE from 'three';
 import { buildWindowDressing } from './WindowDressingGeometry';
 import { windowDressingDefaults } from '../../domain/model/WindowDressing';
+import { pleatedCurtainGeometry } from './PleatedCurtainGeometry';
 
 export interface CurtainMount {
   ceilingHeight?: number;
@@ -44,15 +45,8 @@ export class CurtainMeshBuilder {
 
     const panelWidth = width * 0.28;
     for (const [name, direction] of [['left', -1], ['right', 1]] as const) {
-      const geometry = new THREE.PlaneGeometry(panelWidth, drop, 40, 12);
-      const positions = geometry.attributes.position;
-      // Real geometry gives the cloth folds depth and natural light/shadow.
-      for (let i = 0; i < positions.count; i++) {
-        const across = positions.getX(i) / panelWidth + 0.5;
-        const down = 0.5 - positions.getY(i) / drop;
-        positions.setZ(i, side * Math.sin(across * Math.PI * 12 + down * 0.12) * (0.025 + down * 0.01));
-      }
-      geometry.computeVertexNormals();
+      const folds = Math.max(4, Math.min(12, Math.round(panelWidth / .09)));
+      const geometry = pleatedCurtainGeometry(panelWidth, drop, .06, folds);
       const panel = new THREE.Mesh(geometry, this.fabric);
       panel.name = `curtain_${name}_${window.id}`;
       panel.position.set(direction * (width - panelWidth) / 2, (top + bottom) / 2, z);

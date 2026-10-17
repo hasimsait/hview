@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { Shelving } from '../../../domain/elements/Furniture';
 import { corniceGeometry } from '../../geometry/CorniceGeometry';
 import type { AssetBuildContext, AssetBuilderFn } from './AssetBuildContext';
+import { bookcaseMaterials } from './BookcaseMaterials';
 
 /** Model coordinates are fractions of the published width, height and depth. */
 function parts(c: AssetBuildContext) {
@@ -108,20 +109,18 @@ export const buildBuiltInOven: AssetBuilderFn = c => {
 
 function bookcase(c: AssetBuildContext, hemnes: boolean) {
   const { box } = parts(c), m = c.materials;
-  const frame = !hemnes || c.entity.assetKey.includes('white') ? m.whitePaint : c.entity.assetKey.includes('black_brown') ? m.woodBlackBrown : m.woodLight;
-  const top = hemnes && c.entity.assetKey.includes('90_') ? m.woodLight : frame;
+  const { frame, top, back, shelves } = bookcaseMaterials(c)!;
   const foot = hemnes ? .055 : 0;
   for (const x of [-.475, .475]) box(x, .5 + foot / 2, -.02, .05, 1 - foot, .96, frame, 'Frame');
-  box(0, .53, -.477, .9, .9, .045, frame, 'Back Panel');
+  box(0, .53, -.477, .9, .9, .045, back, 'Back Panel');
   box(0, .9875, 0, 1, .025, 1, top, 'Top');
   box(0, .07, -.08, .9, .08, .76, frame, 'Plinth');
   const count = c.entity instanceof Shelving ? c.entity.shelfCount : 6;
-  for (let i = 0; i < count; i++) box(0, .12 + i * .82 / (count - 1), 0, .9, .012, .91, frame, 'Shelves');
+  for (let i = 0; i < count; i++) box(0, .12 + i * .82 / (count - 1), 0, .9, .012, .91, shelves, 'Shelves');
   if (hemnes) {
     for (const x of [-.455, .455]) for (const z of [-.415, .415]) box(x, .49, z, .065, .98, .13, frame, 'Posts');
     box(0, .961, 0, .98, .028, .97, frame, 'Crown');
     box(0, .11, .432, .9, .035, .06, frame, 'Base Trim');
-    for (let i = 1; i < 5; i++) box(-.45 + i * .18, .53, -.451, .005, .83, .003, frame, 'Back Panel');
   }
   if (c.entity.hasLids) {
     for (const x of [-.225, .225]) box(x, .53, .475, .442, .84, .03, frame, 'Lids');

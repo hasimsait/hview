@@ -12,7 +12,13 @@ import { AddFurniture, ConfigureShelving } from '../../src/application/commands/
 import { SetWindowCurtains, SetWindowPelmet } from '../../src/application/commands/StructuralCommands';
 import { PlanCodec } from '../../src/domain/codec/PlanCodec';
 import { LegacyPlanWriter } from '../../src/domain/codec/LegacyPlanWriter';
-import type { FurnitureCategory } from '../../src/domain/model/PlanData';
+import type { FurnitureCategory, SurfaceFinishConfig } from '../../src/domain/model/PlanData';
+import { FurnitureAppearance } from '../../src/engine/materials/FurnitureAppearance';
+import type { SurfaceMaterialFactory } from '../../src/engine/materials/SurfaceMaterialFactory';
+import { ResourcePool } from '../../src/engine/resources/ResourcePool';
+import type { ViewportSettings } from '../../src/core/types/services';
+import { defaultCabinet } from '../../src/domain/cabinet/CabinetLayout';
+import { PlanDocument } from '../../src/domain/model/PlanDocument';
 import { rawPlan } from './fixtures';
 
 const catalog = new AssetCatalog();
@@ -68,6 +74,29 @@ describe('sourced catalogue', () => {
       if (child instanceof THREE.Mesh && child.userData.section) colors[child.userData.section] = (child.material as THREE.MeshStandardMaterial).color.getHexString();
     });
     expect(colors.Frame).not.toBe(colors.Top);
+    expect(colors['Back Panel']).toBe(colors.Top); expect(colors.Shelves).toBe(colors.Top);
+  });
+
+  it('keeps a smooth HEMNES back and independent back, shelf, frame and top finishes in layouts and saved plans', () => {
+    const builder = new FurnitureMeshBuilder(catalog), codec = new PlanCodec(catalog);
+    const original = item('ikea_hemnes_90_white_light_brown');
+    const backMeshes: THREE.Mesh[] = []; builder.build(original).traverse(mesh => { if (mesh instanceof THREE.Mesh && mesh.userData.section === 'Back Panel') backMeshes.push(mesh); });
+    expect(backMeshes).toHaveLength(1); expect(backMeshes[0].geometry.type).toBe('BoxGeometry');
+    const finishes = { Frame: '#e8e5dc', 'Back Panel': '#b98753', Shelves: '#d2b58c', Top: '#a67542' };
+    let painted = original;
+    for (const [section, color] of Object.entries(finishes)) painted = painted.withSectionFinish(section, { type: 'paint', color });
+    for (const entity of [painted, painted.withCabinet(defaultCabinet(painted.toData(), 0))]) {
+      const resources = new ResourcePool(), root = builder.build(entity);
+      const service = { getMaterial: (finish: SurfaceFinishConfig) => new THREE.MeshStandardMaterial({ color: finish.color }) } as unknown as SurfaceMaterialFactory;
+      new FurnitureAppearance(service, resources, () => ({} as ViewportSettings), () => undefined).apply(root, entity);
+      const colours: Record<string, string[]> = {};
+      root.traverse(mesh => { if (mesh instanceof THREE.Mesh) (colours[mesh.userData.section] ??= []).push((mesh.material as THREE.MeshStandardMaterial).color.getHexString()); });
+      for (const [section, color] of Object.entries(finishes)) expect(colours[section].every(value => value === color.slice(1))).toBe(true);
+      for (const encoded of [codec.encode(new PlanDocument([entity])), new LegacyPlanWriter().encode(new PlanDocument([entity]))]) {
+        const restored = codec.decode(encoded).requireFurniture(entity.id); expect(restored.sectionFinishes).toEqual(painted.sectionFinishes); expect(restored.cabinet).toEqual(entity.cabinet);
+      }
+      resources.ownTree(root).dispose(); expect(resources.size).toBe(0);
+    }
   });
 
   it('migrates window cornices to their host wall and keeps curtain edits independent', () => {

@@ -69,6 +69,9 @@ describe('soft furnishings', () => {
     expect(sheer.every(m => (m.material as THREE.Material).opacity === .28 && (m.material as THREE.Material).depthWrite === false)).toBe(true);
     expect(sheer.every(m => (m.material as THREE.MeshStandardMaterial).defines?.PROJECTION_LOCAL === 1 && (m.material as THREE.MeshStandardMaterial).defines?.IS_STRETCHED === 1)).toBe(true);
     expect(blackout.every(m => (m.material as THREE.Material).opacity === 1)).toBe(true);
+    const frontOfSheer = Math.max(...sheer.map(mesh => new THREE.Box3().setFromObject(mesh).max.z));
+    const backOfBlackout = Math.min(...blackout.map(mesh => new THREE.Box3().setFromObject(mesh).min.z));
+    expect(frontOfSheer).toBeLessThan(backOfBlackout);
     expect(finish.opacity).toBe(1); expect(finish.side).toBe(THREE.FrontSide);
     resources.ownTree(root).dispose(); palette.dispose(); expect(resources.size).toBe(0);
   });
