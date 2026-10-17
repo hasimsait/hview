@@ -6,7 +6,7 @@ For a ready-to-open copy, download [hview_editor.html](hview_editor.html) using 
 
 **Required for future changes:** Any change to application code, styles, assets, dependencies, build/export logic, or `public/sample.plan` must include a freshly generated root-level `hview_editor.html` in the same commit or PR. Run `npm run build:sample-editor`, verify the generated editor opens offline, and commit the updated HTML alongside the source changes before pushing. The checked-in HTML must reflect the current source and working plan; do not leave an outdated build in the repository or edit the generated HTML by hand.
 
-**Required delivery:** End every final HView response with a clickable download link to the latest complete offline editor HTML. This also applies to documentation-only changes, which can reuse the current HTML. Preserve uploaded user plans and provide a separate editor copy when embedding them. See [AGENTS.md](AGENTS.md) for the persistent instructions for future agent sessions.
+**Required delivery:** End every final HView response with a direct, clickable **workspace file download link** to the latest complete offline editor HTML. Do not substitute a GitHub link, including raw files or releases. This also applies to documentation-only changes, which can reuse the current HTML. Preserve uploaded user plans and provide a separate editor copy when embedding them. See [AGENTS.md](AGENTS.md) for the persistent instructions for future agent sessions.
 
 ## Run
 
