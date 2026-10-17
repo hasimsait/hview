@@ -64,6 +64,20 @@
     ]
   },
   {
+    "id": "ivory_taupe_striped_mosaic_30x30",
+    "name": "Ivory & Taupe Striped Mosaic Backsplash",
+    "widthCm": 30,
+    "heightCm": 30,
+    "color": "#ffffff",
+    "roughness": 0.22,
+    "metalness": 0,
+    "defaultGroutWidth": 0,
+    "defaultPattern": "grid",
+    "textures": [
+      "/textures/tiles/ivory_taupe_striped_mosaic_30x30.jpg"
+    ]
+  },
+  {
     "id": "caramel_ripple_gloss_20x10",
     "name": "20x10 Caramel Ripple Gloss Tile",
     "widthCm": 20,
