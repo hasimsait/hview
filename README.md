@@ -8,6 +8,14 @@ For a ready-to-open copy, download [hview_editor.html](hview_editor.html) using 
 
 **Required delivery:** End every final HView response with a direct, clickable **workspace file download link** to the latest complete offline editor HTML. Do not substitute a GitHub link, including raw files or releases. This also applies to documentation-only changes, which can reuse the current HTML. Preserve uploaded user plans and provide a separate editor copy when embedding them. See [AGENTS.md](AGENTS.md) for the persistent instructions for future agent sessions.
 
+For a checkout at `/workspace/hview`, the final response must end with:
+
+```markdown
+[Download the latest offline editor](/workspace/hview/hview_editor.html)
+```
+
+Verify that the file exists and reflects the latest application build, then link it directly. Substitute the actual absolute checkout path if different. No output-directory copy, upload, or publication is needed to link an existing workspace file. If an optional copy fails, use the verified original HTML instead of withholding the link or asking the user for linking instructions, subject to any explicit higher-priority runtime path restrictions. Documentation-only changes reuse the current HTML without rebuilding it.
+
 ## Run
 
 Use Node.js 20.19+ or 22.12+ and npm. Install the locked dependencies, then start Vite:
