@@ -505,7 +505,7 @@
           ],
           "roomSideA": "_4wyay",
           "roomSideB": "_elc1j",
-          "startOffset": 0.024999789079988084,
+          "startOffset": 0.02499978907998808,
           "endOffset": -0.04979931542250782,
           "finishSideB": {
             "type": "paint",
@@ -662,7 +662,7 @@
           ],
           "roomSideA": "_elc1j",
           "startOffset": -0.05,
-          "endOffset": 0.025033174281584702,
+          "endOffset": 0.025033174281584705,
           "finishSideA": {
             "type": "paint",
             "color": "#DFCBAF",
@@ -2109,7 +2109,7 @@
             "_y0oj2"
           ],
           "roomSideA": "_y0oj2",
-          "startOffset": 0.025033174281584702,
+          "startOffset": 0.025033174281584705,
           "endOffset": 0.025009830527855846,
           "finishSideA": {
             "type": "paint",
@@ -7679,7 +7679,7 @@
           ],
           "roomSideA": "_rscdq",
           "roomSideB": "_3h613",
-          "startOffset": -0.024999999999999998,
+          "startOffset": 0.025,
           "endOffset": 0,
           "finishSideA": {
             "type": "tile",
@@ -7811,6 +7811,12 @@
             },
             "startOffset": -0.025,
             "endOffset": 0
+          },
+          "finishEdgeStart": {
+            "type": "plaster",
+            "variant": "smooth",
+            "color": "#efede8",
+            "roughness": 0.85
           },
           "openings": []
         }
@@ -7996,10 +8002,382 @@
       {
         "kind": "wall",
         "data": {
-          "id": "_ojjeh",
+          "id": "_ojjeh_a",
           "p1": {
             "x": -3.009883203165846,
             "y": 6.985099
+          },
+          "p2": {
+            "x": -1.629944781926936,
+            "y": 6.972062375104543
+          },
+          "thickness": 0.05,
+          "height": 2.7,
+          "material": "a_block",
+          "roomIds": [
+            "_qb2a4",
+            "_rscdq"
+          ],
+          "roomSideA": "_rscdq",
+          "roomSideB": "_qb2a4",
+          "startOffset": 0,
+          "endOffset": 0,
+          "finishSideA": {
+            "type": "tile",
+            "variant": "canakkale_wabi_maburu_bej_34x111",
+            "color": "#cec8ba",
+            "roughness": 0.22,
+            "rotation": 0,
+            "groutWidth": 2,
+            "groutColor": "#9ca3af"
+          },
+          "rawWall": {
+            "id": "_ojjeh",
+            "plan": "a",
+            "role": "wall",
+            "child": 0,
+            "archive": 0,
+            "demount": 0,
+            "depth": 5,
+            "height": 270,
+            "angle": -0.54,
+            "p1": {
+              "role": "p1",
+              "x": -300.9883203165846,
+              "y": 698.5099,
+              "demount": 0,
+              "bak": {
+                "x": -300.9883203165846,
+                "y": 698.5099,
+                "link": {
+                  "ct": "node",
+                  "ot": "wall",
+                  "id": "_sypbh",
+                  "z0": "c",
+                  "z1": "p2"
+                }
+              },
+              "link": {
+                "ct": "node",
+                "ot": "wall",
+                "id": "_sypbh",
+                "z0": "c",
+                "z1": "p2"
+              }
+            },
+            "p2": {
+              "role": "p2",
+              "x": -58.23106468035513,
+              "y": 696.2165112272323,
+              "demount": 0,
+              "bak": {
+                "x": -58.23106468035513,
+                "y": 696.2165112272323,
+                "link": {
+                  "ct": "node",
+                  "ot": "wall",
+                  "id": "_h1edo",
+                  "z0": "c",
+                  "z1": "p1"
+                }
+              },
+              "link": {
+                "ct": "node",
+                "ot": "wall",
+                "id": "_h1edo",
+                "z0": "c",
+                "z1": "p1"
+              }
+            },
+            "l1": {
+              "x": -305.988,
+              "y": 696.056
+            },
+            "l2": {
+              "x": -55.731,
+              "y": 693.692
+            },
+            "r1": {
+              "x": -295.988,
+              "y": 700.962
+            },
+            "r2": {
+              "x": -60.73,
+              "y": 698.74
+            },
+            "l1f": {
+              "x": -305.988,
+              "y": 696.056
+            },
+            "l2f": {
+              "x": -55.731,
+              "y": 693.692
+            },
+            "r1f": {
+              "x": -295.988,
+              "y": 700.962
+            },
+            "r2f": {
+              "x": -60.73,
+              "y": 698.74
+            },
+            "p1st": "out",
+            "p2st": "out",
+            "material": "a_block",
+            "color": 0,
+            "inRoom": 0,
+            "area": {
+              "outer": 6.76,
+              "inner": 6.35
+            },
+            "neighbors": {
+              "_sypbh": "",
+              "_h1edo": "",
+              "_u3jaj": "",
+              "_v8dm5": ""
+            },
+            "level": "1",
+            "show_dls": true,
+            "room_on_left": true,
+            "room_on_right": true,
+            "holes": {
+              "_buz1m": {
+                "plan": "a",
+                "type": "single",
+                "group": "doors",
+                "width": 83,
+                "height": 210,
+                "depth": 4,
+                "opening": "r-l",
+                "id": "_buz1m",
+                "pc": {
+                  "x": -105.45502302858858,
+                  "y": 696.6626478240464
+                },
+                "position": "r",
+                "offset": 0.5,
+                "parent": "_ojjeh",
+                "parent_depth": 5,
+                "dls_prs": {},
+                "slope_angle": 0,
+                "casing": 1,
+                "casements": 1,
+                "p1": {
+                  "x": -146.9531760466197,
+                  "y": 697.0546912996275
+                },
+                "p2": {
+                  "x": -63.95687001055751,
+                  "y": 696.2706043484653
+                },
+                "pcb": {
+                  "x": -105.4502996137714,
+                  "y": 697.1626255129012
+                },
+                "p1b": {
+                  "x": -146.94845263180105,
+                  "y": 697.5546689884823
+                },
+                "p2b": {
+                  "x": -63.95214659574049,
+                  "y": 696.7705820373201
+                },
+                "l1": {
+                  "x": -146.97679312070431,
+                  "y": 694.5548028553536
+                },
+                "r1": {
+                  "x": -146.9295589725334,
+                  "y": 699.5545797439014
+                },
+                "l2": {
+                  "x": -63.980487084643755,
+                  "y": 693.7707159041914
+                },
+                "r2": {
+                  "x": -63.933252936472854,
+                  "y": 698.7704927927392
+                },
+                "p1corner": 0,
+                "p2corner": 0,
+                "l1b": {
+                  "x": -146.96729397504532,
+                  "y": 695.5546892475646
+                },
+                "r1b": {
+                  "x": -146.92950602495694,
+                  "y": 699.5545107524355
+                },
+                "l2b": {
+                  "x": -63.97099397504644,
+                  "y": 694.7705892475645
+                },
+                "r2b": {
+                  "x": -63.933206024958054,
+                  "y": 698.7704107524354
+                },
+                "l1c": {
+                  "x": -146.97674071017536,
+                  "y": 694.5547463762277
+                },
+                "l2c": {
+                  "x": -63.98044060493703,
+                  "y": 693.7706575193979
+                },
+                "r1c": {
+                  "x": -146.9295059068245,
+                  "y": 699.5545232585846
+                },
+                "r2c": {
+                  "x": -63.93320580155705,
+                  "y": 698.7704344017548
+                },
+                "p1fact": {
+                  "x": -146.95317604661886,
+                  "y": 697.0546912996275
+                },
+                "p2fact": {
+                  "x": -63.956870010558305,
+                  "y": 696.2706043484653
+                },
+                "pcfact": {
+                  "x": -105.45502302858858,
+                  "y": 696.6626478240464
+                },
+                "bg_polygon": [
+                  {
+                    "x": -146.9295059068245,
+                    "y": 699.5545232585846
+                  },
+                  {
+                    "x": -146.92950602495694,
+                    "y": 699.5545107524355
+                  },
+                  {
+                    "x": -146.96729397504532,
+                    "y": 695.5546892475646
+                  },
+                  {
+                    "x": -146.97674071017536,
+                    "y": 694.5547463762277
+                  },
+                  {
+                    "x": -63.98044060493703,
+                    "y": 693.7706575193979
+                  },
+                  {
+                    "x": -63.97099397504644,
+                    "y": 694.7705892475645
+                  },
+                  {
+                    "x": -63.933206024958054,
+                    "y": 698.7704107524354
+                  },
+                  {
+                    "x": -63.93320580155705,
+                    "y": 698.7704344017548
+                  }
+                ],
+                "eds": {
+                  "l": {
+                    "p1": {
+                      "x": -146.9767,
+                      "y": 694.5548
+                    },
+                    "p2": {
+                      "x": -63.9804,
+                      "y": 693.7707
+                    },
+                    "c": {
+                      "x": -105.4786,
+                      "y": 694.1627
+                    },
+                    "length": 83
+                  },
+                  "r": {
+                    "p1": {
+                      "x": -146.9295,
+                      "y": 699.5545
+                    },
+                    "p2": {
+                      "x": -63.9332,
+                      "y": 698.7704
+                    },
+                    "c": {
+                      "x": -105.4314,
+                      "y": 699.1625
+                    },
+                    "length": 83
+                  }
+                },
+                "polygon": [
+                  {
+                    "x": -146.97679312070431,
+                    "y": 694.5548028553536
+                  },
+                  {
+                    "x": -63.980487084643755,
+                    "y": 693.7707159041914
+                  },
+                  {
+                    "x": -63.933252936472854,
+                    "y": 698.7704927927392
+                  },
+                  {
+                    "x": -146.9295589725334,
+                    "y": 699.5545797439014
+                  }
+                ],
+                "pc1h": {
+                  "x": -105.1857283244217,
+                  "y": 725.16128978166
+                },
+                "f0offset": 0,
+                "selected": 0,
+                "room_l": "_4wyay",
+                "room_r": "_rscdq",
+                "openAngle": 80,
+                "finish": {
+                  "type": "paint",
+                  "color": "#ffffff",
+                  "roughness": 0.85
+                }
+              }
+            },
+            "finishSideA": {
+              "type": "tile",
+              "variant": "canakkale_wabi_maburu_bej_34x111",
+              "color": "#cec8ba",
+              "roughness": 0.22,
+              "rotation": 0,
+              "groutWidth": 2,
+              "groutColor": "#9ca3af"
+            },
+            "startOffset": 0.025000950461594708,
+            "endOffset": 0.025
+          },
+          "finishSideB": {
+            "type": "tile",
+            "variant": "canakkale_wabi_maburu_bej_34x111",
+            "color": "#cec8ba",
+            "roughness": 0.22,
+            "metalness": 0.08,
+            "rotation": 0,
+            "pattern": "grid",
+            "groutWidth": 2,
+            "groutColor": "#d9cbba",
+            "layer": 0
+          },
+          "openings": []
+        }
+      },
+      {
+        "kind": "wall",
+        "data": {
+          "id": "_ojjeh_b",
+          "p1": {
+            "x": -1.629944781926936,
+            "y": 6.972062375104543
           },
           "p2": {
             "x": -0.5823106468035513,
@@ -8009,14 +8387,13 @@
           "height": 2.7,
           "material": "a_block",
           "roomIds": [
-            "_qb2a4",
             "_4wyay",
             "_rscdq"
           ],
           "roomSideA": "_rscdq",
-          "roomSideB": "_qb2a4",
+          "roomSideB": "_4wyay",
           "startOffset": 0,
-          "endOffset": 0.025,
+          "endOffset": -0.025,
           "finishSideA": {
             "type": "tile",
             "variant": "canakkale_wabi_maburu_bej_34x111",
@@ -8357,9 +8734,9 @@
               "type": "door",
               "width": 0.83,
               "height": 2.1,
-              "wallId": "_ojjeh",
+              "wallId": "_ojjeh_b",
               "floorHeight": 0,
-              "distanceAlongWall": 1.9554202282097166,
+              "distanceAlongWall": 0.5754202282097167,
               "position": {
                 "x": -1.0545502302858858,
                 "y": 6.966626478240464
@@ -8715,6 +9092,18 @@
             "startOffset": 0,
             "endOffset": -0.025
           },
+          "finishSideB": {
+            "type": "tile",
+            "variant": "canakkale_wabi_maburu_bej_34x111",
+            "color": "#cec8ba",
+            "roughness": 0.22,
+            "metalness": 0.08,
+            "rotation": 0,
+            "pattern": "grid",
+            "groutWidth": 2,
+            "groutColor": "#d9cbba",
+            "layer": 0
+          },
           "openings": []
         }
       },
@@ -9055,6 +9444,25 @@
             },
             "startOffset": 0.025,
             "endOffset": 0.013070712976859968
+          },
+          "finishSideB": {
+            "type": "tile",
+            "variant": "canakkale_wabi_maburu_bej_34x111",
+            "color": "#cec8ba",
+            "roughness": 0.22,
+            "metalness": 0.08,
+            "rotation": 0,
+            "pattern": "grid",
+            "groutWidth": 2,
+            "groutColor": "#d9cbba",
+            "layer": 0
+          },
+          "finishEdgeStart": {
+            "type": "plaster",
+            "variant": "smooth",
+            "color": "#eae6df",
+            "roughness": 0.8,
+            "layer": 0
           },
           "openings": [
             {
@@ -9418,6 +9826,18 @@
             "startOffset": -0.05,
             "endOffset": 0.012522660166879094
           },
+          "finishSideB": {
+            "type": "tile",
+            "variant": "canakkale_wabi_maburu_bej_34x111",
+            "color": "#cec8ba",
+            "roughness": 0.22,
+            "metalness": 0.08,
+            "rotation": 0,
+            "pattern": "grid",
+            "groutWidth": 2,
+            "groutColor": "#d9cbba",
+            "layer": 0
+          },
           "openings": []
         }
       },
@@ -9442,7 +9862,7 @@
           ],
           "roomSideA": "_elc1j",
           "roomSideB": "_4wyay",
-          "startOffset": 0.024999789079988084,
+          "startOffset": 0.02499978907998808,
           "endOffset": -0.05,
           "finishSideA": {
             "type": "paint",
@@ -11135,8 +11555,9 @@
             "roughness": 0.85
           },
           "finishSideB": {
-            "type": "paint",
-            "color": "#d6e5db",
+            "type": "plaster",
+            "variant": "smooth",
+            "color": "#efede8",
             "roughness": 0.85
           },
           "finishEdges": {
@@ -11380,6 +11801,12 @@
             "startOffset": 0,
             "endOffset": 0.05
           },
+          "finishEdgeEnd": {
+            "type": "plaster",
+            "variant": "smooth",
+            "color": "#efede8",
+            "roughness": 0.85
+          },
           "openings": [
             {
               "id": "_5w0ui",
@@ -11395,7 +11822,7 @@
               },
               "swingSide": "r",
               "hingeSide": "l",
-              "openAngle": 40,
+              "openAngle": 0,
               "finish": {
                 "type": "paint",
                 "color": "#ffffff",
@@ -12339,14 +12766,14 @@
             {
               "id": "7b9010d4-073d-4fbf-9426-183b27e695cc",
               "type": "window",
-              "width": 1.2,
+              "width": 1.4,
               "height": 1.5,
               "wallId": "_w5f7a_b",
               "floorHeight": 0.85,
-              "distanceAlongWall": 1.097,
+              "distanceAlongWall": 0.75,
               "position": {
                 "x": 1.892,
-                "y": -0.3210000000000002
+                "y": -0.6680000000000001
               },
               "curtainState": "hidden"
             }
@@ -12690,6 +13117,18 @@
             "rotation": 0,
             "groutWidth": 2,
             "groutColor": "#d1d5db"
+          },
+          "finishBack": {
+            "type": "tile",
+            "variant": "canakkale_wabi_maburu_bej_34x111",
+            "color": "#cec8ba",
+            "roughness": 0.22,
+            "metalness": 0.08,
+            "rotation": 0,
+            "pattern": "grid",
+            "groutWidth": 2,
+            "groutColor": "#d9cbba",
+            "layer": 0
           }
         }
       },
@@ -31486,6 +31925,18 @@
             "is_micro_room": 0,
             "role": "room",
             "title": "Guest WC (2.1 m²)"
+          },
+          "floorFinish": {
+            "type": "tile",
+            "variant": "canakkale_diadem_bej_59x59",
+            "color": "#d3c7b8",
+            "roughness": 0.76,
+            "metalness": 0.02,
+            "rotation": 0,
+            "pattern": "grid",
+            "groutWidth": 2,
+            "groutColor": "#d9cbba",
+            "layer": 0
           }
         }
       },
@@ -59499,9 +59950,11 @@
           "visible": true,
           "sectionFinishes": {
             "tabletop": {
-              "type": "paint",
-              "color": "#18181b",
-              "roughness": 0.85
+              "type": "wood",
+              "variant": "bleached_birch",
+              "color": "#dfcfb6",
+              "roughness": 0.45,
+              "layer": 0
             }
           },
           "rawItem": {
@@ -59604,9 +60057,10 @@
           "sectionFinishes": {
             "tabletop": {
               "type": "wood",
-              "variant": "natural_oak",
-              "color": "#dfcbaf",
-              "roughness": 0.55
+              "variant": "bleached_birch",
+              "color": "#dfcfb6",
+              "roughness": 0.45,
+              "layer": 0
             }
           },
           "rawItem": {
@@ -59784,7 +60238,7 @@
           "category": "kitchen",
           "assetKey": "fridge",
           "position": {
-            "x": 2.79283913154758,
+            "x": 2.2987365555327814,
             "y": 0,
             "z": 0.9910124444242527
           },
@@ -59891,7 +60345,7 @@
           "category": "kitchen",
           "assetKey": "kitchen_box_wall",
           "position": {
-            "x": -0.2308,
+            "x": -0.2479600209829168,
             "y": 1.45,
             "z": 2.4292
           },
@@ -60225,27 +60679,42 @@
         "data": {
           "id": "_6hwqs",
           "name": "kitchen_box_wall",
-          "displayName": "Kitchen Box Wall",
-          "category": "kitchen",
-          "assetKey": "kitchen_box_wall",
+          "displayName": "Single-Door Base Cabinet",
+          "category": "storage",
+          "assetKey": "cabinet_base_single",
           "position": {
-            "x": -0.2288,
+            "x": -0.24108765330477333,
             "y": 0,
             "z": 2.4147
           },
           "rotationY": 3.1178561757626704,
           "dimensions": {
-            "x": 0.41,
+            "x": 0.39,
             "y": 0.85,
-            "z": 0.41
+            "z": 0.39
           },
           "roomId": "_vzdza",
           "visible": true,
           "sectionFinishes": {
-            "cabinet": {
+            "door_1": {
+              "type": "wood",
+              "variant": "light_beige_laminate",
+              "color": "#ffffff",
+              "roughness": 0.65,
+              "layer": 0
+            },
+            "frame": {
+              "type": "wood",
+              "variant": "light_beige_laminate",
+              "color": "#ffffff",
+              "roughness": 0.65,
+              "layer": 0
+            },
+            "plinth": {
               "type": "paint",
               "color": "#94a395",
-              "roughness": 0.85
+              "roughness": 0.85,
+              "layer": 0
             }
           },
           "cabinet": {
@@ -60286,7 +60755,11 @@
                 }
               }
             ],
-            "contents": []
+            "contents": [],
+            "plinth": {
+              "height": 0.1,
+              "setback": 0.05
+            }
           },
           "rawItem": {
             "name": "kitchen_box_wall",
@@ -60639,6 +61112,20 @@
               "type": "paint",
               "color": "#94a395",
               "roughness": 0.85
+            },
+            "door_2": {
+              "type": "wood",
+              "variant": "light_beige_laminate",
+              "color": "#ffffff",
+              "roughness": 0.65,
+              "layer": 0
+            },
+            "door_1": {
+              "type": "wood",
+              "variant": "light_beige_laminate",
+              "color": "#ffffff",
+              "roughness": 0.65,
+              "layer": 0
             }
           },
           "cabinet": {
@@ -60679,7 +61166,11 @@
                 }
               }
             ],
-            "contents": []
+            "contents": [],
+            "plinth": {
+              "height": 0.1,
+              "setback": 0.05
+            }
           },
           "rawItem": {
             "name": "kitchen_box_door_double",
@@ -60797,12 +61288,27 @@
               "metalness": 0.08,
               "rotation": 0,
               "groutWidth": 0,
-              "groutColor": "#d1d5db"
+              "groutColor": "#d1d5db",
+              "layer": 1
             },
             "cabinet": {
               "type": "paint",
               "color": "#94a395",
               "roughness": 0.85
+            },
+            "door_2": {
+              "type": "wood",
+              "variant": "light_beige_laminate",
+              "color": "#ffffff",
+              "roughness": 0.65,
+              "layer": 0
+            },
+            "door_1": {
+              "type": "wood",
+              "variant": "light_beige_laminate",
+              "color": "#ffffff",
+              "roughness": 0.65,
+              "layer": 0
             }
           },
           "cabinet": {
@@ -60819,22 +61325,10 @@
             },
             "panels": [
               {
-                "id": "shelf_1",
-                "name": "Shelf 1",
-                "kind": "shelf",
-                "at": 0.2713333333333333,
-                "start": "left",
-                "end": "right",
-                "depth": {
-                  "mode": "fit",
-                  "value": 0.02
-                }
-              },
-              {
                 "id": "shelf_2",
                 "name": "Shelf 2",
                 "kind": "shelf",
-                "at": 0.5426666666666666,
+                "at": 0.3453698358015159,
                 "start": "left",
                 "end": "right",
                 "depth": {
@@ -60847,8 +61341,8 @@
             "frontSections": [
               {
                 "id": "front",
-                "bottom": 0,
-                "top": 0.59,
+                "bottom": 0.1,
+                "top": 0.61,
                 "opening": "swing",
                 "doors": {
                   "count": 1,
@@ -60861,9 +61355,9 @@
               },
               {
                 "id": "cb3d5abc-c708-40c4-913c-4cc0aeb5967f",
-                "bottom": 0.59,
+                "bottom": 0.61,
                 "top": "top",
-                "opening": "swing",
+                "opening": "drawer",
                 "doors": {
                   "count": 1,
                   "hinge": "left",
@@ -60871,9 +61365,18 @@
                     0,
                     0
                   ]
-                }
+                },
+                "drawerExtensions": [
+                  0,
+                  0.75
+                ],
+                "drawerBoxHeight": 0.14
               }
-            ]
+            ],
+            "plinth": {
+              "height": 0.1,
+              "setback": 0.05
+            }
           },
           "rawItem": {
             "name": "kitchen_box_door_double",
@@ -60991,12 +61494,41 @@
               "metalness": 0.02,
               "rotation": 0,
               "groutWidth": 0,
-              "groutColor": "#d1d5db"
+              "groutColor": "#d1d5db",
+              "layer": -2
             },
             "cabinet": {
               "type": "paint",
               "color": "#94a395",
               "roughness": 0.85
+            },
+            "door_4": {
+              "type": "wood",
+              "variant": "light_beige_laminate",
+              "color": "#ffffff",
+              "roughness": 0.65,
+              "layer": 0
+            },
+            "door_3": {
+              "type": "wood",
+              "variant": "light_beige_laminate",
+              "color": "#ffffff",
+              "roughness": 0.65,
+              "layer": 0
+            },
+            "door_2": {
+              "type": "wood",
+              "variant": "light_beige_laminate",
+              "color": "#ffffff",
+              "roughness": 0.65,
+              "layer": 0
+            },
+            "door_1": {
+              "type": "wood",
+              "variant": "light_beige_laminate",
+              "color": "#ffffff",
+              "roughness": 0.65,
+              "layer": 0
             }
           },
           "cabinet": {
@@ -61065,9 +61597,9 @@
             "frontSections": [
               {
                 "id": "front",
-                "bottom": 0,
-                "top": 0.28,
-                "opening": "swing",
+                "bottom": 0.1,
+                "top": 0.34705882352941175,
+                "opening": "drawer",
                 "doors": {
                   "count": 1,
                   "hinge": "left",
@@ -61075,13 +61607,17 @@
                     0,
                     0
                   ]
-                }
+                },
+                "drawerExtensions": [
+                  0,
+                  0.75
+                ]
               },
               {
                 "id": "7a3dd36a-2347-411d-9a24-f2317b144f38",
-                "bottom": 0.28,
-                "top": 0.46,
-                "opening": "swing",
+                "bottom": 0.34705882352941175,
+                "top": 0.5058823529411764,
+                "opening": "drawer",
                 "doors": {
                   "count": 1,
                   "hinge": "left",
@@ -61089,13 +61625,17 @@
                     0,
                     0
                   ]
-                }
+                },
+                "drawerExtensions": [
+                  0,
+                  0.75
+                ]
               },
               {
                 "id": "6915e8a2-1c2b-4d94-b699-181f77dae230",
-                "bottom": 0.46,
-                "top": 0.655,
-                "opening": "swing",
+                "bottom": 0.5058823529411764,
+                "top": 0.6779411764705883,
+                "opening": "drawer",
                 "doors": {
                   "count": 1,
                   "hinge": "left",
@@ -61103,13 +61643,17 @@
                     0,
                     0
                   ]
-                }
+                },
+                "drawerExtensions": [
+                  0,
+                  0.75
+                ]
               },
               {
                 "id": "574d69ee-5e48-4231-9927-ed89f4c2f128",
-                "bottom": 0.655,
+                "bottom": 0.6779411764705883,
                 "top": "top",
-                "opening": "swing",
+                "opening": "drawer",
                 "doors": {
                   "count": 1,
                   "hinge": "left",
@@ -61117,9 +61661,17 @@
                     0,
                     0
                   ]
-                }
+                },
+                "drawerExtensions": [
+                  0,
+                  0.75
+                ]
               }
-            ]
+            ],
+            "plinth": {
+              "height": 0.1,
+              "setback": 0.05
+            }
           },
           "rawItem": {
             "name": "kitchen_box_door_double",
@@ -61238,7 +61790,8 @@
               "rotation": 0,
               "pattern": "grid",
               "groutWidth": 0,
-              "groutColor": "#d1d5db"
+              "groutColor": "#d1d5db",
+              "layer": -1
             },
             "cabinet": {
               "type": "paint",
@@ -61500,18 +62053,22 @@
             },
             "seat": {
               "type": "fabric",
-              "variant": "velvet_wine_burgundy",
-              "color": "#54121d",
+              "variant": "velvet_champagne",
+              "color": "#ede6d6",
               "roughness": 0.82,
               "metalness": 0.02,
+              "mappingMode": "stretched",
+              "scale": 1,
               "layer": -1
             },
             "backrest": {
               "type": "fabric",
-              "variant": "velvet_wine_burgundy",
-              "color": "#54121d",
+              "variant": "velvet_champagne",
+              "color": "#ede6d6",
               "roughness": 0.82,
               "metalness": 0.02,
+              "mappingMode": "stretched",
+              "scale": 1,
               "layer": 1
             }
           },
@@ -61631,18 +62188,22 @@
             },
             "seat": {
               "type": "fabric",
-              "variant": "velvet_ruby_red",
-              "color": "#8e1624",
+              "variant": "velvet_wine_burgundy",
+              "color": "#54121d",
               "roughness": 0.82,
               "metalness": 0.02,
+              "mappingMode": "stretched",
+              "scale": 1,
               "layer": -1
             },
             "backrest": {
               "type": "fabric",
-              "variant": "velvet_neutral_silver",
-              "color": "#a0a5ad",
+              "variant": "velvet_wine_burgundy",
+              "color": "#54121d",
               "roughness": 0.82,
               "metalness": 0.02,
+              "mappingMode": "stretched",
+              "scale": 1,
               "layer": 1
             }
           },
@@ -61781,20 +62342,22 @@
             },
             "backrest": {
               "type": "fabric",
-              "variant": "linen_weave",
-              "color": "#d5cbbe",
+              "variant": "velvet_champagne",
+              "color": "#ede6d6",
               "roughness": 0.82,
               "metalness": 0.02,
-              "layer": 1,
-              "scale": 4,
-              "mappingMode": "tiled"
+              "mappingMode": "stretched",
+              "scale": 1,
+              "layer": 1
             },
             "seat": {
               "type": "fabric",
-              "variant": "linen_weave",
-              "color": "#d5cbbe",
+              "variant": "velvet_champagne",
+              "color": "#ede6d6",
               "roughness": 0.82,
               "metalness": 0.02,
+              "mappingMode": "stretched",
+              "scale": 1,
               "layer": -1
             }
           },
@@ -61909,20 +62472,24 @@
               "roughness": 0.6
             },
             "seat": {
-              "type": "paint",
-              "color": "#cfb997",
-              "roughness": 0.85,
+              "type": "fabric",
+              "variant": "velvet_wine_burgundy",
+              "color": "#54121d",
+              "roughness": 0.82,
+              "metalness": 0.02,
+              "mappingMode": "stretched",
+              "scale": 1,
               "layer": -1
             },
             "backrest": {
               "type": "fabric",
-              "variant": "velvet_charcoal",
-              "color": "#26282d",
+              "variant": "velvet_wine_burgundy",
+              "color": "#54121d",
               "roughness": 0.82,
               "metalness": 0.02,
-              "layer": 1,
+              "mappingMode": "stretched",
               "scale": 1,
-              "mappingMode": "stretched"
+              "layer": 1
             }
           },
           "rawItem": {
@@ -62265,6 +62832,12 @@
             },
             "rotationY": 1.5707963267948966,
             "assetKey": "chair"
+          },
+          "finish": {
+            "type": "paint",
+            "color": "#2d4a3e",
+            "roughness": 0.85,
+            "layer": 0
           }
         }
       },
@@ -62340,6 +62913,12 @@
             },
             "rotationY": 1.5707963267948966,
             "assetKey": "chair"
+          },
+          "finish": {
+            "type": "paint",
+            "color": "#2d4a3e",
+            "roughness": 0.85,
+            "layer": 0
           }
         }
       },
@@ -62430,6 +63009,14 @@
             },
             "rotationY": 1.5707963267948966,
             "assetKey": "table_round"
+          },
+          "sectionFinishes": {
+            "tabletop": {
+              "type": "paint",
+              "color": "#607262",
+              "roughness": 0.85,
+              "layer": 0
+            }
           }
         }
       },
@@ -63000,8 +63587,8 @@
               "count": 2,
               "hinge": "left",
               "angles": [
-                0,
-                0
+                91,
+                101
               ]
             },
             "panels": [
@@ -63132,7 +63719,93 @@
                 }
               }
             ],
-            "contents": []
+            "contents": [
+              {
+                "id": "547607a4-194e-4a94-b48b-ab7e8959f694",
+                "name": "Hot-Air Styling Brush",
+                "assetKey": "life_hot_air_brush",
+                "dimensions": {
+                  "x": 0.32,
+                  "y": 0.065,
+                  "z": 0.065
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.020000000000000018,
+                  "y": 0,
+                  "z": 0.10602884953013836
+                },
+                "supportId": "7351383c-c167-4678-af13-ffde847bc271"
+              },
+              {
+                "id": "e4daecae-8059-483f-9dc3-57c2900821a6",
+                "name": "Jewelry and Key Dish",
+                "assetKey": "life_jewelry_tray",
+                "dimensions": {
+                  "x": 0.14,
+                  "y": 0.025,
+                  "z": 0.1
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.3691537966054891,
+                  "y": 0,
+                  "z": 0.009999999999999995
+                },
+                "supportId": "7351383c-c167-4678-af13-ffde847bc271"
+              },
+              {
+                "id": "0ded3bf6-892b-4a08-a4e0-34c6411a56e7",
+                "name": "Perfume and Skin-Care Bottle Set",
+                "assetKey": "life_vanity_bottles",
+                "dimensions": {
+                  "x": 0.22,
+                  "y": 0.16,
+                  "z": 0.1
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.0006471025261760993,
+                  "y": 0,
+                  "z": 0.009999999999999995
+                },
+                "supportId": "3280caf1-4ad3-439c-b9fa-a100b3da0ff2"
+              },
+              {
+                "id": "43f8f7b4-f6be-45ff-9636-801cd0d50a16",
+                "name": "Perfume and Skin-Care Bottle Set",
+                "assetKey": "life_vanity_bottles",
+                "dimensions": {
+                  "x": 0.22,
+                  "y": 0.16,
+                  "z": 0.1
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.44919784100028526,
+                  "y": 0,
+                  "z": 0.009999999999999995
+                },
+                "supportId": "3280caf1-4ad3-439c-b9fa-a100b3da0ff2"
+              },
+              {
+                "id": "93fba6ab-b4d1-46bf-bb79-bada64423978",
+                "name": "Perfume and Skin-Care Bottle Set",
+                "assetKey": "life_vanity_bottles",
+                "dimensions": {
+                  "x": 0.22,
+                  "y": 0.16,
+                  "z": 0.1
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.22530317117167314,
+                  "y": 0,
+                  "z": 0.009999999999999995
+                },
+                "supportId": "3280caf1-4ad3-439c-b9fa-a100b3da0ff2"
+              }
+            ]
           },
           "rawItem": {
             "name": "open_shelving",
@@ -63239,9 +63912,9 @@
         "data": {
           "id": "_f2i0v",
           "name": "backlit_mirror",
-          "displayName": "Backlit Mirror",
+          "displayName": "Mirror Cabinet Upper",
           "category": "bathroom",
-          "assetKey": "backlit_mirror",
+          "assetKey": "mirror_cabinet_upper",
           "position": {
             "x": -1.2568,
             "y": 1.3,
@@ -63317,6 +63990,172 @@
             },
             "rotationY": 3.1414181206645937,
             "assetKey": "backlit_mirror"
+          },
+          "sectionFinishes": {
+            "frame": {
+              "type": "lambri",
+              "variant": "fluted_panel",
+              "color": "#3a4843",
+              "backingColor": "#121212",
+              "roughness": 0.55,
+              "layer": 0
+            }
+          },
+          "cabinet": {
+            "version": 1,
+            "panelThickness": 0.015,
+            "backThickness": 0.006,
+            "doors": {
+              "count": 2,
+              "hinge": "left",
+              "angles": [
+                0,
+                0
+              ],
+              "split": 0.625
+            },
+            "panels": [
+              {
+                "id": "shelf_1",
+                "name": "Shelf 1",
+                "kind": "shelf",
+                "at": 0.2213333333333333,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0
+                },
+                "finish": {
+                  "type": "paint",
+                  "color": "#fbfbf9",
+                  "roughness": 0.85,
+                  "layer": 0
+                }
+              },
+              {
+                "id": "shelf_2",
+                "name": "Shelf 2",
+                "kind": "shelf",
+                "at": 0.4426666666666666,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0
+                },
+                "finish": {
+                  "type": "paint",
+                  "color": "#fbfbf9",
+                  "roughness": 0.85,
+                  "layer": 0
+                }
+              }
+            ],
+            "contents": [
+              {
+                "id": "14facb04-efbb-4102-ad0f-25cc990df2e9",
+                "name": "Perfume and Skin-Care Bottle Set",
+                "assetKey": "life_vanity_bottles",
+                "dimensions": {
+                  "x": 0.22,
+                  "y": 0.16,
+                  "z": 0.08
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.014253632013560155,
+                  "y": 0,
+                  "z": 0.008486703974324931
+                },
+                "supportId": "shelf_1"
+              },
+              {
+                "id": "0e6ebf70-83a6-4491-8d04-e0a9e5e47935",
+                "name": "Jewelry and Key Dish",
+                "assetKey": "life_jewelry_tray",
+                "dimensions": {
+                  "x": 0.14,
+                  "y": 0.025,
+                  "z": 0.09
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.020000000000000018,
+                  "y": 0,
+                  "z": 0.0022994483658619197
+                },
+                "supportId": "base"
+              },
+              {
+                "id": "8e706d30-84b8-48d4-944a-e3cee3629967",
+                "name": "Perfume and Skin-Care Bottle Set",
+                "assetKey": "life_vanity_bottles",
+                "dimensions": {
+                  "x": 0.22,
+                  "y": 0.16,
+                  "z": 0.08
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.4609890883521509,
+                  "y": 0,
+                  "z": 0.009186958779445017
+                },
+                "supportId": "shelf_1"
+              },
+              {
+                "id": "388f4ad3-9b15-4a74-9180-d87f8cfa89bd",
+                "name": "Perfume and Skin-Care Bottle Set",
+                "assetKey": "life_vanity_bottles",
+                "dimensions": {
+                  "x": 0.22,
+                  "y": 0.16,
+                  "z": 0.08
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.237482086426135,
+                  "y": 0,
+                  "z": 0.008486703974324931
+                },
+                "supportId": "shelf_1"
+              },
+              {
+                "id": "2551bd4e-13a7-47db-b5b4-bed6e3f9924a",
+                "name": "Jewelry and Key Dish",
+                "assetKey": "life_jewelry_tray",
+                "dimensions": {
+                  "x": 0.14,
+                  "y": 0.025,
+                  "z": 0.09
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.3113307156988718,
+                  "y": 0,
+                  "z": 0.0022994483658619197
+                },
+                "supportId": "base"
+              },
+              {
+                "id": "3bb889c0-86f8-4120-a6a8-fd47ad369af1",
+                "name": "Jewelry and Key Dish",
+                "assetKey": "life_jewelry_tray",
+                "dimensions": {
+                  "x": 0.14,
+                  "y": 0.025,
+                  "z": 0.09
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.16526413763118336,
+                  "y": 0,
+                  "z": 0.0022994483658619197
+                },
+                "supportId": "base"
+              }
+            ]
           }
         }
       },
@@ -63336,7 +64175,7 @@
           "rotationY": 3.141592653589793,
           "dimensions": {
             "x": 0.24,
-            "y": 0.14,
+            "y": 0.05,
             "z": 0.3
           },
           "roomId": "_8m0m9",
@@ -63433,7 +64272,7 @@
           "roomId": "_rscdq",
           "visible": true,
           "lightConfig": {
-            "intensity": 3,
+            "intensity": 2.45,
             "color": "#e2f0ff"
           },
           "rawItem": {
@@ -63938,7 +64777,7 @@
           "roomId": "_vzdza",
           "visible": true,
           "lightConfig": {
-            "intensity": 1.85,
+            "intensity": 1.4,
             "color": "#e2f0ff"
           },
           "rawItem": {
@@ -64173,7 +65012,9 @@
           "roomId": "_vzdza",
           "visible": true,
           "lightConfig": {
-            "color": "#e2f0ff"
+            "color": "#e2f0ff",
+            "intensity": 0,
+            "enabled": false
           },
           "rawItem": {
             "name": "spotlight",
@@ -64252,8 +65093,9 @@
           "roomId": "_vzdza",
           "visible": true,
           "lightConfig": {
-            "intensity": 1.4,
-            "color": "#e2f0ff"
+            "intensity": 0,
+            "color": "#e2f0ff",
+            "enabled": false
           },
           "rawItem": {
             "name": "spotlight",
@@ -64856,6 +65698,12 @@
             },
             "rotationY": 1.5707963267948966,
             "assetKey": "chair"
+          },
+          "finish": {
+            "type": "paint",
+            "color": "#2d4a3e",
+            "roughness": 0.85,
+            "layer": 0
           }
         }
       },
@@ -65427,6 +66275,24 @@
             "handles": {
               "type": "invisible",
               "color": "invisible",
+              "layer": 0
+            },
+            "door_2": {
+              "type": "paint",
+              "color": "#ffffff",
+              "roughness": 0.85,
+              "layer": 0
+            },
+            "frame": {
+              "type": "paint",
+              "color": "#fbfbf9",
+              "roughness": 0.85,
+              "layer": 0
+            },
+            "door_1": {
+              "type": "paint",
+              "color": "#fbfbf9",
+              "roughness": 0.85,
               "layer": 0
             }
           },
@@ -70262,7 +71128,7 @@
                   "count": 1,
                   "hinge": "left",
                   "angles": [
-                    0,
+                    21,
                     0
                   ]
                 }
@@ -70276,8 +71142,8 @@
                   "count": 2,
                   "hinge": "left",
                   "angles": [
-                    0,
-                    0
+                    169,
+                    82
                   ],
                   "hinges": [
                     {
@@ -70482,108 +71348,6 @@
             },
             "rotationY": 0,
             "assetKey": "socket"
-          }
-        }
-      },
-      {
-        "kind": "furniture.standard",
-        "data": {
-          "id": "_sypdp",
-          "name": "wire_stove",
-          "displayName": "Wire Stove",
-          "category": "kitchen",
-          "assetKey": "wire_stove",
-          "position": {
-            "x": 0.2915,
-            "y": 0,
-            "z": 2.178678902399752
-          },
-          "rotationY": 3.1841786873384548,
-          "dimensions": {
-            "x": 0.14,
-            "y": 0.6,
-            "z": 0.2
-          },
-          "roomId": "_vzdza",
-          "visible": true,
-          "rawItem": {
-            "name": "wire_stove",
-            "pc": {
-              "x": 29.15,
-              "y": 299.35
-            },
-            "angle": 358,
-            "projection": {
-              "x": 29.579,
-              "y": 309.343
-            },
-            "id_room": "_vzdza",
-            "width": 14,
-            "height": 20,
-            "plan": {
-              "sockets": 9
-            },
-            "id": "_sypdp",
-            "item_id": 31,
-            "over_floor": {
-              "value": 30,
-              "display": true
-            },
-            "self_height": 60,
-            "comment": {
-              "id": "_i5xns"
-            },
-            "dimensions": {
-              "x": 0.14,
-              "y": 0.6,
-              "z": 0.2
-            },
-            "f0offset": 0,
-            "dls": {
-              "l": {},
-              "r": {}
-            },
-            "dls_prs": {
-              "v": {},
-              "h": {}
-            },
-            "icon_center": {
-              "x": 29.153,
-              "y": 299.352
-            },
-            "center3d": {
-              "x": 29.153,
-              "y": 299.352
-            },
-            "id_room_zone": "_ubrky",
-            "id_wall": "_kzq4r",
-            "id_wall_old": "_kzq4r",
-            "wall_direction": "l",
-            "wall_line": {
-              "p1": {
-                "x": 36.572,
-                "y": 309.044
-              },
-              "p2": {
-                "x": 22.585,
-                "y": 309.64
-              }
-            },
-            "position": {
-              "x": 0.2915,
-              "y": 0,
-              "z": 2.9935
-            },
-            "rotationY": 3.1841786873384548,
-            "assetKey": "wire_stove"
-          },
-          "sectionFinishes": {
-            "wood": {
-              "type": "paint",
-              "color": "#c99292",
-              "roughness": 0.85,
-              "layer": 0
-            }
           }
         }
       },
@@ -71664,7 +72428,7 @@
           "roomId": "_rscdq",
           "visible": true,
           "lightConfig": {
-            "intensity": 3,
+            "intensity": 2.25,
             "color": "#e2f0ff"
           },
           "rawItem": {
@@ -72482,9 +73246,9 @@
         "data": {
           "id": "f2fa3a52-6ff5-4086-9f37-ab094b9bf644",
           "name": "popular_2580356604",
-          "displayName": "Arcelik 10121 Washing Machine",
+          "displayName": "Standard 60 cm Dishwasher",
           "category": "appliance",
-          "assetKey": "popular_2580356604",
+          "assetKey": "life_dishwasher",
           "position": {
             "x": 1.4776521421394446,
             "y": 0,
@@ -72497,7 +73261,21 @@
             "z": 0.6
           },
           "roomId": "_vzdza",
-          "visible": true
+          "visible": true,
+          "sectionFinishes": {
+            "door_rim": {
+              "type": "paint",
+              "color": "#fdfdfc",
+              "roughness": 0.85,
+              "layer": 0
+            },
+            "door": {
+              "type": "paint",
+              "color": "#ffffff",
+              "roughness": 0.85,
+              "layer": 0
+            }
+          }
         }
       },
       {
@@ -72530,6 +73308,7 @@
           "name": "ikea_80557165",
           "displayName": "IKEA ALMTJARN Bath Mat — Blue, 60 × 120 cm",
           "category": "bathroom",
+          "assetKey": "ikea_80557170",
           "position": {
             "x": -1.273753035592822,
             "y": 0,
@@ -72538,10 +73317,9 @@
           "rotationY": 1.5707963267948966,
           "dimensions": {
             "x": 1.2,
-            "z": 0.6,
-            "y": 0.01
+            "y": 0.01,
+            "z": 0.6
           },
-          "assetKey": "ikea_80557170",
           "roomId": "_rscdq",
           "visible": true,
           "finish": {
@@ -72559,41 +73337,18 @@
           "name": "ikea_10630305",
           "displayName": "IKEA ALMTJARN Bath Mat — Dark Grey, 60 × 90 cm",
           "category": "bathroom",
+          "assetKey": "ikea_60489422",
           "position": {
-            "x": -2.0866281148320738,
+            "x": -2.0412651471427585,
             "y": 0,
             "z": 8.011403592442385
           },
           "rotationY": 1.5707963267948968,
           "dimensions": {
             "x": 0.6,
-            "z": 0.9,
-            "y": 0.015
+            "y": 0.02,
+            "z": 0.9
           },
-          "assetKey": "ikea_60489422",
-          "roomId": "_rscdq",
-          "visible": true
-        }
-      },
-      {
-        "kind": "furniture.standard",
-        "data": {
-          "id": "abaea125-0f6a-44f2-b81c-b5ec390d0844",
-          "name": "ikea_10630310",
-          "displayName": "IKEA ALMTJARN Bath Mat — Dark Blue, 60 × 90 cm",
-          "category": "bathroom",
-          "position": {
-            "x": -2.0547006189615686,
-            "y": 0.05,
-            "z": 8.021600754129578
-          },
-          "rotationY": -1.5706597986139141,
-          "dimensions": {
-            "x": 0.6,
-            "z": 0.9,
-            "y": 0.015
-          },
-          "assetKey": "ikea_10630310",
           "roomId": "_rscdq",
           "visible": true
         }
@@ -72605,6 +73360,7 @@
           "name": "finish_threshold_oak",
           "displayName": "Stone Door Threshold",
           "category": "architecture",
+          "assetKey": "finish_threshold_stone",
           "position": {
             "x": -0.5059097429849022,
             "y": 0,
@@ -72616,7 +73372,6 @@
             "y": 0.018,
             "z": 0.12
           },
-          "assetKey": "finish_threshold_stone",
           "roomId": "_3h613",
           "visible": true
         }
@@ -72628,6 +73383,7 @@
           "name": "finish_threshold_stone",
           "displayName": "Stone Door Threshold",
           "category": "architecture",
+          "assetKey": "finish_threshold_stone",
           "position": {
             "x": -0.49241490736702476,
             "y": 0,
@@ -72639,7 +73395,6 @@
             "y": 0.02,
             "z": 0.15
           },
-          "assetKey": "finish_threshold_stone",
           "roomId": "_4wyay",
           "visible": true
         }
@@ -72651,6 +73406,7 @@
           "name": "finish_threshold_stone",
           "displayName": "Stone Door Threshold",
           "category": "architecture",
+          "assetKey": "finish_threshold_stone",
           "position": {
             "x": -4.165785843927183,
             "y": 0,
@@ -72662,8 +73418,30 @@
             "y": 0.02,
             "z": 0.15
           },
-          "assetKey": "finish_threshold_stone",
           "roomId": "_4wyay",
+          "visible": true
+        }
+      },
+      {
+        "kind": "furniture.standard",
+        "data": {
+          "id": "56554e3a-da6a-4459-8c77-f258e45e364d",
+          "name": "life_nespresso",
+          "displayName": "Nespresso Capsule Coffee Machine",
+          "category": "appliance",
+          "position": {
+            "x": -0.38375072331858107,
+            "y": 0.85,
+            "z": 2.4200040904673084
+          },
+          "rotationY": 3.141592653589793,
+          "dimensions": {
+            "x": 0.11,
+            "y": 0.205,
+            "z": 0.325
+          },
+          "assetKey": "life_nespresso",
+          "roomId": "_vzdza",
           "visible": true
         }
       }
