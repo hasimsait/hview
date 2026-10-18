@@ -30,11 +30,20 @@ export class PlanCodec {
       if (raw.schemaVersion !== 1) throw new Error(`Unsupported HView schema version: ${raw.schemaVersion}`);
       const { document } = envelopeSchema.parse(raw);
       const elements = document.elements.map((entry): PlanElement => {
+        // Renamed product references retain their saved element ID, transform and behavior.
+        if (entry.kind === 'furniture.standard' || entry.kind === 'furniture.luminaire' || entry.kind === 'furniture.shelving' || entry.kind === 'furniture.basin' || entry.kind === 'furniture.recess') {
+          const key = this.factory.catalog.canonicalKey(entry.data.assetKey);
+          if (key !== entry.data.assetKey && key.startsWith('popular_')) return this.factory.furniture({ ...entry.data, assetKey: key });
+        }
         switch (entry.kind) {
           case 'wall': return this.factory.wall(entry.data);
           case 'column': return this.factory.column(entry.data);
           case 'room': return this.factory.room(entry.data);
-          case 'furniture.standard': return this.factory.catalog.behavior(entry.data.assetKey) === 'recess' ? this.factory.furniture(entry.data) : new StandardFurniture(entry.data);
+          case 'furniture.standard': {
+            const key = this.factory.catalog.canonicalKey(entry.data.assetKey);
+            return this.factory.catalog.behavior(key) === 'recess' || key === 'robot_vacuum' || key === 'air_purifier' || this.factory.catalog.get(key)?.capabilities?.resizable === false
+              ? this.factory.furniture(entry.data) : new StandardFurniture(entry.data);
+          }
           case 'furniture.recess': return new WallRecess(entry.data);
           case 'furniture.luminaire': return new Luminaire(entry.data);
           case 'furniture.shelving': return new Shelving(entry.data);

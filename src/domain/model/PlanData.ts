@@ -1,4 +1,8 @@
 // Serialization and import input shapes. These are never the editable document.
+import type { CabinetLayout } from '../cabinet/CabinetLayout';
+import type { WindowDressingConfig } from './WindowDressing';
+import type { WallCorniceConfig } from './WallCornice';
+import type { BalconyRailingConfig } from './BalconyRailing';
 export interface Point2D {
   x: number;
   y: number;
@@ -37,6 +41,8 @@ export interface SurfaceFinishConfig {
 }
 
 
+export type CurtainState = 'visible' | 'hidden' | 'removed';
+
 export interface OpeningData {
   id: string;
   type: OpeningType;
@@ -52,10 +58,15 @@ export interface OpeningData {
   hingeFlipped?: boolean;
   openAngle?: number;  // degrees (0 = closed, 40 = default ajar, 90 = open, etc.)
   finish?: SurfaceFinishConfig;
+  frameColor?: string;
+  /** Absent on older plans means ceiling-mounted curtains are visible. */
+  curtainState?: CurtainState;
+  windowDressing?: WindowDressingConfig;
+  pelmetState?: CurtainState;
   rawOpening?: any;
 }
 
-export type WallSide = 'A' | 'B' | 'edges' | 'edge_start' | 'edge_end' | 'edge_top' | 'baseboard' | 'edge_bottom' | 'both';
+export type WallSide = 'A' | 'B' | 'edges' | 'edge_start' | 'edge_end' | 'edge_top' | 'sill' | 'cornice' | 'baseboard' | 'edge_bottom' | 'both';
 export type ColumnSide = 'all' | 'front' | 'back' | 'left' | 'right';
 
 export interface ColumnData {
@@ -97,6 +108,8 @@ export interface WallData {
   finishEdgeEnd?: SurfaceFinishConfig;   // Finish on end end cap at p2 (+X local)
   finishEdgeTop?: SurfaceFinishConfig;   // Finish on top sill (+Y local)
   finishBaseboard?: SurfaceFinishConfig; // Finish on bottom corner baseboard / skirting
+  finishSill?: SurfaceFinishConfig; // Upward-facing window sills, independent of the wall top
+  cornice?: WallCorniceConfig;
   finishEdges?: SurfaceFinishConfig;     // Fallback for all edges / jambs
   roomSideA?: string;                // Room ID bordering Side A
   roomSideB?: string;                // Room ID bordering Side B
@@ -118,11 +131,15 @@ export interface RoomData {
   floorType?: string;
   floorFinish?: SurfaceFinishConfig;
   ceilingType?: 'clip_in' | 'gypsum' | 'none';
+  /** Finished ceiling elevation above the floor, in metres. Absent uses the finish default. */
+  ceilingHeight?: number;
   wallFinish?: SurfaceFinishConfig;
   rawRoom?: any;
+  railing?: BalconyRailingConfig;
 }
 
 export type FurnitureCategory =
+  | 'architecture'
   | 'bed'
   | 'seating'
   | 'table'
@@ -159,6 +176,8 @@ export interface FurnitureData {
    *  'wood' | 'fabric' | 'metal' | 'ceramic' | 'stone' | 'glass'  */
   sectionFinishes?: Record<string, SurfaceFinishConfig>;
   lightConfig?: LightFixtureConfig;
+  windowCoveringOpen?: number;
+  cabinet?: CabinetLayout;
   rawItem?: any;
 }
 

@@ -1,12 +1,15 @@
 import { OpeningEntity,WallEntity } from '@core/types/plan';
 import * as THREE from 'three';
+import { createTextileMaterial } from '../materials/TextileMaterial';
 import { applyBasicOcclusionShader,createOcclusionUniforms } from '../materials/OcclusionShader';
 import { SurfaceMaterialFactory } from "../materials/SurfaceMaterialFactory";
+import { CurtainMeshBuilder,type CurtainMount } from './CurtainMeshBuilder';
 
 export class OpeningMeshBuilder {
   private readonly leaves = new WeakMap<THREE.Object3D, THREE.Mesh>();
   private readonly slideHandles = new WeakMap<THREE.Object3D, THREE.Mesh>();
   private readonly pivots = new WeakMap<THREE.Object3D, THREE.Object3D>();
+  private readonly frames = new WeakMap<THREE.Object3D, THREE.Mesh[]>();
   interactionTarget(root: THREE.Object3D): THREE.Object3D | undefined { return this.pivots.get(root); }
 
   // Shared occlusion uniforms — driven each frame via updateOrbitPlane()
@@ -17,8 +20,10 @@ export class OpeningMeshBuilder {
   private handleMaterial: THREE.MeshStandardMaterial;
   private glassMaterial: THREE.MeshPhysicalMaterial;
   private sillMaterial: THREE.MeshStandardMaterial;
+  private curtainMaterial: THREE.MeshStandardMaterial;
+  private curtainBuilder: CurtainMeshBuilder;
 
-  get palette(): readonly THREE.Material[] { return [this.frameMaterial, this.doorMaterial, this.handleMaterial, this.glassMaterial, this.sillMaterial]; }
+  get palette(): readonly THREE.Material[] { return [this.frameMaterial, this.doorMaterial, this.handleMaterial, this.glassMaterial, this.sillMaterial, this.curtainMaterial]; }
 
   constructor(private finishService?: SurfaceMaterialFactory) {
     this.frameMaterial = new THREE.MeshStandardMaterial({
@@ -58,8 +63,15 @@ export class OpeningMeshBuilder {
       transparent: true,
     });
 
+    this.curtainMaterial = createTextileMaterial(); this.curtainMaterial.transparent = true;
+    this.curtainBuilder = new CurtainMeshBuilder(this.curtainMaterial, this.handleMaterial, (color, sheer) => {
+      const material = this.curtainMaterial.clone(); material.color.set(color);
+      material.opacity = sheer ? .28 : 1; material.depthWrite = !sheer;
+      applyBasicOcclusionShader(material, this.occlusionUniforms, .6); return material;
+    });
+
     // Apply orbit-fade shader to all opaque standard materials (glass excluded)
-    for (const mat of [this.frameMaterial, this.doorMaterial, this.handleMaterial, this.sillMaterial]) {
+    for (const mat of [this.frameMaterial, this.doorMaterial, this.handleMaterial, this.sillMaterial, this.curtainMaterial]) {
       applyBasicOcclusionShader(mat, this.occlusionUniforms, 0.6);
     }
   }
@@ -76,7 +88,7 @@ export class OpeningMeshBuilder {
 
 
 
-  buildOpening(opening: OpeningEntity, wall: WallEntity): THREE.Group {
+  buildOpening(opening: OpeningEntity, wall: WallEntity, mount: CurtainMount = {}): THREE.Group {
     const group = new THREE.Group();
     group.name = `opening_${opening.id}`;
 
@@ -98,6 +110,8 @@ export class OpeningMeshBuilder {
       this.buildDoor(group, opening, wallThick);
     } else {
       this.buildWindow(group, opening, wallThick);
+      if (opening.curtainState !== 'removed') group.add(this.curtainBuilder.build(opening, wall, mount));
+
     }
 
     // Tag group and all descendants for raycasting and inspection
@@ -110,6 +124,7 @@ export class OpeningMeshBuilder {
     };
     group.traverse((child) => {
       child.userData = {
+        ...child.userData,
         isOpening: true,
         isDoor,
         openingId: opening.id,
@@ -131,16 +146,21 @@ export class OpeningMeshBuilder {
     const sideGeom = new THREE.BoxGeometry(frameThick, h, frameDepth);
     const topGeom = new THREE.BoxGeometry(w, frameThick, frameDepth);
 
-    const leftFrame = new THREE.Mesh(sideGeom, this.frameMaterial);
+    const frameMaterial = this.frameFor(opening);
+    const leftFrame = new THREE.Mesh(sideGeom, frameMaterial);
+    leftFrame.name = `doorFrame_left_${opening.id}`;
     leftFrame.position.set(-w / 2 + frameThick / 2, h / 2, 0);
 
-    const rightFrame = new THREE.Mesh(sideGeom, this.frameMaterial);
+    const rightFrame = new THREE.Mesh(sideGeom, frameMaterial);
+    rightFrame.name = `doorFrame_right_${opening.id}`;
     rightFrame.position.set(w / 2 - frameThick / 2, h / 2, 0);
 
-    const topFrame = new THREE.Mesh(topGeom, this.frameMaterial);
+    const topFrame = new THREE.Mesh(topGeom, frameMaterial);
+    topFrame.name = `doorFrame_top_${opening.id}`;
     topFrame.position.set(0, h - frameThick / 2, 0);
 
     parent.add(leftFrame, rightFrame, topFrame);
+    this.frames.set(parent, [leftFrame, rightFrame, topFrame]);
 
     const doorLeafW = w - frameThick * 2;
     const doorLeafH = h - frameThick;
@@ -200,6 +220,7 @@ export class OpeningMeshBuilder {
       leafMesh.position.set(-doorLeafW / 2, doorLeafH / 2, 0);
     }
     leafMesh.castShadow = true;
+    leafMesh.userData.isSwingLeaf = true;
     doorPivot.add(leafMesh);
 
     // Door handles on both sides of the leaf (near latch edge)
@@ -233,11 +254,26 @@ export class OpeningMeshBuilder {
     }
 
     this.pivots.set(parent, doorPivot);
+    doorPivot.userData.swingSign = hingeOnLeft ? (swingSide === 'r' ? -1 : 1) : (swingSide === 'r' ? 1 : -1);
     doorPivot.rotation.y = swingAngle;
     parent.add(doorPivot);
   }
 
+  private frameFor(opening: OpeningEntity): THREE.Material {
+    if (!opening.frameColor) return this.frameMaterial;
+    if (this.finishService) return this.finishService.getMaterial({ type: 'paint', color: opening.frameColor, roughness: 0.5, metalness: 0.2 }, { projection: 'local' });
+    const material = this.frameMaterial.clone();
+    material.color.set(opening.frameColor);
+    applyBasicOcclusionShader(material, this.occlusionUniforms, 0.6);
+    return material;
+  }
+
   update(root: THREE.Object3D, opening: OpeningEntity): void {
+    const frames = this.frames.get(root);
+    if (frames) {
+      const material = this.frameFor(opening);
+      for (const frame of frames) frame.material = material;
+    }
     const leaf = this.leaves.get(root), pivot = this.pivots.get(root);
     if (!leaf) return;
     if (opening.type === 'window' || opening.type === 'french_window') {

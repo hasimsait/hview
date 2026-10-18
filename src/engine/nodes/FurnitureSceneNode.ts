@@ -29,6 +29,8 @@ export class FurnitureSceneNode<T extends Furniture = Furniture> extends SceneNo
     const previous = this.element;
     const geometryChanged = previous.assetKey !== element.assetKey || previous.customModelUrl !== element.customModelUrl
       || !previous.size.equals(element.dimensions) || previous.hasLids !== element.hasLids
+      || previous.cabinet !== element.cabinet
+      || previous.windowCoveringOpen !== element.windowCoveringOpen
       || (previous instanceof WallRecess && element instanceof WallRecess && previous.hostId !== element.hostId)
       || ('shelfCount' in previous && previous.shelfCount !== (element as T & { shelfCount?: number }).shelfCount);
     if (geometryChanged) this.rebuild(element);

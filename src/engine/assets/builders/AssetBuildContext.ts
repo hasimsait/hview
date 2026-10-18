@@ -1,13 +1,19 @@
 import * as THREE from 'three';
 import type { Furniture } from '../../../domain/elements/Furniture';
+import type { AssetDefinition } from '../../../domain/catalog/AssetDefinition';
 
 export interface ProceduralMaterials {
+  whitePaint: THREE.MeshStandardMaterial;
+  woodBlackBrown: THREE.MeshStandardMaterial;
+  plasticBeige: THREE.MeshStandardMaterial;
+  glassBlack: THREE.MeshStandardMaterial;
   woodLight: THREE.MeshStandardMaterial;
   woodDark: THREE.MeshStandardMaterial;
   fabricLight: THREE.MeshStandardMaterial;
   fabricBlue: THREE.MeshStandardMaterial;
   fabricDark: THREE.MeshStandardMaterial;
   fabricBeige: THREE.MeshStandardMaterial;
+  softFabric: THREE.MeshStandardMaterial;
   metalChrome: THREE.MeshStandardMaterial;
   metalBlack: THREE.MeshStandardMaterial;
   metalBrass: THREE.MeshStandardMaterial;
@@ -29,6 +35,8 @@ export interface AssetBuildContext {
   h: number;
   d: number;
   materials: ProceduralMaterials;
+  definition?: AssetDefinition;
+  coloredMaterial?: (color: string, material: THREE.MeshStandardMaterial) => THREE.MeshStandardMaterial;
   recessHostThickness?: number;
 }
 

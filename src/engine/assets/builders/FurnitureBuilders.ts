@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { Shelving } from '../../../domain/elements/Furniture';
 import { AssetBuildContext } from "./AssetBuildContext";
+import { buildCabinetWorktop } from './WorktopBuilder';
 
 export function buildBed(context: AssetBuildContext, isSingle = false): void {
   const { parent, w, h, d, materials } = context;
@@ -251,13 +252,7 @@ export function buildKitchenBox(context: AssetBuildContext, isWallCabinet = fals
   body.castShadow = true;
   parent.add(body);
 
-  if (!isWallCabinet) {
-    const counter = new THREE.Mesh(new THREE.BoxGeometry(w + 0.02, 0.04, d + 0.04), materials.graniteCounter);
-    counter.userData.section = 'Countertop';
-    counter.position.set(0, boxH + 0.02, 0.01);
-    counter.castShadow = true;
-    parent.add(counter);
-  }
+  if (!isWallCabinet) buildCabinetWorktop({ ...context, h: boxH });
 }
 
 export function buildKitchenWallBox(context: AssetBuildContext): void {

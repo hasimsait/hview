@@ -38,7 +38,7 @@ export class PickingController {
       const target = this.registry.resolve(hit.object);
       if (target) {
         if (target.kind === 'wall' && !target.subtarget) {
-          const surfaces = ['A', 'B', 'edge_start', 'edge_end', 'edge_top', 'edges'] as const;
+          const surfaces = ['A', 'B', 'edge_start', 'edge_end', 'edge_top', 'edges', 'sill'] as const;
           return { target: { ...target, subtarget: surfaces[hit.face?.materialIndex ?? 0] ?? 'edges' }, hit };
         }
         if (target.kind === 'column' && !target.subtarget) {

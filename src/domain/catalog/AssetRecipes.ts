@@ -3,6 +3,32 @@ import type { FurnitureBehavior } from './AssetDefinition';
 export interface AssetRecipe { readonly id: string; readonly aliases: readonly string[]; readonly behavior: FurnitureBehavior; }
 
 export const ASSET_RECIPES = [
+  { id: 'kitchen_worktop', aliases: [], behavior: 'standard' },
+  { id: 'cabinet_fit_object', aliases: [], behavior: 'standard' },
+  { id: 'modular_cabinet', aliases: [], behavior: 'standard' },
+  { id: 'household_detail', aliases: [], behavior: 'standard' },
+  { id: 'soft_furnishing', aliases: [], behavior: 'standard' },
+  { id: 'lighting_component', aliases: [], behavior: 'luminaire' },
+  { id: 'floor_drain', aliases: [], behavior: 'standard' },
+  { id: 'architectural_finish', aliases: [], behavior: 'standard' },
+  { id: 'retail_furniture', aliases: [], behavior: 'standard' },
+  { id: 'bathroom_accessory', aliases: [], behavior: 'standard' },
+  { id: 'electrical_fitting', aliases: [], behavior: 'standard' },
+  { id: 'robot_vacuum', aliases: [], behavior: 'standard' },
+  { id: 'air_purifier', aliases: [], behavior: 'standard' },
+  { id: 'ikea_accessory', aliases: [], behavior: 'standard' },
+  { id: 'angled_range_hood', aliases: [], behavior: 'standard' },
+  { id: 'gas_cooktop', aliases: [], behavior: 'standard' },
+  { id: 'built_in_oven', aliases: [], behavior: 'standard' },
+  { id: 'soap_dispenser', aliases: [], behavior: 'standard' },
+  { id: 'toothbrush_tumbler', aliases: [], behavior: 'standard' },
+  { id: 'soap_dish', aliases: [], behavior: 'standard' },
+  { id: 'pedal_bin', aliases: [], behavior: 'standard' },
+  { id: 'brush_set', aliases: [], behavior: 'standard' },
+  { id: 'paper_towel_holder', aliases: [], behavior: 'standard' },
+  { id: 'curtain_pelmet', aliases: [], behavior: 'standard' },
+  { id: 'hemnes_bookcase', aliases: [], behavior: 'shelving' },
+  { id: 'billy_bookcase', aliases: [], behavior: 'shelving' },
   {
     "id": "chandelier",
     "aliases": [

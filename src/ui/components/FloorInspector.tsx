@@ -11,8 +11,10 @@ Split,
 X,
 } from 'lucide-react';
 import React,{ useEffect,useState } from 'react';
-import { ConfigureCeiling,FinishFloor,RenameRoom } from '../../application/commands/StructuralCommands';
+import { ConfigureCeiling,FinishFloor,RenameRoom,SetCeilingHeight } from '../../application/commands/StructuralCommands';
+import { roomCeilingHeight, roomCeilingMaximum, roomCeilingType } from '../../domain/model/Ceiling';
 import { SurfaceFinishPicker } from './SurfaceFinishPicker';
+import { BalconyRailingControls } from './BalconyRailingControls';
 
 interface FloorInspectorProps {
   room: RoomEntity | null;
@@ -35,6 +37,8 @@ export const FloorInspector: React.FC<FloorInspectorProps> = ({ room, onClose })
   if (!room) return null;
 
   const isWetZone = /bath|toilet|wc|san|shower/i.test(room.name);
+  const sharedMaximum = editor.getDocument().totalHeight, ceilingMaximum = roomCeilingMaximum(room, sharedMaximum);
+  const ceilingHeight = roomCeilingHeight(room, sharedMaximum), ceilingType = roomCeilingType(room);
   const borderingWalls = (editor.getSnapshot()?.walls || []).filter(
     (w) => w.roomSideA === room.id || w.roomSideB === room.id || w.roomIds?.includes(room.id)
   );
@@ -175,17 +179,19 @@ export const FloorInspector: React.FC<FloorInspectorProps> = ({ room, onClose })
             </div>
             <div className="bg-slate-900/60 rounded p-2 border border-slate-800/60">
               <span className="text-slate-400 block text-[10px]">Ceiling Height</span>
-              <span className="text-slate-100 font-semibold">{(room.height || 2.7).toFixed(2)} m</span>
+              <span className="text-slate-100 font-semibold">{ceilingHeight.toFixed(2)} m</span>
             </div>
           </div>
         </div>
+
+        <BalconyRailingControls room={room} />
 
         {/* Ceiling Type Selector */}
         <div className="space-y-1.5">
           <label className="text-[11px] font-medium text-slate-400 flex items-center justify-between">
             <span>Ceiling Finish / Type</span>
             <span className="text-[10px] text-slate-400 capitalize">
-              {room.ceilingType || 'none'}
+              {ceilingType === 'clip_in' ? 'Clip-in' : ceilingType === 'gypsum' ? 'Gypsum' : 'None'}
             </span>
           </label>
           <div className="grid grid-cols-3 gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800">
@@ -200,7 +206,7 @@ export const FloorInspector: React.FC<FloorInspectorProps> = ({ room, onClose })
                 key={c.id}
                 type="button"
                 onClick={() => handleCeilingChange(c.id)}
-                className={`py-1 text-[11px] font-medium rounded transition-colors ${(room.ceilingType || 'none') === c.id
+                className={`py-1 text-[11px] font-medium rounded transition-colors ${ceilingType === c.id
                   ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30'
                   : 'text-slate-400 hover:text-slate-200'
                   }`}
@@ -209,6 +215,16 @@ export const FloorInspector: React.FC<FloorInspectorProps> = ({ room, onClose })
               </button>
             ))}
           </div>
+          <label className="block pt-2 text-slate-300">Finished ceiling height (m)
+            <input aria-label="Finished ceiling height (m)" type="number" min="0.01" max={ceilingMaximum} step="0.01" value={+ceilingHeight.toFixed(3)} className="mt-1 w-full rounded border border-slate-700 bg-slate-950 px-2 py-1.5 text-slate-100" onChange={e => {
+              if (e.target.value === '') return;
+              const height = +e.target.value;
+              if (Number.isFinite(height) && height > 0 && height <= ceilingMaximum) editor.execute(new SetCeilingHeight(room.id, height));
+            }} />
+          </label>
+          <p className="text-[11px] text-slate-400">Shared maximum: {sharedMaximum.toFixed(2)} m · Ceiling drop: {+((sharedMaximum - ceilingHeight) * 100).toFixed(1)} cm</p>
+          <button type="button" className="text-[11px] text-sky-400 hover:text-sky-300" onClick={() => editor.execute(new SetCeilingHeight(room.id))}>Reset ceiling height</button>
+          <p className="text-[10px] text-slate-500">Clip-in ceilings default to a 15 cm drop. Height is measured from the floor.</p>
         </div>
 
         {/* Bordering Room Walls & Partitions */}

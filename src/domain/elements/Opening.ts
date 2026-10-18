@@ -1,8 +1,11 @@
 import { Angle } from '../model/Angle';
 import { finite,immutable,positive } from '../model/Immutable';
-import type { OpeningData,SurfaceFinishConfig } from '../model/PlanData';
+import type { CurtainState,OpeningData,SurfaceFinishConfig } from '../model/PlanData';
 import { SurfaceFinish } from '../model/SurfaceFinish';
 import { PlanElement,type PlanElementVisitor } from './PlanElement';
+import { validateWindowDressing, type WindowDressingConfig } from '../model/WindowDressing';
+import { validateWindowGeometry, windowPosition, type WindowGeometry } from '../model/WindowGeometry';
+import type { Wall } from './Wall';
 
 function requestedDoorAngle(degrees: number): number {
   return Math.max(0, Math.min(180, Math.round(finite(degrees, 'Door angle'))));
@@ -16,6 +19,10 @@ export abstract class Opening extends PlanElement {
     finite(data.distanceAlongWall, 'Opening position');
     if (finite(data.floorHeight, 'Sill elevation') < 0) throw new Error('Sill elevation cannot be negative');
     if (!data.wallId) throw new Error('Opening must belong to a wall');
+    if (data.frameColor !== undefined && !/^#[0-9a-fA-F]{6}$/.test(data.frameColor)) throw new Error('Frame color must be a six-digit hex color');
+    if (data.curtainState !== undefined && !['visible', 'hidden', 'removed'].includes(data.curtainState)) throw new Error('Invalid curtain state');
+    if (data.pelmetState !== undefined && !['visible', 'hidden', 'removed'].includes(data.pelmetState)) throw new Error('Invalid cornice state');
+    if (data.windowDressing) validateWindowDressing(data.windowDressing);
     this.state = immutable({ ...data, finish: SurfaceFinish.optional(data.finish) });
   }
   get displayName() { return this.type.replace('_', ' '); }
@@ -32,12 +39,14 @@ export abstract class Opening extends PlanElement {
   get hingeFlipped() { return this.state.hingeFlipped; }
   get openAngle() { return this.state.openAngle; }
   get finish() { return this.state.finish; }
+  get frameColor() { return this.state.frameColor; }
   get rawOpening() { return this.state.rawOpening; }
   protected abstract recreate(data: OpeningData): Opening;
   withHost(wallId: string, distanceAlongWall: number): Opening {
     return this.recreate({ ...this.state, wallId, distanceAlongWall });
   }
   withFinish(finish?: SurfaceFinishConfig): Opening { return this.recreate({ ...this.state, finish }); }
+  withFrameColor(frameColor?: string): Opening { return this.recreate({ ...this.state, frameColor }); }
   toData(): OpeningData { return structuredClone(this.state); }
 }
 
@@ -87,6 +96,19 @@ export class WindowOpening extends Opening {
   constructor(data: OpeningData) { super(data); Object.freeze(this); }
   get isFrenchWindow() { return this.type === 'french_window'; }
   get topElevation() { return this.floorHeight + this.height; }
+  get curtainState(): CurtainState { return this.state.curtainState ?? 'visible'; }
+  get pelmetState(): CurtainState { return this.state.pelmetState ?? 'visible'; }
+  get windowDressing() { return this.state.windowDressing; }
+  withGeometry(geometry: WindowGeometry, wall: Wall): WindowOpening {
+    if (wall.id !== this.wallId) throw new Error('Window geometry must use its host wall.');
+    validateWindowGeometry(wall, geometry);
+    const position = windowPosition(wall, geometry.distanceAlongWall);
+    if (geometry.width === this.width && geometry.height === this.height && geometry.floorHeight === this.floorHeight && geometry.distanceAlongWall === this.distanceAlongWall && position.x === this.position.x && position.y === this.position.y) return this;
+    return new WindowOpening({ ...this.state, ...geometry, position });
+  }
+  withWindowDressing(windowDressing?: WindowDressingConfig): WindowOpening { return new WindowOpening({ ...this.state, windowDressing }); }
+  withPelmetState(pelmetState: CurtainState): WindowOpening { return new WindowOpening({ ...this.state, pelmetState }); }
+  withCurtainState(curtainState: CurtainState): WindowOpening { return new WindowOpening({ ...this.state, curtainState }); }
   protected recreate(data: OpeningData) { return new WindowOpening(data); }
   accept<R>(visitor: PlanElementVisitor<R>): R { return visitor.visitWindow(this); }
 }

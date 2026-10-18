@@ -3,9 +3,10 @@ import type { WallEntity } from '../../core/types/plan';
 import { applyBasicOcclusionShader,createOcclusionUniforms } from './OcclusionShader';
 import { SurfaceMaterialFactory } from './SurfaceMaterialFactory';
 export class WallSurfacePalette {
-  register(mesh: THREE.Mesh, surface: 'body' | 'frame' | 'baseboard'): void { this.surfaces.set(mesh, surface); }
+  register(mesh: THREE.Mesh, surface: 'body' | 'frame' | 'baseboard' | 'cornice'): void { this.surfaces.set(mesh, surface); }
+  cornice(wall: WallEntity): THREE.Material { return this.finishService.getMaterial(wall.cornice?.finish ?? { type: 'plaster', color: '#ffffff' }, { side: THREE.DoubleSide }); }
   baseboard(wall: WallEntity): THREE.Material { return this.finishService.getMaterial(wall.finishBaseboard ?? { type: 'wood', variant: 'natural_oak' }, { side: THREE.FrontSide }); }
-  private readonly surfaces = new WeakMap<THREE.Mesh, 'body' | 'frame' | 'baseboard'>();
+  private readonly surfaces = new WeakMap<THREE.Mesh, 'body' | 'frame' | 'baseboard' | 'cornice'>();
 
   private wallMaterial: THREE.MeshStandardMaterial;
 
@@ -144,8 +145,9 @@ export class WallSurfacePalette {
       matSideB,        // 1: Side B
       matEdgeStart,    // 2: Edge Start (p1)
       matEdgeEnd,      // 3: Edge End (p2)
-      matEdgeTop,      // 4: Edge Top (sill)
+      matEdgeTop,      // 4: Wall top edge
       matJambs,        // 5: Doorway/window jambs & bottom
+      wall.finishSill ? this.finishService.getMaterial(wall.finishSill, { side: THREE.FrontSide }) : matJambs, // 6: Window sills
     ];
 
   }
@@ -158,6 +160,7 @@ export class WallSurfacePalette {
       if (surface === 'body') object.material = body;
       else if (surface === 'frame') object.material = this.getFrameMaterial(wall.frameColor);
       else if (surface === 'baseboard') object.material = this.finishService.getMaterial(wall.finishBaseboard ?? { type: 'wood', variant: 'natural_oak' }, { side: THREE.FrontSide });
+      else if (surface === 'cornice') object.material = this.cornice(wall);
     });
   }
 

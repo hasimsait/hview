@@ -70,7 +70,7 @@ export class SideBTargetStrategy implements IWallTargetStrategy {
 
 export class EdgesTargetStrategy implements IWallTargetStrategy {
   readonly id = 'edges';
-  readonly label = 'Sides / Edges';
+  readonly label = 'Opening returns / edges';
   readonly title = 'Thickness sides, jambs, and end returns';
   readonly wallSide: WallSide = 'edges';
 
@@ -127,7 +127,7 @@ export class EdgeEndTargetStrategy implements IWallTargetStrategy {
 
 export class EdgeTopTargetStrategy implements IWallTargetStrategy {
   readonly id = 'edge_top';
-  readonly label = 'Top Sill';
+  readonly label = 'Wall top edge';
   readonly title = 'Top horizontal sill of the wall';
   readonly wallSide: WallSide = 'edge_top';
 
@@ -226,7 +226,7 @@ export class RecessCornersTargetStrategy implements IWallTargetStrategy {
 
 export class BaseboardTargetStrategy implements IWallTargetStrategy {
   readonly id = 'baseboard';
-  readonly label = 'Baseboard (Bottom)';
+  readonly label = 'Skirting board (bottom)';
   readonly title = 'Bottom corner baseboard / skirting molding';
   readonly wallSide: WallSide = 'baseboard';
 
@@ -245,6 +245,18 @@ export class BaseboardTargetStrategy implements IWallTargetStrategy {
 
 const recessSidesStrategy = new RecessCornersTargetStrategy();
 const baseboardStrategy = new BaseboardTargetStrategy();
+const sillStrategy: IWallTargetStrategy = {
+  id: 'sill', label: 'Window sills', title: 'Horizontal sills below windows', wallSide: 'sill',
+  getFinish: wall => wall.finishSill ?? wall.finishEdges ?? wall.finish,
+  applyFinish: (editor, wall, finish) => { editor.execute(new FinishWall(wall.id, finish, 'sill')); },
+  resetFinish: (editor, wall) => { editor.execute(new FinishWall(wall.id, DEFAULT_PLASTER_FINISH, 'sill')); },
+};
+const corniceStrategy: IWallTargetStrategy = {
+  id: 'cornice', label: 'Top corner / cornice', title: 'Wall-to-wall ceiling cornice', wallSide: 'cornice',
+  getFinish: wall => wall.cornice?.finish,
+  applyFinish: (editor, wall, finish) => { editor.execute(new FinishWall(wall.id, finish, 'cornice')); },
+  resetFinish: (editor, wall) => { editor.execute(new FinishWall(wall.id, { type: 'plaster', color: '#ffffff' }, 'cornice')); },
+};
 
 export const WALL_TARGET_STRATEGIES: Record<string, IWallTargetStrategy> = {
   A: new SideATargetStrategy(),
@@ -252,6 +264,8 @@ export const WALL_TARGET_STRATEGIES: Record<string, IWallTargetStrategy> = {
   edge_start: new EdgeStartTargetStrategy(),
   edge_end: new EdgeEndTargetStrategy(),
   edge_top: new EdgeTopTargetStrategy(),
+  sill: sillStrategy,
+  cornice: corniceStrategy,
   baseboard: baseboardStrategy,
   edge_bottom: baseboardStrategy,
   edges: new EdgesTargetStrategy(),

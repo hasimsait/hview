@@ -7,6 +7,9 @@ import { TextureSource } from '../materials/TextureSource';
 import { AssetBuildContext,ProceduralMaterials } from "./builders/AssetBuildContext";
 import { FURNITURE_GEOMETRY } from "./FurnitureGeometryLibrary";
 import { mobileRendering } from '../RenderQuality';
+import { buildCabinet } from '../cabinet/CabinetBuilder';
+import { buildCabinetWorktop } from './builders/WorktopBuilder';
+import { createTextileMaterial } from '../materials/TextileMaterial';
 
 export class FurnitureMeshBuilder {
   private readonly outlines = !mobileRendering();
@@ -16,12 +19,17 @@ export class FurnitureMeshBuilder {
 
   // Shared materials for architectural rendering
   private materials: ProceduralMaterials = {
+    whitePaint: new THREE.MeshStandardMaterial({ color: 0xf3f1eb, roughness: 0.65 }),
+    woodBlackBrown: new THREE.MeshStandardMaterial({ color: 0x30251e, roughness: 0.6 }),
+    plasticBeige: new THREE.MeshStandardMaterial({ color: 0xd6cbb8, roughness: 0.4 }),
+    glassBlack: new THREE.MeshStandardMaterial({ color: 0x101116, roughness: 0.12, metalness: 0.15 }),
     woodLight: new THREE.MeshStandardMaterial({ color: 0xdfcbaf, roughness: 0.5 }),
     woodDark: new THREE.MeshStandardMaterial({ color: 0x4a3b32, roughness: 0.6 }),
     fabricLight: new THREE.MeshStandardMaterial({ color: 0xe8e6e1, roughness: 0.85 }),
     fabricBlue: new THREE.MeshStandardMaterial({ color: 0x3d5a80, roughness: 0.8 }),
     fabricDark: new THREE.MeshStandardMaterial({ color: 0x2b2d42, roughness: 0.9 }),
     fabricBeige: new THREE.MeshStandardMaterial({ color: 0xc8b8a6, roughness: 0.85 }),
+    softFabric: createTextileMaterial(),
     metalChrome: new THREE.MeshStandardMaterial({ color: 0xf1f5f9, metalness: 0.96, roughness: 0.06 }),
     metalBlack: new THREE.MeshStandardMaterial({ color: 0x18181b, metalness: 0.15, roughness: 0.70 }),
     metalBrass: new THREE.MeshStandardMaterial({ color: 0xebd48e, metalness: 0.92, roughness: 0.08 }),
@@ -52,9 +60,11 @@ export class FurnitureMeshBuilder {
     // MeshBasicMaterial and MeshPhysicalMaterial (glass) are excluded —
     // basics have no lighting pipeline, glass is already transparent.
     const opaqueMats: THREE.MeshStandardMaterial[] = [
+      this.materials.whitePaint, this.materials.woodBlackBrown, this.materials.plasticBeige, this.materials.glassBlack,
       this.materials.woodLight, this.materials.woodDark,
       this.materials.fabricLight, this.materials.fabricBlue,
       this.materials.fabricDark, this.materials.fabricBeige,
+      this.materials.softFabric,
       this.materials.metalChrome, this.materials.metalBlack, this.materials.metalBrass,
       this.materials.ceramicWhite, this.materials.graniteCounter,
       this.materials.mirror, this.materials.mirrorNonReflective,
@@ -121,7 +131,7 @@ export class FurnitureMeshBuilder {
   }
 
   build(entity: Furniture, recessHostThickness?: number): THREE.Object3D {
-    const key = entity.assetKey;
+    const key = this.catalog.canonicalKey(entity.assetKey);
     const w = entity.dimensions.x;
     const h = entity.dimensions.y;
     const d = entity.dimensions.z;
@@ -137,11 +147,23 @@ export class FurnitureMeshBuilder {
       h,
       d,
       materials: this.materials,
+      definition: this.catalog.get(key),
+      coloredMaterial: (color, base) => {
+        const material = base.clone();
+        material.color.set(color);
+        material.transparent = true;
+        applyBasicOcclusionShader(material, this.occlusionUniforms, 0.6);
+        return material;
+      },
       recessHostThickness,
     };
 
     // Strategy Pattern: dispatch directly to the registered builder
-    FURNITURE_GEOMETRY[this.catalog.recipe(key)](context);
+    if (entity.cabinet || this.catalog.recipe(key) === 'modular_cabinet') {
+      buildCabinet(context, content => this.build(content));
+      if (this.catalog.recipe(key) === 'kitchen_box') buildCabinetWorktop(context);
+    }
+    else FURNITURE_GEOMETRY[this.catalog.recipe(key)](context);
 
     // Universal fallback: ensure every paintable mesh has a readable section name and local metric bounds
     group.traverse((child) => {
@@ -153,7 +175,7 @@ export class FurnitureMeshBuilder {
           }
         }
         const isFabric =
-          child.userData.section === 'Fabric' ||
+          child.userData.isTextile || child.userData.section === 'Fabric' ||
           child.userData.section === 'Seat' ||
           child.userData.section === 'Backrest' ||
           child.userData.section === 'Armrests' ||
@@ -194,6 +216,7 @@ export class FurnitureMeshBuilder {
     parent.traverse((child) => {
       const mesh = child as THREE.Mesh;
       if (mesh.isMesh && mesh.geometry) {
+        if (mesh instanceof THREE.InstancedMesh || mesh.userData.skipOutline || mesh.children.some(child => child.name === 'celOutline')) return;
         // Skip small light bulbs / spheres and smooth curved hoses
         if (mesh.geometry.type === 'SphereGeometry' || mesh.geometry.type === 'TubeGeometry') return;
         const edges = new THREE.EdgesGeometry(mesh.geometry, 28);

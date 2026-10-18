@@ -3,6 +3,7 @@ import type { WallEntity } from '../../core/types/plan';
 import type { SurfaceMaterialFactory } from '../materials/SurfaceMaterialFactory';
 import { WallSurfacePalette } from '../materials/WallSurfacePalette';
 import { WallTrimsBuilder } from './WallTrimsBuilder';
+import type { CorniceCuts } from './CorniceGeometry';
 export interface WallOpeningCut {
   start: number;
   end: number;
@@ -23,7 +24,8 @@ export class WallMeshBuilder {
     isStart: boolean = true,
     isEnd: boolean = true,
     _maxHeight: number = 2.7,
-    omitJambs?: { top?: boolean; bottom?: boolean; left?: boolean; right?: boolean }
+    omitJambs?: { top?: boolean; bottom?: boolean; left?: boolean; right?: boolean },
+    wallTop = true
   ): void {
     const posAttr = geom.getAttribute('position');
     if (!posAttr) return;
@@ -43,6 +45,7 @@ export class WallMeshBuilder {
     const indicesEdgeEnd: number[] = [];
     const indicesEdgeTop: number[] = [];
     const indicesJambs: number[] = [];
+    const indicesSills: number[] = [];
 
     const vA = new THREE.Vector3();
     const vB = new THREE.Vector3();
@@ -91,7 +94,7 @@ export class WallMeshBuilder {
         }
       } else if (cb.y > 0.5 && center.y >= maxY - 0.02) {
         if (!omitJambs?.top) {
-          indicesEdgeTop.push(idxA, idxB, idxC);
+          (wallTop ? indicesEdgeTop : indicesSills).push(idxA, idxB, idxC);
         }
       } else {
         if (!omitJambs?.bottom) {
@@ -107,6 +110,7 @@ export class WallMeshBuilder {
       ...indicesEdgeEnd,
       ...indicesEdgeTop,
       ...indicesJambs,
+      ...indicesSills,
     ];
     geom.setIndex(newIndices);
     geom.clearGroups();
@@ -119,6 +123,7 @@ export class WallMeshBuilder {
       indicesEdgeEnd,   // 3: Edge End
       indicesEdgeTop,   // 4: Edge Top
       indicesJambs,     // 5: Jambs / Bottom
+      indicesSills,     // 6: Window sills
     ];
 
     for (let g = 0; g < groups.length; g++) {
@@ -133,7 +138,9 @@ export class WallMeshBuilder {
     wall: WallEntity,
     cutawayHeight?: number,
     cutouts?: { start: number; end: number }[],
-    recessHoles?: { start: number; end: number; floorHeight: number; topHeight: number }[]
+    recessHoles?: { start: number; end: number; floorHeight: number; topHeight: number }[],
+    corniceHeights?: Partial<Record<'A' | 'B', number>>,
+    corniceCuts?: Partial<Record<'A' | 'B', CorniceCuts>>
   ): THREE.Group {
     const group = new THREE.Group();
     group.name = `wall_${wall.id}`;
@@ -249,6 +256,7 @@ export class WallMeshBuilder {
         const baseboardGroup = this.trims.buildWallBaseboard(wall, length, thickness, angle, openings);
         group.add(baseboardGroup);
       }
+      group.add(this.trims.buildWallCornice(wall, length, maxHeight, thickness, angle, corniceHeights, corniceCuts));
       return group;
     }
 
@@ -459,7 +467,7 @@ export class WallMeshBuilder {
           bottom: b.omitBottomJamb,
           left: b.omitLeftJamb,
           right: b.omitRightJamb,
-        });
+        }, b.endY >= maxHeight - .001);
         const mesh = new THREE.Mesh(geom, wallMaterials);
         this.materials.register(mesh, 'body');
         mesh.userData = { type: 'wall', id: wall.id, wall };
@@ -501,6 +509,7 @@ export class WallMeshBuilder {
       const baseboardGroup = this.trims.buildWallBaseboard(wall, length, thickness, angle, openings);
       group.add(baseboardGroup);
     }
+    group.add(this.trims.buildWallCornice(wall, length, maxHeight, thickness, angle, corniceHeights, corniceCuts));
 
     return group;
   }

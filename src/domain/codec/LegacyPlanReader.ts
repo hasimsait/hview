@@ -121,6 +121,10 @@ export class LegacyPlanReader {
               hingeSide,
               openAngle: typeof h.openAngle === 'number' ? h.openAngle : 40,
               finish: h.finish || undefined,
+              frameColor: h.frameColor || undefined,
+              curtainState: h.curtainState,
+              windowDressing: h.windowDressing,
+              pelmetState: h.pelmetState,
               rawOpening: h,
             });
           }
@@ -145,6 +149,8 @@ export class LegacyPlanReader {
           finishEdgeEnd: w.finishEdgeEnd || undefined,
           finishEdgeTop: w.finishEdgeTop || undefined,
           finishBaseboard: w.finishBaseboard || undefined,
+          finishSill: w.finishSill || undefined,
+          cornice: w.cornice || undefined,
           finishEdges: w.finishEdges || undefined,
           startOffset: w.startOffset,
           endOffset: w.endOffset,
@@ -208,7 +214,9 @@ export class LegacyPlanReader {
           height,
           floorFinish: r.floorFinish || undefined,
           ceilingType: r.ceilingType || undefined,
+          ceilingHeight: r.ceilingHeight !== undefined ? r.ceilingHeight / 100 : undefined,
           wallFinish: r.wallFinish || undefined,
+          railing: r.railing || undefined,
           rawRoom: r,
         });
         roomIdx++;
@@ -300,6 +308,8 @@ export class LegacyPlanReader {
           finish: it.finish || undefined,
           sectionFinishes: it.sectionFinishes || undefined,
           lightConfig: it.lightConfig || undefined,
+          windowCoveringOpen: it.windowCoveringOpen,
+          cabinet: it.cabinet,
           hasLids: it.hasLids !== undefined ? !!it.hasLids : undefined,
           shelfCount: it.shelfCount,
           recessHostId: it.recessHostId,

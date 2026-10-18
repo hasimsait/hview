@@ -1,6 +1,7 @@
 import { PlanDocument } from '@core/types/plan';
 import * as THREE from 'three';
 import { SurfaceMaterialFactory } from "../materials/SurfaceMaterialFactory";
+import { roomCeilingHeight, roomCeilingType } from '../../domain/model/Ceiling';
 
 export class CeilingMeshBuilder {
   private edgeMaterial: THREE.LineBasicMaterial;
@@ -26,6 +27,8 @@ export class CeilingMeshBuilder {
 
     for (const room of plan.rooms) {
       if (!room.polygon || room.polygon.length < 3 || room.area < 0.5) continue;
+      const ceilingVariant = roomCeilingType(room);
+      if (ceilingVariant === 'none') continue;
       if (isolatedRoomIds && isolatedRoomIds.length > 0 && !isolatedRoomIds.includes(room.id)) {
         continue;
       }
@@ -37,7 +40,9 @@ export class CeilingMeshBuilder {
       }
       shape.closePath();
 
-      const geom = new THREE.ShapeGeometry(shape);
+      const height = roomCeilingHeight(room, totalH), drop = Math.max(0, totalH - height);
+      // The underside is at finished height; perimeter faces close the drop to the shared structural level.
+      const geom = drop > .00001 ? new THREE.ExtrudeGeometry(shape, { depth: drop, bevelEnabled: false, steps: 1 }) : new THREE.ShapeGeometry(shape);
 
       // Anchor ceiling UVs to start at (0, 0) at the room's bounding corner for usage estimation
       let minX = Infinity;
@@ -55,9 +60,6 @@ export class CeilingMeshBuilder {
       }
       uvAttr.needsUpdate = true;
 
-      const isWetZone = /bath|toilet|wc|san|shower/i.test(room.name);
-      const ceilingVariant = room.ceilingType || (isWetZone ? 'clip_in' : 'gypsum');
-
       const mat = this.finishService.getMaterial(
         {
           type: ceilingVariant === 'clip_in' ? 'ceiling' : 'plaster',
@@ -67,11 +69,13 @@ export class CeilingMeshBuilder {
         { side: THREE.DoubleSide }
       );
 
-      const mesh = new THREE.Mesh(geom, mat);
+      const fascia = this.finishService.getMaterial({ type: 'plaster', color: '#ffffff' }, { side: THREE.DoubleSide });
+      const mesh = new THREE.Mesh(geom, drop > .00001 ? [mat, fascia] : mat);
       mesh.name = `ceiling_${room.id}`;
-      mesh.userData = { type: 'ceiling', id: room.id, room };
+      mesh.userData = { type: 'ceiling', id: room.id, room, ceilingHeight: height, drop };
       mesh.rotation.x = -Math.PI / 2;
-      mesh.position.y = room.height || totalH;
+      mesh.position.y = height;
+      mesh.castShadow = true;
       mesh.receiveShadow = true;
 
       const edges = new THREE.EdgesGeometry(geom, 25);

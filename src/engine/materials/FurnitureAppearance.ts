@@ -2,9 +2,10 @@ import * as THREE from 'three';
 import type { FurnitureEntity,SurfaceFinishConfig } from '../../core/types/plan';
 import { WallRecess, type RecessHost } from '../../domain/elements/WallRecess';
 import type { ViewportSettings } from '../../core/types/services';
-import { surfaceSection } from '../../domain/model/SurfaceSections';
+import { cabinetSurfaceFinish, surfaceSection } from '../../domain/model/SurfaceSections';
 import type { ResourcePool } from '../resources/ResourcePool';
 import { isFabricStretched,type SurfaceMaterialFactory } from './SurfaceMaterialFactory';
+import { isFixtureLight } from '../lighting/FixtureLight';
 export class FurnitureAppearance {
   private readonly glowMaterials = new WeakSet<THREE.Mesh>();
   constructor(private readonly finishService: SurfaceMaterialFactory, private readonly resources: ResourcePool, private readonly settings: () => ViewportSettings, private readonly recessHost: (item: WallRecess) => RecessHost | undefined) { }
@@ -34,9 +35,12 @@ export class FurnitureAppearance {
         const isRecess = entity instanceof WallRecess;
         const section = sec ? surfaceSection(sec, entity.assetKey) : undefined;
         let secFinish: SurfaceFinishConfig | undefined = section ? entity.sectionFinishes?.[section] : undefined;
+        if (!secFinish && entity.cabinet && child.userData.cabinetPart && section) secFinish = cabinetSurfaceFinish(section, entity.sectionFinishes);
         if (!secFinish && isRecess && section) secFinish = entity.inheritedFinish(section, this.recessHost(entity));
 
-        const activeFinish = secFinish ?? (
+        const content = child.userData.cabinetContent as import('../../domain/cabinet/CabinetLayout').CabinetContent | undefined;
+        const panel = child.userData.cabinetPanel as import('../../domain/cabinet/CabinetLayout').CabinetPanel | undefined;
+        const activeFinish = content ? (section ? content.sectionFinishes?.[section] : undefined) ?? content.finish : panel?.finish ?? secFinish ?? (
           child.userData.isLightEmissive || sec === 'Diffuser' || sec === 'Lens' || sec === 'Bulb'
             ? undefined
             : entity.finish
@@ -52,7 +56,13 @@ export class FurnitureAppearance {
             projection: 'local',
             side: isRecess ? THREE.DoubleSide : undefined,
           });
-          child.material = mat;
+          if (child.userData.isTextile && !(mat as THREE.Material & { isInvisible?: boolean }).isInvisible) {
+            const textile = mat.clone(); textile.side = THREE.DoubleSide;
+            if ('defines' in mat) (textile as THREE.ShaderMaterial).defines = { ...(mat as THREE.ShaderMaterial).defines };
+            textile.onBeforeCompile = mat.onBeforeCompile; textile.customProgramCacheKey = mat.customProgramCacheKey;
+            if (child.userData.isSheer) { textile.opacity = .28; textile.transparent = true; textile.depthWrite = false; }
+            child.material = textile;
+          } else child.material = mat;
           child.visible = !(mat as any).isInvisible && mat.visible !== false;
         } else if (this.resources.original(child)) {
           child.material = this.resources.original(child)!;
@@ -67,13 +77,14 @@ export class FurnitureAppearance {
     const isEnabled = config?.enabled !== false;
     const customIntensity = config?.intensity ?? 1.0;
     const customColor = config?.color;
+    let fixtureType = (entity?.assetKey ?? '').includes('chandelier') ? 'chandelier' : 'spot';
+    mesh.traverse(child => { if (isFixtureLight(child)) fixtureType = child.userData.fixtureType ?? fixtureType; });
 
     mesh.traverse((child) => {
-      // 1. Fixture Point Lights
-      if ((child as any).isPointLight && child.userData?.isFixtureLight) {
-        const pointLight = child as THREE.PointLight;
-        const fixtureType = child.userData.fixtureType as 'chandelier' | 'spot' | undefined;
-        const typeMult = fixtureType === 'chandelier'
+      // 1. Actual room lights, including directional spotlight beams.
+      if (isFixtureLight(child)) {
+        const pointLight = child;
+        const typeMult = child.userData.fixtureType === 'chandelier'
           ? (this.settings().chandelierIntensity ?? 1.0)
           : (this.settings().spotLightIntensity ?? 1.0);
 
@@ -84,7 +95,7 @@ export class FurnitureAppearance {
         if (isEnabled && typeMult > 0 && customIntensity > 0) {
           const finalIntensity = baseInt * typeMult * customIntensity;
           pointLight.intensity = finalIntensity;
-          pointLight.distance = baseDist * Math.sqrt(Math.max(0.2, typeMult * customIntensity));
+          if ('distance' in pointLight) pointLight.distance = baseDist * Math.sqrt(Math.max(0.2, typeMult * customIntensity));
           if (customColor) {
             pointLight.color.set(customColor);
           } else {
@@ -99,9 +110,6 @@ export class FurnitureAppearance {
 
       // 2. Glowing Diffusers / Lenses / Bulbs (isLightEmissive)
       if (child instanceof THREE.Mesh && child.userData?.isLightEmissive) {
-        const fixtureType = (mesh.userData?.prevAssetKey || entity?.assetKey || '').toLowerCase().includes('chandelier')
-          ? 'chandelier'
-          : 'spot';
         const typeMult = fixtureType === 'chandelier'
           ? (this.settings().chandelierIntensity ?? 1.0)
           : (this.settings().spotLightIntensity ?? 1.0);

@@ -1,5 +1,7 @@
+import { validateCabinet, type CabinetLayout } from '../cabinet/CabinetLayout';
 import { z } from 'zod';
 import { Shelving } from '../elements/Furniture';
+import { WINDOW_DRESSING_STYLES } from '../model/WindowDressing';
 
 const number = z.number().finite();
 const positive = number.positive();
@@ -21,21 +23,26 @@ export const openingSchema = z.object({
   wallId: id, floorHeight: number.nonnegative(), distanceAlongWall: number, position: point,
   swingSide: z.enum(['r', 'l']).optional(), hingeSide: z.enum(['r', 'l']).optional(),
   swingFlipped: z.boolean().optional(), hingeFlipped: z.boolean().optional(), openAngle: number.min(0).max(180).optional(),
-  finish, rawOpening: z.unknown().optional(),
+  finish, frameColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
+  pelmetState: z.enum(['visible', 'hidden', 'removed']).optional(),
+  curtainState: z.enum(['visible', 'hidden', 'removed']).optional(), rawOpening: z.unknown().optional(),
+  windowDressing: z.object({ style: z.enum(WINDOW_DRESSING_STYLES), openness: number.min(0).max(1).optional(), color: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(), liningColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional() }).optional(),
 }).passthrough();
 export const wallSchema = z.object({
   id, p1: point, p2: point, thickness: positive, height: positive, material: z.string(), openings: z.array(openingSchema),
   isColumn: z.boolean().optional(), color: z.string().optional(), roomIds: z.array(id).optional(),
   roomSideA: id.optional(), roomSideB: id.optional(), startOffset: number.optional(), endOffset: number.optional(),
   finish, finishSideA: finish, finishSideB: finish, finishEdges: finish, finishEdgeStart: finish, finishEdgeEnd: finish,
-  finishEdgeTop: finish, finishBaseboard: finish, frameColor: z.string().optional(),
+  finishEdgeTop: finish, finishBaseboard: finish, finishSill: finish, frameColor: z.string().optional(),
+  cornice: z.object({ profile: z.enum(['none', 'plain', 'cove', 'stepped', 'ogee']), height: positive.max(1), depth: positive.max(1), offset: number.min(0).max(2), side: z.enum(['interior', 'A', 'B', 'both']), hidden: z.boolean().optional(), finish }).optional(),
   frameStyle: z.enum(['none', 'perimeter', 'grid_3', 'grid_4', 'grid_2x3']).optional(),
   rawWall: z.unknown().optional(),
 }).passthrough();
 export const roomSchema = z.object({
   id, name: z.string(), area: number.nonnegative(), polygon: z.array(point).min(3), height: positive,
-  floorType: z.string().optional(), ceilingType: z.enum(['clip_in', 'gypsum', 'none']).optional(),
+  floorType: z.string().optional(), ceilingType: z.enum(['clip_in', 'gypsum', 'none']).optional(), ceilingHeight: positive.optional(),
   floorFinish: finish, wallFinish: finish, rawRoom: z.unknown().optional(),
+  railing: z.object({ height: number.min(.3).max(3), color: z.string().regex(/^#[\da-f]{6}$/i), edges: z.array(number.int().nonnegative()).optional() }).optional(),
 }).passthrough();
 export const columnSchema = z.object({
   id, name: z.string(), type: z.enum(['column', 'chimney']), width: positive, depth: positive,
@@ -44,11 +51,13 @@ export const columnSchema = z.object({
   finish, finishFront: finish, finishBack: finish, finishLeft: finish, finishRight: finish,
 }).passthrough();
 export const furnitureSchema = z.object({
-  id, name: z.string(), displayName: z.string(), category: z.enum(['bed', 'seating', 'table', 'storage', 'kitchen', 'bathroom', 'decor', 'appliance', 'fixture']),
+  id, name: z.string(), displayName: z.string(), category: z.enum(['architecture', 'bed', 'seating', 'table', 'storage', 'kitchen', 'bathroom', 'decor', 'appliance', 'fixture']),
   assetKey: id, position: vector, rotationY: number, dimensions, roomId: id.optional(), customModelUrl: z.string().optional(),
   visible: z.boolean().optional(), hasLids: z.boolean().optional(), shelfCount: number.int().min(Shelving.minShelves).max(Shelving.maxShelves).optional(), recessHostId: id.optional(),
   finish, sectionFinishes: z.record(finishSchema).optional(),
   lightConfig: z.object({ enabled: z.boolean().optional(), intensity: number.min(0).max(3).optional(), color: z.string().optional() }).optional(),
+  windowCoveringOpen: number.min(0).max(1).optional(),
+  cabinet: z.custom<CabinetLayout>(value => { try { validateCabinet(value as CabinetLayout); return true; } catch { return false; } }, 'Invalid cabinet layout').optional(),
   rawItem: z.unknown().optional(),
 }).passthrough();
 export const legacyDocumentSchema = z.object({
