@@ -112,6 +112,8 @@ A baseline Node build took approximately 53–54 ms for each clothing model in o
 
 **Required verification:** lower mesh/outline counts with unchanged dimensions, section identities and physical surfaces; basket opening/collision tests and per-garment finishes still work.
 
+**Implemented result:** static, same-material pieces are merged within each garment or basket wall; indexed and nonindexed buffers remain separate, avoiding vertex duplication. The laundry cabinet drops from 104 to 24 meshes/outlines, each five-shirt pile from 25 to 15, and five towels from 15 to 10. Position-vertex totals remain unchanged (2,496 / 15,055 / 4,740 respectively). No detail, garment sections, basket holes or moving pivots were removed. Construction timings remained variable and do not establish a build-time improvement; the demonstrated gain is fewer render objects/submissions. All 22 static-part, stacking, laundry and motion cases passed across the run and the Float32-tolerance assertion correction; the offline editor was rebuilt.
+
 ### 06 — Medium: catalogue work grows with the entire catalogue on every input
 
 **File:** `src/ui/components/AssetReplacementModal.tsx`.

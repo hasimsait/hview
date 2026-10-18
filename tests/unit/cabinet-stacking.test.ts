@@ -83,6 +83,12 @@ describe('cabinet content stacking', () => {
       const entity = codec.factory.furniture({ id: key, name: key, displayName: asset.name, assetKey: key, category: 'decor', dimensions: asset.defaultDimensions, position: { x: 0, y: 0, z: 0 }, rotationY: 0 });
       const model = builder.build(entity), bounds = new THREE.Box3().setFromObject(model), actual = bounds.getSize(new THREE.Vector3());
       for (const axis of ['x', 'y', 'z'] as const) { expect(Number.isFinite(actual[axis])).toBe(true); expect(actual[axis]).toBeGreaterThan(0); expect(actual[axis]).toBeLessThanOrEqual(asset.defaultDimensions[axis] + .001); }
+      if (key === 'fit_folded_tshirts_5' || key === 'fit_folded_sweatshirts_5') {
+        const meshes: THREE.Mesh[] = []; model.traverse(o => { if (o instanceof THREE.Mesh) meshes.push(o); });
+        expect(meshes).toHaveLength(15);
+        expect(new Set(meshes.map(m => m.userData.section)).size).toBe(5);
+        expect(meshes.reduce((sum, mesh) => sum + mesh.geometry.attributes.position.count, 0)).toBe(15055);
+      }
     }
   });
 });

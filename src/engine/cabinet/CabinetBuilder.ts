@@ -6,6 +6,7 @@ import { cabinetDoorPose, contentSupportRoot, defaultCabinet, footprint, interio
 import { cabinetDrawer, cabinetInternalDrawer, cabinetBasket, cabinetHasDoors, cabinetLeaves } from '../../domain/cabinet/CabinetFronts';
 import { cabinetBaseHeight } from '../../domain/cabinet/CabinetPlinth';
 import { bookcaseMaterials } from '../assets/builders/BookcaseMaterials';
+import { mergeStaticParts } from '../geometry/MergeStaticParts';
 
 export function buildCabinet(c: AssetBuildContext, buildContent?: (entity: Furniture) => THREE.Object3D): void {
   const layout = c.entity.cabinet ?? defaultCabinet(c.entity.toData(), c.definition?.cabinetDoors ?? 2), t = layout.panelThickness, b = layout.backThickness;
@@ -53,8 +54,9 @@ export function buildCabinet(c: AssetBuildContext, buildContent?: (entity: Furni
       pivots.set(basket.floor.id, pivot);
       pivot.userData.closedPosition = closed.position;
       basket.walls.forEach((box, wall) => {
+        const pieces: THREE.Mesh[] = [];
         const d = box.dimensions, p = box.position;
-        const add = (x: number, y: number, z: number, w: number, h: number, depth: number) => mesh(new THREE.BoxGeometry(w, h, depth), body, 'Laundry Basket', origin.x + x + w / 2 - closed.position.x, origin.y + y + h / 2 - closed.position.y, origin.z + z + depth / 2 - closed.position.z);
+        const add = (x: number, y: number, z: number, w: number, h: number, depth: number) => pieces.push(mesh(new THREE.BoxGeometry(w, h, depth), body, 'Laundry Basket', origin.x + x + w / 2 - closed.position.x, origin.y + y + h / 2 - closed.position.y, origin.z + z + depth / 2 - closed.position.z));
         if (wall === 0) add(p.x, p.y, p.z, d.x, d.y, d.z);
         else {
           // Open lattice walls keep the basket visible without covering the interior in a solid block.
@@ -62,6 +64,7 @@ export function buildCabinet(c: AssetBuildContext, buildContent?: (entity: Furni
           for (let row = 0; row < 5; row++) add(p.x, p.y + row * (d.y - rail) / 4, p.z, d.x, rail, d.z);
           for (let col = 0; col <= n; col++) add(p.x + (wall === 1 ? col * (d.x - rail) / n : 0), p.y, p.z + (wall === 1 ? 0 : col * (d.z - rail) / n), wall === 1 ? rail : d.x, d.y, wall === 1 ? d.z : rail);
         }
+        mergeStaticParts(pieces);
       });
     }
     const tray = cabinetDrawer(layout, c.entity.dimensions, door);
