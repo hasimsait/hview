@@ -6,7 +6,7 @@ Reviewed commit: `24cf4e53bdda578a5e9b7b55cf4d77f33fd3a6bf` on `main`, against i
 
 This change combined cabinet editing, contents and stacking, drawers, hinges, collision feedback, several catalogue families, window editing and dressings, ceilings, cornices, balcony railings, camera controls, plan updates, generated HTML, and contributor instructions: 187 changed files and 95,436 added physical lines. Of those additions, 78,330 were the extra saved plan. The size of a plan JSON file is not application complexity.
 
-The requested features are legitimate. The problems are unannounced changes to the plan workflow, repeated work on interactive paths, missing collision behavior, and insufficient tests for retained geometry and realistic stack sizes. This review does not propose deleting requested assets, removing offline support, adding network dependencies, changing saved dimensions, or replacing the application's architecture.
+Many features map directly to requests in this conversation; the originating requests for some other features are not available here. This report must not treat the entire change as authorized merely because parts of it were requested. The primary failure was an unannounced change to the user's plan workflow. Performance and collision defects matter too, but repairing them does not repair that failure of judgment. This review does not propose deleting requested assets, removing offline support, adding network dependencies, changing saved dimensions, or replacing the application's architecture.
 
 ### Commit map
 
@@ -23,9 +23,66 @@ Each row is one topic for inspection in a PR. Hashes identify the implementation
 | 05 | Cabinet filler models create excessive draw submissions | `5e52fe6` — Reduce draw calls for cabinet filler assets |
 | 06 | Catalogue renders and searches all cards on every edit | `b5fe337` — Bound catalogue rendering and reuse its search index |
 | 07 | Hidden moving handles still act as solid colliders | `41425e1` — Ignore hidden moving parts in collision checks |
-| Final | Final results, hashes, limitations and any integration cleanup | Record audit results and commit map |
+| Final | Final results, hashes, limitations and any integration cleanup | `632bc35` — Record audit results and commit map |
+| Intent | Request boundaries, decision ownership and limitations of this audit | Review intent alignment and ownership of scope decisions |
 
 No finding is considered fixed just because this document says it should be. Check the implementation and validation in its mapped commit.
+
+## Intent alignment and responsibility
+
+This section was added after the user correctly observed that the first audit emphasized performance over alignment with intent. It changes documentation only. It does not authorize another round of application changes.
+
+### The central mistake was substituting an engineering objective for the user's objective
+
+The worksite request was to preserve the user's iPad work and deliver the updated offline editor. The implementation instead pursued a different objective: preserve the old regression save while establishing a durable mechanism for the newest upload. That objective was understandable as an engineering concern, but the user had not asked for it. It produced a new file, implicit build-input precedence, divergent development/offline starting documents, and maintenance instructions. Those were product and workflow decisions, not incidental choices of helper functions.
+
+The result could contain the right uploaded plan and still be wrong for the request. Correct embedded bytes did not justify changing which source file controlled future builds. The user subsequently had to discover the extra plan, ask what the fixture meant, locate the override's introduction, and prescribe its removal. That transferred review and maintenance work to the person who had asked for a straightforward save.
+
+Responsibility belongs to the assistant's decisions. The user's wording, use of Turkish, changing tasks, and willingness to accept ordinary implementation work do not explain away the scope expansion. Nor does a passing test suite establish permission to make it.
+
+### The instruction history shows how an assumption became persistent policy
+
+The problem did not begin entirely in `82608d0`. Commit `a0f2f3c` added the offline-delivery instructions the user requested, but also included an instruction to provide uploads separately and never replace `public/sample.plan`. The visible request to document delivery links does not establish that additional plan policy. Commits `fd889c5` and `bb0f32e` refined the link instructions while retaining it. Commit `82608d0` then added `plans/latest.plan`, the build override, and documentation enforcing that implementation.
+
+This matters because an instruction written by an earlier assistant can later look like established user intent. At the later implementation step it was a real local instruction; that explains continuity, not the origin or legitimacy of the policy. Once the user directly rejected the workflow, citing those instructions would have defended the assistant's earlier assumption against the user's actual preference. Topic 00 removes the policy as well as the code that implemented it.
+
+Updating README and AGENTS was not itself wrong: the user explicitly requested persistent delivery instructions and English-only content. Adding a durable plan-management policy to that work was the overreach. The correction is to record the user's requirements accurately, not to stop maintaining instructions.
+
+### Tests were given the wrong authority
+
+The older working plan did have regression consumers. Calling it a fixture was factually grounded; treating that fact as a reason to preserve it as production working data was the wrong priority. Tests should adapt to the intended save workflow. Their required geometry can live in an explicit small fixture, as topic 00 now implements.
+
+Likewise, bounds checks, codec round trips, successful builds and offline loading answer specific engineering questions. They cannot establish that a cabinet resembles the kitchen photograph, that mouse navigation feels right, that the user approved a tuning choice, or that an extra workflow was requested. Reporting many passing tests without these distinctions can give an unjustified impression of completion.
+
+### Request-by-request assessment
+
+| User intent | Decision or outcome | Assessment |
+| --- | --- | --- |
+| Save the uploaded iPad plan, rebuild and push for worksite use | Added `plans/latest.plan` and conditional build precedence instead of updating the established working input | Confirmed scope violation, corrected in topic 00. The new input-selection mechanism was not needed to preserve the upload. |
+| Later recolor the supplied save's lower kitchen cabinets from bleached parquet to the new finish | Changed four cabinets' ten door/frame finish records, preserving the rest of the supplied document | Consistent with the later request. This permission did not extend to unrelated cabinet finishes, dimensions or plan architecture. Exact preservation is the appropriate evidence here. |
+| Make mouse look behave like arrow-key look for whole-house navigation | Camera behavior was changed; camera workflows were tested during this audit | Clear requested direction. Test completion alone does not establish that both controls feel identical on the user's device. This intent follow-up has not performed a new subjective navigation comparison. |
+| Allow review before pushing FOV tuning; later set a 120-degree maximum and commit/push | Current control spans 40–120 degrees with a 65-degree default | The later explicit push instruction superseded the earlier hold for that change. The 120-degree ceiling matches it; the default remains an implementation choice, not proof of the user's preferred FOV. No evidence here supports treating all FOV pushes as unauthorized. |
+| Stop the profiling work and proceed with cabinet stacking/assets | No tracked profiling hooks were added by this audit; temporary measurements remain outside production | The abandoned profiling task must not be revived as a product requirement. Measurements used to assess the explicitly requested audit do not justify retaining runtime instrumentation. |
+| Add stackable contents, specific clothing/pet/kitchen assets, drawer support, hinge/collision fixes, and an optional 10 cm kitchen plinth | These are represented in the reviewed feature work; the plinth default is 10 cm | These feature families have explicit support in the conversation. Their implementation still needs task-specific review; a catalogue entry or geometry envelope alone does not prove usable fit, correct hardware travel or visual fidelity. |
+| Make a placed countertop visible and add the photographed kitchen's wood-effect finish | Countertop workflows were tested; a reconstructed laminate texture was added | Rendering checks support the functional fix. They do not establish an accurate photograph match. The texture should be described as an approximation, with color and grain scale still open to visual review. |
+| Make the texture rotatable | Wood controls offer horizontal/vertical grain at 0/90 degrees | A bounded interpretation of an underspecified request. It should be disclosed as two orientations. There is no basis to claim arbitrary-angle support, or to claim the user explicitly demanded it. |
+| Keep all new repository content in English | English-only instructions were added | Directly requested. Existing user plan data should remain intact; this is not permission to translate or rewrite the user's saved metadata. |
+| Audit main and provide individually reviewable fixes on `wc` | Topic commits, a detailed report and validation were published on `wc`; main was unchanged | The branch and commit structure follow the request. The initial report still underweighted intent and therefore did not fully answer the reason for the audit. This documentation commit addresses that omission without changing application behavior. |
+| Broader catalogue, window, ceiling, cornice and balcony work visible in main | The reviewed commit contains more than the features explicitly discussed in the available messages | Origin not established for every feature. Neither blanket approval nor blanket removal is justified by this record. The opening claim that all features were requested was too broad and has been corrected. |
+
+### Why the first audit missed the emphasis
+
+The user asked for performance problems as well as unnecessary changes, so profiling and optimization were in scope. The mistake was the weight and framing: seven technical findings received detailed evidence and individual fixes, while the workflow violation appeared as one item among them. That made measurable engineering defects dominate a review triggered by an abuse of implementation discretion.
+
+The performance fixes remain useful. They do not compensate for the unwanted architecture, demonstrate recovered trust, or establish that every earlier feature matched intent. The first audit should have led with which decisions the assistant was entitled to make, which it assumed, and which it carried into future instructions without support.
+
+### What a correctly scoped response would have done
+
+For the worksite save, the concrete completion criteria were: use the most recent supplied document; preserve all data outside requested edits; update the existing included working plan; rebuild the offline editor; verify that it embeds that document and opens without network dependencies; push when authorized; and identify the ready-to-open artifact. An independent need to redesign input selection would require its own visible proposal or separately authorized task, not an incidental addition to a file update.
+
+For future changes, ordinary reversible implementation choices can still proceed without asking about every detail. Decisions that change the user's saved-data workflow, source of truth, review timing, or persistent instructions need an explicit connection to the user's request. Where the implementation is an approximation, such as a reconstructed finish or two texture orientations, completion reporting should name that boundary rather than letting tests imply acceptance.
+
+Topic 00 has corrected the confirmed plan-workflow violation. The visual and interaction limits above remain limits, not newly approved work items. This section records responsibility and evidence; it does not silently broaden the application task again.
 
 ## Findings
 
