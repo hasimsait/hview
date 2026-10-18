@@ -30,7 +30,7 @@ import { CollisionFeedback } from './cabinet/CollisionFeedback';
 import { cabinetDoorPose, cabinetIssues, footprint, interiorOrigin, moveCabinetPart, resolveContent, resolvePanel } from '../domain/cabinet/CabinetLayout';
 import { roomCeilingHeight } from '../domain/model/Ceiling';
 import { wallCorniceLayouts } from './geometry/WallCorniceLayout';
-import { cabinetLeaves } from '../domain/cabinet/CabinetFronts';
+import { cabinetInternalDrawer, cabinetLeaves } from '../domain/cabinet/CabinetFronts';
 import { mobileRendering } from './RenderQuality';
 
 export interface SceneStatus { readonly state: 'loading' | 'ready' | 'recovering' | 'error'; readonly message: string; }
@@ -315,7 +315,7 @@ export class SceneEngine implements ISceneService {
         const previousLeaves = before.cabinet ? cabinetLeaves(before.cabinet, before.dimensions) : [];
         for (const leaf of cabinetLeaves(now.cabinet, now.dimensions)) {
           const old = previousLeaves.find(l => l.section?.id === leaf.section?.id && l.localIndex === leaf.localIndex), previous = old?.angle ?? 0;
-          const signature = (l: typeof leaf) => JSON.stringify([l.tilt, l.doors.hinge, l.doors.count, l.doors.hinges?.[l.localIndex], l.section?.bottom, l.section?.top, l.section?.basketDepth]);
+          const signature = (l: typeof leaf) => JSON.stringify([l.tilt, l.drawer, l.section?.drawerDepth, l.section?.drawerBoxHeight, l.doors.hinge, l.doors.count, l.doors.hinges?.[l.localIndex], l.section?.bottom, l.section?.top, l.section?.basketDepth]);
           const hingeChanged = old && signature(leaf) !== signature(old);
           if (leaf.angle !== previous || hingeChanged) {
             checked = true;
@@ -323,6 +323,10 @@ export class SceneEngine implements ISceneService {
           }
         }
         if (checked) { const root = this.getRenderObject(id); if (root) root.userData.doorCollision = collides; }
+        for (const drawer of now.cabinet.internalDrawers ?? []) {
+          const previousDrawer = before.cabinet?.internalDrawers?.find(d => d.id === drawer.id);
+          if (!previousDrawer || previousDrawer.extension !== drawer.extension) this.checkInternalDrawerCollision(id, drawer.id, previousDrawer?.extension ?? 0);
+        }
       }
     }
     if (!change.previous || change.previous.rooms.length !== change.document.rooms.length || change.document.rooms.some((room, index) => room !== change.previous!.rooms[index])) this.ceilingsDirty = true;
@@ -1055,14 +1059,17 @@ export class SceneEngine implements ISceneService {
     const final = pivot.rotation[axis], finalRotation = pivot.rotation.clone(), finalPosition = pivot.position.clone(), item = this.currentPlan?.get(id);
     // Opening angles are unsigned in the document; hinge orientation supplies sign.
     const from = previousAngle === undefined ? final : (pivot.userData.swingSign ?? Math.sign(final || 1)) * previousAngle;
-    const steps = Math.max(1, Math.ceil(Math.abs(final - from) / (Math.PI / 90)));
+    const sliding = pivot.userData.slide && door !== undefined && item instanceof Furniture && item.cabinet;
+    const slideFinal = sliding ? cabinetLeaves(item.cabinet!, item.dimensions)[door!].angle : 0;
+    const slideFrom = previousAngle === undefined ? slideFinal : previousAngle * 180 / Math.PI;
+    const steps = sliding ? Math.max(1, Math.ceil(Math.abs(slideFinal - slideFrom) / 2)) : Math.max(1, Math.ceil(Math.abs(final - from) / (Math.PI / 90)));
     const obstacles = this.picking.getCandidates().filter((o): o is THREE.Mesh => o instanceof THREE.Mesh && !pivot.getObjectById(o.id));
     let collides = false; this.scene.updateMatrixWorld(true);
     for (let step = 1; step <= steps && !collides; step++) {
       const angle = from + (final - from) * step / steps;
       pivot.rotation[axis] = angle;
       if (door !== undefined && item instanceof Furniture && item.cabinet) {
-        const pose = cabinetDoorPose(item.dimensions, item.cabinet, door, Math.abs(angle) * 180 / Math.PI);
+        const pose = cabinetDoorPose(item.dimensions, item.cabinet, door, sliding ? slideFrom + (slideFinal - slideFrom) * step / steps : Math.abs(angle) * 180 / Math.PI);
         pivot.position.set(pose.position.x, pose.position.y, pose.position.z); pivot.rotation.set(pose.rotationX, pose.rotationY, 0);
       }
       pivot.updateWorldMatrix(true, true);
@@ -1075,6 +1082,30 @@ export class SceneEngine implements ISceneService {
     if (collides) this.collisionFeedback.mark(pivot);
     root.userData.doorCollision = collides; this.invalidate(); return collides;
   }
+  private checkInternalDrawerCollision(id: string, drawerId: string, previous: number): void {
+    if (this.cabinetEditingId) return;
+    const item = this.currentPlan?.get(id), root = this.getRenderObject(id);
+    if (!(item instanceof Furniture) || !item.cabinet || !root) return;
+    const drawer = item.cabinet.internalDrawers?.find(d => d.id === drawerId);
+    const pivot = root.getObjectByName(`cabinet_part_drawer_${drawerId}`);
+    if (!drawer || !pivot) return;
+    const tray = cabinetInternalDrawer(item.cabinet, item.dimensions, drawer), final = pivot.position.z;
+    const moving: THREE.Mesh[] = []; pivot.traverse(o => { if (o instanceof THREE.Mesh) moving.push(o); });
+    const obstacles = this.picking.getCandidates().filter((o): o is THREE.Mesh => o instanceof THREE.Mesh && !pivot.getObjectById(o.id));
+    const from = final - (drawer.extension - previous) * tray.travel, steps = Math.max(1, Math.ceil(Math.abs(final - from) / .02));
+    let collides = false; this.scene.updateMatrixWorld(true);
+    for (let step = 1; step <= steps && !collides; step++) {
+      pivot.position.z = from + (final - from) * step / steps; pivot.updateWorldMatrix(true, true);
+      for (const other of obstacles) {
+        let visible = true; for (let p: THREE.Object3D | null = other; p; p = p.parent) if (!p.visible) visible = false;
+        if (visible && moving.some(part => this.collisionFeedback.intersects(part, other, ['wall', 'column'].includes(this.picking.resolve(other)?.kind ?? '')))) { collides = true; break; }
+      }
+    }
+    pivot.position.z = final; pivot.updateWorldMatrix(true, true);
+    if (collides) this.collisionFeedback.mark(pivot);
+    root.userData.internalDrawerCollision = { ...(root.userData.internalDrawerCollision ?? {}), [drawerId]: collides };
+  }
+
   getRenderObject(id: string): THREE.Group | undefined { return this.graph.get(id)?.group; }
   getTransformTarget(id: string): THREE.Object3D | undefined {
     const node = this.graph.get(id);

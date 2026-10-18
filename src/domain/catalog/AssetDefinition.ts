@@ -1,3 +1,4 @@
+import type { DailyLifeModel } from './DailyLifeAssets';
 import type { Vector3D } from '../model/PlanData';
 import type { AssetRecipeId } from './AssetRecipes';
 import type { AccessoryModel } from './AccessoryModel';
@@ -48,6 +49,7 @@ export interface AssetDefinition {
   floorDrain?: FloorDrainModel;
   softFurnishing?: SoftFurnishingModel;
   householdDetail?: HouseholdDetailModel;
+  dailyLife?: DailyLifeModel;
   electrical?: {
     series: 'karre' | 'bubble';
     control: 'single_switch' | 'double_switch' | 'socket' | 'double_socket';

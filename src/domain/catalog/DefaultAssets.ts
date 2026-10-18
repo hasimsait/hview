@@ -1,3 +1,4 @@
+import { DAILY_LIFE_ASSETS } from './DailyLifeAssets';
 import type { AssetDefinition } from './AssetDefinition';
 import { CURATED_ASSETS } from './CuratedAssets';
 import { IKEA_ACCESSORIES } from './IkeaAccessories';
@@ -14,6 +15,7 @@ import { SOFT_FURNISHINGS } from './SoftFurnishings';
 
 export const DEFAULT_ASSETS: readonly AssetDefinition[] = [
   ...CABINET_ASSETS,
+  ...DAILY_LIFE_ASSETS,
   ...CABINET_FIT_OBJECTS,
   ...HOUSEHOLD_DETAILS,
   ...SOFT_FURNISHINGS,

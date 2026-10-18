@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { splitCabinetFront, type CabinetFrontSection } from '../../domain/cabinet/CabinetFronts';
+import { cabinetDrawerDefaultHeight, cabinetDrawer, cabinetLeaves, splitCabinetFront, type CabinetFrontSection } from '../../domain/cabinet/CabinetFronts';
 import { withCabinetFrontSections, type CabinetLayout } from '../../domain/cabinet/CabinetLayout';
 import type { Vector3D } from '../../domain/model/PlanData';
 import { createElementId } from '../../platform/ElementId';
 
-export function CabinetFrontControls({ layout, size, onChange }: { layout: CabinetLayout; size: Vector3D; onChange: (layout: CabinetLayout) => void }) {
+export function CabinetFrontControls({ layout, size, onChange, onPlace }: { layout: CabinetLayout; size: Vector3D; onChange: (layout: CabinetLayout) => void; onPlace?: (support: string) => void }) {
   const [selected, setSelected] = useState(''), [cut, setCut] = useState<number | undefined>();
   const section = layout.frontSections?.find(s => s.id === selected) ?? layout.frontSections?.[0];
   const bottom = section?.bottom ?? 0, top = section?.top === 'top' || !section ? size.y : section.top;
@@ -18,10 +18,15 @@ export function CabinetFrontControls({ layout, size, onChange }: { layout: Cabin
       </select></label>
       <label className="block">Opening<select aria-label="Front section opening" className="w-full bg-slate-800 p-1" value={section.opening} onChange={e => {
         const opening = e.target.value as CabinetFrontSection['opening'];
-        update({ opening, doors: { ...section.doors, angles: opening === 'tilt-out' ? [40, 40] : [115, 115] } });
-      }}><option value="swing">Side-hinged doors</option><option value="tilt-out">Tilt-out laundry basket</option></select></label>
+        update({ opening, drawerExtensions: opening === 'drawer' ? [.75, .75] : section.drawerExtensions, doors: { ...section.doors, count: section.doors.count || 1, angles: opening === 'drawer' ? [0, 0] : opening === 'tilt-out' ? [40, 40] : [115, 115] } });
+      }}><option value="swing">Side-hinged doors</option><option value="tilt-out">Tilt-out laundry basket</option><option value="drawer">Pull-out drawer</option></select></label>
       <label className="block">Panels across<select aria-label="Front section panel count" className="w-full bg-slate-800 p-1" value={section.doors.count} onChange={e => update({ doors: { ...section.doors, count: +e.target.value as 0 | 1 | 2 } })}><option value="0">Open section</option><option value="1">One panel</option><option value="2">Two panels</option></select></label>
       {section.opening === 'swing' && section.doors.count === 1 && <label className="block">Hinge side<select aria-label="Front section hinge side" className="w-full bg-slate-800 p-1" value={section.doors.hinge} onChange={e => update({ doors: { ...section.doors, hinge: e.target.value as 'left' | 'right' } })}><option value="left">Left</option><option value="right">Right</option></select></label>}
+      {section.opening === 'drawer' && <>
+        <label className="block">Drawer box depth (cm)<input aria-label="Drawer box depth (cm)" type="number" min="2" step=".1" className="w-full bg-slate-800 p-1" value={+((section.drawerDepth ?? size.z - layout.backThickness - layout.panelThickness - .025) * 100).toFixed(1)} onChange={e => { const depth = +e.target.value / 100; if (depth >= .02) update({ drawerDepth: depth }); }} /></label>
+        <label className="block">Drawer box height (cm)<input aria-label="Drawer box height (cm)" type="number" min="2" step=".1" className="w-full bg-slate-800 p-1" value={+((section.drawerBoxHeight ?? cabinetDrawerDefaultHeight(layout, size, bottom, top)) * 100).toFixed(1)} onChange={e => { const h = +e.target.value / 100; if (h >= .02) update({ drawerBoxHeight: h }); }} /></label>
+        {cabinetLeaves(layout, size).filter(l => l.section?.id === section.id).map(l => { const tray = cabinetDrawer(layout, size, l)!; return <div key={l.index}><p className="text-slate-400">Drawer {l.index + 1} clear volume: {[tray.usable.x, tray.usable.y, tray.usable.z].map(v => (v * 100).toFixed(1)).join(' × ')} cm (W × H × D)</p>{onPlace && <button className="w-full rounded bg-emerald-700 p-2" onClick={() => onPlace(tray.floor.id)}>Place object in drawer {l.index + 1}</button>}</div>; })}
+      </>}
       {section.opening === 'tilt-out' && <label className="block">Basket depth (cm)<input aria-label="Laundry basket depth (cm)" type="number" min="1" step="0.1" className="w-full bg-slate-800 p-1" value={+((section.basketDepth ?? size.z - layout.backThickness - layout.panelThickness - .025) * 100).toFixed(1)} onChange={e => { const depth = +e.target.value / 100; if (depth > 0) update({ basketDepth: depth }); }} /></label>}
       <label className="block">Section bottom (cm)<input aria-label="Front section bottom (cm)" type="number" step="0.1" className="w-full bg-slate-800 p-1" value={+(bottom * 100).toFixed(2)} onChange={e => { if (e.target.value !== '') update({ bottom: +e.target.value / 100 }); }} /></label>
       <label className="block">Section top (cm)<input aria-label="Front section top (cm)" type="number" step="0.1" className="w-full bg-slate-800 p-1" value={+(top * 100).toFixed(2)} onChange={e => { if (e.target.value !== '') update({ top: +e.target.value / 100 }); }} /></label>

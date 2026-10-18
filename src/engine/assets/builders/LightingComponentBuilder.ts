@@ -96,6 +96,12 @@ export const buildLightingComponent: AssetBuilderFn = c => {
       break;
     }
     case 'cabinet_light': {
+      if (model.style === 'vertical') {
+        p.box(0, .5, 0, 1, 1, 1, housing, 'Aluminum Profile');
+        emitter(p.box(0, .5, .45, .70, .98, .10, glow, 'Vertical Diffuser'));
+        addFixtureLight(c.parent, [0, c.h * .5, c.d], 2.5, 2, 'spot');
+        break;
+      }
       p.box(0, .6, 0, 1, .8, 1, housing, 'Housing');
       if (model.style === 'strip') {
         const count = Math.max(3, Math.min(60, Math.round(c.w / .04)));

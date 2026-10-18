@@ -38,3 +38,46 @@ The wide two-tone HEMNES variants use natural wood on the top, shelves and smoot
 - Decorative ceiling cornices are configured on the host wall under **Wall Framing → Top corner / cornice**. They span the whole wall at the finished ceiling height, with plain square, cove, stepped and ogee profiles. Existing window cornices migrate to one wall cornice; visibility and removal remain independent of curtains. Standalone catalogue pieces remain available for custom arrangements.
 
 The appliance photographs do not identify exact product codes, so these entries use standard-size estimates, marked “Approx.” in the catalogue. Countertop accessories and the cooktop start at 90 cm elevation and can be moved to match the plan's counters.
+
+## Pet care, vanity, wardrobe storage and drawer inserts
+
+These are generic procedural planning models with reference dimensions, not
+manufacturer-verified product replicas. All names, descriptions and UI labels are
+in English, including requirements translated from Turkish prompts.
+
+- Pet care: a scratching tower with hideaway, food/water tray, covered litter box,
+  stainless-steel drinking fountain, automatic feeder, and an elevated cat house
+  on scratching columns. The elevated house is 130 cm tall with its floor
+  approximately 87 cm above ground.
+- Vanity accessories: perfume/skin-care set (10 cm deep), hot-air styling brush
+  (6.5 cm deep, generic Philips-style form), and jewelry/key dish (10 cm deep).
+  These fit within the usable depth of the 16 cm upper mirror cabinet. That
+  cabinet now supports Edit layout with its asymmetric mirrored fronts preserved.
+- Wardrobe storage: short shirt/jacket and long-coat garment envelopes, EU 47
+  ankle boots and sneakers, women’s tall boots and sneakers. Shoe sizes describe
+  approximate outer planning envelopes; confirm actual footwear dimensions.
+- Drawer inserts: a modular cutlery organizer and a pull-out trouser rack. The
+  organizer keeps 8.5 × 22 cm compartment modules at their physical size; resizing
+  removes whole modules and leaves any remaining strip unused. It does not scale
+  compartments smaller. The rack keeps its bars at fixed spacing.
+- Lighting: a vertical cabinet LED profile with visible diffuser and controllable
+  illumination. It remains entirely embedded in offline exports.
+
+### Cabinet drawer workflow
+
+In Edit layout, split the front into sections and choose **Pull-out drawer** for
+an individual section. Front section height remains independent of drawer box
+height and depth. The clear-volume readout subtracts the 12 mm box walls and
+8 mm bottom. Extension is a separate 0–100% value; swing and tilt-out fronts keep
+using degrees. **Place object in drawer** attaches contents to the moving box,
+including stacks of objects.
+
+**Add internal drawer** creates a separate box behind the outer front. Its bottom,
+height, depth, front setback and extension are editable. Open the outer door before
+extending an internal drawer; moving fronts and boxes receive collision feedback
+against visible surrounding objects. Shelves remain independent and may need to
+be repositioned or removed if they intersect a drawer box.
+
+Three-drawer and deep-pan base cabinet presets, plus a wardrobe with internal
+pull-out drawers, are available in Modular cabinets. Drawer configuration and
+contents survive canonical plans, legacy plan exports and self-contained HTML.

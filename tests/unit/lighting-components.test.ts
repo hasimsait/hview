@@ -25,8 +25,8 @@ const lights = (root: THREE.Object3D) => { const result: FixtureLight[] = []; ro
 const glowMeshes = (root: THREE.Object3D) => { const result: THREE.Mesh[] = []; root.traverse(o => { if (o instanceof THREE.Mesh && o.userData.isLightEmissive) result.push(o); }); return result; };
 
 describe('lighting components and floor drains', () => {
-  it('registers 14 controllable light fittings across seven collections and five floor drains', () => {
-    expect(LIGHTING_COMPONENTS).toHaveLength(14); expect(FLOOR_DRAINS).toHaveLength(5);
+  it('registers 15 controllable light fittings across seven collections and five floor drains', () => {
+    expect(LIGHTING_COMPONENTS).toHaveLength(15); expect(FLOOR_DRAINS).toHaveLength(5);
     expect(new Set(LIGHTING_COMPONENTS.map(a => a.collection)).size).toBe(7);
     for (const a of [...LIGHTING_COMPONENTS, ...FLOOR_DRAINS]) {
       expect(catalog.get(a.key)).toEqual(a);
@@ -56,7 +56,7 @@ describe('lighting components and floor drains', () => {
       const root = builder.build(item(a)); root.updateMatrixWorld(true);
       const emitters = lights(root);
       if (a.lightingComponent!.kind === 'track') expect(emitters).toHaveLength(a.lightingComponent!.style === 'straight' ? 3 : 5);
-      if (a.lightingComponent!.kind === 'cabinet_light' || a.key === 'lighting_pendant_linear') expect(emitters).toHaveLength(3);
+      if (a.lightingComponent!.kind === 'cabinet_light' || a.key === 'lighting_pendant_linear') expect(emitters).toHaveLength(a.lightingComponent!.style === 'vertical' ? 1 : 3);
       const directions = emitters.filter((l): l is THREE.SpotLight => l instanceof THREE.SpotLight).map(l =>
         l.target.getWorldPosition(new THREE.Vector3()).sub(l.getWorldPosition(new THREE.Vector3())).normalize());
       if (a.lightingComponent!.kind === 'cove_light') {

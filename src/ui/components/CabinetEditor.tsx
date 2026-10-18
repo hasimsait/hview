@@ -13,7 +13,8 @@ import { createElementId } from '../../platform/ElementId';
 import { RuntimeContext, useDocument, useRuntime } from '../context/RuntimeContext';
 import { AssetReplacementModal } from './AssetReplacementModal';
 import { Inspector } from './Inspector';
-import { cabinetBasket, cabinetLeaves, setCabinetDoorAngle } from '../../domain/cabinet/CabinetFronts';
+import { cabinetDrawerTrays, cabinetBasket, cabinetLeaves, setCabinetDoorAngle } from '../../domain/cabinet/CabinetFronts';
+import { CabinetInternalDrawers } from './CabinetInternalDrawers';
 import { CabinetFrontControls } from './CabinetFrontControls';
 import { CabinetHingeControls } from './CabinetHingeControls';
 import { Viewport3D } from './Viewport3D';
@@ -23,7 +24,7 @@ export function CabinetEditor({ cabinet, onClose }: { cabinet: Furniture; onClos
   const [session] = useState(() => {
     const runtime = new ApplicationRuntime();
     let layout = structuredClone(cabinet.cabinet ?? defaultCabinet(cabinet.toData(), cabinetDoorCount(outer.catalog.get(cabinet.assetKey)) ?? 2));
-    for (const leaf of cabinetLeaves(layout, cabinet.dimensions)) layout = setCabinetDoorAngle(layout, leaf.index, leaf.tilt ? 40 : 115);
+    for (const leaf of cabinetLeaves(layout, cabinet.dimensions)) layout = setCabinetDoorAngle(layout, leaf.index, leaf.drawer ? 75 : leaf.tilt ? 40 : 115);
     runtime.editor.load(new PlanDocument([cabinet.withCabinet(layout).withTransform({ x: 0, y: 0, z: 0 }, 0)], Math.max(2.7, cabinet.dimensions.y)));
     return runtime;
   });
@@ -31,9 +32,10 @@ export function CabinetEditor({ cabinet, onClose }: { cabinet: Furniture; onClos
     let saved = structuredClone(layout);
     saved.doors.angles = [0, 0];
     for (const section of saved.frontSections ?? []) section.doors.angles = [0, 0];
+    saved.internalDrawers = saved.internalDrawers?.map(d => ({ ...d, extension: cabinet.cabinet?.internalDrawers?.find(old => old.id === d.id)?.extension ?? 0 }));
     const previous = cabinet.cabinet ? cabinetLeaves(cabinet.cabinet, cabinet.dimensions) : [];
     for (const leaf of cabinetLeaves(saved, cabinet.dimensions)) {
-      const old = previous.find(l => l.section?.id === leaf.section?.id && l.localIndex === leaf.localIndex && l.tilt === leaf.tilt);
+      const old = previous.find(l => l.section?.id === leaf.section?.id && l.localIndex === leaf.localIndex && l.tilt === leaf.tilt && l.drawer === leaf.drawer);
       saved = setCabinetDoorAngle(saved, leaf.index, old?.angle ?? 0);
     }
     outer.editor.execute(new ConfigureCabinet(cabinet.id, saved)); onClose();
@@ -42,6 +44,7 @@ export function CabinetEditor({ cabinet, onClose }: { cabinet: Furniture; onClos
 function CabinetWorkspace({ original, onCancel, onDone }: { original: Furniture; onCancel: () => void; onDone: (layout: CabinetLayout) => void }) {
   const runtime = useRuntime(), doc = useDocument()!, item = doc.requireFurniture(original.id), layout = item.cabinet!, size = item.dimensions;
   const [selected, setSelected] = useState<string | null>(null), [section, setSection] = useState('all'), [adding, setAdding] = useState(false), [replacing, setReplacing] = useState(false);
+  const [supportTarget, setSupportTarget] = useState<string | undefined>();
   const [stackCopies, setStackCopies] = useState(2);
   const [placeOnSelected, setPlaceOnSelected] = useState(false);
   const ref = useRef({ item, selected }); ref.current = { item, selected };
@@ -80,9 +83,9 @@ function CabinetWorkspace({ original, onCancel, onDone }: { original: Furniture;
   }
   function chooseAsset(asset: AssetDefinition) {
     const previous = replacing ? content : undefined, support = panel?.kind === 'shelf' ? resolvePanel(layout, size, panel) : undefined;
-    const value: CabinetContent = { id: previous?.id ?? createElementId(), name: asset.name, assetKey: asset.key, dimensions: { ...asset.defaultDimensions }, rotationY: previous?.rotationY ?? 0, position: previous?.position ?? (placeOnSelected && content ? { x: 0, y: 0, z: 0 } : { x: .02, y: 0, z: .01 }), supportId: previous?.supportId ?? (placeOnSelected ? content?.id : undefined) ?? support?.id ?? 'base' };
+    const value: CabinetContent = { id: previous?.id ?? createElementId(), name: asset.name, assetKey: asset.key, dimensions: { ...asset.defaultDimensions }, rotationY: previous?.rotationY ?? 0, position: previous?.position ?? (placeOnSelected && content ? { x: 0, y: 0, z: 0 } : supportTarget?.startsWith('drawer_') ? { x: .015, y: 0, z: .015 } : { x: .02, y: 0, z: .01 }), supportId: previous?.supportId ?? supportTarget ?? (placeOnSelected ? content?.id : undefined) ?? support?.id ?? 'base' };
     const settled = settleContent(layout, size, value);
-    update({ ...layout, contents: previous ? layout.contents.map(o => o.id === previous.id ? settled : o) : [...layout.contents, settled] }, previous ? 'Replace cabinet content' : 'Add cabinet content'); select(value.id); setAdding(false); setReplacing(false); setPlaceOnSelected(false);
+    update({ ...layout, contents: previous ? layout.contents.map(o => o.id === previous.id ? settled : o) : [...layout.contents, settled] }, previous ? 'Replace cabinet content' : 'Add cabinet content'); select(value.id); setAdding(false); setReplacing(false); setPlaceOnSelected(false); setSupportTarget(undefined);
   }
   const resolved = panel ? resolvePanel(layout, size, panel) : undefined;
   const inspected = content ? new StandardFurniture({ id: content.id, name: content.assetKey, assetKey: content.assetKey, displayName: content.name, category: 'decor', position: content.position, rotationY: content.rotationY, dimensions: content.dimensions, finish: content.finish, sectionFinishes: content.sectionFinishes }) : panel && resolved ? new StandardFurniture({ id: panel.id, name: panel.name, assetKey: 'cabinet_open', displayName: panel.name, category: 'storage', position: resolved.position, rotationY: Math.PI, dimensions: resolved.dimensions, finish: panel.finish }) : null;
@@ -127,12 +130,13 @@ function CabinetWorkspace({ original, onCancel, onDone }: { original: Furniture;
         <p>Usable interior: {[inner.x, inner.y, inner.z].map(n => +(n * 100).toFixed(1)).join(' × ')} cm (W × H × D)</p>
         <p className="text-slate-400">Origin: inside left, bottom and back. Red means penetration or missing support. Touching is allowed.</p>
         <div className="grid grid-cols-2 gap-2"><button className="rounded bg-sky-700 p-2" onClick={() => addPanel('shelf')}>Add shelf</button><button className="rounded bg-sky-700 p-2" onClick={() => addPanel('divider')}>Add divider</button></div>
-        <button className="w-full rounded bg-emerald-700 p-2" onClick={() => { setReplacing(false); setAdding(true); }}>Place object</button>
+        <button className="w-full rounded bg-emerald-700 p-2" onClick={() => { setReplacing(false); setSupportTarget(undefined); setAdding(true); }}>Place object</button>
         <label className="block">Panel thickness (mm)<input aria-label="Panel thickness (mm)" className="w-full bg-slate-800 p-1" type="number" min="1" max="100" step="1" value={+(layout.panelThickness * 1000).toFixed(2)} onChange={e => { const n = +e.target.value / 1000; if (n > 0 && n <= .1) update({ ...layout, panelThickness: n }); }} /></label>
         <label className="block">Back thickness (mm)<input aria-label="Back thickness (mm)" className="w-full bg-slate-800 p-1" type="number" min="1" max="100" step="1" value={+(layout.backThickness * 1000).toFixed(2)} onChange={e => { const n = +e.target.value / 1000; if (n > 0 && n <= .1) update({ ...layout, backThickness: n }); }} /></label>
         {!layout.frontSections && <label className="block">Doors<select aria-label="Cabinet door count" className="w-full bg-slate-800 p-1" value={layout.doors.count} onChange={e => update({ ...layout, doors: { ...layout.doors, count: +e.target.value as 0 | 1 | 2 } })}><option value="0">Open cabinet</option><option value="1">One door</option><option value="2">Two doors</option></select></label>}
         {!layout.frontSections && layout.doors.count === 1 && <label className="block">Hinge side<select aria-label="Cabinet hinge side" className="w-full bg-slate-800 p-1" value={layout.doors.hinge} onChange={e => update({ ...layout, doors: { ...layout.doors, hinge: e.target.value as 'left' | 'right' } })}><option value="left">Left</option><option value="right">Right</option></select></label>}
-        <CabinetFrontControls layout={layout} size={size} onChange={next => update(next, 'Configure cabinet fronts')} />
+        <CabinetInternalDrawers layout={layout} size={size} onChange={next => update(next, 'Configure internal drawers')} onPlace={support => { setSupportTarget(support); setPlaceOnSelected(false); setReplacing(false); setAdding(true); }} />
+        <CabinetFrontControls layout={layout} size={size} onPlace={support => { setSupportTarget(support); setPlaceOnSelected(false); setReplacing(false); setAdding(true); }} onChange={next => update(next, 'Configure cabinet fronts')} />
         <CabinetHingeControls showAngles layout={layout} onChange={next => update(next, 'Configure cabinet hinge')} />
         <p role="status" className={issues.size ? 'text-red-300' : 'text-emerald-300'}>{issues.size ? `${issues.size} parts need attention` : 'No collisions or unsupported objects'}</p>
         <div className="space-y-1" aria-label="Cabinet parts">{[...layout.panels, ...layout.contents].map(p => <button key={p.id} aria-label={p.name} aria-pressed={p.id === selected} className={`block w-full rounded border p-2 text-left ${p.id === selected ? 'border-sky-400 bg-sky-900/40' : 'border-slate-700'} ${issues.has(p.id) ? 'text-red-300' : ''}`} onClick={() => select(p.id)}>{p.name}{issues.has(p.id) && <small className="block">{issues.get(p.id)!.join(', ')}</small>}</button>)}</div>
@@ -149,7 +153,7 @@ function CabinetWorkspace({ original, onCancel, onDone }: { original: Furniture;
           <label className="block">{panel.depth.mode === 'fit' ? 'Front setback (cm)' : 'Fixed depth (cm)'}<input aria-label={panel.depth.mode === 'fit' ? 'Front setback (cm)' : 'Fixed depth (cm)'} className="w-full bg-slate-800 p-1" type="number" min="0" step=".1" value={+(panel.depth.value * 100).toFixed(2)} onChange={e => editPanel({ depth: { ...panel.depth, value: Math.max(0, +e.target.value / 100) } })} /></label>
           {panel.kind === 'divider' && <button className="w-full rounded bg-sky-700 p-2" onClick={() => update(splitDivider(layout, size, panel.id), 'Split divider at shelves')}>Split divider at shelves</button>}
         </div>}
-        {content && <div className="p-3 border-b border-slate-700"><label>Supporting surface<select aria-label="Supporting shelf" className="w-full bg-slate-800 p-1" value={content.supportId ?? 'none'} onChange={e => update({ ...layout, contents: layout.contents.map(o => o.id === content.id ? { ...o, supportId: e.target.value === 'none' ? undefined : e.target.value, position: { ...o.position, y: 0 } } : o) })}><option value="none">No attachment</option><option value="base">Cabinet base</option>{layout.panels.filter(p => p.kind === 'shelf').map(p => <option key={p.id} value={p.id}>{p.name}</option>)}{layout.contents.filter(o => !contentDependsOn(layout, o.id, content.id)).map(o => <option key={o.id} value={o.id}>On top of {o.name}</option>)}{cabinetLeaves(layout, size).map(l => cabinetBasket(layout, size, l)?.floor).filter(Boolean).map(b => <option key={b!.id} value={b!.id}>{b!.name}</option>)}</select></label>
+        {content && <div className="p-3 border-b border-slate-700"><label>Supporting surface<select aria-label="Supporting shelf" className="w-full bg-slate-800 p-1" value={content.supportId ?? 'none'} onChange={e => update({ ...layout, contents: layout.contents.map(o => o.id === content.id ? { ...o, supportId: e.target.value === 'none' ? undefined : e.target.value, position: { ...o.position, y: 0, ...(e.target.value.startsWith('drawer_') ? { x: Math.max(.015, o.position.x), z: Math.max(.015, o.position.z) } : {}) } } : o) })}><option value="none">No attachment</option><option value="base">Cabinet base</option>{layout.panels.filter(p => p.kind === 'shelf').map(p => <option key={p.id} value={p.id}>{p.name}</option>)}{cabinetDrawerTrays(layout, size).map(d => <option key={d.floor.id} value={d.floor.id}>{d.floor.name}</option>)}{layout.contents.filter(o => !contentDependsOn(layout, o.id, content.id)).map(o => <option key={o.id} value={o.id}>On top of {o.name}</option>)}{cabinetLeaves(layout, size).map(l => cabinetBasket(layout, size, l)?.floor).filter(Boolean).map(b => <option key={b!.id} value={b!.id}>{b!.name}</option>)}</select></label>
           <div className="mt-3 space-y-2">
             <label className="block">Copies to stack<input aria-label="Copies to stack" type="number" min="1" max={Math.min(20, 256 - layout.contents.length)} step="1" value={stackCopies} className="w-full bg-slate-800 p-1" onChange={e => setStackCopies(Math.max(1, Math.min(20, Math.floor(Number(e.target.value) || 1))))} /></label>
             <button className="w-full rounded bg-sky-700 p-2 disabled:opacity-40" disabled={layout.contents.length + stackCopies > 256} onClick={() => { const ids = Array.from({ length: stackCopies }, () => createElementId()); update(stackContent(layout, content.id, ids), 'Stack cabinet objects'); select(ids[ids.length - 1]); }}>Stack copies above</button>
@@ -160,6 +164,6 @@ function CabinetWorkspace({ original, onCancel, onDone }: { original: Furniture;
         <Inspector item={inspected} className="w-full bg-slate-900 p-4 text-xs" onClose={() => select(null)} onOpenReplaceModal={() => { setReplacing(true); setAdding(true); }} interior={{ panel: !!panel, sections: [...sections], section, selectSection: setSection, transform, finish, remove: () => { update(removeCabinetPart(layout, size, inspected.id), 'Delete cabinet part'); select(null); } }} />
       </aside>}
     </div>
-    <AssetReplacementModal isOpen={adding} mode="add" onClose={() => { setAdding(false); setPlaceOnSelected(false); }} onSelectAsset={chooseAsset} filterAsset={asset => cabinetDoorCount(asset) === undefined} />
+    <AssetReplacementModal isOpen={adding} mode="add" onClose={() => { setAdding(false); setPlaceOnSelected(false); setSupportTarget(undefined); }} onSelectAsset={chooseAsset} filterAsset={asset => cabinetDoorCount(asset) === undefined} />
   </div>;
 }

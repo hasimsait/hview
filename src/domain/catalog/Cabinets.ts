@@ -1,5 +1,8 @@
 import type { AssetDefinition } from './AssetDefinition';
 export const CABINET_ASSETS: readonly AssetDefinition[] = [
+  ['cabinet_drawers_three', 'Three-Drawer Base Cabinet', .6, .8, .6, 1],
+  ['cabinet_drawers_deep', 'Deep Pan Drawer Base Cabinet', .6, .8, .6, 1],
+  ['cabinet_wardrobe_drawers', 'Wardrobe with Internal Pull-Out Drawers', .9, 2.1, .6, 2],
   ['cabinet_base_single', 'Single-Door Base Cabinet', .6, .8, .6, 1],
   ['cabinet_base_double', 'Double-Door Base Cabinet', .8, .8, .6, 2],
   ['cabinet_wall_single', 'Single-Door Wall Cabinet', .4, .7, .35, 1],
@@ -14,7 +17,7 @@ export const CABINET_ASSETS: readonly AssetDefinition[] = [
 export function cabinetDoorCount(asset: AssetDefinition | undefined): 0 | 1 | 2 | undefined {
   if (!asset) return undefined;
   if (asset.cabinetDoors !== undefined) return asset.cabinetDoors;
-  if (['ward_double', 'kitchen_box_door_double', 'kitchen_box_wall'].includes(asset.key)) return 2;
+  if (['mirror_cabinet_upper', 'ward_double', 'kitchen_box_door_double', 'kitchen_box_wall'].includes(asset.key)) return 2;
   if (asset.key === 'ward_single') return 1;
   if (['open_shelving', 'hemnes_bookcase', 'billy_bookcase'].includes(asset.recipe ?? asset.key) || asset.key.startsWith('hemnes_') || asset.key.startsWith('billy_')) return 0;
   if (asset.furnitureProduct && ['wardrobe', 'bookcase', 'sideboard', 'bedside', 'shoe_cabinet'].includes(asset.furnitureProduct.kind) && (asset.furnitureProduct.doors ?? 0) <= 2) return (asset.furnitureProduct.doors ?? 0) as 0 | 1 | 2;

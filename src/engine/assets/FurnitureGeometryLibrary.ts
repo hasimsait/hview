@@ -1,3 +1,4 @@
+import { buildDailyLife } from './builders/DailyLifeBuilder';
 import type { AssetRecipeId } from '../../domain/catalog/AssetRecipes';
 import type { AssetBuilderFn } from "./builders/AssetBuildContext";
 import * as Bathroom from "./builders/BathroomBuilders";
@@ -19,6 +20,7 @@ import { buildHouseholdDetail } from './builders/HouseholdDetailBuilder';
 import { buildSoftFurnishing } from './builders/SoftFurnishingBuilder';
 
 export const FURNITURE_GEOMETRY: Readonly<Record<AssetRecipeId, AssetBuilderFn>> = {
+  daily_life: buildDailyLife,
   kitchen_worktop: buildWorktop,
   cabinet_fit_object: buildCabinetFitObject,
   modular_cabinet: buildCabinet,

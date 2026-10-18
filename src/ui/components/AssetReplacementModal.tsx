@@ -20,6 +20,10 @@ const CATEGORIES = [
   { id: 'architecture', label: 'Architectural Finishes' },
   { id: 'lighting', label: 'Lighting' },
   { id: 'household', label: 'Everyday Objects' },
+  { id: 'pets', label: 'Pet Care' },
+  { id: 'wardrobe_items', label: 'Clothing & Shoes' },
+  { id: 'vanity', label: 'Vanity Accessories' },
+  { id: 'drawer_inserts', label: 'Drawer Inserts' },
   { id: 'practical', label: 'Practical Details' },
   { id: 'textiles', label: 'Soft Furnishings' },
   { id: 'bathroom', label: 'Bathroom & Accessories' },
@@ -63,7 +67,11 @@ export const AssetReplacementModal: React.FC<AssetReplacementModalProps> = ({
     const matchesCategory =
       selectedCategory === 'all' || (selectedCategory === 'lighting' ? !!asset.capabilities?.lighting
         : selectedCategory === 'cabinets' ? asset.cabinetDoors !== undefined
-        : selectedCategory === 'household' ? !!asset.householdDetail && !asset.householdDetail.practical
+        : selectedCategory === 'pets' ? !!asset.dailyLife?.kind.startsWith('cat_')
+        : selectedCategory === 'wardrobe_items' ? !!asset.dailyLife && /^(garment|boots|sneakers)_/.test(asset.dailyLife.kind)
+        : selectedCategory === 'vanity' ? asset.collection === 'Vanity accessories'
+        : selectedCategory === 'drawer_inserts' ? asset.collection === 'Drawer inserts'
+        : selectedCategory === 'household' ? (!!asset.householdDetail && !asset.householdDetail.practical) || !!asset.dailyLife
         : selectedCategory === 'practical' ? !!asset.householdDetail?.practical
         : selectedCategory === 'textiles' ? !!asset.softFurnishing || /^(Rugs|Cushions)$/.test(asset.collection ?? '') : asset.category.toLowerCase() === selectedCategory.toLowerCase());
     const query = searchable(searchQuery.trim());

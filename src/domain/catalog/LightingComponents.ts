@@ -2,7 +2,7 @@ import type { AssetDefinition, AssetPlacement } from './AssetDefinition';
 
 export interface LightingComponentModel {
   kind: 'downlight' | 'surface_spot' | 'track' | 'pendant' | 'wall_light' | 'cabinet_light' | 'cove_light';
-  style: 'round' | 'square' | 'double' | 'straight' | 'l_shape' | 'dome' | 'globe' | 'linear' | 'up_down' | 'opal' | 'bar' | 'strip';
+  style: 'round' | 'square' | 'double' | 'straight' | 'l_shape' | 'dome' | 'globe' | 'linear' | 'up_down' | 'opal' | 'bar' | 'strip' | 'vertical';
   color: string;
 }
 const ceiling = (height: number): AssetPlacement => ({ mount: 'ceiling', ceilingOffset: height });
@@ -17,6 +17,7 @@ function fixture(key: string, name: string, collection: string, model: LightingC
   };
 }
 export const LIGHTING_COMPONENTS: readonly AssetDefinition[] = [
+  fixture('cabinet_vertical', 'Cabinet Interior Vertical LED Profile', 'Under-cabinet lighting', { kind: 'cabinet_light', style: 'vertical', color: '#b7bec1' }, [.018, 1.2, .015], { mount: 'surface', defaultElevation: .15 }, 'Vertical aluminum channel with a continuous diffuser for wardrobe and cabinet side panels.'),
   fixture('downlight_round', 'Round Recessed LED Downlight', 'Recessed downlights', { kind: 'downlight', style: 'round', color: '#f3f1eb' }, [.10, .025, .10], ceiling(.025), 'Thin circular trim and recessed diffuser with a downward light beam.'),
   fixture('downlight_square', 'Square Recessed LED Downlight', 'Recessed downlights', { kind: 'downlight', style: 'square', color: '#f3f1eb' }, [.10, .025, .10], ceiling(.025), 'Square ceiling trim with a recessed lens and a soft-edged downward beam.'),
   fixture('spot_single', 'Surface-Mounted Cylinder Spotlight', 'Spotlights', { kind: 'surface_spot', style: 'round', color: '#25272b' }, [.08, .14, .08], ceiling(.14), 'Cylindrical ceiling housing, anti-glare baffle and a working downward spotlight.'),
