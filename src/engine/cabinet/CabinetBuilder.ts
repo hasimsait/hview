@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import type { AssetBuildContext } from '../assets/builders/AssetBuildContext';
 import { StandardFurniture, type Furniture } from '../../domain/elements/Furniture';
-import { cabinetDoorPose, defaultCabinet, footprint, interiorOrigin, resolveContent, resolvePanel, type CabinetBox } from '../../domain/cabinet/CabinetLayout';
+import { cabinetDoorPose, contentSupportRoot, defaultCabinet, footprint, interiorOrigin, resolveContent, resolvePanel, type CabinetBox } from '../../domain/cabinet/CabinetLayout';
 
 import { cabinetBasket, cabinetHasDoors, cabinetLeaves } from '../../domain/cabinet/CabinetFronts';
 import { bookcaseMaterials } from '../assets/builders/BookcaseMaterials';
@@ -66,7 +66,8 @@ export function buildCabinet(c: AssetBuildContext, buildContent?: (entity: Furni
     const entity = new StandardFurniture({ id: content.id, assetKey: content.assetKey, name: content.assetKey, displayName: content.name, category: 'decor', position: { x: 0, y: 0, z: 0 }, rotationY: 0, dimensions: content.dimensions, finish: content.finish, sectionFinishes: content.sectionFinishes });
     const model = buildContent?.(entity);
     if (model) { model.traverse(child => { child.userData.cabinetPart = content.id; child.userData.cabinetContent = content; }); group.add(model); }
-    const pivot = content.supportId ? pivots.get(content.supportId) : undefined;
+    const rootSupport = contentSupportRoot(layout, content);
+    const pivot = rootSupport ? pivots.get(rootSupport) : undefined;
     if (pivot) {
       const offset = pivot.userData.closedPosition;
       group.position.sub(new THREE.Vector3(offset.x, offset.y, offset.z)); group.userData.cabinetClosedOffset = offset; pivot.add(group);

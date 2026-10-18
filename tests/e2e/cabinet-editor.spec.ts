@@ -125,7 +125,7 @@ test('concealed hinge travel clears a flush enclosure and collision checks follo
   expect((await snapshot(page))!.data.cabinet.doors.angles).toEqual([90, 0]);
 });
 
-test('offline editor saves a cabinet layout and iPad displays the same contents and working doors', async ({ page, context, request }, info) => {
+test('offline editor saves stacked rolls and folded clothes and iPad displays the same contents and working doors', async ({ page, context, request }, info) => {
   const template = await (await request.get('/hview_editor_template.html')).text(), html = packStandaloneHtml(setScriptContent(template, 'plan-data', escapeScriptJson(JSON.stringify(fixture()))));
   const url = 'http://127.0.0.1:3100/__offline__/cabinet.html';
   await context.route(/^https?:/, route => route.request().url() === url ? route.fulfill({ status: 200, contentType: 'text/html', body: html }) : route.abort());
@@ -133,6 +133,23 @@ test('offline editor saves a cabinet layout and iPad displays the same contents 
   await expect.poll(async () => (await snapshot(page))?.status).toBe('ready');
   await selectCabinet(page); await page.getByRole('button', { name: 'Edit layout', exact: true }).click(); await expect.poll(async () => (await snapshot(page, true))?.status).toBe('ready');
   await page.getByRole('button', { name: 'Shelf 1', exact: true }).click(); await chooseObject(page, 'Toilet Paper Roll');
+  await page.getByLabel('Copies to stack', { exact: true }).fill('2');
+  await page.getByRole('button', { name: 'Stack copies above', exact: true }).click();
+  let stacked = (await snapshot(page, true))!.data.cabinet.contents;
+  expect(stacked).toHaveLength(3);
+  expect(stacked[1].supportId).toBe(stacked[0].id); expect(stacked[2].supportId).toBe(stacked[1].id);
+  await page.getByRole('button', { name: 'Undo layout', exact: true }).click();
+  expect((await snapshot(page, true))!.data.cabinet.contents).toHaveLength(1);
+  await page.getByRole('button', { name: 'Redo layout', exact: true }).click();
+  await page.getByRole('button', { name: 'Shelf 2', exact: true }).click();
+  await chooseObject(page, '5 Folded T-shirts');
+  const pile = (await snapshot(page, true))!.data.cabinet.contents.at(-1);
+  await page.getByRole('button', { name: 'Place another object on top', exact: true }).click();
+  await page.getByPlaceholder('Search assets (e.g. towel, fan, sconce, bed, sink)...').fill('Folded Sweatshirt');
+  await page.getByRole('button').filter({ has: page.getByRole('heading', { name: 'Folded Sweatshirt', exact: true }) }).click();
+  expect((await snapshot(page, true))!.data.cabinet.contents.at(-1).supportId).toBe(pile.id);
+  expect((await snapshot(page, true))!.red).toEqual([]);
+  await page.screenshot({ path: info.outputPath('stacked-clothes-preview.png') });
   await page.getByLabel('Cabinet door 1 hinge type', { exact: true }).selectOption('fully-cranked');
   await page.getByLabel('Cabinet door 1 hinge travel (mm)', { exact: true }).fill('25');
   await page.getByRole('button', { name: 'Done', exact: true }).click(); await page.getByLabel('Cabinet door 1 angle', { exact: true }).fill('105');

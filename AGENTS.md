@@ -1,5 +1,9 @@
 # HView contributor instructions
 
+## English-only repository content
+
+All new code, identifiers, comments, documentation, asset names, descriptions, aliases, and user-facing text must be in English. Translate Turkish prompts into English requirements; never copy Turkish prompt text into repository content. Preserve existing user plan data unchanged.
+
 ## Always deliver the latest offline editor
 
 The user wants a ready-to-open offline editor at the end of every HView response. End every final response with a clickable Markdown workspace download link to the latest complete offline editor `.html` file. Make that link the final line, including for documentation-only changes and status responses.

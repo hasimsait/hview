@@ -1,12 +1,42 @@
 import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import type { AssetBuildContext } from '../assets/builders/AssetBuildContext';
 import { accessoryParts } from '../assets/builders/IkeaAccessoryBuilder';
 export function buildCabinetFitObject(c: AssetBuildContext): void {
   const p = accessoryParts(c), key = c.entity.assetKey, m = c.materials;
   const plastic = c.coloredMaterial?.('#638987', m.whitePaint) ?? m.whitePaint;
-  if (key === 'fit_toilet_roll') {
-    p.lathe([[.14, 0], [.5, 0], [.5, 1], [.14, 1], [.14, 0]], m.whitePaint, 'Paper');
-    p.lathe([[.13, 0], [.14, 0], [.14, 1], [.13, 1], [.13, 0]], m.woodLight, 'Cardboard Core');
+  if (key.startsWith('fit_folded_')) {
+    const count = Number(key.match(/_(\d+)$/)?.[1] ?? 1), step = 1 / count;
+    const pants = key.includes('pants'), towel = key.includes('towel'), sweatshirt = key.includes('sweatshirt');
+    const palette = pants ? ['#344458', '#555c66', '#aa9273'] : towel ? ['#ded5c4', '#94aaa5', '#c4a69c', '#b2b9c2', '#f0e9dc'] : sweatshirt ? ['#a1aca8', '#d1b6a0', '#515d72', '#a57f7c', '#d1c9b8'] : ['#ece7de', '#7b91a2', '#b5bba8', '#bd9185', '#434c5e'];
+    const garment = pants ? 'Pants' : towel ? 'Towel' : sweatshirt ? 'Sweatshirt' : 'T-shirt';
+    for (let i = 0; i < count; i++) {
+      const section = `${garment} ${i + 1}`, material = c.coloredMaterial?.(palette[i % palette.length], m.fabricLight) ?? m.fabricLight;
+      const y = i * step, shift = count > 1 ? (i % 2 ? .012 : -.012) : 0;
+      const rounded = (x: number, cy: number, z: number, w: number, h: number, d: number) => p.add(new RoundedBoxGeometry(w, h, d, 2, Math.min(h / 3, .035)), material, section, x, cy, z);
+      rounded(shift, y + step * .46, 0, .96, step * .92, .96);
+      if (pants) {
+        // Folded legs, top waistband and a small visible pocket seam.
+        rounded(shift, y + step * .93, -.19, .88, step * .10, .52);
+        p.box(shift, y + step * .94, .04, .008, step * .025, .81, m.fabricDark, section);
+        p.box(shift + .24, y + step * .985, -.30, .20, step * .02, .012, m.fabricDark, section);
+      } else if (towel) {
+        p.box(shift, y + step * .30, .482, .88, step * .035, .007, m.fabricLight, section);
+        p.box(shift, y + step * .65, .482, .88, step * .035, .007, m.fabricLight, section);
+      } else {
+        // A folded collar and tucked sleeve flaps distinguish clothing from boxes.
+        for (const x of [-.31, .31]) rounded(shift + x, y + step * .91, -.04, .25, step * .10, .65);
+        p.ring(.065, .009 * step, material, section, shift, y + step * .98, -.30);
+        p.box(shift, y + step * .15, .482, .85, step * .035, .007, m.fabricDark, section);
+      }
+    }
+  } else if (key === 'fit_toilet_roll' || key === 'fit_toilet_rolls_3') {
+    const count = key === 'fit_toilet_rolls_3' ? 3 : 1;
+    for (let i = 0; i < count; i++) {
+      const h = .995 / count;
+      p.lathe([[.14, 0], [.5, 0], [.5, h], [.14, h], [.14, 0]], m.whitePaint, 'Paper', 0, i / count);
+      p.lathe([[.13, 0], [.14, 0], [.14, h], [.13, h], [.13, 0]], m.woodLight, 'Cardboard Core', 0, i / count);
+    }
   } else if (key === 'fit_mop_set' || key === 'fit_spin_mop_set') {
     const spin = key === 'fit_spin_mop_set', red = c.coloredMaterial?.('#c62832', m.whitePaint) ?? plastic;
     const bh = Math.min(.30 / c.h, .40);
