@@ -98,6 +98,8 @@ This contradicts the user's request to fix door collisions: a sliding door can p
 
 **Required verification:** obstacles hit only in the middle of the path, both slide directions, clear travel, endpoint contact, and identical final transforms before and after a check. Ordinary hinged doors must retain their behavior.
 
+**Implemented result:** sliding leaves and handles now share a translation target. The sampler follows their horizontal travel and restores the final pose after an obstruction. The panel travels in front of the jamb rather than through its frame, and the target does not enable an inappropriate rotation gizmo. Tests cover both slide directions, a handle obstruction between clear endpoint poses, clear travel past its own jamb, clamped openness, and retained local leaf/handle transforms. All 35 sliding/opening/layout unit cases passed; the offline editor was rebuilt.
+
 ### 05 — Medium: small cabinet fillers produce disproportionate geometry and draw calls
 
 **Files:** `src/engine/cabinet/CabinetFitObjectBuilder.ts`, `src/engine/cabinet/CabinetBuilder.ts`.

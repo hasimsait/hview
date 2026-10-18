@@ -1081,14 +1081,18 @@ export class SceneEngine implements ISceneService {
     // Opening angles are unsigned in the document; hinge orientation supplies sign.
     const from = previousAngle === undefined ? final : (pivot.userData.swingSign ?? Math.sign(final || 1)) * previousAngle;
     const sliding = pivot.userData.slide && door !== undefined && item instanceof Furniture && item.cabinet;
+    const roomSlide = item instanceof Opening && item.type === 'door_coupe' && pivot.userData.slideAxis === 'x';
+    const roomSlideFrom = previousAngle === undefined ? finalPosition.x : pivot.userData.slideSign * pivot.userData.slideDistance * THREE.MathUtils.clamp(previousAngle / (Math.PI / 2), 0, 1);
     const slideFinal = sliding ? cabinetLeaves(item.cabinet!, item.dimensions)[door!].angle : 0;
     const slideFrom = previousAngle === undefined ? slideFinal : previousAngle * 180 / Math.PI;
-    const steps = sliding ? Math.max(1, Math.ceil(Math.abs(slideFinal - slideFrom) / 2)) : Math.max(1, Math.ceil(Math.abs(final - from) / (Math.PI / 90)));
+    const steps = roomSlide ? Math.max(1, Math.ceil(Math.abs(finalPosition.x - roomSlideFrom) / .02))
+      : sliding ? Math.max(1, Math.ceil(Math.abs(slideFinal - slideFrom) / 2)) : Math.max(1, Math.ceil(Math.abs(final - from) / (Math.PI / 90)));
     let collides = false; this.scene.updateMatrixWorld(true);
     const query = this.collisionFeedback.prepare(pivot, this.picking.getCandidates());
     for (let step = 1; step <= steps && !collides; step++) {
       const angle = from + (final - from) * step / steps;
-      pivot.rotation[axis] = angle;
+      if (roomSlide) pivot.position.x = THREE.MathUtils.lerp(roomSlideFrom, finalPosition.x, step / steps);
+      else pivot.rotation[axis] = angle;
       if (door !== undefined && item instanceof Furniture && item.cabinet) {
         const pose = cabinetDoorPose(item.dimensions, item.cabinet, door, sliding ? slideFrom + (slideFinal - slideFrom) * step / steps : Math.abs(angle) * 180 / Math.PI);
         pivot.position.set(pose.position.x, pose.position.y, pose.position.z); pivot.rotation.set(pose.rotationX, pose.rotationY, 0);

@@ -7,7 +7,6 @@ import { CurtainMeshBuilder,type CurtainMount } from './CurtainMeshBuilder';
 
 export class OpeningMeshBuilder {
   private readonly leaves = new WeakMap<THREE.Object3D, THREE.Mesh>();
-  private readonly slideHandles = new WeakMap<THREE.Object3D, THREE.Mesh>();
   private readonly pivots = new WeakMap<THREE.Object3D, THREE.Object3D>();
   private readonly frames = new WeakMap<THREE.Object3D, THREE.Mesh[]>();
   interactionTarget(root: THREE.Object3D): THREE.Object3D | undefined { return this.pivots.get(root); }
@@ -185,22 +184,25 @@ export class OpeningMeshBuilder {
     if (opening.type === 'door_coupe') {
       // Sliding door (door_coupe): offset leaf along frame based on openAngleDeg (0 = closed, 90 = open)
       const openRatio = Math.max(0, Math.min(1, openAngleDeg / 90));
+      const slider = new THREE.Group(); slider.name = `doorSlider_${opening.id}`;
+      slider.userData = { slideAxis: 'x', slideSign: hingeOnLeft ? 1 : -1, slideDistance: doorLeafW };
+      slider.position.x = (hingeOnLeft ? 1 : -1) * doorLeafW * openRatio;
+      this.pivots.set(parent, slider); parent.add(slider);
       const leafGeom = new THREE.BoxGeometry(doorLeafW, doorLeafH, leafThick);
       const leafMesh = new THREE.Mesh(leafGeom, leafMat);
       this.leaves.set(parent, leafMesh);
       leafMesh.name = `doorLeaf_${opening.id}`;
-      const slideOffset = hingeOnLeft ? doorLeafW * openRatio : -doorLeafW * openRatio;
-      const zOffset = swingSide === 'r' ? leafThick * 0.6 : -leafThick * 0.6;
-      leafMesh.position.set(slideOffset, reveal + doorLeafH / 2, zOffset);
+      // The panel travels in front of the jamb, rather than through its solid frame.
+      const zOffset = (swingSide === 'r' ? 1 : -1) * (frameDepth / 2 + leafThick / 2 + .003);
+      leafMesh.position.set(0, reveal + doorLeafH / 2, zOffset);
       leafMesh.castShadow = true;
-      parent.add(leafMesh);
+      leafMesh.userData.isSwingLeaf = true; slider.add(leafMesh);
 
       // Handle recess
       const handleGeom = new THREE.BoxGeometry(0.02, 0.14, leafThick + 0.005);
       const handleMesh = new THREE.Mesh(handleGeom, this.handleMaterial);
-      handleMesh.position.set(slideOffset + (hingeOnLeft ? -doorLeafW * 0.35 : doorLeafW * 0.35), 1.0, zOffset);
-      parent.add(handleMesh);
-      this.slideHandles.set(parent, handleMesh);
+      handleMesh.position.set(hingeOnLeft ? -doorLeafW * 0.35 : doorLeafW * 0.35, 1.0, zOffset);
+      handleMesh.userData.isSwingCollider = true; slider.add(handleMesh);
       return;
     }
 
@@ -288,14 +290,11 @@ export class OpeningMeshBuilder {
     }
     leaf.material = opening.finish && this.finishService ? this.finishService.getMaterial(opening.finish, { projection: 'local' }) : this.doorMaterial;
     const left = (opening.swingSide ?? 'r') === (opening.hingeSide ?? 'r');
-    if (pivot) {
+    if (pivot?.userData.slideAxis === 'x') {
+      pivot.position.x = (left ? 1 : -1) * pivot.userData.slideDistance * Math.max(0, Math.min(1, (opening.openAngle ?? 40) / 90));
+    } else if (pivot) {
       const sign = left ? (opening.swingSide === 'r' ? -1 : 1) : (opening.swingSide === 'r' ? 1 : -1);
       pivot.rotation.y = sign * (opening.openAngle ?? 40) * Math.PI / 180;
-    } else {
-      const offset = (left ? 1 : -1) * ((leaf.geometry as THREE.BoxGeometry).parameters.width) * Math.max(0, Math.min(1, (opening.openAngle ?? 40) / 90));
-      const delta = offset - leaf.position.x;
-      leaf.position.x = offset;
-      const handle = this.slideHandles.get(root); if (handle) handle.position.x += delta;
     }
   }
 
