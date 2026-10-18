@@ -1,7 +1,8 @@
 import { finite,immutable,positive } from '../model/Immutable';
 import type { SurfaceFinishConfig,WallData,WallFrameStyle,WallSide } from '../model/PlanData';
 import { SurfaceFinish } from '../model/SurfaceFinish';
-import type { Opening } from './Opening';
+import { WindowOpening, type Opening } from './Opening';
+import { defaultWallCornice, validateWallCornice, type WallCorniceConfig } from '../model/WallCornice';
 import { PlanElement,type PlanElementVisitor } from './PlanElement';
 
 export class Wall extends PlanElement {
@@ -14,8 +15,19 @@ export class Wall extends PlanElement {
     positive(data.thickness, 'Wall thickness'); positive(data.height, 'Wall height');
     for (const point of [data.p1, data.p2]) { finite(point.x, 'Wall X'); finite(point.y, 'Wall Y'); }
     const { openings: _transportOpenings, ...shape } = data;
+    // Old plans attached a short cornice to each window. Consolidate them once on the host wall.
+    const windows = openings.filter((o): o is WindowOpening => o instanceof WindowOpening);
+    if (shape.cornice === undefined && windows.length) {
+      const visible = windows.some(w => w.pelmetState === 'visible'), hidden = windows.some(w => w.pelmetState === 'hidden');
+      shape.cornice = { ...defaultWallCornice(true), profile: visible || hidden ? 'cove' : 'none', ...(hidden && !visible ? { hidden: true } : {}) };
+    }
+    if (shape.cornice) validateWallCornice(shape.cornice);
     this.state = immutable(shape);
-    this.openings = Object.isFrozen(openings) ? openings : Object.freeze([...openings]);
+    const migrated = openings.some(o => o instanceof WindowOpening && o.toData().pelmetState !== undefined) ? openings.map(o => {
+      if (!(o instanceof WindowOpening)) return o;
+      const { pelmetState: _legacyCornice, ...clean } = o.toData(); return new WindowOpening(clean);
+    }) : openings;
+    this.openings = Object.isFrozen(migrated) ? migrated : Object.freeze([...migrated]);
     if (openings.some(opening => opening.wallId !== this.id)) throw new Error('Opening belongs to another wall');
     Object.freeze(this);
   }
@@ -34,6 +46,8 @@ export class Wall extends PlanElement {
   get finishEdgeEnd() { return this.state.finishEdgeEnd; }
   get finishEdgeTop() { return this.state.finishEdgeTop; }
   get finishBaseboard() { return this.state.finishBaseboard; }
+  get finishSill() { return this.state.finishSill; }
+  get cornice() { return this.state.cornice; }
   get roomIds(): readonly string[] | undefined { return this.state.roomIds; }
   get roomSideA() { return this.state.roomSideA; }
   get roomSideB() { return this.state.roomSideB; }
@@ -57,19 +71,23 @@ export class Wall extends PlanElement {
     } else if (side === 'both') {
       Object.assign(next, {
         finish, finishSideA: finish, finishSideB: finish, finishEdges: finish,
-        finishEdgeStart: finish, finishEdgeEnd: finish, finishEdgeTop: finish
+        finishEdgeStart: finish, finishEdgeEnd: finish, finishEdgeTop: finish, finishSill: finish
       });
     } else if (side === 'edges') {
-      Object.assign(next, { finishEdges: finish, finishEdgeStart: finish, finishEdgeEnd: finish, finishEdgeTop: finish });
+      Object.assign(next, { finishEdges: finish, finishEdgeStart: finish, finishEdgeEnd: finish, finishEdgeTop: finish, finishSill: finish });
+    } else if (side === 'cornice') {
+      next.cornice = { ...(this.cornice ?? defaultWallCornice(this.openings.some(o => o instanceof WindowOpening))), profile: this.cornice?.profile === 'none' ? 'cove' : this.cornice?.profile ?? 'cove', finish };
     } else {
       const field = {
-        edge_start: 'finishEdgeStart', edge_end: 'finishEdgeEnd', edge_top: 'finishEdgeTop',
+        edge_start: 'finishEdgeStart', edge_end: 'finishEdgeEnd', edge_top: 'finishEdgeTop', sill: 'finishSill',
         baseboard: 'finishBaseboard', edge_bottom: 'finishBaseboard'
       } as const;
       next[field[side]] = finish;
     }
     return new Wall({ ...next, openings: [] }, this.openings);
   }
+  withCornice(cornice: WallCorniceConfig): Wall { return new Wall({ ...this.state, cornice, openings: [] }, this.openings); }
+  withBaseboard(finish?: SurfaceFinishConfig): Wall { return new Wall({ ...this.state, finishBaseboard: SurfaceFinish.optional(finish), openings: [] }, this.openings); }
 
   withFrame(frameStyle: WallFrameStyle, frameColor: string): Wall {
     return new Wall({ ...this.state, frameStyle, frameColor, openings: [] }, this.openings);

@@ -94,7 +94,7 @@ export interface IInteractionService {
 export interface ISurfaceFinishService {
   getMaterial(
     config: SurfaceFinishConfig,
-    options?: { side?: THREE.Side; depthWrite?: boolean; projection?: 'world' | 'local' }
+    options?: { side?: THREE.Side; depthWrite?: boolean; projection?: 'world' | 'local'; foregroundOcclusion?: boolean }
   ): THREE.Material;
   getTileTexture(variant?: string): THREE.Texture;
   getLambriTexture(variant?: string, slatColor?: string, backingColor?: string): THREE.Texture;

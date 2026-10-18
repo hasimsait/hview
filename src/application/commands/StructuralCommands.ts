@@ -1,8 +1,12 @@
 import { Column } from '../../domain/elements/Column';
-import { Door,Opening,SlidingDoor } from '../../domain/elements/Opening';
-import type { ColumnSide,RoomData,SurfaceFinishConfig,WallFrameStyle,WallSide } from '../../domain/model/PlanData';
+import { Door,Opening,SlidingDoor,WindowOpening } from '../../domain/elements/Opening';
+import type { ColumnSide,CurtainState,RoomData,SurfaceFinishConfig,WallFrameStyle,WallSide } from '../../domain/model/PlanData';
 import type { PlanDocument } from '../../domain/model/PlanDocument';
 import type { EditorCommand } from './EditorCommand';
+import type { WindowDressingConfig } from '../../domain/model/WindowDressing';
+import { roomCeilingMaximum } from '../../domain/model/Ceiling';
+import { defaultWallCornice, type WallCorniceConfig } from '../../domain/model/WallCornice';
+import type { BalconyRailingConfig } from '../../domain/model/BalconyRailing';
 
 export class SplitWall implements EditorCommand {
   readonly label = 'Split wall';
@@ -19,6 +23,19 @@ export class FinishWall implements EditorCommand {
   readonly label = 'Finish wall';
   constructor(private readonly id: string, private readonly finish: SurfaceFinishConfig, private readonly side: WallSide = 'both') { }
   execute(document: PlanDocument): PlanDocument { return document.replace(document.requireWall(this.id).withFinish(this.side, this.finish)); }
+}
+export class ConfigureWallCornice implements EditorCommand {
+  readonly label = 'Configure wall cornice';
+  constructor(private readonly id: string, private readonly cornice: WallCorniceConfig) { }
+  execute(document: PlanDocument): PlanDocument { return document.replace(document.requireWall(this.id).withCornice(this.cornice)); }
+}
+export class SetWallSkirting implements EditorCommand {
+  readonly label = 'Configure skirting boards';
+  constructor(private readonly id: string, private readonly enabled: boolean) { }
+  execute(document: PlanDocument): PlanDocument {
+    const wall = document.requireWall(this.id);
+    return document.replace(wall.withBaseboard(this.enabled ? wall.finishBaseboard ?? { type: 'paint', color: '#f3f1ea' } : undefined));
+  }
 }
 export class FinishColumn implements EditorCommand {
   readonly label = 'Finish column';
@@ -54,6 +71,20 @@ export class ConfigureCeiling implements EditorCommand {
   constructor(private readonly id: string, private readonly type: RoomData['ceilingType']) { }
   execute(document: PlanDocument): PlanDocument { return document.replace(document.requireRoom(this.id).withCeiling(this.type)); }
 }
+export class ConfigureBalconyRailing implements EditorCommand {
+  readonly label = 'Configure balcony railing';
+  constructor(private readonly id: string, private readonly config?: BalconyRailingConfig) { }
+  execute(document: PlanDocument): PlanDocument { return document.replace(document.requireRoom(this.id).withRailing(this.config)); }
+}
+export class SetCeilingHeight implements EditorCommand {
+  readonly label = 'Set ceiling height';
+  constructor(private readonly id: string, private readonly height?: number) { }
+  execute(document: PlanDocument): PlanDocument {
+    const room = document.requireRoom(this.id);
+    if (this.height !== undefined && this.height > roomCeilingMaximum(room, document.totalHeight)) throw new Error('Ceiling height cannot exceed the shared maximum');
+    return document.replace(room.withCeilingHeight(this.height));
+  }
+}
 export class OpenDoor implements EditorCommand {
   readonly label = 'Open door';
   constructor(private readonly id: string, private readonly degrees: number) { }
@@ -79,6 +110,46 @@ export class FinishOpening implements EditorCommand {
     const opening = document.require(this.id);
     if (!(opening instanceof Opening)) throw new Error('Expected an opening');
     return document.replace(opening.withFinish(this.finish));
+  }
+}
+
+export class ColorOpeningFrame implements EditorCommand {
+  readonly label = 'Color opening frame';
+  constructor(private readonly id: string, private readonly color?: string) { }
+  execute(document: PlanDocument): PlanDocument {
+    const opening = document.require(this.id);
+    if (!(opening instanceof Opening)) throw new Error('Expected an opening');
+    return document.replace(opening.withFrameColor(this.color));
+  }
+}
+
+export class SetWindowCurtains implements EditorCommand {
+  readonly label = 'Configure window curtains';
+  constructor(private readonly id: string, private readonly state: CurtainState) { }
+  execute(document: PlanDocument): PlanDocument {
+    const window = document.require(this.id);
+    if (!(window instanceof WindowOpening)) throw new Error('Expected a window');
+    return document.replace(window.withCurtainState(this.state));
+  }
+}
+export class ConfigureWindowDressing implements EditorCommand {
+  readonly label = 'Configure window dressing';
+  constructor(private readonly id: string, private readonly config?: WindowDressingConfig) { }
+  execute(document: PlanDocument): PlanDocument {
+    const window = document.require(this.id);
+    if (!(window instanceof WindowOpening)) throw new Error('Expected a window');
+    return document.replace(window.withWindowDressing(this.config));
+  }
+}
+
+export class SetWindowPelmet implements EditorCommand {
+  readonly label = 'Configure ceiling cornice';
+  constructor(private readonly id: string, private readonly state: CurtainState) { }
+  execute(document: PlanDocument): PlanDocument {
+    const window = document.require(this.id);
+    if (!(window instanceof WindowOpening)) throw new Error('Expected a window');
+    const wall = document.requireWall(window.wallId), cornice = wall.cornice ?? defaultWallCornice(true);
+    return document.replace(wall.withCornice({ ...cornice, profile: this.state === 'removed' ? 'none' : cornice.profile === 'none' ? 'cove' : cornice.profile, hidden: this.state === 'hidden' }));
   }
 }
 

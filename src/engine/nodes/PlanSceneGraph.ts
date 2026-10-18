@@ -1,15 +1,18 @@
 import * as THREE from 'three';
 import { Column } from '../../domain/elements/Column';
 import { Furniture } from '../../domain/elements/Furniture';
-import { Opening } from '../../domain/elements/Opening';
+import { Opening, WindowOpening } from '../../domain/elements/Opening';
 import { Room } from '../../domain/elements/Room';
 import { Wall } from '../../domain/elements/Wall';
 import { WallRecess } from '../../domain/elements/WallRecess';
+import { roomCeilingHeight } from '../../domain/model/Ceiling';
+import { wallCorniceLayouts } from '../geometry/WallCorniceLayout';
+import { openRailingRuns } from '../../domain/model/BalconyRailing';
 import type { PlanDocument } from '../../domain/model/PlanDocument';
 import { FurnitureSceneNode } from './FurnitureSceneNode';
 import type { SceneNode } from './SceneNode';
 import type { SceneNodeFactory } from './SceneNodeFactory';
-import { ColumnSceneNode,OpeningSceneNode,WallSceneNode } from './StructuralSceneNodes';
+import { ColumnSceneNode,OpeningSceneNode,RoomSceneNode,WallSceneNode } from './StructuralSceneNodes';
 
 export interface SceneBuckets {
   walls: THREE.Group;
@@ -22,6 +25,8 @@ export interface SceneBuckets {
 /** Reconciles immutable elements into retained roots. Owns every node lifetime. */
 export class PlanSceneGraph {
   private readonly nodes = new Map<string, SceneNode>();
+  private corniceLayouts = new Map<string, string>();
+  private railingLayouts = new Map<string, string>();
 
   constructor(
     private readonly factory: SceneNodeFactory,
@@ -37,6 +42,17 @@ export class PlanSceneGraph {
   }
 
   reconcile(document: PlanDocument): void {
+    const railingWalls = [...document.walls, ...document.columns.map(column => column.wallShape(document.totalHeight))];
+    const railingLayouts = new Map(document.rooms.filter(room => room.railing).map(room => [room.id, JSON.stringify(openRailingRuns(room.polygon, railingWalls, room.railing!.edges))]));
+    const changedRailings = new Set([...railingLayouts.keys()].filter(id => railingLayouts.get(id) !== this.railingLayouts.get(id)));
+    this.railingLayouts = railingLayouts;
+    const layouts = new Map([...wallCorniceLayouts(document)].map(([id, layout]) => [id, JSON.stringify(layout)]));
+    const changedCornices = new Set([...new Set([...layouts.keys(), ...this.corniceLayouts.keys()])].filter(id => layouts.get(id) !== this.corniceLayouts.get(id)));
+    this.corniceLayouts = layouts;
+    const changedCeilings = new Set(document.rooms.filter(room => {
+      const previous = this.nodes.get(room.id)?.model;
+      return previous instanceof Room && roomCeilingHeight(previous, document.totalHeight) !== roomCeilingHeight(room, document.totalHeight);
+    }).map(room => room.id));
     const rebuildWalls = new Set<string>();
     for (const recess of document.recesses) {
       const previous = this.nodes.get(recess.id)?.model;
@@ -88,8 +104,12 @@ export class PlanSceneGraph {
       if (!node) {
         node = element.accept(this.factory);
         this.nodes.set(element.id, node);
+      } else if (node instanceof WallSceneNode && element instanceof Wall && changedCornices.has(element.id)) {
+        node.reconcile(element, true);
+      } else if (node instanceof RoomSceneNode && element instanceof Room && changedRailings.has(element.id)) {
+        node.reconcile(element, true);
       } else if (node.model !== element) {
-        node.reconcile(element);
+        (node as SceneNode).reconcile(element);
       }
 
       const bucket =
@@ -152,6 +172,12 @@ export class PlanSceneGraph {
       if (node instanceof WallSceneNode || node instanceof ColumnSceneNode) {
         node.rebuild();
       }
+    }
+    for (const element of document.allElements) {
+      if (!(element instanceof WindowOpening)) continue;
+      const wall = document.requireWall(element.wallId), roomId = wall.roomSideA ?? wall.roomSideB ?? wall.roomIds?.[0];
+      const node = this.nodes.get(element.id);
+      if (roomId && changedCeilings.has(roomId) && node instanceof OpeningSceneNode) node.rebuild();
     }
   }
 

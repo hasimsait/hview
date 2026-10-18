@@ -2,6 +2,8 @@ import { ViewMode } from '@core/types/services';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
+export const MAX_CAMERA_PITCH = Math.PI / 2 - .04;
+
 export interface CameraNavigationOptions {
   onInput?: () => void;
   moveSpeed?: number;      // Walking speed in meters/second (default: 2.8)
@@ -24,13 +26,43 @@ export class CameraNavigationController {
   private boundKeyUp: (e: KeyboardEvent) => void;
   private boundBlur: () => void;
 
+  private pointerElement: HTMLElement | SVGElement | null = null;
+  private mouseDrag: { id: number; x: number; y: number; controls: OrbitControls; enableRotate: boolean } | null = null;
+
+  private handlePointerDown = (event: Event): void => {
+    const e = event as PointerEvent;
+    const controls = this.getControls();
+    if (e.pointerType !== 'mouse' || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey ||
+        this.getViewMode() === 'topDown' || !controls?.enabled || !controls.enableRotate) return;
+    this.mouseDrag = { id: e.pointerId, x: e.clientX, y: e.clientY, controls, enableRotate: controls.enableRotate };
+    // Let OrbitControls continue handling pan/zoom and pointer capture, but replace orbit rotation.
+    controls.enableRotate = false;
+  };
+
+  private handlePointerMove = (e: PointerEvent): void => {
+    const drag = this.mouseDrag;
+    if (!drag || e.pointerId !== drag.id) return;
+    const dx = e.clientX - drag.x;
+    const dy = e.clientY - drag.y;
+    drag.x = e.clientX;
+    drag.y = e.clientY;
+    if (!drag.controls.enabled || this.getViewMode() === 'topDown') return;
+    const scale = 2 * Math.PI * drag.controls.rotateSpeed / Math.max(1, this.pointerElement?.clientHeight ?? 1);
+    this.rotatePerspective(drag.controls, -dx * scale, dy * scale);
+    this.onInput();
+  };
+
+  private handlePointerEnd = (e?: PointerEvent): void => {
+    if (!this.mouseDrag || (e && e.pointerId !== this.mouseDrag.id)) return;
+    this.mouseDrag.controls.enableRotate = this.getViewMode() !== 'topDown' && this.mouseDrag.enableRotate;
+    this.mouseDrag = null;
+  };
+
   private forwardVector = new THREE.Vector3();
   private rightVector = new THREE.Vector3();
   private tempOffset = new THREE.Vector3();
-  private camRight = new THREE.Vector3();
   private moveDelta = new THREE.Vector3();
   private panDelta = new THREE.Vector3();
-  private worldUp = new THREE.Vector3(0, 1, 0);
 
   constructor(
     private perspectiveCamera: THREE.PerspectiveCamera,
@@ -56,6 +88,11 @@ export class CameraNavigationController {
     window.addEventListener('keydown', this.boundKeyDown, { passive: false });
     window.addEventListener('keyup', this.boundKeyUp, { passive: true });
     window.addEventListener('blur', this.boundBlur);
+    this.pointerElement = this.getControls()?.domElement ?? null;
+    this.pointerElement?.addEventListener('pointerdown', this.handlePointerDown, true);
+    window.addEventListener('pointermove', this.handlePointerMove);
+    window.addEventListener('pointerup', this.handlePointerEnd);
+    window.addEventListener('pointercancel', this.handlePointerEnd);
   }
 
   detach(): void {
@@ -64,6 +101,12 @@ export class CameraNavigationController {
     window.removeEventListener('keydown', this.boundKeyDown);
     window.removeEventListener('keyup', this.boundKeyUp);
     window.removeEventListener('blur', this.boundBlur);
+    this.pointerElement?.removeEventListener('pointerdown', this.handlePointerDown, true);
+    window.removeEventListener('pointermove', this.handlePointerMove);
+    window.removeEventListener('pointerup', this.handlePointerEnd);
+    window.removeEventListener('pointercancel', this.handlePointerEnd);
+    this.handlePointerEnd();
+    this.pointerElement = null;
     this.keys = {};
   }
 
@@ -99,7 +142,8 @@ export class CameraNavigationController {
       key === 'ArrowDown' ||
       key === 'ArrowLeft' ||
       key === 'ArrowRight' ||
-      key === 'Shift';
+      key === 'Shift' ||
+      key === 'Control';
 
     if (isNavKey) {
       this.keys[code] = true;
@@ -125,6 +169,7 @@ export class CameraNavigationController {
   }
 
   private handleBlur(): void {
+    this.handlePointerEnd();
     this.keys = {};
   }
 
@@ -157,51 +202,10 @@ export class CameraNavigationController {
 
     const camera = this.perspectiveCamera;
 
-    // --- 1. ROTATION (Arrow Keys) ---
-    // In-place rotation: rotate view direction (controls.target) around camera.position
+    const turn = Number(Boolean(this.keys['ArrowLeft'])) - Number(Boolean(this.keys['ArrowRight']));
+    const tilt = Number(Boolean(this.keys['ArrowUp'])) - Number(Boolean(this.keys['ArrowDown']));
+    if (!isCtrl) this.rotatePerspective(controls, turn * currentRotSpeed, tilt * currentRotSpeed);
     const offset = this.tempOffset.subVectors(controls.target, camera.position);
-    let distance = offset.length();
-    if (distance < 0.2) {
-      distance = 2.0;
-      offset.normalize().multiplyScalar(distance);
-    }
-
-    let hasRotated = false;
-
-    // A. Yaw (Turn Left / Right)
-    if (!isCtrl) {
-      if (this.keys['ArrowLeft']) {
-        offset.applyAxisAngle(this.worldUp, currentRotSpeed);
-        hasRotated = true;
-      }
-      if (this.keys['ArrowRight']) {
-        offset.applyAxisAngle(this.worldUp, -currentRotSpeed);
-        hasRotated = true;
-      }
-
-      // B. Pitch (Tilt Up / Down)
-      const lookUp = this.keys['ArrowUp'];
-      const lookDown = this.keys['ArrowDown'];
-      if (lookUp || lookDown) {
-        // Calculate camera's horizontal right axis
-        const camRight = this.camRight.crossVectors(offset, this.worldUp).normalize();
-        if (camRight.lengthSq() > 0.001) {
-          const currentPitch = Math.asin(THREE.MathUtils.clamp(offset.y / distance, -0.999, 0.999));
-          const pitchDelta = (lookUp ? 1 : -1) * currentRotSpeed;
-          const maxPitch = Math.PI / 2 - 0.04;  // ~87 degrees (avoid gimbal flipping)
-          const minPitch = -Math.PI / 2 + 0.04;
-          const newPitch = THREE.MathUtils.clamp(currentPitch + pitchDelta, minPitch, maxPitch);
-          const actualDelta = newPitch - currentPitch;
-          offset.applyAxisAngle(camRight, actualDelta);
-          hasRotated = true;
-        }
-      }
-    }
-
-    if (hasRotated) {
-      offset.normalize().multiplyScalar(distance);
-      controls.target.copy(camera.position).add(offset);
-    }
 
     // --- 2. TRANSLATION (WASD + Vertical Q/E/Space/C + Ctrl+Arrows) ---
     // Compute horizontal forward & right vectors based on current facing direction
@@ -252,6 +256,26 @@ export class CameraNavigationController {
         controls.target.y += floorAdj;
       }
     }
+  }
+
+  // Shared by mouse dragging and arrow keys: turn at the current eye position.
+  private rotatePerspective(controls: OrbitControls, turn: number, tilt: number): void {
+    if (!turn && !tilt) return;
+    const camera = this.perspectiveCamera;
+    const offset = this.tempOffset.subVectors(controls.target, camera.position);
+    let distance = offset.length();
+    if (distance < 0.2) {
+      distance = 2.0;
+      camera.getWorldDirection(offset).multiplyScalar(distance);
+    }
+    const yaw = Math.atan2(offset.x, offset.z) + turn;
+    const pitch = THREE.MathUtils.clamp(
+      Math.atan2(offset.y, Math.hypot(offset.x, offset.z)) + tilt,
+      -MAX_CAMERA_PITCH, MAX_CAMERA_PITCH
+    );
+    const horizontal = Math.cos(pitch) * distance;
+    offset.set(Math.sin(yaw) * horizontal, Math.sin(pitch) * distance, Math.cos(yaw) * horizontal);
+    controls.target.copy(camera.position).add(offset);
   }
 
   private updateTopDown(dt: number, controls: OrbitControls): void {

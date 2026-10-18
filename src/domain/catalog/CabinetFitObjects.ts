@@ -1,0 +1,20 @@
+import type { AssetDefinition } from './AssetDefinition';
+export const CABINET_FIT_OBJECTS: readonly AssetDefinition[] = [
+  ['fit_toilet_roll', 'Toilet Paper Roll', .12, .10, .12],
+  ['fit_toilet_rolls_3', '3 Stacked Toilet Paper Rolls', .12, .30, .12],
+  ['fit_folded_tshirt', 'Folded T-shirt', .28, .025, .32],
+  ['fit_folded_tshirts_5', '5 Folded T-shirts', .28, .125, .32],
+  ['fit_folded_sweatshirt', 'Folded Sweatshirt', .32, .055, .36],
+  ['fit_folded_sweatshirts_5', '5 Folded Sweatshirts', .32, .275, .36],
+  ['fit_folded_pants', 'Folded Pants', .26, .035, .34],
+  ['fit_folded_pants_3', '3 Folded Pants', .26, .105, .34],
+  ['fit_folded_towel', 'Folded Towel', .30, .04, .40],
+  ['fit_folded_towels_5', '5 Folded Towels', .30, .20, .40],
+  ['fit_detergent', 'Laundry Detergent Bottle', .15, .30, .09],
+  ['fit_spray_bottle', 'Cleaning Spray Bottle', .10, .28, .07],
+  ['fit_bucket', 'Cleaning Bucket', .30, .28, .30],
+  ['fit_mop', 'Long-Handle Mop', .28, 1.40, .12],
+  ['fit_flat_mop', 'Microfibre Flat Mop', .42, 1.40, .13],
+  ['fit_mop_set', 'Flat Mop and Wringer Bucket Set', .38, 1.40, .30],
+  ['fit_spin_mop_set', 'Spin Mop and Bucket Set', .50, 1.40, .30],
+].map(([key, name, x, y, z]) => ({ key: key as string, name: name as string, category: 'decor', collection: 'Cabinet fit objects', recipe: 'cabinet_fit_object', aliases: String(key).includes('folded') ? [String(name).toLowerCase().replace('t-shirt', 'tshirt'), 'folded clothes', 'laundry', 'wardrobe storage'] : key === 'fit_mop_set' ? ['vileda', 'vileda flat mop'] : key === 'fit_spin_mop_set' ? ['vileda turbo', 'vileda spin mop', 'rotating mop'] : undefined, defaultDimensions: { x: x as number, y: y as number, z: z as number }, placement: { mount: 'floor' }, source: { retailer: 'Generic' } }));

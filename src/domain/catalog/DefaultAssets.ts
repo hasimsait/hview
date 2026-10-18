@@ -1,6 +1,32 @@
+import { DAILY_LIFE_ASSETS } from './DailyLifeAssets';
 import type { AssetDefinition } from './AssetDefinition';
+import { CURATED_ASSETS } from './CuratedAssets';
+import { IKEA_ACCESSORIES } from './IkeaAccessories';
+import { ELECTRICAL_ASSETS } from './ElectricalAssets';
+import { HOUSEHOLD_APPLIANCES } from './HouseholdAppliances';
+import { POPULAR_PRODUCTS } from './PopularProducts';
+import { ARCHITECTURAL_FINISHES } from './ArchitecturalFinishes';
+import { LIGHTING_COMPONENTS } from './LightingComponents';
+import { FLOOR_DRAINS } from './FloorDrains';
+import { CABINET_FIT_OBJECTS } from './CabinetFitObjects';
+import { CABINET_ASSETS } from './Cabinets';
+import { HOUSEHOLD_DETAILS } from './HouseholdDetails';
+import { SOFT_FURNISHINGS } from './SoftFurnishings';
 
 export const DEFAULT_ASSETS: readonly AssetDefinition[] = [
+  ...CABINET_ASSETS,
+  ...DAILY_LIFE_ASSETS,
+  ...CABINET_FIT_OBJECTS,
+  ...HOUSEHOLD_DETAILS,
+  ...SOFT_FURNISHINGS,
+  ...LIGHTING_COMPONENTS,
+  ...FLOOR_DRAINS,
+  ...ARCHITECTURAL_FINISHES,
+  ...CURATED_ASSETS,
+  ...IKEA_ACCESSORIES,
+  ...ELECTRICAL_ASSETS,
+  ...HOUSEHOLD_APPLIANCES,
+  ...POPULAR_PRODUCTS,
   // Beds
   {
     key: 'bed_double',
@@ -127,6 +153,18 @@ export const DEFAULT_ASSETS: readonly AssetDefinition[] = [
   },
 
   // Kitchen
+  {
+    key: 'kitchen_worktop',
+    name: 'Kitchen Worktop',
+    category: 'kitchen',
+    collection: 'Worktops',
+    recipe: 'kitchen_worktop',
+    description: 'Independent countertop slab. Resize its width, thickness and depth, set its elevation, and choose a stone, wood or other finish.',
+    defaultDimensions: { x: 2.4, y: .04, z: .62 },
+    placement: { mount: 'surface', defaultElevation: .85, wallOffset: .311 },
+    aliases: ['counter', 'countertop', 'worktop', 'counter top', 'counter slab'],
+    capabilities: { resizable: true },
+  },
   {
     key: 'fridge',
     name: 'Refrigerator',
@@ -333,7 +371,7 @@ export const DEFAULT_ASSETS: readonly AssetDefinition[] = [
     key: 'chandelier',
     name: 'Pendant Chandelier',
     category: 'decor',
-    description: 'Ceiling pendant light with soft glow',
+    description: 'Ring chandelier with warm glowing globes and room illumination',
     defaultDimensions: { x: 0.6, y: 0.6, z: 0.6 },
     placement: { mount: 'ceiling', ceilingOffset: 0.55 },
     capabilities: {
@@ -349,7 +387,7 @@ export const DEFAULT_ASSETS: readonly AssetDefinition[] = [
     key: 'chandelier_cascading',
     name: 'Cascading Chandelier',
     category: 'decor',
-    description: 'Multi-tier concentric glowing brass chandelier',
+    description: 'Multi-tier glowing brass chandelier with warm room illumination',
     defaultDimensions: { x: 0.7, y: 0.8, z: 0.7 },
     placement: { mount: 'ceiling', ceilingOffset: 0.55 },
     capabilities: {

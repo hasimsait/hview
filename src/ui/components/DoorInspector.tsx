@@ -13,7 +13,7 @@ Sparkles,
 X,
 } from 'lucide-react';
 import React from 'react';
-import { FinishOpening,FlipDoor,OpenDoor,RotateDoor } from '../../application/commands/StructuralCommands';
+import { ColorOpeningFrame,FinishOpening,FlipDoor,OpenDoor,RotateDoor } from '../../application/commands/StructuralCommands';
 import { allDoors as queryDoors } from '../../application/queries/SelectionQueries';
 import { SurfaceFinishPicker } from './SurfaceFinishPicker';
 
@@ -118,6 +118,45 @@ export const DoorInspector: React.FC<DoorInspectorProps> = ({ selected, onClose 
       </div>
 
       {/* Manual Flip Action Controls */}
+      <fieldset className="py-3 border-b border-slate-800 space-y-2">
+        <legend className="pt-3 text-xs font-semibold text-slate-200">Door frame color</legend>
+        <div className="flex items-center gap-2">
+          <input
+            type="color"
+            aria-label="Door frame color"
+            value={opening.frameColor ?? '#333338'}
+            onChange={event => editor.execute(new ColorOpeningFrame(opening.id, event.target.value))}
+            className="h-9 w-12 rounded border border-slate-700 bg-slate-800 cursor-pointer"
+          />
+          <span className="font-mono text-slate-400">{opening.frameColor ?? '#333338'}</span>
+          <button
+            type="button"
+            disabled={!opening.frameColor}
+            onClick={() => editor.execute(new ColorOpeningFrame(opening.id))}
+            className="ml-auto text-slate-400 hover:text-white disabled:opacity-40"
+          >Reset frame color</button>
+        </div>
+        <div className="flex gap-2">
+          {[
+            { name: 'White', color: '#f8fafc' },
+            { name: 'Black', color: '#18181b' },
+            { name: 'Greige', color: '#d6cbb8' },
+            { name: 'Walnut', color: '#6b4932' },
+          ].map(preset => (
+            <button
+              key={preset.name}
+              type="button"
+              aria-label={`${preset.name} door frame`}
+              title={`${preset.name} door frame`}
+              onClick={() => editor.execute(new ColorOpeningFrame(opening.id, preset.color))}
+              className="h-8 w-8 rounded border border-slate-600 hover:border-sky-400"
+              style={{ backgroundColor: preset.color }}
+            />
+          ))}
+        </div>
+      </fieldset>
+
+      {/* Manual Flip Action Controls */}
       <div className="py-3 border-b border-slate-800 space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-white font-semibold text-xs flex items-center gap-1.5">
@@ -194,6 +233,7 @@ export const DoorInspector: React.FC<DoorInspectorProps> = ({ selected, onClose 
           </label>
           <div className="flex items-center gap-1.5">
             <input
+              aria-label="Door opening angle"
               type="number"
               min="0"
               max="180"

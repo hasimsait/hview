@@ -1,4 +1,5 @@
 import { Shelving } from '../elements/Furniture';
+import { Opening, WindowOpening } from '../elements/Opening';
 import { WallRecess } from '../elements/WallRecess';
 import { PlanDocument } from '@core/types/plan';
 
@@ -89,6 +90,10 @@ export class LegacyPlanWriter {
       }
 
       // Shelving lids / doors
+      if (item.cabinet) rawItem.cabinet = structuredClone(item.cabinet);
+      else delete rawItem.cabinet;
+      if (item.windowCoveringOpen !== undefined) rawItem.windowCoveringOpen = item.windowCoveringOpen;
+      else delete rawItem.windowCoveringOpen;
       if (item.hasLids !== undefined) {
         rawItem.hasLids = item.hasLids;
       } else {
@@ -174,6 +179,8 @@ export class LegacyPlanWriter {
       if (wall.finishEdgeEnd) rawWall.finishEdgeEnd = wall.finishEdgeEnd; else delete rawWall.finishEdgeEnd;
       if (wall.finishEdgeTop) rawWall.finishEdgeTop = wall.finishEdgeTop; else delete rawWall.finishEdgeTop;
       if (wall.finishBaseboard) rawWall.finishBaseboard = wall.finishBaseboard; else delete rawWall.finishBaseboard;
+      if (wall.finishSill) rawWall.finishSill = wall.finishSill; else delete rawWall.finishSill;
+      if (wall.cornice) rawWall.cornice = structuredClone(wall.cornice); else delete rawWall.cornice;
       if (wall.finishEdges) rawWall.finishEdges = wall.finishEdges; else delete rawWall.finishEdges;
       delete rawWall.cavities;
       if (wall.startOffset !== undefined) rawWall.startOffset = wall.startOffset; else delete rawWall.startOffset;
@@ -200,6 +207,12 @@ export class LegacyPlanWriter {
         } else {
           delete rawHole.finish;
         }
+        if (op.frameColor) rawHole.frameColor = op.frameColor; else delete rawHole.frameColor;
+        delete rawHole.pelmetState;
+        const curtainState = op instanceof Opening ? op.toData().curtainState : op.curtainState;
+        if (curtainState) rawHole.curtainState = curtainState; else delete rawHole.curtainState;
+        const dressing = op instanceof WindowOpening ? op.windowDressing : op instanceof Opening ? undefined : op.windowDressing;
+        if (dressing) rawHole.windowDressing = dressing; else delete rawHole.windowDressing;
         rawWall.holes[op.id] = rawHole;
       }
 
@@ -213,7 +226,7 @@ export class LegacyPlanWriter {
         ...structuredClone(room.rawRoom || {}), id: room.id,
         title: room.name, name: room.name, area: room.area, height: room.height * 100,
         polygon: room.polygon.map(point => ({ x: point.x * 100, y: point.y * 100 })),
-        floorFinish: room.floorFinish, ceilingType: room.ceilingType, wallFinish: room.wallFinish
+        floorFinish: room.floorFinish, ceilingType: room.ceilingType, ceilingHeight: room.ceilingHeight === undefined ? undefined : room.ceilingHeight * 100, wallFinish: room.wallFinish, railing: room.railing
       };
     }
     planObj.rooms2 = rooms;

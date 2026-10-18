@@ -1,10 +1,52 @@
+import { buildDailyLife } from './builders/DailyLifeBuilder';
 import type { AssetRecipeId } from '../../domain/catalog/AssetRecipes';
 import type { AssetBuilderFn } from "./builders/AssetBuildContext";
 import * as Bathroom from "./builders/BathroomBuilders";
 import * as Furniture from "./builders/FurnitureBuilders";
+import { buildWorktop } from './builders/WorktopBuilder';
 import * as Lighting from "./builders/LightingBuilders";
+import * as Catalogue from './builders/CatalogueBuilders';
+import { buildIkeaAccessory } from './builders/IkeaAccessoryBuilder';
+import { buildBathroomAccessory } from './builders/BathroomAccessoryBuilder';
+import { buildFurnitureProduct } from './builders/FurnitureProductBuilder';
+import { buildElectricalFitting } from './builders/ElectricalBuilders';
+import { buildAirPurifier, buildRobotVacuum } from './builders/HouseholdBuilders';
+import { buildArchitecturalFinish } from './builders/ArchitecturalFinishBuilder';
+import { buildLightingComponent } from './builders/LightingComponentBuilder';
+import { buildFloorDrain } from './builders/FloorDrainBuilder';
+import { buildCabinetFitObject } from '../cabinet/CabinetFitObjectBuilder';
+import { buildCabinet } from '../cabinet/CabinetBuilder';
+import { buildHouseholdDetail } from './builders/HouseholdDetailBuilder';
+import { buildSoftFurnishing } from './builders/SoftFurnishingBuilder';
 
 export const FURNITURE_GEOMETRY: Readonly<Record<AssetRecipeId, AssetBuilderFn>> = {
+  daily_life: buildDailyLife,
+  kitchen_worktop: buildWorktop,
+  cabinet_fit_object: buildCabinetFitObject,
+  modular_cabinet: buildCabinet,
+  household_detail: buildHouseholdDetail,
+  soft_furnishing: buildSoftFurnishing,
+  lighting_component: buildLightingComponent,
+  floor_drain: buildFloorDrain,
+  architectural_finish: buildArchitecturalFinish,
+  retail_furniture: buildFurnitureProduct,
+  bathroom_accessory: buildBathroomAccessory,
+  electrical_fitting: buildElectricalFitting,
+  robot_vacuum: buildRobotVacuum,
+  air_purifier: buildAirPurifier,
+  ikea_accessory: buildIkeaAccessory,
+  angled_range_hood: Catalogue.buildAngledHood,
+  gas_cooktop: Catalogue.buildGasCooktop,
+  built_in_oven: Catalogue.buildBuiltInOven,
+  soap_dispenser: Catalogue.buildSoapDispenser,
+  toothbrush_tumbler: Catalogue.buildTumbler,
+  soap_dish: Catalogue.buildSoapDish,
+  pedal_bin: Catalogue.buildPedalBin,
+  brush_set: Catalogue.buildBrushSet,
+  paper_towel_holder: Catalogue.buildPaperTowelHolder,
+  curtain_pelmet: Catalogue.buildCurtainPelmet,
+  hemnes_bookcase: Catalogue.buildHemnesBookcase,
+  billy_bookcase: Catalogue.buildBillyBookcase,
   'chandelier': Lighting.buildChandelier,
   'chandelier_cascading': Lighting.buildCascadingChandelier,
   'ceiling_spot': Lighting.buildCylinderSpotlight,

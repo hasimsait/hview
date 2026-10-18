@@ -1,6 +1,6 @@
 import { ensureLocalMetricBounds,ensureStretchedUvs } from '../geometry/UVProjector';
 import { BrowserCanvasFactory,type CanvasFactory } from './CanvasFactory';
-import { OcclusionShader } from './OcclusionShader';
+import { OcclusionShader, keepForegroundVisible } from './OcclusionShader';
 import { CoatingTextureStrategy } from './strategies/CoatingTextureStrategy';
 import { FabricTextureStrategy } from './strategies/FabricTextureStrategy';
 import { GlassTextureStrategy } from './strategies/GlassTextureStrategy';
@@ -193,7 +193,7 @@ export class SurfaceMaterialFactory implements ISurfaceFinishService {
 
   getMaterial(
     config: SurfaceFinishConfig,
-    options?: { side?: THREE.Side; depthWrite?: boolean; projection?: 'world' | 'local' }
+    options?: { side?: THREE.Side; depthWrite?: boolean; projection?: 'world' | 'local'; foregroundOcclusion?: boolean }
   ): THREE.Material {
     const side = options?.side ?? THREE.FrontSide;
     const depthWrite = options?.depthWrite ?? true;
@@ -209,7 +209,7 @@ export class SurfaceMaterialFactory implements ISurfaceFinishService {
     const scaleStr = config.scale !== undefined ? `s${config.scale}` : 'sdef';
     const backingColorStr = config.backingColor ? `b${config.backingColor}` : 'bdef';
     const layer = normalizeSurfaceLayer(config.layer);
-    const key = `${config.type}_${config.variant || 'default'}_${config.color || 'none'}_${backingColorStr}_${roughnessStr}_${metalnessStr}_${rotation}_${pattern}_${groutWidth}_${groutColor}_${mappingModeStr}_${scaleStr}_${side}_${depthWrite}_${projection}_${layer}`;
+    const key = `${config.type}_${config.variant || 'default'}_${config.color || 'none'}_${backingColorStr}_${roughnessStr}_${metalnessStr}_${rotation}_${pattern}_${groutWidth}_${groutColor}_${mappingModeStr}_${scaleStr}_${side}_${depthWrite}_${projection}_${layer}_${options?.foregroundOcclusion !== false}`;
 
     if (this.materials.has(key)) {
       return this.materials.get(key)!;
@@ -414,6 +414,7 @@ export class SurfaceMaterialFactory implements ISurfaceFinishService {
       if (this.materials.get(key) === mat) this.materials.delete(key);
       this.layerMaterials.delete(mat);
     });
+    if (options?.foregroundOcclusion === false) keepForegroundVisible(mat);
     this.materials.set(key, mat);
     return mat;
   }

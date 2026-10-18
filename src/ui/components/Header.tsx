@@ -81,6 +81,7 @@ export const Header: React.FC<HeaderProps> = ({
   const lightingPopoverRef = useRef<HTMLDivElement>(null);
 
   const plan = useDocument();
+  const [fieldOfView, setFieldOfView] = useState(() => sceneService.getFieldOfView());
   const [roomPopoverOpen, setRoomPopoverOpen] = useState(false);
   const [lightingPopoverOpen, setLightingPopoverOpen] = useState(false);
   const [showCeilings, setShowCeilings] = useState(false);
@@ -257,6 +258,22 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         </div>
 
+        {viewMode !== 'topDown' && (
+          <label className="flex items-center gap-2 px-2 py-1 rounded-lg border border-slate-700/60 bg-slate-800/80 text-xs text-slate-300"
+            title="Vertical field of view. Widen the view without changing your standing position.">
+            <span>FOV</span>
+            <input type="range" aria-label="Field of view" min="40" max="120" step="1"
+              value={fieldOfView}
+              onChange={e => {
+                const value = Number(e.target.value);
+                sceneService.setFieldOfView(value);
+                setFieldOfView(value);
+              }}
+              className="w-24 accent-sky-400" />
+            <output className="w-8 text-right tabular-nums">{fieldOfView}°</output>
+          </label>
+        )}
+
         {/* Room Multi-Select Popover */}
         {plan && visibleRooms.length > 0 && (
           <div className="relative" ref={roomPopoverRef}>
@@ -419,7 +436,7 @@ export const Header: React.FC<HeaderProps> = ({
             ? 'bg-purple-500/20 border-purple-500/40 text-purple-300 shadow-sm'
             : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:text-slate-200'
             }`}
-          title="Toggle suspended ceilings (Asma Tavan) - OFF by default for unobstructed top-down planning"
+          title="Toggle suspended ceilings - OFF by default for unobstructed top-down planning"
         >
           <Grid className="w-3.5 h-3.5" />
           Ceilings: {showCeilings ? 'ON' : 'OFF'}

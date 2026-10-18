@@ -37,6 +37,20 @@ describe('shader program reuse without shared material values', () => {
     factory.apply(b, new THREE.Vector2(2, 3), 'local');
     expect(a.customProgramCacheKey()).not.toBe(b.customProgramCacheKey());
   });
+  it('keeps placement surfaces opaque without fading other surfaces or compiling another program', () => {
+    const factory = new SurfaceMaterialFactory(), finish = { type: 'paint' as const, color: '#c6b9a4' };
+    const normal = factory.getMaterial(finish, { projection: 'local' });
+    const top = factory.getMaterial(finish, { projection: 'local', foregroundOcclusion: false });
+    expect(normal).not.toBe(top); expect(normal.customProgramCacheKey()).toBe(top.customProgramCacheKey());
+    const shader = () => ({ uniforms: {} as Record<string, { value: any }>, vertexShader: THREE.ShaderLib.standard.vertexShader, fragmentShader: THREE.ShaderLib.standard.fragmentShader });
+    const a = shader(), b = shader();
+    normal.onBeforeCompile(a as any, {} as THREE.WebGLRenderer); top.onBeforeCompile(b as any, {} as THREE.WebGLRenderer);
+    expect(a.fragmentShader).toBe(b.fragmentShader);
+    factory.setForegroundMode('clip'); expect(a.uniforms.uForegroundMode.value).toBe(2); expect(b.uniforms.uForegroundMode.value).toBe(0);
+    factory.setForegroundMode('transparent'); expect(a.uniforms.uForegroundMode.value).toBe(1); expect(b.uniforms.uForegroundMode.value).toBe(0);
+    const invisible = factory.getMaterial({ type: 'invisible' }, { foregroundOcclusion: false }); expect(invisible.visible).toBe(false);
+    factory.dispose();
+  });
   it('does not share basic shaders with different baked fade distances', () => {
     const a = new THREE.MeshStandardMaterial(), b = new THREE.MeshStandardMaterial();
     applyBasicOcclusionShader(a, createOcclusionUniforms(), 0.5);

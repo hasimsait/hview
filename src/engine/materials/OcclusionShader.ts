@@ -78,6 +78,16 @@ export function applyBasicOcclusionShader(
   };
 }
 
+/** Keep a placement surface visible without changing shader source or sharing fade uniforms. */
+export function keepForegroundVisible(material: THREE.Material): void {
+  const compile = material.onBeforeCompile, programKey = material.customProgramCacheKey();
+  material.onBeforeCompile = function(shader, renderer) {
+    compile.call(this, shader, renderer);
+    if (shader.uniforms.uForegroundMode) shader.uniforms.uForegroundMode = { value: 0 };
+  };
+  material.customProgramCacheKey = () => programKey;
+}
+
 export class OcclusionShader {
   private occlusionUniforms = createOcclusionUniforms();
   updateOrbitPlane(orbitCenter: THREE.Vector3, cameraDir: THREE.Vector3): void {

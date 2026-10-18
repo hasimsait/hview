@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { AssetBuildContext } from "./AssetBuildContext";
+import { addFixtureLight } from '../../lighting/FixtureLight';
 
 export function buildChandelier(context: AssetBuildContext): void {
   const { parent, w, d, materials } = context;
@@ -36,18 +37,8 @@ export function buildChandelier(context: AssetBuildContext): void {
     parent.add(globe);
   }
 
-  // Warm ambient point light cast into the room
-  const light = new THREE.PointLight(0xfff2dc, 0.85, 7.0, 1.8);
-  light.name = 'fixtureLight';
-  light.userData = {
-    isFixtureLight: true,
-    fixtureType: 'chandelier',
-    baseIntensity: 0.85,
-    baseDistance: 7.0,
-    baseColor: 0xfff2dc,
-  };
-  light.position.set(0, -0.1, 0);
-  parent.add(light);
+  // Candela-scale room light, separate from the visible glowing globes.
+  addFixtureLight(parent, [0, -.1, 0], 18, 9, 'chandelier');
 }
 
 export function buildCascadingChandelier(context: AssetBuildContext): void {
@@ -90,17 +81,7 @@ export function buildCascadingChandelier(context: AssetBuildContext): void {
     parent.add(glow);
   }
 
-  const light = new THREE.PointLight(0xfff2dc, 0.85, 7.0, 1.8);
-  light.name = 'fixtureLight';
-  light.userData = {
-    isFixtureLight: true,
-    fixtureType: 'chandelier',
-    baseIntensity: 0.85,
-    baseDistance: 7.0,
-    baseColor: 0xfff2dc,
-  };
-  light.position.set(0, -0.1, 0);
-  parent.add(light);
+  addFixtureLight(parent, [0, -.3, 0], 22, 9, 'chandelier');
 }
 
 export function buildCylinderSpotlight(context: AssetBuildContext): void {

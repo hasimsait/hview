@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type { Column } from '../../domain/elements/Column';
-import type { Opening } from '../../domain/elements/Opening';
+import { WindowOpening,type Opening } from '../../domain/elements/Opening';
 import type { Room } from '../../domain/elements/Room';
 import type { Wall } from '../../domain/elements/Wall';
 import type { PickRegistry } from '../picking/PickRegistry';
@@ -17,12 +17,13 @@ export class WallSceneNode extends SceneNode<Wall> {
     super(element, resources, picking, { kind: 'wall', id: element.id });
     this.replaceGeometry(builder.build(element));
   }
-  reconcile(element: Wall): void {
+  reconcile(element: Wall, contextChanged = false): void {
     const previous = this.element;
     const geometryChanged = previous.p1 !== element.p1 || previous.p2 !== element.p2 || previous.thickness !== element.thickness
       || previous.height !== element.height || openingCutSignature(previous) !== openingCutSignature(element)
       || previous.startOffset !== element.startOffset || previous.endOffset !== element.endOffset || previous.frameStyle !== element.frameStyle;
-    if (geometryChanged) this.replaceGeometry(this.builder.build(element));
+    const trimShape = (wall: Wall) => JSON.stringify(wall.cornice && { ...wall.cornice, finish: undefined });
+    if (contextChanged || geometryChanged || Boolean(previous.finishBaseboard) !== Boolean(element.finishBaseboard) || trimShape(previous) !== trimShape(element)) this.replaceGeometry(this.builder.build(element));
     else { this.builder.applyMaterials(this.group, element); this.refreshMaterials(); }
     this.element = element;
   }
@@ -38,7 +39,7 @@ export class OpeningSceneNode extends SceneNode<Opening> {
   }
   reconcile(element: Opening): void {
     const previous = this.element;
-    if (previous.width !== element.width || previous.height !== element.height || previous.floorHeight !== element.floorHeight || previous.position !== element.position || previous.wallId !== element.wallId || previous.swingSide !== element.swingSide || previous.hingeSide !== element.hingeSide) this.replaceGeometry(this.builder.build(element));
+    if (previous.width !== element.width || previous.height !== element.height || previous.floorHeight !== element.floorHeight || previous.distanceAlongWall !== element.distanceAlongWall || previous.position !== element.position || previous.wallId !== element.wallId || previous.swingSide !== element.swingSide || previous.hingeSide !== element.hingeSide || (previous instanceof WindowOpening && element instanceof WindowOpening && (previous.curtainState !== element.curtainState || previous.pelmetState !== element.pelmetState || previous.windowDressing !== element.windowDressing))) this.replaceGeometry(this.builder.build(element));
     else { this.builder.update(this.group.children[0], element); this.refreshMaterials(); }
     this.element = element;
   }
@@ -62,8 +63,8 @@ export class RoomSceneNode extends SceneNode<Room> {
   constructor(element: Room, private readonly builder: RoomNodeBuilder, resources: ResourcePool, picking: PickRegistry) {
     super(element, resources, picking, { kind: 'room', id: element.id }); this.replaceGeometry(builder.build(element));
   }
-  reconcile(element: Room): void {
-    if (element.polygon !== this.element.polygon || element.name !== this.element.name || element.area !== this.element.area) this.replaceGeometry(this.builder.build(element));
+  reconcile(element: Room, contextChanged = false): void {
+    if (contextChanged || element.polygon !== this.element.polygon || element.name !== this.element.name || element.area !== this.element.area || element.railing !== this.element.railing) this.replaceGeometry(this.builder.build(element));
     else { this.builder.applyMaterials(this.group, element); this.refreshMaterials(); }
     this.element = element;
   }

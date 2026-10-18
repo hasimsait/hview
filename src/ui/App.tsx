@@ -18,8 +18,10 @@ import { Room } from '../domain/elements/Room';
 import { Wall } from '../domain/elements/Wall';
 import type { FurnitureCategory } from '../domain/model/PlanData';
 import { isPointInPolygon } from '../domain/model/WallTopology';
+import { roomCeilingHeight } from '../domain/model/Ceiling';
 import { isOpaquePlanSource } from '../services/plan/PlanRequest';
 import { createElementId } from '../platform/ElementId';
+import { CabinetEditor } from './components/CabinetEditor';
 import { ColumnInspector } from './components/ColumnInspector';
 import { WindowInspector } from './components/WindowInspector';
 import { useViewportFullscreen } from '@ui/hooks/useViewportFullscreen';
@@ -37,6 +39,7 @@ export const App: React.FC = () => {
   const selectedWall = selected instanceof Wall ? selected : null;
   const selectedRoom = selected instanceof Room ? selected : null;
   const selectedOpening = selected instanceof Opening && document ? { opening: selected, wall: document.requireWall(selected.wallId) } : null;
+  const [editingCabinet, setEditingCabinet] = useState<Furniture | null>(null);
   const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false);
   const [isAddAssetModalOpen, setIsAddAssetModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('perspective');
@@ -90,7 +93,7 @@ export const App: React.FC = () => {
   // Global keyboard shortcuts for Undo, Redo, and Save
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (isSaving) return;
+      if (isSaving || editingCabinet) return;
       const mod = event.metaKey || event.ctrlKey;
       if (!mod) return;
       const key = event.key.toLowerCase();
@@ -126,7 +129,7 @@ export const App: React.FC = () => {
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [editor, isSaving]);
+  }, [editor, isSaving, editingCabinet]);
 
   // Load plan automatically on initial launch
   useEffect(() => {
@@ -173,6 +176,15 @@ export const App: React.FC = () => {
     sceneService.updateSettings({ showFixtures: nextVal });
   };
 
+  // Selecting a newly added or replaced electrical fitting makes its bucket visible.
+  // The manual Sockets toggle still works while the same fitting remains selected.
+  useEffect(() => {
+    if (selectedItem?.category === 'fixture') {
+      setShowFixtures(true);
+      sceneService.updateSettings({ showFixtures: true });
+    }
+  }, [selectedItem?.id, selectedItem?.assetKey, selectedItem?.category, sceneService]);
+
   const handleUpdateLighting = (settings: Partial<ViewportSettings>) => {
     if (settings.globalLighting !== undefined) setGlobalLighting(settings.globalLighting);
     if (settings.globalLightIntensity !== undefined) setGlobalLightIntensity(settings.globalLightIntensity);
@@ -182,7 +194,7 @@ export const App: React.FC = () => {
   };
 
   const handleAddAsset = (asset: AssetDefinition) => {
-    const dims = asset.defaultDimensions || { x: 0.6, y: 0.6, z: 0.6 };
+    const dims = { ...(asset.defaultDimensions || { x: 0.6, y: 0.6, z: 0.6 }) };
     const mount = asset.placement?.mount ?? (asset.category === 'decor' ? 'wall' : 'floor');
     const wallHit = sceneService.getWallInCameraView();
 
@@ -193,6 +205,12 @@ export const App: React.FC = () => {
 
     const planSnapshot = editor.getSnapshot();
     const planTotalH = planSnapshot?.totalHeight || 2.7;
+    const target = sceneService.getControls()?.target;
+    const placementPoint = wallHit ? { x: wallHit.point.x + wallHit.normal.x * .15, y: wallHit.point.z + wallHit.normal.z * .15 } : { x: target?.x ?? 0, y: target?.z ?? 0 };
+    const placementRoom = planSnapshot?.rooms.find(r => isPointInPolygon(placementPoint, r.polygon)) ?? planSnapshot?.rooms.find(r => r.id === (wallHit?.wall.roomSideA ?? wallHit?.wall.roomSideB ?? wallHit?.wall.roomIds?.[0]));
+    const finishedCeiling = placementRoom ? roomCeilingHeight(placementRoom, planTotalH) : planTotalH;
+    if (asset.softFurnishing?.kind === 'curtain') dims.y = Math.max(.1, finishedCeiling - .025);
+    const ceilingOffset = asset.softFurnishing?.kind === 'curtain' ? dims.y : asset.placement?.ceilingOffset ?? dims.y + .05;
     let position: { x: number; y: number; z: number };
     let rotationY = 0;
     let roomId: string | undefined;
@@ -204,9 +222,11 @@ export const App: React.FC = () => {
       let offsetDist = asset.placement?.wallOffset ?? 0.01;
 
       if (mount === 'ceiling') {
-        const offset = asset.placement?.ceilingOffset ?? (dims.y + 0.05);
-        elevation = Math.max(2.1, planTotalH - offset);
-        offsetDist = Math.max(0.15, dims.z / 2);
+        elevation = Math.max(0, finishedCeiling - ceilingOffset);
+        offsetDist = asset.placement?.wallOffset ?? Math.max(0.15, dims.z / 2);
+      } else if (mount === 'surface') {
+        elevation = asset.placement?.defaultElevation ?? 0.9;
+        offsetDist = asset.placement?.wallOffset ?? dims.z / 2 + 0.04;
       } else if (mount === 'floor') {
         elevation = 0.0;
         offsetDist = dims.z / 2 + 0.04;
@@ -228,15 +248,15 @@ export const App: React.FC = () => {
         z: point.z + normal.z * offsetDist,
       };
       rotationY = Math.atan2(normal.x, normal.z);
-      roomId = wall.roomSideA || wall.roomSideB || wall.roomIds?.[0];
+      roomId = placementRoom?.id ?? wall.roomSideA ?? wall.roomSideB ?? wall.roomIds?.[0];
     } else {
       const target = sceneService.getControls()?.target;
       const x = target?.x ?? 0;
       const z = target?.z ?? 0;
       const elevation =
         mount === 'ceiling'
-          ? Math.max(2.1, planTotalH - (asset.placement?.ceilingOffset ?? dims.y + 0.05))
-          : 0.0;
+          ? Math.max(0, finishedCeiling - ceilingOffset)
+          : mount === 'surface' ? (asset.placement?.defaultElevation ?? 0.9) : 0.0;
       position = { x, y: elevation, z };
       roomId = planSnapshot?.rooms.find((r) => isPointInPolygon({ x, y: z }, r.polygon))?.id;
     }
@@ -266,6 +286,7 @@ export const App: React.FC = () => {
 
   return (
     <div className="app-shell relative flex flex-col w-full overflow-hidden bg-slate-950 text-slate-100">
+      <div className="contents" inert={!!editingCabinet}>
       {/* Top Header */}
       <Header
         isViewportFullscreen={isViewportFullscreen}
@@ -294,14 +315,15 @@ export const App: React.FC = () => {
 
       {/* Main 3D Canvas Area */}
       <main className="flex-1 min-h-0 relative w-full">
-        <Viewport3D disabled={isSaving} hideControls={isViewportFullscreen} />
+        <Viewport3D disabled={isSaving || !!editingCabinet} hideControls={isViewportFullscreen} />
 
         {/* Inspector Drawers wrapped in ErrorBoundary */}
         <ErrorBoundary>
           {/* Selected Furniture Inspector */}
-          {selectedItem && (
+          {selectedItem && !editingCabinet && (
             <Inspector
               item={selectedItem}
+              onEditLayout={() => setEditingCabinet(selectedItem)}
               onOpenReplaceModal={() => setIsReplaceModalOpen(true)}
               onClose={() => editor.selection.select('furniture', null)}
             />
@@ -363,6 +385,8 @@ export const App: React.FC = () => {
         mode="add"
         onSelectAsset={handleAddAsset}
       />
+      </div>
+      {editingCabinet && <CabinetEditor cabinet={editingCabinet} onClose={() => setEditingCabinet(null)} />}
       {isSaving && <SavingOverlay />}
     </div>
   );

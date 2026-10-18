@@ -9,6 +9,7 @@ export class WoodTextureStrategy {
   dispose(): void { this.textures.dispose(); }
   resolveWoodPhotoInfo(variant?: string): { url: string; name: string } {
     const v = (variant || '').toLowerCase();
+    if (v === 'light_beige_laminate') return { url: '/textures/wood/wood_light_beige_laminate.jpg', name: 'Light Beige Wood-Effect Laminate' };
     if (v.includes('wenge') || v.includes('black_oak') || v.includes('dark_oak')) {
       return { url: '/textures/wood/wood_dark_wenge.jpg', name: 'Dark Wenge' };
     }
@@ -179,12 +180,12 @@ export class WoodTextureStrategy {
     canvas.height = 512;
     const ctx = canvas.getContext('2d')!;
 
-    const baseColor = variant.includes('walnut')
+    const baseColor = variant === 'light_beige_laminate' ? '#c7b79d' : variant.includes('walnut')
       ? '#3d2f26'
       : variant.includes('teak')
         ? '#7d522a'
         : '#dfcfb8';
-    const grainColor = variant.includes('walnut')
+    const grainColor = variant === 'light_beige_laminate' ? '#bca98e' : variant.includes('walnut')
       ? '#2a1f18'
       : variant.includes('teak')
         ? '#5e3c1d'

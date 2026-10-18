@@ -14,6 +14,7 @@ export class AssetCatalog {
     for (const recipe of ASSET_RECIPES) {
       const candidates: readonly string[] = [recipe.id, ...recipe.aliases];
       let canonical = candidates.find(key => this.definitions.has(key));
+      canonical ??= [...this.definitions.values()].find(definition => definition.recipe === recipe.id)?.key;
       if (!canonical) {
         canonical = recipe.id;
         this.register({
@@ -33,6 +34,10 @@ export class AssetCatalog {
 
   register(definition: AssetDefinition): void {
     this.definitions.set(definition.key, immutable(definition));
+    if (definition.recipe) {
+      this.recipes.set(definition.key, definition.recipe);
+      this.behaviors.set(definition.key, ASSET_RECIPES.find(recipe => recipe.id === definition.recipe)?.behavior ?? 'standard');
+    }
     for (const alias of definition.aliases ?? []) this.aliases.set(alias.toLowerCase(), definition.key);
   }
 
@@ -40,7 +45,12 @@ export class AssetCatalog {
   all(): readonly AssetDefinition[] { return [...this.definitions.values()]; }
   canonicalKey(key: string): string {
     const clean = key.toLowerCase().trim();
-    return this.definitions.has(clean) ? clean : this.aliases.get(clean) ?? clean;
+    if (this.definitions.has(clean)) return clean;
+    const alias = this.aliases.get(clean); if (alias) return alias;
+    // Older imported catalogues used a source prefix plus this stable numeric reference.
+    const reference = clean.match(/^[a-z]+_([0-9]+)$/)?.[1];
+    const product = `popular_${reference}`;
+    return reference && this.definitions.has(product) ? product : clean;
   }
 
   /** Historical fuzzy names are interpreted only by the legacy import adapter. */

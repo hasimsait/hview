@@ -216,6 +216,16 @@ export const PLASTER_FINISHES = [
 
 export const FURNITURE_WOOD_FINISHES = [
   {
+    id: 'light_beige_laminate',
+    name: 'Light Beige Wood-Effect Laminate',
+    subtitle: 'Kitchen photo reference · fine horizontal printed grain',
+    type: 'wood' as const,
+    variant: 'light_beige_laminate',
+    imageUrl: '/textures/wood/wood_light_beige_laminate.jpg',
+    color: '#ffffff',
+    roughness: 0.65,
+  },
+  {
     id: 'natural_oak',
     name: 'Natural Scandinavian Oak',
     subtitle: 'Golden blonde natural grain veneer',
