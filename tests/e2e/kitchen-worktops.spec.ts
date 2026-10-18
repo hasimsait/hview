@@ -121,7 +121,7 @@ test('placed countertops stay visible and selectable in foreground clip mode wit
     const mesh = scene.getRenderObject(id).getObjectByName(`worktop_${id}`), shader = { uniforms: {} as any, vertexShader: '#include <common>\n#include <worldpos_vertex>', fragmentShader: '#include <common>\n#include <dithering_fragment>\n#include <map_fragment>' };
     mesh.material.onBeforeCompile(shader, {});
     const hit = scene.pick({ x: point.x, y: point.y });
-    return { x: rect.left + (point.x + 1) * rect.width / 2, y: rect.top + (1 - point.y) * rect.height / 2, picked: hit?.target.id, foreground: scene.isPointForegroundOccluded(camera.position.clone().set(p.x, p.y + item.dimensions.y, p.z)), mode: shader.uniforms.uForegroundMode.value, imageReady: !!mesh.material.map?.image?.width };
+    return { x: rect.left + (point.x + 1) * rect.width / 2, y: rect.top + (1 - point.y) * rect.height / 2, picked: hit?.target.id, foreground: scene.isPointForegroundOccluded(camera.position.clone().set(p.x, p.y + item.dimensions.y, p.z)), mode: shader.uniforms.uForegroundMode.value, imageReady: !!mesh.material.map?.image?.width, rotation: shader.uniforms.uTileRot?.value.toArray() };
   }, added.id);
   await page.getByRole('button', { name: /Foreground: Fade/ }).click();
   const bare = await focus(page); expect(bare.foreground).toBe(true); expect(bare.picked).toBe(added.id); expect(bare.mode).toBe(0);
@@ -131,6 +131,13 @@ test('placed countertops stay visible and selectable in foreground clip mode wit
   await expect.poll(async () => (await focus(page)).imageReady).toBe(true);
   const painted = await focus(page); expect(painted.picked).toBe(added.id); expect(painted.mode).toBe(0);
   expect((await state(page))!.furniture.find((f: any) => f.id === added.id).sectionFinishes.countertop).toMatchObject({ type: 'wood', variant: 'light_beige_laminate', color: '#ffffff' });
+  expect(painted.rotation).toEqual([1, 0]);
+  await page.getByRole('button', { name: 'Vertical grain (90°)', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Vertical grain (90°)', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  expect((await focus(page)).rotation[0]).toBeCloseTo(0); expect((await focus(page)).rotation[1]).toBeCloseTo(1);
+  await page.getByRole('button', { name: /Natural Scandinavian Oak/ }).click();
+  await page.getByRole('button', { name: /Light Beige Wood-Effect Laminate/ }).click();
+  expect((await state(page))!.furniture.find((f: any) => f.id === added.id).sectionFinishes.countertop.rotation).toBe(90);
   await page.screenshot({ path: info.outputPath('countertop-laminate-visible.png') });
   const downloading = page.waitForEvent('download'); await page.getByRole('button', { name: 'Full Editor (.html)', exact: true }).click();
   const path = info.outputPath('countertop-laminate.html'); await (await downloading).saveAs(path);
@@ -139,8 +146,14 @@ test('placed countertops stay visible and selectable in foreground clip mode wit
   await tablet.goto(url); await ready(tablet);
   await tablet.getByRole('button', { name: /Foreground: Fade/ }).tap();
   const restored = await focus(tablet); expect(restored.picked).toBe(added.id); expect(restored.mode).toBe(0);
+  expect(restored.rotation[0]).toBeCloseTo(0); expect(restored.rotation[1]).toBeCloseTo(1);
+  expect((await state(tablet))!.furniture.find((f: any) => f.id === added.id).sectionFinishes.countertop.rotation).toBe(90);
   await expect.poll(async () => (await focus(tablet)).imageReady).toBe(true);
   await tablet.touchscreen.tap(restored.x, restored.y); expect((await state(tablet))!.selected.id).toBe(added.id);
+  await tablet.getByRole('button', { name: 'Wood & Parquet', exact: true }).tap();
+  await expect(tablet.getByRole('button', { name: 'Vertical grain (90°)', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await tablet.getByRole('button', { name: 'Horizontal grain (0°)', exact: true }).tap();
+  expect((await focus(tablet)).rotation).toEqual([1, 0]);
   await tablet.screenshot({ path: info.outputPath('ipad-countertop-laminate.png') });
   await context.close();
 });

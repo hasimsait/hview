@@ -449,6 +449,27 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
       {/* Tab 2: Wood & Parquet (Furniture Hardwoods, Flooring, and Dual-Tone Lambri) */}
       {activeTab === 'lambri' && (
         <div className="space-y-4">
+          {currentFinish?.type === 'wood' && (
+            <div className="space-y-2 rounded-lg border border-slate-800 bg-slate-950 p-2">
+              <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-300">
+                <RotateCw className="h-3.5 w-3.5 text-amber-400" />
+                Grain direction
+              </div>
+              <div className="grid grid-cols-2 gap-1">
+                {[0, 90].map((rotation) => (
+                  <button
+                    key={rotation}
+                    type="button"
+                    aria-pressed={(Math.abs(Math.sin((currentFinish.rotation || 0) * Math.PI / 180)) > 0.707) === (rotation === 90)}
+                    onClick={() => onSelectFinish({ ...currentFinish, rotation })}
+                    className="rounded bg-slate-800 px-2 py-1 text-[11px] text-slate-300 transition-colors hover:bg-slate-700 aria-pressed:bg-amber-600 aria-pressed:text-white"
+                  >
+                    {rotation === 0 ? 'Horizontal grain (0°)' : 'Vertical grain (90°)'}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           {/* Section 1: Solid Hardwood & Furniture Veneers */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-[10px] uppercase font-semibold text-slate-400">
@@ -468,6 +489,7 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                         variant: w.variant,
                         color: w.color,
                         roughness: w.roughness,
+                        rotation: currentFinish?.type === 'wood' ? currentFinish.rotation : 0,
                       })
                     }
                     className={`flex items-center gap-2.5 p-2 rounded-lg border text-left transition-all ${active
@@ -480,6 +502,7 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                       style={{
                         backgroundImage: `url(${resolveEmbeddedTextureUrl(w.imageUrl)})`,
                         backgroundColor: w.color,
+                        transform: active ? `rotate(${currentFinish?.rotation || 0}deg)` : undefined,
                       }}
                     />
                     <div className="flex-1 min-w-0">
@@ -511,6 +534,7 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                         variant: p.variant,
                         color: p.color,
                         roughness: p.roughness,
+                        rotation: currentFinish?.type === 'wood' ? currentFinish.rotation : 0,
                       })
                     }
                     className={`flex items-center gap-2 p-2 rounded-lg border text-left transition-all ${active
