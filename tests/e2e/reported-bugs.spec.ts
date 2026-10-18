@@ -27,7 +27,7 @@ async function selectWall(page: import('@playwright/test').Page) {
 }
 
 test('the living-room door-wall junction has no selectable gap beside the door', async ({ page, request }) => {
-  const raw = legacyData(readFileSync('public/sample.plan', 'utf8'));
+  const raw = legacyData(readFileSync('tests/fixtures/reported-geometry.json', 'utf8'));
   const plan = raw.plan || raw;
   plan.walls = Object.fromEntries(['_g9657', '_rxf4v', '_vfhig', '_w5f7a_a'].map(id => [id, plan.walls[id]]));
   plan.rooms2 = {}; plan.items = {}; plan.columns = [];
@@ -75,7 +75,7 @@ test('paint highlight changes while the wall remains focused, not only after res
 test('isolating Bathroom hides the hallway door while retaining its own entrance', async ({ page, request }) => {
   // Preserve the real positions/IDs from the working plan, trimming unrelated
   // rooms and furniture to make the same geometry bug fast to reproduce.
-  const raw = legacyData(readFileSync('public/sample.plan', 'utf8'));
+  const raw = legacyData(readFileSync('tests/fixtures/reported-geometry.json', 'utf8'));
   const plan = raw.plan || raw;
   plan.walls = Object.fromEntries(['_tmb2o', '_ojjeh'].map(id => [id, plan.walls[id]]));
   plan.rooms2 = Object.fromEntries([['_rscdq', 'Bathroom'], ['_4wyay', 'Hallway'], ['_3h613', 'Bedroom']].map(([id, title]) => [id, { ...plan.rooms2[id], title }]));

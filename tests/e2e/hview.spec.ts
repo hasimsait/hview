@@ -1,6 +1,5 @@
 import { expect, test } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-import { legacyData } from '../support/editor';
 
 test('renders the real plan and switches views and visibility controls', async ({ page }) => {
   const errors: string[] = [];
@@ -19,9 +18,9 @@ test('renders the real plan and switches views and visibility controls', async (
   });
   const response = await page.goto('/');
   expect(response!.status()).toBe(200);
-  await expect(page.getByText('42 Walls · 8 Columns')).toBeVisible();
+  await expect(page.getByText('43 Walls · 8 Columns')).toBeVisible();
   await expect(page.getByText('10 Rooms')).toBeVisible();
-  await expect(page.getByText('119 Objects')).toBeVisible();
+  await expect(page.getByText('123 Objects')).toBeVisible();
   await expect(page.locator('canvas').first()).toBeVisible();
   await page.waitForFunction(() => (window as any).__drawCalls > 100);
 
@@ -44,14 +43,14 @@ test('renders the real plan and switches views and visibility controls', async (
 
 test('asset search handles no matches and cancellation', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByText('119 Objects')).toBeVisible();
+  await expect(page.getByText('123 Objects')).toBeVisible();
   await page.getByRole('button', { name: 'Add Asset', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Add Asset / Accessory' })).toBeVisible();
   await page.getByPlaceholder('Search assets (e.g. towel, fan, sconce, bed, sink)...').fill('no-such-asset-123456');
   await expect(page.getByText('0 assets available')).toBeVisible();
   await page.getByRole('button', { name: 'Cancel', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Add Asset / Accessory' })).toHaveCount(0);
-  await expect(page.getByText('119 Objects')).toBeVisible();
+  await expect(page.getByText('123 Objects')).toBeVisible();
 });
 
 test('real save endpoint persists JSON and rejects invalid payloads without data loss', async ({ request }) => {
@@ -62,11 +61,11 @@ test('real save endpoint persists JSON and rejects invalid payloads without data
     const save = await request.post('/api/save-plan', { data: edited });
     expect(save.status()).toBe(200);
     expect((await save.json()).success).toBe(true);
-    expect(legacyData(await (await request.get('/sample.plan')).text())).toEqual(edited);
+    expect(JSON.parse(await (await request.get('/sample.plan')).text())).toEqual(edited);
 
     const invalid = await request.post('/api/save-plan', { data: Buffer.from('{invalid'), headers: { 'Content-Type': 'application/json' } });
     expect(invalid.status()).toBe(500);
-    expect(legacyData(await (await request.get('/sample.plan')).text())).toEqual(edited);
+    expect(JSON.parse(await (await request.get('/sample.plan')).text())).toEqual(edited);
   } finally {
     expect((await request.post('/api/save-plan', { data: Buffer.from(original), headers: { 'Content-Type': 'application/json' } })).status()).toBe(200);
     expect(await (await request.get('/sample.plan')).text()).toBe(original);
