@@ -22,6 +22,7 @@ Each row is one topic for inspection in a PR. Final hashes and validation outcom
 | 04 | Sliding room doors bypass collision checks | Check sliding room doors along their translation path |
 | 05 | Cabinet filler models create excessive draw submissions | Reduce draw calls for cabinet filler assets |
 | 06 | Catalogue renders and searches all cards on every edit | Bound catalogue rendering and reuse its search index |
+| 07 | Hidden moving handles still act as solid colliders | Ignore hidden moving parts in collision checks |
 | Final | Final results, hashes, limitations and any integration cleanup | Record audit results and commit map |
 
 No finding is considered fixed just because this document says it should be. Check the implementation and validation in its mapped commit.
@@ -127,6 +128,14 @@ The absence of image thumbnails is not a network bug: these cards intentionally 
 **Required verification:** matching and accent handling remain correct across all products; filtering finds items outside the initial page; pagination resets when filters change; mobile/offline add and replacement workflows work.
 
 **Implemented result:** search metadata, sources and collections are indexed once per open modal session; filtering searches the entire catalogue. The UI initially mounts 60 cards and exposes Show more assets, resetting the page on search/filter changes. On the same offline touch-emulation check, cards fell from 723 to 60 and total DOM nodes from 9,338 to 1,022. Single opening-to-two-frame samples were 241 ms before and 211.2 ms after; these noisy SwiftShader timings do not establish a large universal latency improvement. Three search unit cases and two browser workflows passed, including a product beyond the first page, page reset, source/collection filtering and accent handling. Type checks passed after completing the motion test fixture types; the offline editor was rebuilt.
+
+### 07 — Medium: hidden moving parts still cause phantom collisions
+
+**Files:** `src/engine/SceneEngine.ts`, `src/engine/cabinet/CollisionFeedback.ts`.
+
+The original motion traversal collects handles and stored-object meshes even if their finish hides them. Visibility is checked for obstacles, but not for moving parts. A deliberately hidden handle can therefore turn a door red when its invisible geometry crosses an obstacle. The included save contains hidden cabinet handles, so this is relevant to the current worksite plan.
+
+**Fix and verification:** the per-motion query skips moving meshes with either a hidden mesh or hidden ancestor. A new unit case tests both and then restores visibility to confirm the real collision still returns. All 33 collision-query, sliding-door and cabinet-layout cases passed; the offline editor was rebuilt. This additional collision finding has its own topic commit rather than being hidden in final report cleanup.
 
 ## Additional review observations and limits
 

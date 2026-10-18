@@ -1,6 +1,11 @@
 import * as THREE from 'three';
 import { OBB } from 'three/examples/jsm/math/OBB.js';
 
+function visibleInScene(object: THREE.Object3D): boolean {
+  for (let parent: THREE.Object3D | null = object; parent; parent = parent.parent) if (!parent.visible) return false;
+  return true;
+}
+
 /** Temporary, nonblocking feedback. Never mutates a finish or enables global collision checks. */
 export class CollisionFeedback {
   private readonly material = new THREE.MeshStandardMaterial({ color: '#ff2424', emissive: '#991010', emissiveIntensity: .35, roughness: .7 });
@@ -100,15 +105,14 @@ export class CollisionQuery {
     const moving = new Set<THREE.Object3D>(); movingRoot.traverse(object => moving.add(object));
     for (const mesh of candidates) {
       if (!(mesh instanceof THREE.Mesh) || !mesh.geometry || moving.has(mesh)) continue;
-      let visible = true;
-      for (let parent: THREE.Object3D | null = mesh; parent; parent = parent.parent) if (!parent.visible) { visible = false; break; }
-      if (!visible) continue;
+      if (!visibleInScene(mesh)) continue;
       if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox();
       this.obstacles.push({ mesh, bounds: mesh.geometry.boundingBox!.clone().applyMatrix4(mesh.matrixWorld) });
     }
   }
   intersects(moving: readonly THREE.Mesh[]): boolean {
     for (const mesh of moving) {
+      if (!visibleInScene(mesh)) continue;
       if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox();
       this.bounds.copy(mesh.geometry.boundingBox!).applyMatrix4(mesh.matrixWorld);
       for (const obstacle of this.obstacles) {

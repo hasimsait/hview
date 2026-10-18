@@ -3,6 +3,15 @@ import { describe, expect, it, vi } from 'vitest';
 import { CollisionFeedback } from '../../src/engine/cabinet/CollisionFeedback';
 
 describe('motion collision broad phase', () => {
+  it('does not turn a hidden moving handle or its hidden parent into a phantom collision', () => {
+    const scene = new THREE.Group(), pivot = new THREE.Group(), material = new THREE.MeshBasicMaterial(); scene.add(pivot);
+    const handle = new THREE.Mesh(new THREE.BoxGeometry(.02, .1, .04), material), obstacle = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), material);
+    pivot.add(handle); scene.add(obstacle); scene.updateMatrixWorld(true);
+    const feedback = new CollisionFeedback(), query = feedback.prepare(pivot, [handle, obstacle]);
+    handle.visible = false; expect(query.intersects([handle])).toBe(false);
+    handle.visible = true; pivot.visible = false; expect(query.intersects([handle])).toBe(false);
+    pivot.visible = true; expect(query.intersects([handle])).toBe(true); feedback.dispose();
+  });
   it('keeps 2,000 distant meshes out of exact tests across 90 poses', () => {
     const scene = new THREE.Group(), pivot = new THREE.Group(), material = new THREE.MeshBasicMaterial(); scene.add(pivot);
     const leaf = new THREE.Mesh(new THREE.BoxGeometry(.6, 1, .02), material); leaf.position.x = .3; pivot.add(leaf);
