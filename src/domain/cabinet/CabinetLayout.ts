@@ -2,6 +2,7 @@ import type { FurnitureData, SurfaceFinishConfig, Vector3D } from '../model/Plan
 import { SurfaceFinish } from '../model/SurfaceFinish';
 import { finite, identifier, positive } from '../model/Immutable';
 import { cabinetDrawerTrays, cabinetBasket, cabinetHasDoors, cabinetLeafSettings, cabinetLeaves, type CabinetDoors, type CabinetFrontSection } from './CabinetFronts';
+import { cabinetBaseHeight, type CabinetPlinth } from './CabinetPlinth';
 export { cabinetDoorPose } from './CabinetFronts';
 
 /** All dimensions are metres. Interior coordinates start at inside left/base/back. */
@@ -53,6 +54,7 @@ export interface CabinetLayout {
   version: 1;
   panelThickness: number;
   backThickness: number;
+  plinth?: CabinetPlinth;
   doors: CabinetDoors;
   frontSections?: CabinetFrontSection[];
   panels: CabinetPanel[];
@@ -64,6 +66,10 @@ export const CABINET_EPSILON = .0005;
 export function validateCabinet(layout: CabinetLayout): CabinetLayout {
   if (!layout || layout.version !== 1) throw new Error('Unsupported cabinet layout');
   for (const [key, value] of [['Panel', layout.panelThickness], ['Back', layout.backThickness]] as const) if (positive(value, `${key} thickness`) > .1) throw new Error('Cabinet panels must be at most 100 mm thick');
+  if (layout.plinth) {
+    if (positive(layout.plinth.height, 'Plinth height') > .5) throw new Error('Plinth height must be at most 50 cm');
+    if (finite(layout.plinth.setback, 'Plinth setback') < 0) throw new Error('Plinth setback must not be negative');
+  }
   const validateDoors = (doors: CabinetDoors, tilt = false) => {
     if (![0, 1, 2].includes(doors?.count) || !['left', 'right'].includes(doors.hinge) || doors.angles?.length !== 2) throw new Error('Cabinets have zero, one or two doors');
     if (doors.split !== undefined && (finite(doors.split, 'Door split') < .1 || doors.split > .9)) throw new Error('Invalid door split');
@@ -98,7 +104,7 @@ export function validateCabinet(layout: CabinetLayout): CabinetLayout {
     }
   }
   if (!Array.isArray(layout.panels) || !Array.isArray(layout.contents) || layout.panels.length > 256 || layout.contents.length > 256) throw new Error('Cabinet layout is too large');
-  const ids = new Set<string>(['left', 'right', 'bottom', 'top', 'base', 'shell_left', 'shell_right', 'shell_base', 'shell_top', 'shell_back', 'door_0', 'door_1']);
+  const ids = new Set<string>(['left', 'right', 'bottom', 'top', 'base', 'plinth_front', 'plinth_left', 'plinth_right', 'shell_left', 'shell_right', 'shell_base', 'shell_top', 'shell_back', 'door_0', 'door_1']);
   for (const [index, leaf] of cabinetLeafSettings(layout).entries()) { ids.add(`door_${index}`); if (leaf.section?.opening === 'drawer') ids.add(`drawer_${leaf.section.id}_${leaf.localIndex}`); if (leaf.section?.opening === 'tilt-out') ids.add(`basket_${leaf.section.id}_${leaf.localIndex}`); }
   for (const d of layout.internalDrawers ?? []) ids.add(`drawer_${d.id}`);
   for (const p of [...layout.panels, ...layout.contents, ...(layout.internalDrawers ?? [])]) { identifier(p.id); if (ids.has(p.id)) throw new Error('Duplicate cabinet part'); ids.add(p.id); if (p.finish) SurfaceFinish.optional(p.finish); if ('sectionFinishes' in p && p.sectionFinishes) Object.values(p.sectionFinishes).forEach(finish => SurfaceFinish.optional(finish)); if (typeof p.name !== 'string') throw new Error('Cabinet part needs a name'); }
@@ -126,9 +132,9 @@ export function cabinetHinge(c: CabinetLayout, index: number): CabinetHinge {
   return leaf?.doors.hinges?.[leaf.localIndex] ?? { type: 'pivot', travel: 0 };
 }
 export function interior(size: Vector3D, c: CabinetLayout): Vector3D {
-  return { x: size.x - c.panelThickness * 2, y: size.y - c.panelThickness * 2, z: size.z - c.backThickness - (cabinetHasDoors(c) ? c.panelThickness : 0) };
+  return { x: size.x - c.panelThickness * 2, y: size.y - cabinetBaseHeight(c) - c.panelThickness * 2, z: size.z - c.backThickness - (cabinetHasDoors(c) ? c.panelThickness : 0) };
 }
-export function interiorOrigin(size: Vector3D, c: CabinetLayout): Vector3D { return { x: -size.x / 2 + c.panelThickness, y: c.panelThickness, z: -size.z / 2 + c.backThickness }; }
+export function interiorOrigin(size: Vector3D, c: CabinetLayout): Vector3D { return { x: -size.x / 2 + c.panelThickness, y: cabinetBaseHeight(c) + c.panelThickness, z: -size.z / 2 + c.backThickness }; }
 export function endpoint(c: CabinetLayout, size: Vector3D, ref: string | number, start: boolean): number {
   if (typeof ref === 'number') return ref;
   const inner = interior(size, c);
@@ -247,9 +253,10 @@ export function moveCabinetPart(c: CabinetLayout, size: Vector3D, id: string, ce
 export function cabinetIssues(c: CabinetLayout, size: Vector3D): Map<string, string[]> {
   const result = new Map<string, string[]>(), i = interior(size, c);
   const flag = (id: string, reason: string) => result.set(id, [...new Set([...(result.get(id) ?? []), reason])]);
+  if (c.plinth && c.plinth.setback > size.z - c.panelThickness * 2) flag('plinth_front', 'Plinth setback exceeds cabinet depth');
   if (i.x <= 0 || i.y <= 0 || i.z <= 0) { flag('shell_left', 'Cabinet smaller than panel thicknesses'); flag('shell_right', 'Cabinet smaller than panel thicknesses'); }
   const boxes = [...c.panels.map(p => resolvePanel(c, size, p)), ...c.contents.map(o => resolveContent(c, size, o)), ...cabinetLeaves(c, size).flatMap(l => cabinetBasket(c, size, l)?.walls ?? []), ...cabinetDrawerTrays(c, size).flatMap(d => d.walls)];
-  for (const l of cabinetLeaves(c, size)) if (l.bottom < 0 || l.top > size.y || l.top <= l.bottom + .004) flag(`door_${l.index}`, 'Front outside cabinet height');
+  for (const l of cabinetLeaves(c, size)) if (l.bottom < cabinetBaseHeight(c) || l.top > size.y || l.top <= l.bottom + .004) flag(`door_${l.index}`, 'Front outside cabinet height');
   for (const a of cabinetLeaves(c, size)) for (const b of cabinetLeaves(c, size)) if (a.section?.id !== b.section?.id && Math.min(a.top, b.top) - Math.max(a.bottom, b.bottom) > CABINET_EPSILON) flag(`door_${a.index}`, 'Overlapping front sections');
   for (const box of boxes) {
     const f = footprint(box.dimensions, box.rotationY);

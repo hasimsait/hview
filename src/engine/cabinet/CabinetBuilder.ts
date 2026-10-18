@@ -4,6 +4,7 @@ import { StandardFurniture, type Furniture } from '../../domain/elements/Furnitu
 import { cabinetDoorPose, contentSupportRoot, defaultCabinet, footprint, interiorOrigin, resolveContent, resolvePanel, type CabinetBox } from '../../domain/cabinet/CabinetLayout';
 
 import { cabinetDrawer, cabinetInternalDrawer, cabinetBasket, cabinetHasDoors, cabinetLeaves } from '../../domain/cabinet/CabinetFronts';
+import { cabinetBaseHeight } from '../../domain/cabinet/CabinetPlinth';
 import { bookcaseMaterials } from '../assets/builders/BookcaseMaterials';
 
 export function buildCabinet(c: AssetBuildContext, buildContent?: (entity: Furniture) => THREE.Object3D): void {
@@ -19,11 +20,17 @@ export function buildCabinet(c: AssetBuildContext, buildContent?: (entity: Furni
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(Math.max(.001, w), Math.max(.001, h), Math.max(.001, d)), material);
     mesh.userData = { section, cabinetPart: id }; mesh.castShadow = mesh.receiveShadow = true; group.add(mesh); c.parent.add(group); return group;
   };
-  box('shell_left', 'Frame', -c.w / 2 + t / 2, c.h / 2, carcassZ, t, c.h, carcassDepth);
-  box('shell_right', 'Frame', c.w / 2 - t / 2, c.h / 2, carcassZ, t, c.h, carcassDepth);
-  box('shell_base', 'Frame', 0, t / 2, carcassZ, c.w - 2 * t, t, carcassDepth);
+  const baseHeight = cabinetBaseHeight(layout), bodyHeight = c.h - baseHeight;
+  if (layout.plinth) {
+    const depth = Math.max(t, c.d - layout.plinth.setback);
+    box('plinth_front', 'Plinth', 0, baseHeight / 2, c.d / 2 - layout.plinth.setback - t / 2, c.w - 2 * t, baseHeight, t);
+    for (const side of [-1, 1]) box(side < 0 ? 'plinth_left' : 'plinth_right', 'Plinth', side * (c.w / 2 - t / 2), baseHeight / 2, -layout.plinth.setback / 2, t, baseHeight, depth);
+  }
+  box('shell_left', 'Frame', -c.w / 2 + t / 2, baseHeight + bodyHeight / 2, carcassZ, t, bodyHeight, carcassDepth);
+  box('shell_right', 'Frame', c.w / 2 - t / 2, baseHeight + bodyHeight / 2, carcassZ, t, bodyHeight, carcassDepth);
+  box('shell_base', 'Frame', 0, baseHeight + t / 2, carcassZ, c.w - 2 * t, t, carcassDepth);
   box('shell_top', bookcase ? 'Top' : 'Frame', 0, c.h - t / 2, carcassZ, c.w - 2 * t, t, carcassDepth, bookcase?.top);
-  box('shell_back', 'Back Panel', 0, c.h / 2, -c.d / 2 + b / 2, c.w - 2 * t, c.h - 2 * t, b, bookcase?.back);
+  box('shell_back', 'Back Panel', 0, baseHeight + bodyHeight / 2, -c.d / 2 + b / 2, c.w - 2 * t, bodyHeight - 2 * t, b, bookcase?.back);
   const addPart = (p: CabinetBox, section: string) => box(p.id, section, origin.x + p.position.x + p.dimensions.x / 2, origin.y + p.position.y + p.dimensions.y / 2, origin.z + p.position.z + p.dimensions.z / 2, p.dimensions.x, p.dimensions.y, p.dimensions.z, section === 'Shelves' ? bookcase?.shelves : undefined);
   for (const panel of layout.panels) { const group = addPart(resolvePanel(layout, c.entity.dimensions, panel), panel.kind === 'shelf' ? 'Shelves' : 'Dividers'); group.traverse(child => { child.userData.cabinetPanel = panel; }); }
   const leaves = cabinetLeaves(layout, c.entity.dimensions), pivots = new Map<string, THREE.Group>();

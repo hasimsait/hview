@@ -8,9 +8,9 @@ async function state(page: Page, draft = false) {
     const root = document.getElementById('root') as any, key = Object.keys(root).find(k => k.startsWith('__reactContainer$'))!, contexts: any[] = [];
     function scan(fiber: any) { if (!fiber) return; const value = fiber.memoizedProps?.value; if (value?.editor && value?.scene && !contexts.includes(value)) contexts.push(value); scan(fiber.child); scan(fiber.sibling); }
     scan(root[key].stateNode.current); const runtime = contexts[draft ? 1 : 0]; if (!runtime) return null;
-    const item = runtime.editor.getDocument().requireFurniture('cabinet'), mesh = runtime.scene.getRenderObject(item.id), colours: Record<string, string[]> = {}, tops: any[] = [];
-    mesh?.traverse((o: any) => { if (!o.isMesh) return; const section = o.userData.section; if (section) (colours[section] ??= []).push(o.material.color.getHexString()); if (section === 'Countertop') tops.push({ size: o.geometry.parameters, elevation: o.position.y, visible: o.visible }); });
-    return { data: item.toData(), colours, tops, status: runtime.scene.getStatus().state, furniture: runtime.editor.getDocument().furniture.map((o: any) => o.toData()), selected: runtime.editor.selection.getSnapshot() };
+    const item = runtime.editor.getDocument().requireFurniture('cabinet'), mesh = runtime.scene.getRenderObject(item.id), colours: Record<string, string[]> = {}, tops: any[] = [], plinths: any[] = [];
+    mesh?.traverse((o: any) => { if (!o.isMesh) return; const section = o.userData.section; if (section) (colours[section] ??= []).push(o.material.color.getHexString()); if (section === 'Plinth') plinths.push({ size: o.geometry.parameters, position: o.parent.position.toArray() }); if (section === 'Countertop') tops.push({ size: o.geometry.parameters, elevation: o.position.y, visible: o.visible }); });
+    return { data: item.toData(), colours, tops, plinths, status: runtime.scene.getStatus().state, furniture: runtime.editor.getDocument().furniture.map((o: any) => o.toData()), selected: runtime.editor.selection.getSnapshot() };
   }, draft);
 }
 async function ready(page: Page) { await expect(page.getByRole('button', { name: 'Move', exact: true }).first()).toBeVisible(); await expect.poll(async () => (await state(page))?.status).toBe('ready'); }
@@ -67,4 +67,40 @@ test('independent worktop can be placed, resized and finished while offline iPad
   await selectCabinet(tablet); await tablet.getByLabel('Cabinet door 1 angle', { exact: true }).fill('45'); expectRetained(await state(tablet));
   await tablet.getByRole('button', { name: 'Edit layout', exact: true }).click(); await expect.poll(async () => (await state(tablet, true))?.status).toBe('ready'); expectRetained(await state(tablet, true));
   await tablet.getByRole('button', { name: 'Cancel layout', exact: true }).click(); expectRetained(await state(tablet)); await tablet.screenshot({ path: info.outputPath('ipad-kitchen-worktops.png') }); await context.close();
+});
+
+
+test('optional plinth keeps worktop height and persists through layout editing and offline touch reload', async ({ page, browser }, info) => {
+  const initial = await state(page); await selectCabinet(page);
+  await expect(page.getByLabel('Cabinet plinth', { exact: true })).not.toBeChecked();
+  await page.getByLabel('Cabinet plinth', { exact: true }).check();
+  await expect(page.getByLabel('Plinth height (cm)', { exact: true })).toHaveValue('10');
+  await expect(page.getByLabel('Plinth setback (cm)', { exact: true })).toHaveValue('5');
+  let current = (await state(page))!;
+  expect(current.data.cabinet.plinth).toEqual({ height: .1, setback: .05 });
+  expect(current.data.dimensions).toEqual(initial!.data.dimensions); expect(current.tops).toEqual(initial!.tops);
+  expect(current.plinths).toHaveLength(3); expect(current.colours.Plinth).toEqual(['94a395', '94a395', '94a395']);
+  await page.getByLabel('Plinth height (cm)', { exact: true }).fill('12');
+  await page.getByLabel('Plinth setback (cm)', { exact: true }).fill('7');
+  current = (await state(page))!; expect(current.plinths.every((p: any) => p.size.height === .12)).toBe(true);
+  await page.getByRole('button', { name: 'Edit layout', exact: true }).click();
+  await expect.poll(async () => (await state(page, true))?.status).toBe('ready');
+  await expect(page.getByLabel('Plinth height (cm)', { exact: true })).toHaveValue('12');
+  await page.getByLabel('Plinth height (cm)', { exact: true }).fill('15');
+  await page.getByRole('button', { name: 'Undo layout', exact: true }).click();
+  await expect(page.getByLabel('Plinth height (cm)', { exact: true })).toHaveValue('12');
+  await page.getByRole('button', { name: 'Done', exact: true }).click();
+  await page.getByLabel('Cabinet door 1 angle', { exact: true }).fill('70');
+  expectRetained(await state(page));
+  await page.screenshot({ path: info.outputPath('kitchen-plinth.png') });
+  const downloading = page.waitForEvent('download'); await page.getByRole('button', { name: 'Full Editor (.html)', exact: true }).click();
+  const path = info.outputPath('kitchen-plinth.html'); await (await downloading).saveAs(path);
+  const context = await browser.newContext({ viewport: { width: 1024, height: 768 }, hasTouch: true, isMobile: true });
+  const url = await offlineDocument(context, path, 'kitchen-plinth'), tablet = await context.newPage();
+  await tablet.goto(url); await ready(tablet); current = (await state(tablet))!;
+  expect(current.data.cabinet.plinth).toEqual({ height: .12, setback: .07 });
+  expect(current.plinths).toHaveLength(3); expect(current.tops).toEqual(initial!.tops);
+  await selectCabinet(tablet); await tablet.getByLabel('Cabinet plinth', { exact: true }).uncheck();
+  expect((await state(tablet))!.plinths).toHaveLength(0); expect((await state(tablet))!.tops).toEqual(initial!.tops);
+  await context.close();
 });

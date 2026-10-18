@@ -15,7 +15,7 @@ export function cabinetSurfaceFinish(section: string, sections?: Readonly<Record
   const key = surfaceSection(section);
   if (sections?.[key]) return sections[key];
   if (/^door_\d+$/.test(key)) return sections?.doors ?? sections?.lids ?? sections?.cabinet ?? sections?.body ?? sections?.frame;
-  if (['frame', 'back_panel', 'shelves', 'dividers', 'laundry_basket'].includes(key)) return sections?.cabinet ?? sections?.body ?? sections?.frame;
+  if (['frame', 'back_panel', 'shelves', 'dividers', 'laundry_basket', 'plinth'].includes(key)) return sections?.cabinet ?? sections?.body ?? sections?.frame;
   return undefined; // Worktops, handles and stored objects keep their own finishes.
 }
 

@@ -1,11 +1,11 @@
 import type { AssetDefinition } from './AssetDefinition';
 
 export type DailyLifeKind = 'cat_tree' | 'cat_tray' | 'cat_litter' | 'cat_fountain' | 'cat_feeder' | 'cat_house'
-  | 'vanity_bottles' | 'hot_air_brush' | 'jewelry_tray' | 'dishwasher' | 'garment_short' | 'garment_coat'
+  | 'nespresso' | 'vanity_bottles' | 'hot_air_brush' | 'jewelry_tray' | 'dishwasher' | 'garment_short' | 'garment_coat'
   | 'boots_large' | 'boots_women' | 'sneakers_large' | 'sneakers_women' | 'drawer_organizer' | 'trouser_rack';
 export interface DailyLifeModel { kind: DailyLifeKind; }
 function asset(kind: DailyLifeKind, name: string, collection: string, size: [number, number, number], description: string, surface = false): AssetDefinition {
-  return { key: `life_${kind}`, name, collection, category: kind === 'dishwasher' ? 'appliance' : 'decor', recipe: 'daily_life', dailyLife: { kind },
+  return { key: `life_${kind}`, name, collection, category: ['dishwasher', 'nespresso'].includes(kind) ? 'appliance' : 'decor', recipe: 'daily_life', dailyLife: { kind },
     defaultDimensions: { x: size[0], y: size[1], z: size[2] }, placement: kind.startsWith('garment_') ? { mount: 'surface', defaultElevation: kind === 'garment_coat' ? .45 : .85 } : surface ? { mount: 'surface', defaultElevation: .85 } : { mount: 'floor' },
     capabilities: { resizable: true }, description, source: { retailer: 'Generic', dimensions: 'reference', dimensionNotes: 'Reference planning envelope, not a verified manufacturer specification. Adjust to the actual item.' } };
 }
@@ -19,6 +19,7 @@ export const DAILY_LIFE_ASSETS: readonly AssetDefinition[] = [
   asset('vanity_bottles', 'Perfume and Skin-Care Bottle Set', 'Vanity accessories', [.22, .16, .10], 'Perfume, serum, lotion and cream containers on a shallow tray. 10 cm depth fits shallow mirrored cabinets.', true),
   asset('hot_air_brush', 'Hot-Air Styling Brush', 'Vanity accessories', [.32, .065, .065], 'Generic Philips-style brush-shaped hair dryer with a handle, oval bristle barrel, controls and cord stub. Reference dimensions only.', true),
   asset('jewelry_tray', 'Jewelry and Key Dish', 'Vanity accessories', [.14, .025, .10], 'Shallow open dish holding a ring, bracelet and a key. Suitable for nightstands and mirrored-cabinet shelves.', true),
+  { ...asset('nespresso', 'Nespresso Capsule Coffee Machine', 'Countertop appliances', [.11, .205, .325], 'Compact Nespresso-style capsule machine with lifting lever, two brew buttons, rear water reservoir, coffee outlet and removable drip tray. Reference envelope; resize to your model.', true), aliases: ['nespresso', 'capsule coffee machine', 'pod coffee machine'] },
   asset('dishwasher', 'Standard 60 cm Dishwasher', 'Kitchen appliances', [.60, .845, .60], 'Freestanding full-size dishwasher with front door, recessed handle, control strip, plinth and side panels.'),
   asset('garment_short', 'Hanging Shirt and Jacket Garment Envelope', 'Wardrobe storage', [.52, 1.05, .065], 'Short hanging garment envelope with shoulder shaping, hanger hook, front zipper and a visible jacket silhouette.'),
   asset('garment_coat', 'Hanging Long-Coat Garment Envelope', 'Wardrobe storage', [.60, 1.55, .085], 'Long hanging garment envelope for a coat, with hanger hook, zipper and a full-length coat silhouette.'),

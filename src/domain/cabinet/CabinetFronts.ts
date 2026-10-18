@@ -1,4 +1,5 @@
 import type { CabinetBox, CabinetHinge, CabinetLayout } from './CabinetLayout';
+import { cabinetBaseHeight } from './CabinetPlinth';
 import type { Vector3D } from '../model/PlanData';
 
 export interface CabinetDoors {
@@ -50,7 +51,7 @@ export function cabinetLeaves(c: CabinetLayout, size: Vector3D): CabinetLeaf[] {
     const sideways = concealed ? hinge.travel + c.panelThickness / 2 : 0;
     const width = concealed ? Math.max(.001, Math.sqrt(Math.max(0, availableWidth ** 2 - sideways ** 2)) - .002) : availableWidth;
     return { index, localIndex, section, doors, hingeInset,
-      bottom: section?.bottom ?? 0, top: !section || section.top === 'top' ? size.y : section.top,
+      bottom: section?.bottom ?? cabinetBaseHeight(c), top: !section || section.top === 'top' ? size.y : section.top,
       width, left: doors.count === 2 ? localIndex === 0 : doors.hinge === 'left',
       angle: section?.opening === 'drawer' ? (section.drawerExtensions?.[localIndex] ?? 0) * 100 : doors.angles[localIndex],
       drawer: section?.opening === 'drawer', extension: section?.opening === 'drawer' ? section.drawerExtensions?.[localIndex] ?? 0 : 0, tilt: section?.opening === 'tilt-out' };
@@ -86,7 +87,7 @@ export function cabinetDoorPose(size: Vector3D, c: CabinetLayout, index: number,
 /** Basket panels in the same closed interior coordinates as shelves and stored objects. */
 export function cabinetBasket(c: CabinetLayout, size: Vector3D, leaf: CabinetLeaf): { floor: CabinetBox; walls: CabinetBox[] } | undefined {
   if (!leaf.tilt || !leaf.section) return;
-  const t = c.panelThickness, origin = { x: -size.x / 2 + t, y: t, z: -size.z / 2 + c.backThickness };
+  const t = c.panelThickness, origin = { x: -size.x / 2 + t, y: cabinetBaseHeight(c) + t, z: -size.z / 2 + c.backThickness };
   const pose = cabinetDoorPose(size, c, leaf.index, 0), w = Math.max(.001, leaf.width - .06), h = Math.max(.001, (leaf.top - leaf.bottom) * .58);
   const depth = leaf.section.basketDepth ?? Math.max(.001, size.z - c.backThickness - t - .025), b = .008;
   const x = pose.position.x - w / 2 - origin.x, y = pose.position.y + .028 - origin.y, z = pose.position.z + pose.leafOffsetZ - t / 2 - .008 - depth - origin.z;
@@ -107,7 +108,7 @@ export function cabinetDrawerDefaultHeight(c: CabinetLayout, size: Vector3D, bot
 }
 export function cabinetDrawer(c: CabinetLayout, size: Vector3D, leaf: CabinetLeaf): CabinetDrawerTray | undefined {
   if (!leaf.drawer || !leaf.section) return;
-  const t = c.panelThickness, origin = { x: -size.x / 2 + t, y: t, z: -size.z / 2 + c.backThickness };
+  const t = c.panelThickness, origin = { x: -size.x / 2 + t, y: cabinetBaseHeight(c) + t, z: -size.z / 2 + c.backThickness };
   const pose = cabinetDoorPose(size, c, leaf.index, 0), width = Math.max(.02, leaf.width - .05);
   const depth = leaf.section.drawerDepth ?? Math.max(.02, size.z - c.backThickness - t - .025);
   const height = leaf.section.drawerBoxHeight ?? cabinetDrawerDefaultHeight(c, size, leaf.bottom, leaf.top);

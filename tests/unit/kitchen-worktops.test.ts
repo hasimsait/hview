@@ -4,6 +4,10 @@ import { AssetCatalog } from '../../src/domain/catalog/AssetCatalog';
 import { PlanCodec } from '../../src/domain/codec/PlanCodec';
 import { LegacyPlanWriter } from '../../src/domain/codec/LegacyPlanWriter';
 import { defaultCabinet } from '../../src/domain/cabinet/CabinetLayout';
+import { configureCabinetPlinth, DEFAULT_CABINET_PLINTH } from '../../src/domain/cabinet/CabinetPlinth';
+import { interior, interiorOrigin, cabinetIssues, validateCabinet } from '../../src/domain/cabinet/CabinetLayout';
+import { cabinetLeaves } from '../../src/domain/cabinet/CabinetFronts';
+import { CollisionFeedback } from '../../src/engine/cabinet/CollisionFeedback';
 import { cabinetDoorCount } from '../../src/domain/catalog/Cabinets';
 import { PlanDocument } from '../../src/domain/model/PlanDocument';
 import { StandardFurniture } from '../../src/domain/elements/Furniture';
@@ -70,6 +74,47 @@ describe('independent worktops and retained kitchen cabinet appearance', () => {
     const before = meshes(rendered(item)).find(m => m.userData.section === 'Cabinet')!;
     const after = meshes(rendered(item.withCabinet(defaultCabinet(item.toData(), 2)) as StandardFurniture)).find(m => m.userData.section === 'Frame')!;
     expect(colour(after)).toBe(colour(before));
+  });
+  it('adds a recessed 10 cm plinth inside the total height while retaining the countertop and base supports', () => {
+    const original = cabinet(), layout = configureCabinetPlinth(defaultCabinet(original.toData(), 2), original.dimensions.y, DEFAULT_CABINET_PLINTH);
+    layout.contents = [{ id: 'bottle', name: 'Bottle', assetKey: 'fit_detergent', dimensions: { x: .15, y: .2, z: .09 }, position: { x: .02, y: 0, z: .01 }, rotationY: 0, supportId: 'base' }];
+    const data = original.withCabinet(layout) as StandardFurniture, root = rendered(data), before = rendered(original);
+    expect(interiorOrigin(data.dimensions, layout).y).toBeCloseTo(.118);
+    expect(interior(data.dimensions, layout).y).toBeCloseTo(.714);
+    expect([...cabinetIssues(layout, data.dimensions)]).toEqual([]);
+    expect(new THREE.Box3().setFromObject(top(root)[0])).toEqual(new THREE.Box3().setFromObject(top(before)[0]));
+    const base = new THREE.Box3().setFromObject(root.getObjectByName('cabinet_part_shell_base')!);
+    expect(base.min.y).toBeCloseTo(.10); expect(base.max.y).toBeCloseTo(.118);
+    const plinth = new THREE.Box3().setFromObject(root.getObjectByName('cabinet_part_plinth_front')!);
+    expect(plinth.min.y).toBeCloseTo(0); expect(plinth.max.y).toBeCloseTo(.10); expect(plinth.max.z).toBeCloseTo(data.dimensions.z / 2 - .05);
+    const bottle = root.getObjectByName('cabinet_content_bottle')!; expect(bottle.position.y).toBeCloseTo(.118);
+    const doors = cabinetLeaves(layout, data.dimensions); expect(doors.every(leaf => leaf.bottom === .1)).toBe(true);
+    expect(meshes(root).filter(m => m.userData.section === 'Plinth').every(m => colour(m) === '94a395')).toBe(true);
+    const painted = data.withSectionFinish('Plinth', { type: 'paint', color: '#222222' });
+    expect(meshes(rendered(painted as StandardFurniture)).filter(m => m.userData.section === 'Plinth').every(m => colour(m) === '222222')).toBe(true);
+    const feedback = new CollisionFeedback();
+    for (const angle of [0, 45, 90, 170]) {
+      const opened = rendered(data.withCabinet({ ...layout, doors: { ...layout.doors, angles: [angle, 0] } }) as StandardFurniture);
+      const pivot = opened.getObjectByName('cabinet_door_0')!; opened.updateMatrixWorld(true);
+      for (const moving of meshes(pivot)) for (const obstacle of meshes(opened).filter(m => m.userData.section === 'Plinth')) expect(feedback.intersects(moving, obstacle)).toBe(false);
+    }
+    feedback.dispose();
+  });
+  it('resizes stacked drawer fronts proportionally and retains plinth settings through undo and both exports', () => {
+    const asset = catalog.get('cabinet_drawers_three')!, item = new StandardFurniture({ ...cabinet().toData(), assetKey: asset.key, dimensions: asset.defaultDimensions });
+    const original = defaultCabinet(item.toData(), 1), layout = configureCabinetPlinth(original, item.dimensions.y, { height: .1, setback: .04 });
+    const leaves = cabinetLeaves(layout, item.dimensions);
+    expect(leaves[0].bottom).toBeCloseTo(.1); expect(leaves[0].top - leaves[0].bottom).toBeCloseTo((item.dimensions.y - .1) * .25);
+    expect(cabinetIssues(layout, item.dimensions).size).toBe(0);
+    const editor = new EditorSession(codec.factory); editor.load(new PlanDocument([item])); editor.execute(new ConfigureCabinet(item.id, layout));
+    editor.undo(); expect(editor.getDocument().requireFurniture(item.id).cabinet).toBeUndefined(); editor.redo();
+    for (const encoded of [codec.encode(editor.getDocument()), new LegacyPlanWriter().encode(editor.getDocument())]) expect(codec.decode(encoded).requireFurniture(item.id).cabinet).toEqual(layout);
+    const removed = configureCabinetPlinth(layout, item.dimensions.y);
+    expect(removed.plinth).toBeUndefined();
+    for (let i = 0; i < original.frontSections!.length; i++) expect(removed.frontSections![i].bottom).toBeCloseTo(original.frontSections![i].bottom);
+    expect(meshes(rendered(item.withCabinet(removed) as StandardFurniture)).some(m => m.userData.section === 'Plinth')).toBe(false);
+    for (const plinth of [{ height: 0, setback: .05 }, { height: .51, setback: .05 }, { height: NaN, setback: .05 }, { height: .1, setback: -.01 }]) expect(() => validateCabinet({ ...original, plinth })).toThrow();
+    expect(cabinetIssues({ ...original, plinth: { height: .1, setback: 1 } }, item.dimensions).get('plinth_front')).toBeDefined();
   });
   it('adds a separate resizable slab with no cabinet behaviour and independent finishes and elevation', () => {
     const asset = catalog.get('kitchen_worktop')!; expect(asset.defaultDimensions).toEqual({ x: 2.4, y: .04, z: .62 }); expect(asset.placement).toMatchObject({ mount: 'surface', defaultElevation: .85 });

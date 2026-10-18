@@ -27,7 +27,7 @@ test('new daily-life assets render offline and remain searchable in English', as
   });
   expect(state).toHaveLength(DAILY_LIFE_ASSETS.length); expect(state.every((a: any) => a.built)).toBe(true);
   await page.screenshot({ path: info.outputPath('daily-life-gallery.png') });
-  for (const key of ['life_cat_house', 'life_cat_fountain', 'life_vanity_bottles', 'life_garment_coat', 'life_boots_large', 'life_drawer_organizer']) {
+  for (const key of ['life_nespresso', 'life_cat_house', 'life_cat_fountain', 'life_vanity_bottles', 'life_garment_coat', 'life_boots_large', 'life_drawer_organizer']) {
     await page.evaluate(async key => {
       const root = document.getElementById('root') as any, ref = Object.keys(root).find(k => k.startsWith('__reactContainer$'))!;
       const runtime = root[ref].stateNode.current.memoizedState.element.props.value, f = runtime.editor.getDocument().requireFurniture(key), p = f.position, d = f.dimensions;
@@ -45,5 +45,7 @@ test('new daily-life assets render offline and remain searchable in English', as
   await page.getByPlaceholder('Search assets (e.g. towel, fan, sconce, bed, sink)...').fill('EU 47');
   await expect(page.getByRole('heading', { name: 'EU 47 Sneakers — Pair', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'EU 47 Ankle Boots — Pair', exact: true })).toBeVisible();
+  await page.getByPlaceholder('Search assets (e.g. towel, fan, sconce, bed, sink)...').fill('Nespresso');
+  await expect(page.getByRole('heading', { name: 'Nespresso Capsule Coffee Machine', exact: true })).toBeVisible();
   expect(errors).toEqual([]); expect(requests).toEqual([]);
 });

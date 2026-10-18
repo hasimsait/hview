@@ -88,6 +88,19 @@ export function buildDailyLife(c: AssetBuildContext): void {
     for (const z of [-.47, .47]) rounded(0, .35, z, .94, .45, .06, cream, 'Dish Rim');
     p.ring(.09, .018, m.metalBrass, 'Ring', -.20, .38, .02); p.ring(.22, .014, steel, 'Bracelet', .17, .36, -.10);
     p.box(-.05, .39, .24, .36, .04, .06, steel, 'Key'); p.ring(.055, .014, steel, 'Key', -.25, .39, .24);
+  } else if (kind === 'nespresso') {
+    rounded(0, .43, -.045, .82, .80, .65, dark, 'Housing');
+    const tank = color('#9bbac7', m.glassBlack); tank.transparent = true; tank.opacity = .4;
+    rounded(0, .46, -.36, .72, .86, .27, tank, 'Water Reservoir');
+    rounded(0, .91, -.36, .76, .04, .28, dark, 'Reservoir Lid');
+    rounded(0, .53, .30, .66, .54, .12, dark, 'Capsule Head');
+    p.cylinder(0, .39, .34, .045, .12, steel, 'Coffee Outlet');
+    rounded(0, .035, .29, .94, .07, .42, dark, 'Drip Tray');
+    for (let i = 0; i < 7; i++) p.box(-.36 + i * .12, .076, .29, .025, .012, .32, steel, 'Drip Tray Grille');
+    for (const x of [-.18, .18]) p.cylinder(x, .845, .05, .07, .025, color('#b6c9ad'), 'Brew Buttons');
+    for (const x of [-.30, .30]) p.rod(new THREE.Vector3(x, .85, -.18), new THREE.Vector3(x, .98, .12), .018, steel, 'Capsule Lever');
+    p.rod(new THREE.Vector3(-.30, .98, .12), new THREE.Vector3(.30, .98, .12), .018, steel, 'Capsule Lever');
+    for (const side of [-1, 1]) for (let rib = 0; rib < 8; rib++) p.box(side * .414, .42, -.28 + rib * .065, .012, .61, .018, m.metalBlack, 'Side Ribs');
   } else if (kind === 'dishwasher') {
     rounded(0, .51, 0, .98, .98, .98, color('#c9cdd0', steel), 'Body');
     p.box(0, .47, .492, .94, .82, .016, color('#d9dcdd', steel), 'Door');

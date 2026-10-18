@@ -16,6 +16,8 @@ import { Inspector } from './Inspector';
 import { cabinetDrawerTrays, cabinetBasket, cabinetLeaves, setCabinetDoorAngle } from '../../domain/cabinet/CabinetFronts';
 import { CabinetInternalDrawers } from './CabinetInternalDrawers';
 import { CabinetFrontControls } from './CabinetFrontControls';
+import { CabinetPlinthControls } from './CabinetPlinthControls';
+import { supportsCabinetPlinth } from '../../domain/cabinet/CabinetPlinth';
 import { CabinetHingeControls } from './CabinetHingeControls';
 import { Viewport3D } from './Viewport3D';
 
@@ -135,6 +137,7 @@ function CabinetWorkspace({ original, onCancel, onDone }: { original: Furniture;
         <label className="block">Back thickness (mm)<input aria-label="Back thickness (mm)" className="w-full bg-slate-800 p-1" type="number" min="1" max="100" step="1" value={+(layout.backThickness * 1000).toFixed(2)} onChange={e => { const n = +e.target.value / 1000; if (n > 0 && n <= .1) update({ ...layout, backThickness: n }); }} /></label>
         {!layout.frontSections && <label className="block">Doors<select aria-label="Cabinet door count" className="w-full bg-slate-800 p-1" value={layout.doors.count} onChange={e => update({ ...layout, doors: { ...layout.doors, count: +e.target.value as 0 | 1 | 2 } })}><option value="0">Open cabinet</option><option value="1">One door</option><option value="2">Two doors</option></select></label>}
         {!layout.frontSections && layout.doors.count === 1 && <label className="block">Hinge side<select aria-label="Cabinet hinge side" className="w-full bg-slate-800 p-1" value={layout.doors.hinge} onChange={e => update({ ...layout, doors: { ...layout.doors, hinge: e.target.value as 'left' | 'right' } })}><option value="left">Left</option><option value="right">Right</option></select></label>}
+        {(supportsCabinetPlinth(item.assetKey) || layout.plinth) && <CabinetPlinthControls layout={layout} size={size} onChange={next => update(next, 'Configure cabinet plinth')} />}
         <CabinetInternalDrawers layout={layout} size={size} onChange={next => update(next, 'Configure internal drawers')} onPlace={support => { setSupportTarget(support); setPlaceOnSelected(false); setReplacing(false); setAdding(true); }} />
         <CabinetFrontControls layout={layout} size={size} onPlace={support => { setSupportTarget(support); setPlaceOnSelected(false); setReplacing(false); setAdding(true); }} onChange={next => update(next, 'Configure cabinet fronts')} />
         <CabinetHingeControls showAngles layout={layout} onChange={next => update(next, 'Configure cabinet hinge')} />

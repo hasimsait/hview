@@ -22,6 +22,16 @@ describe('daily-life catalogue', () => {
     }
     expect(bounds.min.y).toBeGreaterThanOrEqual(-.001);
   });
+  it('adds a countertop Nespresso capsule machine with separate functional parts and saved identity', () => {
+    const asset = catalog.get('life_nespresso')!, model = build(asset.key), sections = new Set<string>();
+    model.traverse(o => { if (o instanceof THREE.Mesh) sections.add(o.userData.section); });
+    for (const section of ['Water Reservoir', 'Capsule Lever', 'Brew Buttons', 'Coffee Outlet', 'Drip Tray']) expect(sections.has(section)).toBe(true);
+    expect(asset.category).toBe('appliance'); expect(asset.placement).toMatchObject({ mount: 'surface', defaultElevation: .85 });
+    expect(catalog.canonicalKey('nespresso')).toBe(asset.key);
+    const entity = codec.factory.furniture({ id: 'coffee', name: asset.key, assetKey: asset.key, displayName: asset.name, category: 'appliance', dimensions: asset.defaultDimensions, position: { x: 1, y: .85, z: 2 }, rotationY: .5 });
+    const document = new PlanDocument([entity]);
+    expect(codec.decode(codec.encode(document)).requireFurniture('coffee').toData()).toMatchObject({ assetKey: asset.key, position: { y: .85 }, dimensions: asset.defaultDimensions });
+  });
   it('keeps vanity items shallower than the usable depth of a 16 cm mirrored cabinet', () => {
     for (const key of ['life_vanity_bottles', 'life_hot_air_brush', 'life_jewelry_tray']) expect(catalog.get(key)!.defaultDimensions.z).toBeLessThanOrEqual(.16 - .018 - .006);
   });

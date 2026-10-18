@@ -17,6 +17,8 @@ import React,{ useCallback,useState } from 'react';
 import { ConfigureLuminaire,ConfigureShelving,FinishFurniture,RemoveElement,TransformFurniture,SetWindowCoveringOpen } from '../../application/commands/FurnitureCommands';
 import { cabinetDoorCount } from '../../domain/catalog/Cabinets';
 import { defaultCabinet } from '../../domain/cabinet/CabinetLayout';
+import { CabinetPlinthControls } from './CabinetPlinthControls';
+import { supportsCabinetPlinth } from '../../domain/cabinet/CabinetPlinth';
 import { CabinetHingeControls } from './CabinetHingeControls';
 import { ConfigureCabinet } from '../../application/commands/CabinetCommands';
 import type { Vector3D } from '../../domain/model/PlanData';
@@ -173,6 +175,7 @@ export const Inspector: React.FC<InspectorProps> = ({
 
       {!interior && (item.cabinet || cabinetDoorCount(definition) !== undefined) && <div className="py-3 space-y-2 border-b border-slate-800">
         <button className="w-full rounded bg-sky-600 p-2 font-semibold" onClick={onEditLayout}>Edit layout</button>
+        {(supportsCabinetPlinth(item.assetKey) || item.cabinet?.plinth) && <CabinetPlinthControls layout={item.cabinet ?? defaultCabinet(item.toData(), legacyDoors ?? 2)} size={item.dimensions} onChange={layout => editor.execute(new ConfigureCabinet(item.id, layout, 'Configure cabinet plinth'))} />}
         <CabinetHingeControls showAngles layout={item.cabinet ?? defaultCabinet(item.toData(), legacyDoors ?? 2)} onChange={layout => editor.execute(new ConfigureCabinet(item.id, layout, 'Configure cabinet doors'))} />
         {item.cabinet?.internalDrawers?.map((drawer, i) => <label key={drawer.id} className="block text-xs text-slate-300">{drawer.name}: {Math.round(drawer.extension * 100)}%
           <input type="range" aria-label={`Internal drawer ${i + 1} extension`} min="0" max="100" value={Math.round(drawer.extension * 100)} className="w-full accent-sky-400" onChange={e => editor.execute(new ConfigureCabinet(item.id, { ...item.cabinet!, internalDrawers: item.cabinet!.internalDrawers!.map(d => d.id === drawer.id ? { ...d, extension: +e.target.value / 100 } : d) }, 'Extend internal drawer'))} />
