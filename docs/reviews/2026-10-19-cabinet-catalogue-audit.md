@@ -84,6 +84,8 @@ Every sampled pose loops through all pickable scene meshes. Each pair constructs
 
 **Required verification:** the same near-obstacle, contact, hole, rotated and sheared-geometry results; assert distant candidates do not invoke the narrow phase; document benchmark inputs rather than promising a universal frame-rate gain.
 
+**Implemented result:** a per-motion obstacle snapshot performs conservative world-AABB rejection before the unchanged exact collision routine. A synthetic 2,000-distant-mesh/90-pose comparison took 150.56 ms with the former exact-pair loop and 14.82 ms with the query. The regression test proves that all 180,000 distant pairs avoid the narrow phase. Near/contact, hidden-ancestor and rotated/sheared cases retain their results. All 29 collision/layout unit cases passed; the offline editor was rebuilt.
+
 ### 04 — High: sliding room doors have no collision target
 
 **Files:** `src/engine/geometry/OpeningMeshBuilder.ts`, `src/engine/SceneEngine.ts`.

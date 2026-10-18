@@ -1084,8 +1084,8 @@ export class SceneEngine implements ISceneService {
     const slideFinal = sliding ? cabinetLeaves(item.cabinet!, item.dimensions)[door!].angle : 0;
     const slideFrom = previousAngle === undefined ? slideFinal : previousAngle * 180 / Math.PI;
     const steps = sliding ? Math.max(1, Math.ceil(Math.abs(slideFinal - slideFrom) / 2)) : Math.max(1, Math.ceil(Math.abs(final - from) / (Math.PI / 90)));
-    const obstacles = this.picking.getCandidates().filter((o): o is THREE.Mesh => o instanceof THREE.Mesh && !pivot.getObjectById(o.id));
     let collides = false; this.scene.updateMatrixWorld(true);
+    const query = this.collisionFeedback.prepare(pivot, this.picking.getCandidates());
     for (let step = 1; step <= steps && !collides; step++) {
       const angle = from + (final - from) * step / steps;
       pivot.rotation[axis] = angle;
@@ -1094,10 +1094,7 @@ export class SceneEngine implements ISceneService {
         pivot.position.set(pose.position.x, pose.position.y, pose.position.z); pivot.rotation.set(pose.rotationX, pose.rotationY, 0);
       }
       pivot.updateWorldMatrix(true, true);
-      for (const other of obstacles) {
-        let visible = true; for (let p: THREE.Object3D | null = other; p; p = p.parent) if (!p.visible) visible = false;
-        if (visible && moving.some(part => this.collisionFeedback.intersects(part, other))) { collides = true; break; }
-      }
+      collides = query.intersects(moving);
     }
     pivot.rotation.copy(finalRotation); pivot.position.copy(finalPosition); pivot.updateWorldMatrix(true, true);
     if (collides) this.collisionFeedback.mark(pivot);
@@ -1111,15 +1108,12 @@ export class SceneEngine implements ISceneService {
     if (!drawer || !pivot) return;
     const tray = cabinetInternalDrawer(item.cabinet, item.dimensions, drawer), final = pivot.position.z;
     const moving: THREE.Mesh[] = []; pivot.traverse(o => { if (o instanceof THREE.Mesh) moving.push(o); });
-    const obstacles = this.picking.getCandidates().filter((o): o is THREE.Mesh => o instanceof THREE.Mesh && !pivot.getObjectById(o.id));
     const from = final - (drawer.extension - previous) * tray.travel, steps = Math.max(1, Math.ceil(Math.abs(final - from) / .02));
     let collides = false; this.scene.updateMatrixWorld(true);
+    const query = this.collisionFeedback.prepare(pivot, this.picking.getCandidates());
     for (let step = 1; step <= steps && !collides; step++) {
       pivot.position.z = from + (final - from) * step / steps; pivot.updateWorldMatrix(true, true);
-      for (const other of obstacles) {
-        let visible = true; for (let p: THREE.Object3D | null = other; p; p = p.parent) if (!p.visible) visible = false;
-        if (visible && moving.some(part => this.collisionFeedback.intersects(part, other))) { collides = true; break; }
-      }
+      collides = query.intersects(moving);
     }
     pivot.position.z = final; pivot.updateWorldMatrix(true, true);
     if (collides) this.collisionFeedback.mark(pivot);
