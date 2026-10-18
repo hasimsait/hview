@@ -27,6 +27,7 @@ export interface CabinetLeaf {
   bottom: number;
   top: number;
   width: number;
+  hingeInset: number;
   left: boolean;
   angle: number;
   tilt: boolean;
@@ -37,11 +38,23 @@ export function cabinetLeafSettings(c: CabinetLayout) {
   return (c.frontSections ?? [{ doors: c.doors }]).flatMap(section => Array.from({ length: section.doors.count }, (_, localIndex) => ({ section: 'id' in section ? section as CabinetFrontSection : undefined, doors: section.doors, localIndex })));
 }
 export function cabinetLeaves(c: CabinetLayout, size: Vector3D): CabinetLeaf[] {
-  return cabinetLeafSettings(c).map(({ section, doors, localIndex }, index) => ({ index, localIndex, section, doors,
-    bottom: section?.bottom ?? 0, top: !section || section.top === 'top' ? size.y : section.top,
-    width: (size.x - .004) * (doors.count === 2 ? (localIndex === 0 ? doors.split ?? .5 : 1 - (doors.split ?? .5)) : 1) - .002, left: doors.count === 2 ? localIndex === 0 : doors.hinge === 'left',
-    angle: section?.opening === 'drawer' ? (section.drawerExtensions?.[localIndex] ?? 0) * 100 : doors.angles[localIndex],
-    drawer: section?.opening === 'drawer', extension: section?.opening === 'drawer' ? section.drawerExtensions?.[localIndex] ?? 0 : 0, tilt: section?.opening === 'tilt-out' }));
+  return cabinetLeafSettings(c).map(({ section, doors, localIndex }, index) => {
+    const hinge = doors.hinges?.[localIndex];
+    const concealed = (!section || section.opening === 'swing') && hinge && hinge.type !== 'pivot';
+    // Cranked arms reduce the overlay at the cabinet's outer edges.
+    const hingeInset = concealed ? c.panelThickness * (hinge.type === 'fully-cranked' ? 1 : hinge.type === 'half-cranked' ? .5 : 0) : 0;
+    const nominalWidth = (size.x - .004) * (doors.count === 2 ? (localIndex === 0 ? doors.split ?? .5 : 1 - (doors.split ?? .5)) : 1) - .002;
+    const availableWidth = Math.max(.001, nominalWidth - hingeInset * (doors.count === 1 ? 2 : 1));
+    // The latch edge initially moves sideways as the concealed pivot translates.
+    // Include panel thickness in its swept radius so paired leaves keep a reveal.
+    const sideways = concealed ? hinge.travel + c.panelThickness / 2 : 0;
+    const width = concealed ? Math.max(.001, Math.sqrt(Math.max(0, availableWidth ** 2 - sideways ** 2)) - .002) : availableWidth;
+    return { index, localIndex, section, doors, hingeInset,
+      bottom: section?.bottom ?? 0, top: !section || section.top === 'top' ? size.y : section.top,
+      width, left: doors.count === 2 ? localIndex === 0 : doors.hinge === 'left',
+      angle: section?.opening === 'drawer' ? (section.drawerExtensions?.[localIndex] ?? 0) * 100 : doors.angles[localIndex],
+      drawer: section?.opening === 'drawer', extension: section?.opening === 'drawer' ? section.drawerExtensions?.[localIndex] ?? 0 : 0, tilt: section?.opening === 'tilt-out' };
+  });
 }
 export function cabinetHasDoors(c: CabinetLayout): boolean { return cabinetLeafSettings(c).length > 0; }
 export function updateCabinetLeaf(c: CabinetLayout, index: number, update: (doors: CabinetDoors, localIndex: number) => CabinetDoors): CabinetLayout {
@@ -63,12 +76,12 @@ export function cabinetDoorPose(size: Vector3D, c: CabinetLayout, index: number,
   if (leaf.drawer) {
     const depth = leaf.section?.drawerDepth ?? Math.max(.02, size.z - c.backThickness - c.panelThickness - .025);
     const extension = degrees === undefined ? leaf.extension : Math.max(0, Math.min(1, degrees / 100));
-    return { position: { x: leaf.doors.count === 2 ? (leaf.localIndex ? size.x / 2 - .002 - leaf.width / 2 : -size.x / 2 + .002 + leaf.width / 2) : 0, y: leaf.bottom + .002, z: size.z / 2 - c.panelThickness / 2 + depth * .9 * extension }, rotationY: 0, rotationX: 0 };
+    return { position: { x: leaf.doors.count === 2 ? (leaf.localIndex ? size.x / 2 - .002 - leaf.width / 2 : -size.x / 2 + .002 + leaf.width / 2) : 0, y: leaf.bottom + .002, z: size.z / 2 - c.panelThickness / 2 + depth * .9 * extension }, rotationY: 0, rotationX: 0, leafOffsetZ: 0 };
   }
-  if (leaf.tilt) return { position: { x: leaf.doors.count === 2 ? (leaf.localIndex ? 1 : -1) * (size.x / 4) : 0, y: leaf.bottom + .002, z: size.z / 2 - c.panelThickness / 2 }, rotationY: 0, rotationX: angle };
+  if (leaf.tilt) return { position: { x: leaf.doors.count === 2 ? (leaf.localIndex ? 1 : -1) * (size.x / 4) : 0, y: leaf.bottom + .002, z: size.z / 2 + .001 }, rotationY: 0, rotationX: angle, leafOffsetZ: -c.panelThickness / 2 - .001 };
   const sign = leaf.left ? 1 : -1, hinge = leaf.doors.hinges?.[leaf.localIndex];
   const travel = !hinge || hinge.type === 'pivot' ? 0 : hinge.travel * Math.sin(Math.min(Math.PI / 2, angle));
-  return { position: { x: sign * (-size.x / 2 + .002 + travel), y: leaf.bottom, z: size.z / 2 - c.panelThickness / 2 + travel }, rotationY: -sign * angle, rotationX: 0 };
+  return { position: { x: sign * (-size.x / 2 + .002 + leaf.hingeInset + travel), y: leaf.bottom, z: size.z / 2 - c.panelThickness / 2 + travel }, rotationY: -sign * angle, rotationX: 0, leafOffsetZ: 0 };
 }
 /** Basket panels in the same closed interior coordinates as shelves and stored objects. */
 export function cabinetBasket(c: CabinetLayout, size: Vector3D, leaf: CabinetLeaf): { floor: CabinetBox; walls: CabinetBox[] } | undefined {
@@ -76,7 +89,7 @@ export function cabinetBasket(c: CabinetLayout, size: Vector3D, leaf: CabinetLea
   const t = c.panelThickness, origin = { x: -size.x / 2 + t, y: t, z: -size.z / 2 + c.backThickness };
   const pose = cabinetDoorPose(size, c, leaf.index, 0), w = Math.max(.001, leaf.width - .06), h = Math.max(.001, (leaf.top - leaf.bottom) * .58);
   const depth = leaf.section.basketDepth ?? Math.max(.001, size.z - c.backThickness - t - .025), b = .008;
-  const x = pose.position.x - w / 2 - origin.x, y = pose.position.y + .028 - origin.y, z = pose.position.z - t / 2 - .008 - depth - origin.z;
+  const x = pose.position.x - w / 2 - origin.x, y = pose.position.y + .028 - origin.y, z = pose.position.z + pose.leafOffsetZ - t / 2 - .008 - depth - origin.z;
   const floor: CabinetBox = { id: `basket_${leaf.section.id}_${leaf.localIndex}`, name: `Basket ${leaf.index + 1}`, position: { x, y, z }, dimensions: { x: w, y: b, z: depth } };
   const wall = (px: number, py: number, pz: number, width: number, height: number, d: number): CabinetBox => ({ id: `door_${leaf.index}`, name: floor.name, position: { x: px, y: py, z: pz }, dimensions: { x: width, y: height, z: d } });
   return { floor, walls: [wall(x, y, z, w, b, depth), wall(x, y + b, z, w, h, b), wall(x, y + b, z, b, h, depth), wall(x + w - b, y + b, z, b, h, depth)] };

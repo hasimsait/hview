@@ -87,11 +87,13 @@ test('shrinking and restoring a cabinet preserves shelves and contents and check
 
 test('cabinet doors swing independently, turn red for an obstacle and leave ordinary placement unchecked', async ({ page, request }) => {
   const raw = fixture(); raw.plan.items.cabinet.cabinet.doors.count = 2;
-  Object.assign(raw.plan.items, { obstacle: { name: 'cube', assetKey: 'detail_books', dimensions: { x: .22, y: .5, z: .22 }, position: { x: 1.82, y: .4, z: 2.4 }, pc: { x: 182, y: 240 }, rotationY: 0 } });
+  Object.assign(raw.plan.items, { obstacle: { name: 'cube', assetKey: 'detail_books', dimensions: { x: .22, y: .5, z: .22 }, position: { x: 1.7, y: .4, z: 2.4 }, pc: { x: 170, y: 240 }, rotationY: 0 } });
   await request.post('/api/save-plan', { data: raw }); await page.evaluate(() => localStorage.clear()); await page.reload(); await ready(page); await selectCabinet(page);
   await page.getByLabel('Cabinet door 1 angle', { exact: true }).fill('90');
   expect((await snapshot(page))!.doorCollision).toBe(true); expect((await snapshot(page))!.red).toContain('door_0');
   expect((await snapshot(page))!.data.cabinet.doors.angles).toEqual([90, 0]);
+  await page.getByLabel('Cabinet door 2 angle', { exact: true }).fill('10');
+  expect((await snapshot(page))!.doorCollision).toBe(true); expect((await snapshot(page))!.red).toContain('door_0');
   await numberField(page, 'X (Horiz.)').fill('3'); expect((await snapshot(page))!.red).toEqual([]);
   await page.getByLabel('Cabinet door 1 angle', { exact: true }).fill('91'); expect((await snapshot(page))!.doorCollision).toBe(false);
   await page.getByLabel('Cabinet door 2 angle', { exact: true }).fill('70'); expect((await snapshot(page))!.data.cabinet.doors.angles).toEqual([91, 70]);
@@ -107,6 +109,7 @@ test('concealed hinge travel clears a flush enclosure and collision checks follo
   const travel = page.getByLabel('Cabinet door 1 hinge travel (mm)', { exact: true });
   await expect(travel).toHaveValue('20'); expect((await snapshot(page))!.doorCollision).toBe(false); expect((await snapshot(page))!.red).toEqual([]);
   // Rechecking at the same angle must use the new hardware path.
+  await type.selectOption('straight-arm');
   await travel.fill('2'); expect((await snapshot(page))!.doorCollision).toBe(true); expect((await snapshot(page))!.red).toContain('door_0');
   await travel.fill('20'); expect((await snapshot(page))!.doorCollision).toBe(false);
   await angle.fill('0'); expect((await snapshot(page))!.doorCollision).toBe(false);
@@ -123,6 +126,22 @@ test('concealed hinge travel clears a flush enclosure and collision checks follo
   await page.getByRole('button', { name: 'Done', exact: true }).click();
   expect((await snapshot(page))!.data.cabinet.doors.hinges[0]).toEqual({ type: 'fully-cranked', travel: .025 });
   expect((await snapshot(page))!.data.cabinet.doors.angles).toEqual([90, 0]);
+});
+
+test('layout previews check door sweeps against extended internal drawers and clear recovered warnings', async ({ page, request }) => {
+  const raw = fixture();
+  raw.plan.items.cabinet.cabinet.panels = [];
+  raw.plan.items.cabinet.cabinet.internalDrawers = [{ id: 'inside', name: 'Internal drawer', bottom: .5, height: .15, depth: .3, setback: .02, extension: 1 }];
+  await request.post('/api/save-plan', { data: raw }); await page.evaluate(() => localStorage.clear()); await page.reload(); await ready(page); await openLayout(page);
+  const angle = page.getByLabel('Cabinet door 1 angle', { exact: true });
+  await angle.fill('0');
+  expect((await snapshot(page, true))!.doorCollision).toBe(true);
+  expect((await snapshot(page, true))!.red).toContain('door_0');
+  await expect(page.getByRole('status').filter({ hasText: 'parts need attention' })).toBeVisible();
+  await angle.fill('115'); await angle.fill('116');
+  expect((await snapshot(page, true))!.doorCollision).toBe(false);
+  expect((await snapshot(page, true))!.red).toEqual([]);
+  await page.getByRole('button', { name: 'Cancel layout', exact: true }).click();
 });
 
 test('offline editor saves stacked rolls and folded clothes and iPad displays the same contents and working doors', async ({ page, context, request }, info) => {
@@ -186,8 +205,8 @@ test('dragging a shelf changes its exact height and carries its attached content
 });
 
 test('room door rotation checks actual walls and objects without mistaking contact or its doorway for collision', async ({ page, request }) => {
-  const raw = fixture(); Object.assign(raw.plan.walls.wall.holes.door, { openAngle: 0 });
-  Object.assign(raw.plan.items, { obstruction: { name: 'books', assetKey: 'detail_books', dimensions: { x: .2, y: .6, z: .2 }, position: { x: .65, y: .4, z: .4 }, pc: { x: 65, y: 40 }, rotationY: 0 } });
+  const raw = fixture(); Object.assign(raw.plan.walls.wall.holes.door, { openAngle: 0, opening: 'r-r' });
+  Object.assign(raw.plan.items, { obstruction: { name: 'books', assetKey: 'detail_books', dimensions: { x: .2, y: .6, z: .2 }, position: { x: 1.1, y: .4, z: .4 }, pc: { x: 110, y: 40 }, rotationY: 0 } });
   await request.post('/api/save-plan', { data: raw }); await page.evaluate(() => localStorage.clear()); await page.reload(); await ready(page);
   const point = await page.evaluate(async () => { const path = '/src/main.tsx'; const { runtime } = await import(path), s = runtime.scene, camera = s.getCamera();
     camera.position.set(1, 1.2, 3); s.getControls()!.target.set(1, 1, 0); s.getControls()!.update(); camera.updateMatrixWorld(true); s.invalidate();
@@ -197,7 +216,8 @@ test('room door rotation checks actual walls and objects without mistaking conta
   await field.fill('90');
   const collision = () => page.evaluate(async () => { const path = '/src/main.tsx'; const { runtime } = await import(path); return runtime.scene.getRenderObject('door')?.userData.doorCollision; });
   expect(await collision()).toBe(true);
-  await field.fill('0'); await field.fill('1'); expect(await collision()).toBe(false);
+  await field.fill('0'); await field.fill('1');
+  expect(await collision()).toBe(false);
 });
 
 test('an existing cabinet gains an editable interior and collision checking on its first door opening', async ({ page, request }) => {

@@ -48,7 +48,7 @@ function CabinetWorkspace({ original, onCancel, onDone }: { original: Furniture;
   const [stackCopies, setStackCopies] = useState(2);
   const [placeOnSelected, setPlaceOnSelected] = useState(false);
   const ref = useRef({ item, selected }); ref.current = { item, selected };
-  const panel = layout.panels.find(p => p.id === selected), content = layout.contents.find(o => o.id === selected), inner = interior(size, layout), issues = cabinetIssues(layout, size);
+  const panel = layout.panels.find(p => p.id === selected), content = layout.contents.find(o => o.id === selected), inner = interior(size, layout), issues = new Map<string, string[]>(Object.entries(runtime.scene.getRenderObject(item.id)?.userData.cabinetIssues ?? Object.fromEntries(cabinetIssues(layout, size))));
   const update = (next: CabinetLayout, label = 'Edit cabinet layout') => runtime.editor.execute(new ConfigureCabinet(item.id, next, label));
   const select = (id: string | null) => { setSelected(id); setSection('all'); };
   function front(angled = false) {

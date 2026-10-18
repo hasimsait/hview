@@ -35,6 +35,6 @@ export function CabinetHingeControls({ layout, onChange, showAngles = false }: {
         </label>}</>}
       </div>;
     })}
-    {leaves.some(l => !['tilt-out', 'drawer'].includes(l.section?.opening ?? 'swing')) && <p className="text-[10px] text-slate-400">Concealed hinges move the door inward and outward as it opens. Travel is approximate; use your hinge's clearance dimensions. Arm type alone does not guarantee clearance.</p>}
+    {leaves.some(l => !['tilt-out', 'drawer'].includes(l.section?.opening ?? 'swing')) && <p className="text-[10px] text-slate-400">Concealed hinges automatically narrow the leaf for swing clearance. Cranked arms also reduce the overlay: half a side-panel thickness for half-cranked, a full thickness for fully-cranked. Travel is approximate; check your hinge's dimensions.</p>}
   </div>;
 }

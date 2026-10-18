@@ -38,9 +38,9 @@ export function buildCabinet(c: AssetBuildContext, buildContent?: (entity: Furni
       part.userData = { section, cabinetPart: `door_${index}`, cabinetDoor: index, isSwingCollider: true };
       part.castShadow = part.receiveShadow = true; pivot.add(part); return part;
     };
-    const leaf = mesh(new THREE.BoxGeometry(Math.max(.001, width), height, t), mirrorCabinet ? c.materials.mirrorNonReflective : body, mirrorCabinet ? 'Mirrors' : `Door ${index + 1}`, (tilt || drawer) ? 0 : (left ? 1 : -1) * width / 2, (tilt || drawer) ? height / 2 : (height + .004) / 2, 0);
+    const leaf = mesh(new THREE.BoxGeometry(Math.max(.001, width), height, t), mirrorCabinet ? c.materials.mirrorNonReflective : body, mirrorCabinet ? 'Mirrors' : `Door ${index + 1}`, (tilt || drawer) ? 0 : (left ? 1 : -1) * width / 2, (tilt || drawer) ? height / 2 : (height + .004) / 2, pose.leafOffsetZ);
     leaf.userData.isSwingLeaf = true;
-    if (!mirrorCabinet) mesh(new THREE.BoxGeometry((tilt || drawer) ? Math.min(.128, width * .6) : .012, (tilt || drawer) ? .012 : Math.min(.128, height / 3), .025), c.materials.metalChrome, 'Handles', (tilt || drawer) ? 0 : (left ? 1 : -1) * (width - .035), drawer ? height * .70 : tilt ? height - .04 : height / 2, t / 2 + .0125);
+    if (!mirrorCabinet) mesh(new THREE.BoxGeometry((tilt || drawer) ? Math.min(.128, width * .6) : .012, (tilt || drawer) ? .012 : Math.min(.128, height / 3), .025), c.materials.metalChrome, 'Handles', (tilt || drawer) ? 0 : (left ? 1 : -1) * (width - .035), drawer ? height * .70 : tilt ? height - .04 : height / 2, pose.leafOffsetZ + t / 2 + .0125);
     const basket = cabinetBasket(layout, c.entity.dimensions, door);
     if (basket) {
       pivots.set(basket.floor.id, pivot);

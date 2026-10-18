@@ -162,8 +162,9 @@ export class OpeningMeshBuilder {
     parent.add(leftFrame, rightFrame, topFrame);
     this.frames.set(parent, [leftFrame, rightFrame, topFrame]);
 
-    const doorLeafW = w - frameThick * 2;
-    const doorLeafH = h - frameThick;
+    const reveal = .003;
+    const doorLeafW = Math.max(.001, w - frameThick * 2 - reveal * 2);
+    const doorLeafH = Math.max(.001, h - frameThick - reveal * 2);
     const leafThick = 0.04;
 
     // The immutable opening supplies canonical swing and hinge orientation.
@@ -190,7 +191,7 @@ export class OpeningMeshBuilder {
       leafMesh.name = `doorLeaf_${opening.id}`;
       const slideOffset = hingeOnLeft ? doorLeafW * openRatio : -doorLeafW * openRatio;
       const zOffset = swingSide === 'r' ? leafThick * 0.6 : -leafThick * 0.6;
-      leafMesh.position.set(slideOffset, doorLeafH / 2, zOffset);
+      leafMesh.position.set(slideOffset, reveal + doorLeafH / 2, zOffset);
       leafMesh.castShadow = true;
       parent.add(leafMesh);
 
@@ -206,8 +207,12 @@ export class OpeningMeshBuilder {
     // Hinged door
     const doorPivot = new THREE.Group();
     doorPivot.name = `doorPivot_${opening.id}`;
-    const pivotX = hingeOnLeft ? -w / 2 + frameThick : w / 2 - frameThick;
-    doorPivot.position.set(pivotX, 0, 0);
+    const pivotX = hingeOnLeft ? -w / 2 + frameThick + reveal : w / 2 - frameThick - reveal;
+    // The hinge barrel sits on the opening face, not in the middle of the
+    // jamb. Otherwise the leaf cuts through its own frame as soon as it turns.
+    const face = swingSide === 'r' ? 1 : -1;
+    const leafOffsetZ = -face * leafThick / 2;
+    doorPivot.position.set(pivotX, 0, face * (frameDepth / 2 + .001));
 
     const leafGeom = new THREE.BoxGeometry(doorLeafW, doorLeafH, leafThick);
     const leafMesh = new THREE.Mesh(leafGeom, leafMat);
@@ -215,9 +220,9 @@ export class OpeningMeshBuilder {
 
     // Position leaf relative to pivot
     if (hingeOnLeft) {
-      leafMesh.position.set(doorLeafW / 2, doorLeafH / 2, 0);
+      leafMesh.position.set(doorLeafW / 2, reveal + doorLeafH / 2, leafOffsetZ);
     } else {
-      leafMesh.position.set(-doorLeafW / 2, doorLeafH / 2, 0);
+      leafMesh.position.set(-doorLeafW / 2, reveal + doorLeafH / 2, leafOffsetZ);
     }
     leafMesh.castShadow = true;
     leafMesh.userData.isSwingLeaf = true;
@@ -229,13 +234,14 @@ export class OpeningMeshBuilder {
     // Front handle (+Z)
     const handleFront = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.12, 16), this.handleMaterial);
     handleFront.rotation.x = Math.PI / 2;
-    handleFront.position.set(handleDistFromPivot, 1.0, leafThick / 2 + 0.03);
+    handleFront.position.set(handleDistFromPivot, 1.0, leafOffsetZ + leafThick / 2 + 0.03);
 
     // Back handle (-Z)
     const handleBack = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.12, 16), this.handleMaterial);
     handleBack.rotation.x = Math.PI / 2;
-    handleBack.position.set(handleDistFromPivot, 1.0, -leafThick / 2 - 0.03);
+    handleBack.position.set(handleDistFromPivot, 1.0, leafOffsetZ - leafThick / 2 - 0.03);
 
+    handleFront.userData.isSwingCollider = handleBack.userData.isSwingCollider = true;
     doorPivot.add(handleFront, handleBack);
 
     // Opening angle: open towards the correct room/side
@@ -286,7 +292,7 @@ export class OpeningMeshBuilder {
       const sign = left ? (opening.swingSide === 'r' ? -1 : 1) : (opening.swingSide === 'r' ? 1 : -1);
       pivot.rotation.y = sign * (opening.openAngle ?? 40) * Math.PI / 180;
     } else {
-      const offset = (left ? 1 : -1) * (opening.width - 0.08) * Math.max(0, Math.min(1, (opening.openAngle ?? 40) / 90));
+      const offset = (left ? 1 : -1) * ((leaf.geometry as THREE.BoxGeometry).parameters.width) * Math.max(0, Math.min(1, (opening.openAngle ?? 40) / 90));
       const delta = offset - leaf.position.x;
       leaf.position.x = offset;
       const handle = this.slideHandles.get(root); if (handle) handle.position.x += delta;

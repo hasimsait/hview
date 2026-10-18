@@ -306,26 +306,30 @@ export class SceneEngine implements ISceneService {
     this.collisionFeedback.clear();
     this.currentPlan = change.document;
     this.graph.reconcile(change.document);
-    if (this.cabinetEditingId) this.checkCabinetLayout();
+    if (this.cabinetEditingId) this.checkCabinetLayout(change.previous ?? undefined);
     else for (const id of change.updated) {
       const now = change.document.get(id), before = change.previous?.get(id);
       if (now instanceof Opening && before instanceof Opening && now.openAngle !== before.openAngle) this.checkDoorCollision(id, undefined, (before.openAngle ?? 40) * Math.PI / 180);
       if (now instanceof Furniture && before instanceof Furniture && now.cabinet) {
-        let checked = false, collides = false;
         const previousLeaves = before.cabinet ? cabinetLeaves(before.cabinet, before.dimensions) : [];
-        for (const leaf of cabinetLeaves(now.cabinet, now.dimensions)) {
-          const old = previousLeaves.find(l => l.section?.id === leaf.section?.id && l.localIndex === leaf.localIndex), previous = old?.angle ?? 0;
-          const signature = (l: typeof leaf) => JSON.stringify([l.tilt, l.drawer, l.section?.drawerDepth, l.section?.drawerBoxHeight, l.doors.hinge, l.doors.count, l.doors.hinges?.[l.localIndex], l.section?.bottom, l.section?.top, l.section?.basketDepth]);
-          const hingeChanged = old && signature(leaf) !== signature(old);
-          if (leaf.angle !== previous || hingeChanged) {
-            checked = true;
-            collides = this.checkDoorCollision(id, leaf.index, (hingeChanged ? 0 : previous) * Math.PI / 180, false) || collides;
+        const signature = (leaf: ReturnType<typeof cabinetLeaves>[number]) => JSON.stringify([leaf.tilt, leaf.drawer, leaf.section?.drawerDepth, leaf.section?.drawerBoxHeight, leaf.doors.hinge, leaf.doors.count, leaf.doors.hinges?.[leaf.localIndex], leaf.bottom, leaf.top, leaf.section?.basketDepth]);
+        const motions = cabinetLeaves(now.cabinet, now.dimensions).map(leaf => {
+          const old = previousLeaves.find(l => l.section?.id === leaf.section?.id && l.localIndex === leaf.localIndex);
+          return { leaf, previous: old?.angle ?? 0, hardwareChanged: !old || signature(leaf) !== signature(old) };
+        });
+        const drawers = (now.cabinet.internalDrawers ?? []).map(drawer => ({ drawer, old: before.cabinet?.internalDrawers?.find(d => d.id === drawer.id) }));
+        const moved = motions.some(({ leaf, previous, hardwareChanged }) => leaf.angle !== previous || hardwareChanged)
+          || drawers.some(({ drawer, old }) => !old || old.extension !== drawer.extension);
+        if (moved) {
+          // Recheck unchanged leaves at their final pose too: moving a second
+          // door or drawer must not erase a still-colliding first door's warning.
+          let collides = false;
+          for (const { leaf, previous, hardwareChanged } of motions) {
+            const from = hardwareChanged ? 0 : previous;
+            collides = this.checkDoorCollision(id, leaf.index, from * Math.PI / 180, false) || collides;
           }
-        }
-        if (checked) { const root = this.getRenderObject(id); if (root) root.userData.doorCollision = collides; }
-        for (const drawer of now.cabinet.internalDrawers ?? []) {
-          const previousDrawer = before.cabinet?.internalDrawers?.find(d => d.id === drawer.id);
-          if (!previousDrawer || previousDrawer.extension !== drawer.extension) this.checkInternalDrawerCollision(id, drawer.id, previousDrawer?.extension ?? 0);
+          const root = this.getRenderObject(id); if (root) root.userData.doorCollision = collides;
+          for (const { drawer, old } of drawers) this.checkInternalDrawerCollision(id, drawer.id, old?.extension ?? drawer.extension);
         }
       }
     }
@@ -1040,15 +1044,31 @@ export class SceneEngine implements ISceneService {
     const root = this.getRenderObject(id);
     return root?.getObjectByName(`cabinet_part_${part}`) ?? root?.getObjectByName(`cabinet_content_${part}`) ?? (part.startsWith('door_') ? root?.getObjectByName(`cabinet_door_${part.slice(5)}`) : undefined);
   }
-  private checkCabinetLayout(): void {
+  private checkCabinetLayout(previous?: PlanDocument): void {
     const item = this.currentPlan?.get(this.cabinetEditingId!);
     if (!(item instanceof Furniture) || !item.cabinet) return;
     const issues = cabinetIssues(item.cabinet, item.dimensions), root = this.getRenderObject(item.id);
+    const before = previous?.get(item.id);
+    const oldLeaves = before instanceof Furniture && before.cabinet ? cabinetLeaves(before.cabinet, before.dimensions) : [];
+    let collides = false;
+    for (const leaf of cabinetLeaves(item.cabinet, item.dimensions)) {
+      const old = oldLeaves.find(l => l.section?.id === leaf.section?.id && l.localIndex === leaf.localIndex);
+      const hardwareChanged = old && JSON.stringify(old.doors.hinges?.[old.localIndex]) !== JSON.stringify(leaf.doors.hinges?.[leaf.localIndex]);
+      const from = hardwareChanged ? 0 : old?.angle;
+      if (this.checkDoorCollision(item.id, leaf.index, from === undefined ? undefined : from * Math.PI / 180, false)) {
+        issues.set(`door_${leaf.index}`, ['Intersects along the door or drawer path']); collides = true;
+      }
+    }
+    if (root) root.userData.doorCollision = collides;
+    for (const drawer of item.cabinet.internalDrawers ?? []) {
+      const old = before instanceof Furniture ? before.cabinet?.internalDrawers?.find(d => d.id === drawer.id) : undefined;
+      this.checkInternalDrawerCollision(item.id, drawer.id, old?.extension ?? drawer.extension);
+      if (root?.userData.internalDrawerCollision?.[drawer.id]) issues.set(`drawer_${drawer.id}`, ['Intersects along the drawer path']);
+    }
     if (root) root.userData.cabinetIssues = Object.fromEntries(issues);
     for (const id of issues.keys()) { const part = this.getCabinetPart(item.id, id); if (part) this.collisionFeedback.mark(part); }
   }
   checkDoorCollision(id: string, door?: number, previousAngle?: number, clearFeedback = true): boolean {
-    if (this.cabinetEditingId) return false;
     if (clearFeedback) this.collisionFeedback.clear();
     const root = this.getRenderObject(id), pivot = door === undefined ? this.getTransformTarget(id) : root?.getObjectByName(`cabinet_door_${door}`);
     if (!root || !pivot) return false;
@@ -1075,7 +1095,7 @@ export class SceneEngine implements ISceneService {
       pivot.updateWorldMatrix(true, true);
       for (const other of obstacles) {
         let visible = true; for (let p: THREE.Object3D | null = other; p; p = p.parent) if (!p.visible) visible = false;
-        if (visible && moving.some(part => this.collisionFeedback.intersects(part, other, ['wall', 'column'].includes(this.picking.resolve(other)?.kind ?? '')))) { collides = true; break; }
+        if (visible && moving.some(part => this.collisionFeedback.intersects(part, other))) { collides = true; break; }
       }
     }
     pivot.rotation.copy(finalRotation); pivot.position.copy(finalPosition); pivot.updateWorldMatrix(true, true);
@@ -1083,7 +1103,6 @@ export class SceneEngine implements ISceneService {
     root.userData.doorCollision = collides; this.invalidate(); return collides;
   }
   private checkInternalDrawerCollision(id: string, drawerId: string, previous: number): void {
-    if (this.cabinetEditingId) return;
     const item = this.currentPlan?.get(id), root = this.getRenderObject(id);
     if (!(item instanceof Furniture) || !item.cabinet || !root) return;
     const drawer = item.cabinet.internalDrawers?.find(d => d.id === drawerId);
@@ -1098,7 +1117,7 @@ export class SceneEngine implements ISceneService {
       pivot.position.z = from + (final - from) * step / steps; pivot.updateWorldMatrix(true, true);
       for (const other of obstacles) {
         let visible = true; for (let p: THREE.Object3D | null = other; p; p = p.parent) if (!p.visible) visible = false;
-        if (visible && moving.some(part => this.collisionFeedback.intersects(part, other, ['wall', 'column'].includes(this.picking.resolve(other)?.kind ?? '')))) { collides = true; break; }
+        if (visible && moving.some(part => this.collisionFeedback.intersects(part, other))) { collides = true; break; }
       }
     }
     pivot.position.z = final; pivot.updateWorldMatrix(true, true);

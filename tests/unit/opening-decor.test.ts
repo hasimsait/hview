@@ -7,6 +7,7 @@ import { LegacyPlanWriter } from '../../src/domain/codec/LegacyPlanWriter';
 import { Door,WindowOpening } from '../../src/domain/elements/Opening';
 import { OpeningMeshBuilder } from '../../src/engine/geometry/OpeningMeshBuilder';
 import { OpeningSceneNode } from '../../src/engine/nodes/StructuralSceneNodes';
+import { CollisionFeedback } from '../../src/engine/cabinet/CollisionFeedback';
 import { PickRegistry } from '../../src/engine/picking/PickRegistry';
 import { ResourcePool } from '../../src/engine/resources/ResourcePool';
 import { rawPlan } from './fixtures';
@@ -36,6 +37,24 @@ describe('door frames and window curtains', () => {
     expect(reset.frameColor).toBeUndefined();
     expect(reset.finish).toEqual(leaf);
     expect(() => editor.execute(new ColorOpeningFrame('door', 'bad-color'))).toThrow('hex color');
+  });
+
+  it('clears its own frame and the finished floor throughout either room-door swing', () => {
+    const { editor } = setup(), builder = new OpeningMeshBuilder(), feedback = new CollisionFeedback();
+    const wall = editor.getDocument().requireWall('wall'), original = editor.getDocument().get('door') as Door;
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(6, 6)); floor.rotation.x = -Math.PI / 2; floor.position.set(2, .002, 0); floor.updateMatrixWorld(true);
+    for (const swingSide of ['l', 'r'] as const) for (const hingeSide of ['l', 'r'] as const) {
+      const door = new Door({ ...original.toData(), swingSide, hingeSide, openAngle: 0 });
+      const root = builder.buildOpening(door, wall), pivot = builder.interactionTarget(root)!;
+      const moving: THREE.Mesh[] = [], obstacles = [floor];
+      pivot.traverse(o => { if (o instanceof THREE.Mesh) moving.push(o); });
+      root.traverse(o => { if (o instanceof THREE.Mesh && !pivot.getObjectById(o.id)) obstacles.push(o); });
+      for (let angle = 0; angle <= 180; angle += 2) {
+        builder.update(root, door.withOpenAngle(angle)); root.updateMatrixWorld(true);
+        for (const leaf of moving) for (const other of obstacles) expect(feedback.intersects(leaf, other), `${swingSide}/${hingeSide}, ${angle} degrees / ${other.name}`).toBe(false);
+      }
+    }
+    feedback.dispose();
   });
 
   it('defaults old and French windows to curtains and remembers hiding and deletion', () => {

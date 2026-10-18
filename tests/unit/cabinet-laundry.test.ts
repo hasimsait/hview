@@ -60,6 +60,20 @@ describe('mop sets and stacked laundry fronts', () => {
     expect(removed.contents[0].supportId).toBeUndefined(); expect(removed.contents[0].position).toEqual(closedPosition); validateCabinet(removed);
     expect(cabinetIssues(removed, size).get('bottle')).toContain('Unsupported');
   });
+  it('keeps a floor-level tilt-out leaf above the finished floor without moving its closed basket', () => {
+    const c = laundry(); c.frontSections![0].bottom = 0;
+    const root = builder.build(entity(c)), pivot = root.getObjectByName('cabinet_door_0')!;
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(4, 4)); floor.rotation.x = -Math.PI / 2; floor.position.y = .002; floor.updateMatrixWorld(true);
+    const feedback = new CollisionFeedback();
+    const closed = cabinetDoorPose(size, c, 0, 0);
+    expect(closed.position.z + closed.leafOffsetZ).toBeCloseTo(size.z / 2 - c.panelThickness / 2);
+    for (let angle = 0; angle <= 60; angle++) {
+      const pose = cabinetDoorPose(size, c, 0, angle);
+      pivot.position.set(pose.position.x, pose.position.y, pose.position.z); pivot.rotation.x = pose.rotationX; root.updateMatrixWorld(true);
+      for (const part of meshes(pivot)) expect(feedback.intersects(part, floor), `${angle} degrees / ${part.userData.section}`).toBe(false);
+    }
+    feedback.dispose();
+  });
   it('retains stacked fronts, basket depth, supported contents and angles in both saved formats', () => {
     const c = laundry(); c.frontSections![0].basketDepth = .27;
     const document = new PlanDocument([entity(setCabinetDoorAngle(c, 1, 35))], 2.7);

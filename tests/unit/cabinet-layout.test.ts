@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { describe, expect, it } from 'vitest';
 import { cabinetDoorPose, cabinetIssues, defaultCabinet, footprint, interior, interiorOrigin, moveCabinetPart, penetrates, removeCabinetPart, resolveContent, resolvePanel, settleContent, shelfClearances, splitDivider, validateCabinet, type CabinetContent, type CabinetLayout, type CabinetPanel, type CabinetHinge } from '../../src/domain/cabinet/CabinetLayout';
+import { cabinetLeaves } from '../../src/domain/cabinet/CabinetFronts';
 import { AssetCatalog } from '../../src/domain/catalog/AssetCatalog';
 import { PlanCodec } from '../../src/domain/codec/PlanCodec';
 import { LegacyPlanWriter } from '../../src/domain/codec/LegacyPlanWriter';
@@ -123,11 +124,12 @@ describe('cabinet layout and fit rules', () => {
 });
 
 describe('cabinet rendering and collision feedback', () => {
-  it('keeps the closed position and independently translates mirrored concealed hinges', () => {
+  it('applies the cranked overlay allowance and independently translates mirrored concealed hinges', () => {
     const c = layout(); c.doors.count = 2; c.doors.hinges = [{ type: 'half-cranked', travel: .02 }, { type: 'fully-cranked', travel: .03 }];
     const closed = [cabinetDoorPose(size, c, 0), cabinetDoorPose(size, c, 1)];
     const legacy = layout(); legacy.doors.count = 2;
-    expect(closed).toEqual([cabinetDoorPose(size, legacy, 0), cabinetDoorPose(size, legacy, 1)]);
+    expect(closed[0].position.x - cabinetDoorPose(size, legacy, 0).position.x).toBeCloseTo(c.panelThickness / 2);
+    expect(closed[1].position.x - cabinetDoorPose(size, legacy, 1).position.x).toBeCloseTo(-c.panelThickness);
     c.doors.angles = [90, 90]; const root = builder.build(entity(c));
     const left = root.getObjectByName('cabinet_door_0')!, right = root.getObjectByName('cabinet_door_1')!;
     expect(left.position.x - closed[0].position.x).toBeCloseTo(.02); expect(left.position.z - closed[0].position.z).toBeCloseTo(.02);
@@ -150,7 +152,7 @@ describe('cabinet rendering and collision feedback', () => {
           for (const shell of meshes(root).filter(m => m.userData.cabinetPart?.startsWith('shell_'))) expect(feedback.intersects(leaf, shell)).toBe(false);
         }
       }
-      c.doors.hinges![0].travel = .002; c.doors.angles[0] = 90;
+      c.doors.hinges![0] = { type: 'straight-arm', travel: .002 }; c.doors.angles[0] = 90;
       const insufficient = builder.build(entity(c)); insufficient.updateMatrixWorld(true);
       expect(feedback.intersects(meshes(insufficient).find(m => m.userData.isSwingLeaf)!, obstacle)).toBe(true);
       c.doors.hinges = undefined;
@@ -158,6 +160,28 @@ describe('cabinet rendering and collision feedback', () => {
       expect(feedback.intersects(meshes(fixed).find(m => m.userData.isSwingLeaf)!, obstacle)).toBe(true);
     }
     feedback.dispose(); obstacle.geometry.dispose();
+  });
+  it('reduces cranked door widths and keeps unequal paired doors clear through opening and closing', () => {
+    const feedback = new CollisionFeedback();
+    for (const count of [1, 2] as const) for (const type of ['straight-arm', 'half-cranked', 'fully-cranked'] as const) {
+      const c = layout(); c.doors.count = count; c.doors.split = .3;
+      c.doors.hinges = [{ type, travel: .05 }, { type, travel: .05 }];
+      const legacy = { ...c, doors: { ...c.doors, hinges: undefined } };
+      const leaves = cabinetLeaves(c, size), original = cabinetLeaves(legacy, size);
+      for (const leaf of leaves) expect(leaf.width).toBeLessThan(original[leaf.index].width);
+      if (type === 'fully-cranked') expect(leaves[0].width).toBeLessThan(original[0].width - c.panelThickness * (count === 1 ? 2 : 1));
+      const root = builder.build(entity(c)); root.rotation.y = .73; root.position.set(4, 0, -3);
+      for (const moving of leaves) for (let angle = 0; angle <= 170; angle++) {
+        const pivot = root.getObjectByName(`cabinet_door_${moving.index}`)!;
+        const pose = cabinetDoorPose(size, c, moving.index, angle);
+        pivot.position.set(pose.position.x, pose.position.y, pose.position.z); pivot.rotation.y = pose.rotationY; root.updateMatrixWorld(true);
+        const parts = meshes(pivot), obstacles = meshes(root).filter(mesh => !pivot.getObjectById(mesh.id));
+        for (const part of parts) for (const obstacle of obstacles) expect(feedback.intersects(part, obstacle), `${count} doors, ${type}, leaf ${moving.index}, ${angle} degrees / ${obstacle.userData.cabinetPart}`).toBe(false);
+        const closed = cabinetDoorPose(size, c, moving.index, 0);
+        pivot.position.set(closed.position.x, closed.position.y, closed.position.z); pivot.rotation.y = 0;
+      }
+    }
+    feedback.dispose();
   });
   it('opens each door independently about its actual hinge without moving the shell or contents', () => {
     const c = layout(); c.doors.count = 2; c.contents = [detergent()];
@@ -195,7 +219,43 @@ describe('cabinet rendering and collision feedback', () => {
     const shape = new THREE.Shape(); shape.moveTo(-1, 0); shape.lineTo(1, 0); shape.lineTo(1, 2); shape.lineTo(-1, 2); shape.closePath();
     const hole = new THREE.Path(); hole.moveTo(-.4, .001); hole.lineTo(-.4, 1.5); hole.lineTo(.4, 1.5); hole.lineTo(.4, .001); hole.closePath(); shape.holes.push(hole);
     const wall = new THREE.Mesh(new THREE.ExtrudeGeometry(shape, { depth: .2, bevelEnabled: false })), leaf = new THREE.Mesh(new THREE.BoxGeometry(.7, 1.4, .018)); leaf.position.set(0, .75, .1); wall.updateMatrixWorld(); leaf.updateMatrixWorld();
-    const feedback = new CollisionFeedback(); expect(feedback.intersects(leaf, wall, true)).toBe(false); leaf.position.x = .2; leaf.updateMatrixWorld(); expect(feedback.intersects(leaf, wall, true)).toBe(true); feedback.dispose();
+    const feedback = new CollisionFeedback(); expect(feedback.intersects(leaf, wall)).toBe(false); leaf.position.x = .2; leaf.updateMatrixWorld(); expect(feedback.intersects(leaf, wall)).toBe(true); feedback.dispose();
+  });
+  it('transforms off-centre collision geometry under rotated, scaled and mirrored parents', () => {
+    const feedback = new CollisionFeedback();
+    for (const mirror of [1, -1]) {
+      const parent = new THREE.Group(); parent.position.set(3, .8, -2); parent.rotation.y = Math.PI / 2; parent.scale.set(mirror * 2, 1.5, .5);
+      const obstacle = new THREE.Mesh(new THREE.BoxGeometry(.4, .6, .2).translate(1, .3, 0)); parent.add(obstacle); parent.updateMatrixWorld(true);
+      const leaf = new THREE.Mesh(new THREE.BoxGeometry(.1, .1, .01));
+      leaf.position.copy(new THREE.Vector3(1, .3, 0).applyMatrix4(obstacle.matrixWorld)); leaf.updateMatrixWorld(true);
+      expect(feedback.intersects(leaf, obstacle)).toBe(true);
+      leaf.position.set(3 + 1, .8 + .3, -2); leaf.updateMatrixWorld(true);
+      expect(feedback.intersects(leaf, obstacle)).toBe(false);
+    }
+    feedback.dispose();
+  });
+  it('uses actual geometry when a box has a baked rotation', () => {
+    const feedback = new CollisionFeedback();
+    const obstacle = new THREE.Mesh(new THREE.BoxGeometry(.8, .2, .08).rotateY(Math.PI / 4));
+    const leaf = new THREE.Mesh(new THREE.BoxGeometry(.04, .1, .018));
+    obstacle.updateMatrixWorld(true); leaf.position.set(.25, 0, .25); leaf.updateMatrixWorld(true);
+    expect(feedback.intersects(leaf, obstacle)).toBe(false);
+    leaf.position.z = -.25; leaf.updateMatrixWorld(true); expect(feedback.intersects(leaf, obstacle)).toBe(true);
+    feedback.dispose();
+  });
+  it('checks hollow furniture geometry rather than filling its bounding box', () => {
+    const feedback = new CollisionFeedback(), ring = new THREE.Mesh(new THREE.TorusGeometry(.4, .06, 12, 48));
+    const leaf = new THREE.Mesh(new THREE.BoxGeometry(.2, .2, .018)); ring.updateMatrixWorld(true); leaf.updateMatrixWorld(true);
+    expect(feedback.intersects(leaf, ring)).toBe(false);
+    expect(feedback.intersects(ring, leaf)).toBe(false);
+    leaf.position.x = .4; leaf.updateMatrixWorld(true); expect(feedback.intersects(leaf, ring)).toBe(true);
+    feedback.dispose();
+  });
+  it('detects a door fully contained in solid geometry even without crossing surface triangles', () => {
+    const feedback = new CollisionFeedback(), solid = new THREE.Mesh(new THREE.SphereGeometry(.5, 16, 12));
+    const leaf = new THREE.Mesh(new THREE.BoxGeometry(.2, .2, .018)); solid.updateMatrixWorld(true); leaf.updateMatrixWorld(true);
+    expect(feedback.intersects(leaf, solid)).toBe(true);
+    feedback.dispose();
   });
   it('releases cabinet panel, door and nested-content resources repeatedly', () => {
     const resources = new ResourcePool(), palette = resources.ownTree(Object.assign(new THREE.Object3D(), { material: builder.palette })), baseline = resources.size;
