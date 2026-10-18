@@ -4,6 +4,7 @@ import type { Furniture } from '../../domain/elements/Furniture';
 import type { PickRegistry } from '../picking/PickRegistry';
 import type { ResourcePool } from '../resources/ResourcePool';
 import { SceneNode } from './SceneNode';
+import { applyCabinetMotion, sameCabinetGeometry } from '../cabinet/CabinetMotion';
 
 export interface FurnitureGeometryBuilder<T extends Furniture> { build(element: T): THREE.Object3D; }
 export interface FurnitureAppearance<T extends Furniture> { apply(root: THREE.Object3D, element: T): void; }
@@ -29,13 +30,16 @@ export class FurnitureSceneNode<T extends Furniture = Furniture> extends SceneNo
     const previous = this.element;
     const geometryChanged = previous.assetKey !== element.assetKey || previous.customModelUrl !== element.customModelUrl
       || !previous.size.equals(element.dimensions) || previous.hasLids !== element.hasLids
-      || previous.cabinet !== element.cabinet
+      || !sameCabinetGeometry(previous.cabinet, element.cabinet)
       || previous.windowCoveringOpen !== element.windowCoveringOpen
       || (previous instanceof WallRecess && element instanceof WallRecess && previous.hostId !== element.hostId)
       || ('shelfCount' in previous && previous.shelfCount !== (element as T & { shelfCount?: number }).shelfCount);
     if (geometryChanged) this.rebuild(element);
-    else if (previous.finish !== element.finish || previous.sectionFinishes !== element.sectionFinishes || previous.lightConfig !== element.lightConfig) {
-      this.appearance.apply(this.group, element); this.refreshMaterials();
+    else {
+      if (previous.cabinet !== element.cabinet) applyCabinetMotion(this.group, element);
+      if (previous.finish !== element.finish || previous.sectionFinishes !== element.sectionFinishes || previous.lightConfig !== element.lightConfig) {
+        this.appearance.apply(this.group, element); this.refreshMaterials();
+      }
     }
     this.transform(element); this.element = element;
   }

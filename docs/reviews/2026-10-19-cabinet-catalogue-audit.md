@@ -70,6 +70,8 @@ A V8 CPU profile of the baseline attributed approximately 5,174 ms of self time 
 
 **Required verification:** geometry identity and resource disposal assertions for door, front-drawer and internal-drawer motion; contents follow their drawers; shape changes still rebuild; existing cabinet/browser workflows continue to pass.
 
+**Implemented result:** motion-only layout edits update retained pivot transforms. The single-door reproduction now invokes the builder once and retains all nine pickable meshes (previously zero); one measured reconcile took 0.51 ms. Five new unit cases cover hinged, tilt-out, front-drawer and internal-drawer motion, contents following their supports, return to the closed pose, resource lifetimes and hardware rebuilds. All 13 motion/scene-graph cases passed; the offline editor was rebuilt.
+
 ### 03 — Medium: collision sampling repeatedly processes distant scene meshes
 
 **Files:** `src/engine/SceneEngine.ts`, `src/engine/cabinet/CollisionFeedback.ts`.
