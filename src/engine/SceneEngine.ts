@@ -1133,7 +1133,7 @@ export class SceneEngine implements ISceneService {
   }
 
   pick(point: THREE.Vector2) {
-    return this.picker.pick(point, this.activeCamera, hit => !this.isPointForegroundOccluded(hit.point));
+    return this.picker.pick(point, this.activeCamera, hit => hit.object.userData.foregroundOcclusion === false || !this.isPointForegroundOccluded(hit.point));
   }
 
   isPointForegroundOccluded(worldPoint: THREE.Vector3): boolean {

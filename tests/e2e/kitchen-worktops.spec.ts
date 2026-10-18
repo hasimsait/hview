@@ -104,3 +104,43 @@ test('optional plinth keeps worktop height and persists through layout editing a
   expect((await state(tablet))!.plinths).toHaveLength(0); expect((await state(tablet))!.tops).toEqual(initial!.tops);
   await context.close();
 });
+
+
+test('placed countertops stay visible and selectable in foreground clip mode with photo laminate offline', async ({ page, browser }, info) => {
+  await selectCabinet(page); await page.getByRole('button', { name: 'Add Asset', exact: true }).click();
+  await page.getByRole('button', { name: 'Kitchen', exact: true }).click();
+  await page.getByPlaceholder('Search assets (e.g. towel, fan, sconce, bed, sink)...').fill('countertop');
+  await page.getByRole('button').filter({ has: page.getByRole('heading', { name: 'Kitchen Worktop', exact: true }) }).click();
+  const added = (await state(page))!.furniture.find((f: any) => f.assetKey === 'kitchen_worktop')!;
+  const focus = async (target: Page) => target.evaluate(async id => {
+    const root = document.getElementById('root') as any, key = Object.keys(root).find(k => k.startsWith('__reactContainer$'))!;
+    const runtime = root[key].stateNode.current.memoizedState.element.props.value, scene = runtime.scene, item = runtime.editor.getDocument().requireFurniture(id), p = item.position, camera = scene.getCamera();
+    camera.position.set(p.x, p.y + 1.6, p.z + 4); scene.getControls().target.set(p.x, p.y, p.z - 1.5); scene.getControls().update(); camera.updateMatrixWorld(true); scene.invalidate();
+    await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))); scene.getScene().updateMatrixWorld(true);
+    const point = camera.position.clone().set(p.x, p.y + item.dimensions.y, p.z).project(camera), rect = scene.getDomElement().getBoundingClientRect();
+    const mesh = scene.getRenderObject(id).getObjectByName(`worktop_${id}`), shader = { uniforms: {} as any, vertexShader: '#include <common>\n#include <worldpos_vertex>', fragmentShader: '#include <common>\n#include <dithering_fragment>\n#include <map_fragment>' };
+    mesh.material.onBeforeCompile(shader, {});
+    const hit = scene.pick({ x: point.x, y: point.y });
+    return { x: rect.left + (point.x + 1) * rect.width / 2, y: rect.top + (1 - point.y) * rect.height / 2, picked: hit?.target.id, foreground: scene.isPointForegroundOccluded(camera.position.clone().set(p.x, p.y + item.dimensions.y, p.z)), mode: shader.uniforms.uForegroundMode.value, imageReady: !!mesh.material.map?.image?.width };
+  }, added.id);
+  await page.getByRole('button', { name: /Foreground: Fade/ }).click();
+  const bare = await focus(page); expect(bare.foreground).toBe(true); expect(bare.picked).toBe(added.id); expect(bare.mode).toBe(0);
+  await page.mouse.click(bare.x, bare.y); expect((await state(page))!.selected.id).toBe(added.id);
+  await page.getByRole('button', { name: 'Wood & Parquet', exact: true }).click();
+  await page.getByRole('button', { name: /Light Beige Wood-Effect Laminate/ }).click();
+  await expect.poll(async () => (await focus(page)).imageReady).toBe(true);
+  const painted = await focus(page); expect(painted.picked).toBe(added.id); expect(painted.mode).toBe(0);
+  expect((await state(page))!.furniture.find((f: any) => f.id === added.id).sectionFinishes.countertop).toMatchObject({ type: 'wood', variant: 'light_beige_laminate', color: '#ffffff' });
+  await page.screenshot({ path: info.outputPath('countertop-laminate-visible.png') });
+  const downloading = page.waitForEvent('download'); await page.getByRole('button', { name: 'Full Editor (.html)', exact: true }).click();
+  const path = info.outputPath('countertop-laminate.html'); await (await downloading).saveAs(path);
+  const context = await browser.newContext({ viewport: { width: 1024, height: 768 }, hasTouch: true, isMobile: true });
+  const url = await offlineDocument(context, path, 'countertop-laminate'), tablet = await context.newPage();
+  await tablet.goto(url); await ready(tablet);
+  await tablet.getByRole('button', { name: /Foreground: Fade/ }).tap();
+  const restored = await focus(tablet); expect(restored.picked).toBe(added.id); expect(restored.mode).toBe(0);
+  await expect.poll(async () => (await focus(tablet)).imageReady).toBe(true);
+  await tablet.touchscreen.tap(restored.x, restored.y); expect((await state(tablet))!.selected.id).toBe(added.id);
+  await tablet.screenshot({ path: info.outputPath('ipad-countertop-laminate.png') });
+  await context.close();
+});

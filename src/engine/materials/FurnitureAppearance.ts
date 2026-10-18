@@ -54,6 +54,7 @@ export class FurnitureAppearance {
           }
           const mat = this.finishService.getMaterial(activeFinish, {
             projection: 'local',
+            foregroundOcclusion: child.userData.foregroundOcclusion !== false,
             side: isRecess ? THREE.DoubleSide : undefined,
           });
           if (child.userData.isTextile && !(mat as THREE.Material & { isInvisible?: boolean }).isInvisible) {

@@ -452,7 +452,7 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
           {/* Section 1: Solid Hardwood & Furniture Veneers */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-[10px] uppercase font-semibold text-slate-400">
-              <span>Solid Hardwood &amp; Furniture Veneers</span>
+              <span>Wood, Veneers &amp; Laminates</span>
               <span className="text-[9px] text-amber-400 font-normal">Photographic PBR</span>
             </div>
             <div className="grid grid-cols-1 gap-1.5">

@@ -123,6 +123,7 @@ describe('independent worktops and retained kitchen cabinet appearance', () => {
     editor.execute(new AddFurniture({ id: 'top', name: asset.key, assetKey: asset.key, displayName: asset.name, category: 'kitchen', position: { x: 1, y: .85, z: 3 }, rotationY: .2, dimensions: asset.defaultDimensions }));
     editor.execute(new TransformFurniture('top', undefined, undefined, { x: 3.1, y: .03, z: .65 })); editor.execute(new FinishFurniture('top', stone));
     const item = editor.getDocument().requireFurniture('top'), root = rendered(item as StandardFurniture), bounds = new THREE.Box3().setFromObject(root);
+    expect(meshes(builder.build(item))[0].userData.foregroundOcclusion).toBe(false);
     expect(item.cabinet).toBeUndefined(); expect(meshes(root)).toHaveLength(1); expect(bounds.min.y).toBeCloseTo(0); expect(bounds.max.y).toBeCloseTo(.03); expect(bounds.getSize(new THREE.Vector3()).x).toBeCloseTo(3.1); expect(bounds.getSize(new THREE.Vector3()).z).toBeCloseTo(.65);
     expect(editor.getDocument().requireFurniture(original.id)).toBe(original);
     for (const encoded of [codec.encode(editor.getDocument()), new LegacyPlanWriter().encode(editor.getDocument())]) expect(codec.decode(encoded).requireFurniture('top').toData()).toMatchObject({ dimensions: { x: 3.1, y: .03, z: .65 }, position: { y: .85 }, finish: stone });
