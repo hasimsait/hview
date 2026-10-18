@@ -56,6 +56,8 @@ A V8 CPU profile of the baseline attributed approximately 5,174 ms of self time 
 
 **Required verification:** unchanged diagnostics for supported stacks, cycles, unsupported objects, rotated contents, penetration, deletion and drawer supports; exercise the documented 256-item limit; compare the same benchmark after the change.
 
+**Implemented result:** pass-local memoized content resolution is shared by diagnostics, cabinet construction and drag previews. The same 100/256-object diagnostic cases took 13.93/23.36 ms in one post-fix run while tests and a build were running. These measurements are indicative, not a device guarantee. A getter-count regression test bounds reads of parent positions and checks that a later edit receives fresh coordinates. All 46 cabinet unit cases passed; the offline editor was rebuilt.
+
 ### 02 — High: changing an angle rebuilds unchanged cabinet geometry
 
 **File:** `src/engine/nodes/FurnitureSceneNode.ts`; related builders under `src/engine/cabinet/`.

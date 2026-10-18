@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import * as THREE from 'three';
-import { cabinetIssues, contentDependsOn, contentSupportRoot, defaultCabinet, removeCabinetPart, resolveContent, settleContent, stackContent, validateCabinet, type CabinetContent } from '../../src/domain/cabinet/CabinetLayout';
+import { cabinetIssues, contentDependsOn, contentSupportRoot, defaultCabinet, removeCabinetPart, resolveContent, resolveContents, settleContent, stackContent, validateCabinet, type CabinetContent } from '../../src/domain/cabinet/CabinetLayout';
 import { PlanCodec } from '../../src/domain/codec/PlanCodec';
 import { PlanDocument } from '../../src/domain/model/PlanDocument';
 import { FurnitureMeshBuilder } from '../../src/engine/assets/FurnitureMeshBuilder';
@@ -11,6 +11,23 @@ const roll: CabinetContent = { id: 'roll', name: 'Toilet Paper Roll', assetKey: 
 function layout() { return { ...defaultCabinet({ dimensions: size, assetKey: 'cabinet_tall_single' }, 1), panels: [], contents: [structuredClone(roll)] }; }
 
 describe('cabinet content stacking', () => {
+  it('checks the full 256-object limit without repeatedly reading resolved parent positions', () => {
+    let reads = 0;
+    const c = { ...layout(), contents: Array.from({ length: 256 }, (_, index) => ({ ...roll, id: `roll_${index}`, supportId: index ? `roll_${index - 1}` : 'base', dimensions: { x: .1, y: .005, z: .1 }, get position() { reads++; return { x: 0, y: 0, z: 0 }; } })) };
+    expect(cabinetIssues(c, size).size).toBe(0);
+    expect(reads).toBeLessThanOrEqual(256 * 3);
+    const boxes = resolveContents(c, size);
+    expect(boxes.get('roll_255')!.position.y).toBeCloseTo(1.275);
+    c.contents[0] = { ...c.contents[0], position: { x: 0, y: .02, z: 0 } };
+    expect(resolveContents(c, size).get('roll_255')!.position.y).toBeCloseTo(1.295);
+    expect(cabinetIssues(c, size).get('roll_0')).toContain('Unsupported');
+  });
+
+  it('rejects a support cycle during bulk resolution', () => {
+    const c = stackContent(layout(), 'roll', ['second']);
+    c.contents[0].supportId = 'second';
+    expect(() => resolveContents(c, size)).toThrow('Circular cabinet stack');
+  });
   it('stacks three independent rolls in contact, follows a moved shelf and persists the chain', () => {
     let c = stackContent(layout(), 'roll', ['second', 'third']);
     expect(c.contents.map(o => resolveContent(c, size, o).position.y)).toEqual([0, .1, .2]);

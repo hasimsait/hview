@@ -27,7 +27,7 @@ import { FloorMeshBuilder } from "./geometry/FloorMeshBuilder";
 import { OpeningMeshBuilder } from "./geometry/OpeningMeshBuilder";
 import { SurfaceMaterialFactory } from "./materials/SurfaceMaterialFactory";
 import { CollisionFeedback } from './cabinet/CollisionFeedback';
-import { cabinetDoorPose, cabinetIssues, footprint, interiorOrigin, moveCabinetPart, resolveContent, resolvePanel } from '../domain/cabinet/CabinetLayout';
+import { cabinetDoorPose, cabinetIssues, footprint, interiorOrigin, moveCabinetPart, resolveContents, resolvePanel } from '../domain/cabinet/CabinetLayout';
 import { roomCeilingHeight } from '../domain/model/Ceiling';
 import { wallCorniceLayouts } from './geometry/WallCorniceLayout';
 import { cabinetInternalDrawer, cabinetLeaves } from '../domain/cabinet/CabinetFronts';
@@ -1027,9 +1027,10 @@ export class SceneEngine implements ISceneService {
       object.position.set(origin.x + box.position.x + box.dimensions.x / 2, origin.y + box.position.y + box.dimensions.y / 2, origin.z + box.position.z + box.dimensions.z / 2);
       object.scale.set(box.dimensions.x / previous.dimensions.x, box.dimensions.y / previous.dimensions.y, box.dimensions.z / previous.dimensions.z);
     }
+    const contents = resolveContents(c, item.dimensions);
     for (const o of c.contents) {
       const object = this.getCabinetPart(id, o.id); if (!object) continue;
-      const box = resolveContent(c, item.dimensions, o), f = footprint(o.dimensions, o.rotationY);
+      const box = contents.get(o.id)!, f = footprint(o.dimensions, o.rotationY);
       object.position.set(origin.x + box.position.x + f.x / 2, origin.y + box.position.y, origin.z + box.position.z + f.z / 2); object.rotation.y = o.rotationY;
       const offset = object.userData.cabinetClosedOffset;
       if (offset) object.position.sub(new THREE.Vector3(offset.x, offset.y, offset.z));

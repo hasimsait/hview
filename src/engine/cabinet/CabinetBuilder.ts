@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import type { AssetBuildContext } from '../assets/builders/AssetBuildContext';
 import { StandardFurniture, type Furniture } from '../../domain/elements/Furniture';
-import { cabinetDoorPose, contentSupportRoot, defaultCabinet, footprint, interiorOrigin, resolveContent, resolvePanel, type CabinetBox } from '../../domain/cabinet/CabinetLayout';
+import { cabinetDoorPose, contentSupportRoot, defaultCabinet, footprint, interiorOrigin, resolveContents, resolvePanel, type CabinetBox } from '../../domain/cabinet/CabinetLayout';
 
 import { cabinetDrawer, cabinetInternalDrawer, cabinetBasket, cabinetHasDoors, cabinetLeaves } from '../../domain/cabinet/CabinetFronts';
 import { cabinetBaseHeight } from '../../domain/cabinet/CabinetPlinth';
@@ -90,8 +90,9 @@ export function buildCabinet(c: AssetBuildContext, buildContent?: (entity: Furni
     for (const side of [-1, 1]) box(`${tray.floor.id}_rail_${side}`, 'Telescopic Slides', origin.x + tray.floor.position.x + (side < 0 ? -.004 : tray.floor.dimensions.x + .004), origin.y + drawer.bottom + .025, origin.z + tray.floor.position.z + drawer.depth / 2, .006, .025, drawer.depth, c.materials.metalChrome);
     pivots.set(tray.floor.id, pivot); c.parent.add(pivot);
   }
+  const contents = resolveContents(layout, c.entity.dimensions);
   for (const content of layout.contents) {
-    const resolved = resolveContent(layout, c.entity.dimensions, content), f = footprint(content.dimensions, content.rotationY), group = new THREE.Group();
+    const resolved = contents.get(content.id)!, f = footprint(content.dimensions, content.rotationY), group = new THREE.Group();
     group.name = `cabinet_content_${content.id}`; group.userData = { cabinetPart: content.id, cabinetContent: content };
     group.position.set(origin.x + resolved.position.x + f.x / 2, origin.y + resolved.position.y, origin.z + resolved.position.z + f.z / 2); group.rotation.y = content.rotationY;
     const entity = new StandardFurniture({ id: content.id, assetKey: content.assetKey, name: content.assetKey, displayName: content.name, category: 'decor', position: { x: 0, y: 0, z: 0 }, rotationY: 0, dimensions: content.dimensions, finish: content.finish, sectionFinishes: content.sectionFinishes });

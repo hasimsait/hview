@@ -179,12 +179,43 @@ export function contentSupportRoot(c: CabinetLayout, o: CabinetContent): string 
   }
   return undefined;
 }
-export function resolveContent(c: CabinetLayout, size: Vector3D, o: CabinetContent, seen = new Set<string>()): CabinetBox {
-  if (seen.has(o.id)) throw new Error('Circular cabinet stack');
-  seen.add(o.id);
-  const parent = c.contents.find(p => p.id === o.supportId);
-  const box = parent ? resolveContent(c, size, parent, seen) : structuralSupports(c, size).find(p => p.id === o.supportId);
-  return { id: o.id, name: o.name, dimensions: o.dimensions, rotationY: o.rotationY, position: { x: o.position.x + (box?.position.x ?? 0), y: o.position.y + (box ? box.position.y + box.dimensions.y : 0), z: o.position.z + (box?.position.z ?? 0) } };
+/** A pass owns its derived boxes; edits and undo never reuse stale coordinates. */
+class CabinetContentResolver {
+  readonly contents: Map<string, CabinetContent>;
+  readonly structural: CabinetBox[];
+  readonly boxes = new Map<string, CabinetBox>();
+  private readonly resolving = new Set<string>();
+  constructor(c: CabinetLayout, size: Vector3D) {
+    this.contents = new Map(c.contents.map(o => [o.id, o]));
+    this.structural = structuralSupports(c, size);
+  }
+  resolve(o: CabinetContent): CabinetBox {
+    const cached = this.boxes.get(o.id); if (cached) return cached;
+    if (this.resolving.has(o.id)) throw new Error('Circular cabinet stack');
+    this.resolving.add(o.id);
+    const parent = o.supportId ? this.contents.get(o.supportId) : undefined;
+    const box = parent ? this.resolve(parent) : this.structural.find(p => p.id === o.supportId);
+    const resolved = { id: o.id, name: o.name, dimensions: o.dimensions, rotationY: o.rotationY, position: { x: o.position.x + (box?.position.x ?? 0), y: o.position.y + (box ? box.position.y + box.dimensions.y : 0), z: o.position.z + (box?.position.z ?? 0) } };
+    this.boxes.set(o.id, resolved); this.resolving.delete(o.id);
+    return resolved;
+  }
+  dependsOn(id: string, ancestor: string): boolean {
+    const seen = new Set<string>();
+    let current: string | undefined = id;
+    while (current && !seen.has(current)) {
+      if (current === ancestor) return true;
+      seen.add(current); current = this.contents.get(current)?.supportId;
+    }
+    return false;
+  }
+}
+export function resolveContent(c: CabinetLayout, size: Vector3D, o: CabinetContent): CabinetBox {
+  return new CabinetContentResolver(c, size).resolve(o);
+}
+export function resolveContents(c: CabinetLayout, size: Vector3D): ReadonlyMap<string, CabinetBox> {
+  const resolver = new CabinetContentResolver(c, size);
+  for (const o of c.contents) resolver.resolve(o);
+  return resolver.boxes;
 }
 /** Strict penetration of upright oriented boxes. Mere contact (including shelf contact) is valid. */
 export function penetrates(a: CabinetBox, b: CabinetBox, epsilon = CABINET_EPSILON): boolean {
@@ -214,7 +245,8 @@ function structuralSupports(c: CabinetLayout, size: Vector3D): CabinetBox[] {
   return [{ id: 'base', name: 'Base', position: { x: 0, y: -c.panelThickness, z: 0 }, dimensions: { x: Math.max(.001, i.x), y: c.panelThickness, z: Math.max(.001, i.z) } }, ...c.panels.filter(p => p.kind === 'shelf').map(p => resolvePanel(c, size, p)).filter(p => !p.invalid), ...cabinetLeaves(c, size).flatMap(l => { const b = cabinetBasket(c, size, l); return b ? [b.floor] : []; }), ...cabinetDrawerTrays(c, size).map(d => d.floor)];
 }
 function supports(c: CabinetLayout, size: Vector3D, excluded?: string): CabinetBox[] {
-  return [...structuralSupports(c, size), ...c.contents.filter(o => !excluded || !contentDependsOn(c, o.id, excluded)).map(o => resolveContent(c, size, o))];
+  const resolver = new CabinetContentResolver(c, size);
+  return [...resolver.structural, ...c.contents.filter(o => !excluded || !resolver.dependsOn(o.id, excluded)).map(o => resolver.resolve(o))];
 }
 /** Make independently editable copies attached in a vertical chain; one command can undo all copies. */
 export function stackContent(c: CabinetLayout, id: string, ids: string[]): CabinetLayout {
@@ -252,18 +284,20 @@ export function moveCabinetPart(c: CabinetLayout, size: Vector3D, id: string, ce
 }
 export function cabinetIssues(c: CabinetLayout, size: Vector3D): Map<string, string[]> {
   const result = new Map<string, string[]>(), i = interior(size, c);
+  const resolver = new CabinetContentResolver(c, size), contentBoxes = c.contents.map(o => resolver.resolve(o));
+  const leaves = cabinetLeaves(c, size), surfaces = [...resolver.structural, ...contentBoxes];
   const flag = (id: string, reason: string) => result.set(id, [...new Set([...(result.get(id) ?? []), reason])]);
   if (c.plinth && c.plinth.setback > size.z - c.panelThickness * 2) flag('plinth_front', 'Plinth setback exceeds cabinet depth');
   if (i.x <= 0 || i.y <= 0 || i.z <= 0) { flag('shell_left', 'Cabinet smaller than panel thicknesses'); flag('shell_right', 'Cabinet smaller than panel thicknesses'); }
-  const boxes = [...c.panels.map(p => resolvePanel(c, size, p)), ...c.contents.map(o => resolveContent(c, size, o)), ...cabinetLeaves(c, size).flatMap(l => cabinetBasket(c, size, l)?.walls ?? []), ...cabinetDrawerTrays(c, size).flatMap(d => d.walls)];
-  for (const l of cabinetLeaves(c, size)) if (l.bottom < cabinetBaseHeight(c) || l.top > size.y || l.top <= l.bottom + .004) flag(`door_${l.index}`, 'Front outside cabinet height');
-  for (const a of cabinetLeaves(c, size)) for (const b of cabinetLeaves(c, size)) if (a.section?.id !== b.section?.id && Math.min(a.top, b.top) - Math.max(a.bottom, b.bottom) > CABINET_EPSILON) flag(`door_${a.index}`, 'Overlapping front sections');
+  const boxes = [...c.panels.map(p => resolvePanel(c, size, p)), ...contentBoxes, ...leaves.flatMap(l => cabinetBasket(c, size, l)?.walls ?? []), ...cabinetDrawerTrays(c, size).flatMap(d => d.walls)];
+  for (const l of leaves) if (l.bottom < cabinetBaseHeight(c) || l.top > size.y || l.top <= l.bottom + .004) flag(`door_${l.index}`, 'Front outside cabinet height');
+  for (const a of leaves) for (const b of leaves) if (a.section?.id !== b.section?.id && Math.min(a.top, b.top) - Math.max(a.bottom, b.bottom) > CABINET_EPSILON) flag(`door_${a.index}`, 'Overlapping front sections');
   for (const box of boxes) {
     const f = footprint(box.dimensions, box.rotationY);
     if (box.invalid || box.position.x < -CABINET_EPSILON || box.position.y < -CABINET_EPSILON || box.position.z < -CABINET_EPSILON || box.position.x + f.x > i.x + CABINET_EPSILON || box.position.y + box.dimensions.y > i.y + CABINET_EPSILON || box.position.z + f.z > i.z + CABINET_EPSILON) flag(box.id, 'Outside usable interior');
     for (const other of boxes) if (other.id !== box.id && penetrates(box, other)) flag(box.id, `Intersects ${other.name}`);
   }
-  for (const o of c.contents) if (!supports(c, size, o.id).some(s => supportedOn(resolveContent(c, size, o), s))) flag(o.id, 'Unsupported');
+  for (const box of contentBoxes) if (!surfaces.some(s => s.id !== box.id && supportedOn(box, s) && !resolver.dependsOn(s.id, box.id))) flag(box.id, 'Unsupported');
   return result;
 }
 export function removeCabinetPart(c: CabinetLayout, size: Vector3D, id: string): CabinetLayout {
