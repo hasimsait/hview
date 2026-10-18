@@ -2,8 +2,9 @@ import { FurnitureEntity } from '@core/types/plan';
 import { AssetDefinition } from '@core/types/services';
 import { useRuntime } from '@ui/context/RuntimeContext';
 import { Box,Check,Search,X,Flower2,Archive,Lamp,Frame,Clock,ShoppingCart,Utensils,Bath,Layers } from 'lucide-react';
-import React,{ useState } from 'react';
+import React,{ useMemo, useState } from 'react';
 import { ReplaceFurniture } from '../../application/commands/FurnitureCommands';
+import { AssetSearchIndex } from '../../domain/catalog/AssetSearchIndex';
 
 interface AssetReplacementModalProps {
   item?: FurnitureEntity | null;
@@ -37,7 +38,7 @@ const CATEGORIES = [
   { id: 'fixture', label: 'Sockets & Switches' },
 ];
 
-const searchable = (value: string) => value.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+const PAGE_SIZE = 60;
 
 export const AssetReplacementModal: React.FC<AssetReplacementModalProps> = ({
   item,
@@ -54,39 +55,22 @@ export const AssetReplacementModal: React.FC<AssetReplacementModalProps> = ({
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sourceFilter, setSourceFilter] = useState('all');
   const [collectionFilter, setCollectionFilter] = useState('all');
+  const [limit, setLimit] = useState(PAGE_SIZE);
+  const index = useMemo(() => isOpen ? new AssetSearchIndex(assetRegistry.all()) : null, [isOpen, assetRegistry]);
+  const filteredAssets = useMemo(() => index?.search({ query: searchQuery, category: selectedCategory, source: sourceFilter, collection: collectionFilter }, filterAsset) ?? [], [index, searchQuery, selectedCategory, sourceFilter, collectionFilter, filterAsset]);
 
   if (!isOpen) return null;
 
-  const allAssets = assetRegistry.all();
-  const sources = [...new Set(allAssets.flatMap(asset => asset.source ? [asset.source.retailer] : []))].sort();
-  const collections = [...new Set(allAssets.flatMap(asset => asset.collection ? [asset.collection] : []))].sort();
-  const filteredAssets = allAssets.filter((asset) => {
-    if (filterAsset && !filterAsset(asset)) return false;
-    if (sourceFilter !== 'all' && asset.source?.retailer !== sourceFilter) return false;
-    if (collectionFilter !== 'all' && asset.collection !== collectionFilter) return false;
-    const matchesCategory =
-      selectedCategory === 'all' || (selectedCategory === 'lighting' ? !!asset.capabilities?.lighting
-        : selectedCategory === 'cabinets' ? asset.cabinetDoors !== undefined
-        : selectedCategory === 'pets' ? !!asset.dailyLife?.kind.startsWith('cat_')
-        : selectedCategory === 'wardrobe_items' ? !!asset.dailyLife && /^(garment|boots|sneakers)_/.test(asset.dailyLife.kind)
-        : selectedCategory === 'vanity' ? asset.collection === 'Vanity accessories'
-        : selectedCategory === 'drawer_inserts' ? asset.collection === 'Drawer inserts'
-        : selectedCategory === 'household' ? (!!asset.householdDetail && !asset.householdDetail.practical) || !!asset.dailyLife
-        : selectedCategory === 'practical' ? !!asset.householdDetail?.practical
-        : selectedCategory === 'textiles' ? !!asset.softFurnishing || /^(Rugs|Cushions)$/.test(asset.collection ?? '') : asset.category.toLowerCase() === selectedCategory.toLowerCase());
-    const query = searchable(searchQuery.trim());
-    const matchesSearch = [asset.name, asset.description, asset.key, asset.collection, asset.source?.retailer, asset.source?.productCode, ...(asset.aliases ?? [])]
-      .some(value => value && searchable(value).includes(query));
-    return matchesCategory && matchesSearch;
-  });
+  const visibleAssets = filteredAssets.slice(0, limit);
+  const close = () => { setLimit(PAGE_SIZE); onClose(); };
 
   const handleSelectAsset = (asset: AssetDefinition) => {
     if (mode === 'add' || onSelectAsset) {
       onSelectAsset?.(asset);
-      onClose();
+      close();
     } else if (item) {
       editor.execute(new ReplaceFurniture(item.id, asset.key));
-      onClose();
+      close();
     }
   };
 
@@ -110,7 +94,7 @@ export const AssetReplacementModal: React.FC<AssetReplacementModalProps> = ({
             </p>
           </div>
           <button
-            onClick={onClose}
+            onClick={close}
             className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
           >
             <X className="w-5 h-5" />
@@ -125,22 +109,22 @@ export const AssetReplacementModal: React.FC<AssetReplacementModalProps> = ({
               type="text"
               placeholder="Search assets (e.g. towel, fan, sconce, bed, sink)..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => { setLimit(PAGE_SIZE); setSearchQuery(e.target.value); }}
               className="w-full bg-slate-800 border border-slate-700 rounded-lg pl-9 pr-3 py-1.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             <label className="text-[11px] text-slate-400">Source
-              <select aria-label="Catalogue source" value={sourceFilter} onChange={event => setSourceFilter(event.target.value)} className="mt-1 w-full rounded border border-slate-700 bg-slate-800 p-2 text-xs text-slate-100">
+              <select aria-label="Catalogue source" value={sourceFilter} onChange={event => { setLimit(PAGE_SIZE); setSourceFilter(event.target.value); }} className="mt-1 w-full rounded border border-slate-700 bg-slate-800 p-2 text-xs text-slate-100">
                 <option value="all">All sources</option>
-                {sources.map(source => <option key={source} value={source}>{source}</option>)}
+                {index!.sources.map(source => <option key={source} value={source}>{source}</option>)}
               </select>
             </label>
             <label className="text-[11px] text-slate-400">Accessory type
-              <select aria-label="Accessory type" value={collectionFilter} onChange={event => setCollectionFilter(event.target.value)} className="mt-1 w-full rounded border border-slate-700 bg-slate-800 p-2 text-xs text-slate-100">
+              <select aria-label="Accessory type" value={collectionFilter} onChange={event => { setLimit(PAGE_SIZE); setCollectionFilter(event.target.value); }} className="mt-1 w-full rounded border border-slate-700 bg-slate-800 p-2 text-xs text-slate-100">
                 <option value="all">All accessory types</option>
-                {collections.map(collection => <option key={collection} value={collection}>{collection}</option>)}
+                {index!.collections.map(collection => <option key={collection} value={collection}>{collection}</option>)}
               </select>
             </label>
           </div>
@@ -148,7 +132,7 @@ export const AssetReplacementModal: React.FC<AssetReplacementModalProps> = ({
             {CATEGORIES.map((cat) => (
               <button
                 key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
+                onClick={() => { setLimit(PAGE_SIZE); setSelectedCategory(cat.id); }}
                 className={`px-3 py-1 text-xs rounded-full whitespace-nowrap transition-colors ${selectedCategory === cat.id
                   ? 'bg-sky-500 text-white font-medium'
                   : 'bg-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-700'
@@ -161,8 +145,8 @@ export const AssetReplacementModal: React.FC<AssetReplacementModalProps> = ({
         </div>
 
         {/* Asset Cards Grid */}
-        <div className="p-4 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 gap-3 flex-1">
-          {filteredAssets.map((asset) => {
+        <div role="region" aria-label="Catalogue results" className="p-4 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 gap-3 flex-1">
+          {visibleAssets.map((asset) => {
             const collection = asset.collection ?? '';
             const Icon = /plant|Vases/.test(collection) ? Flower2 : /lamp/.test(collection) ? Lamp
               : /Mirror|frame/.test(collection) ? Frame : collection === 'Clocks' ? Clock
@@ -209,13 +193,14 @@ export const AssetReplacementModal: React.FC<AssetReplacementModalProps> = ({
               </button>
             );
           })}
+          {visibleAssets.length < filteredAssets.length && <button className="col-span-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 text-sm text-slate-200 hover:bg-slate-700" onClick={() => setLimit(limit + PAGE_SIZE)}>Show more assets</button>}
         </div>
 
         {/* Footer */}
         <div className="p-3 border-t border-slate-800 bg-slate-900/60 flex justify-between items-center text-xs text-slate-400">
           <span>{filteredAssets.length} assets available</span>
           <button
-            onClick={onClose}
+            onClick={close}
             className="px-4 py-1.5 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors"
           >
             Cancel

@@ -126,6 +126,8 @@ The absence of image thumbnails is not a network bug: these cards intentionally 
 
 **Required verification:** matching and accent handling remain correct across all products; filtering finds items outside the initial page; pagination resets when filters change; mobile/offline add and replacement workflows work.
 
+**Implemented result:** search metadata, sources and collections are indexed once per open modal session; filtering searches the entire catalogue. The UI initially mounts 60 cards and exposes Show more assets, resetting the page on search/filter changes. On the same offline touch-emulation check, cards fell from 723 to 60 and total DOM nodes from 9,338 to 1,022. Single opening-to-two-frame samples were 241 ms before and 211.2 ms after; these noisy SwiftShader timings do not establish a large universal latency improvement. Three search unit cases and two browser workflows passed, including a product beyond the first page, page reset, source/collection filtering and accent handling. Type checks passed after completing the motion test fixture types; the offline editor was rebuilt.
+
 ## Additional review observations and limits
 
 ### Test volume does not establish visual accuracy
