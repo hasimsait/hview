@@ -10,19 +10,19 @@ The requested features are legitimate. The problems are unannounced changes to t
 
 ### Commit map
 
-Each row is one topic for inspection in a PR. Final hashes and validation outcomes will be filled in after fixes. The existing plan correction is included rather than folded into another commit.
+Each row is one topic for inspection in a PR. Hashes identify the implementation commits; the sections below record their evidence and validation. The existing plan correction is included rather than folded into another commit.
 
-| Topic | Finding | Commit / intended title |
+| Topic | Finding | Commit / title |
 | --- | --- | --- |
 | 00 | Unrequested latest-plan override and production data used as a fixture | `c22bb75` — Use sample.plan directly for the included editor plan |
-| Report | Review evidence and scope before implementation | This report's initial commit |
-| 01 | Repeated cabinet support resolution freezes large stacks | Bound cabinet stack diagnostics to resolved content |
-| 02 | Door and drawer motion rebuild the entire cabinet | Retain cabinet geometry during door and drawer motion |
-| 03 | Collision sampling repeats expensive work for distant meshes | Cull distant meshes before cabinet collision tests |
-| 04 | Sliding room doors bypass collision checks | Check sliding room doors along their translation path |
-| 05 | Cabinet filler models create excessive draw submissions | Reduce draw calls for cabinet filler assets |
-| 06 | Catalogue renders and searches all cards on every edit | Bound catalogue rendering and reuse its search index |
-| 07 | Hidden moving handles still act as solid colliders | Ignore hidden moving parts in collision checks |
+| Report | Review evidence and scope before implementation | `6767015` — Document audit of the Cabinet and Catalogue main commit |
+| 01 | Repeated cabinet support resolution freezes large stacks | `cda32e5` — Bound cabinet stack diagnostics to resolved content |
+| 02 | Door and drawer motion rebuild the entire cabinet | `45e5c6b` — Retain cabinet geometry during door and drawer motion |
+| 03 | Collision sampling repeats expensive work for distant meshes | `9a34ed3` — Cull distant meshes before cabinet collision tests |
+| 04 | Sliding room doors bypass collision checks | `78c4acc` — Check sliding room doors along their translation path |
+| 05 | Cabinet filler models create excessive draw submissions | `5e52fe6` — Reduce draw calls for cabinet filler assets |
+| 06 | Catalogue renders and searches all cards on every edit | `b5fe337` — Bound catalogue rendering and reuse its search index |
+| 07 | Hidden moving handles still act as solid colliders | `41425e1` — Ignore hidden moving parts in collision checks |
 | Final | Final results, hashes, limitations and any integration cleanup | Record audit results and commit map |
 
 No finding is considered fixed just because this document says it should be. Check the implementation and validation in its mapped commit.
@@ -143,6 +143,8 @@ The original motion traversal collects handles and stored-object meshes even if 
 
 Hundreds of asset cases verify that geometry exists, fits an envelope, has sections and survives a codec round trip. Those are useful checks. They do not prove that an approximation looks like the product, uses the right material, or renders correctly under every view and light. Screenshots saved during a workflow are not automatically golden-image comparisons. The retained-geometry and large-stack failures above passed the existing suite.
 
+The new laminate is a reconstructed visual reference, not a calibrated manufacturer texture or measured material sample. Its color under scene lighting and physical grain scale are approximations. The wood controls expose the requested horizontal/vertical grain choice; they do not establish arbitrary-angle texture rotation. Neither geometry bounds nor a passing export test establishes a photographically accurate kitchen.
+
 The tests also coupled production working-plan contents to hardcoded old object counts and IDs. Topic 00 repairs the affected cases. Future real-plan smoke tests should assert meaningful properties of the included save, while specific geometry bugs should use explicit small fixtures.
 
 ### Lighting costs require an explicit tradeoff
@@ -155,9 +157,17 @@ The existing four-source mobile budget is useful, but switching which *types* of
 
 `SurfaceFinishPicker.tsx` is 1,525 lines, `SceneEngine.ts` is 1,157, and several new UI/builders put many independent operations on single lines. The ternary-heavy category filter mixes catalogue policy with presentation. This makes omissions and incorrect comparisons harder to spot. File length alone is not a defect. The fixes should extract cohesive operations where needed, not mechanically reformat the repository or introduce abstractions without a measured purpose.
 
+The motion code also overloads the word angle: hinged leaves use degrees, drawer leaves expose percentage times 100, and the scene API accepts a previous value converted through radians. The dedicated drawer fields remain correct, but the shared interface is easy to misuse. The translation fix preserves the saved format and existing controls. A future typed motion-path refactor should be reviewed separately rather than smuggled into a saved-plan update.
+
 ### Keep existing offline packaging and user data
 
 Base64/gzip packaging, binary image resources, texture resizing and the explicit save flow existed before this commit. Changing these while correcting a saved plan would repeat the scope error under review. This audit preserves the current plan's bytes and its user/vendor metadata. Reducing JSON line counts is not itself a runtime optimization.
+
+### Further structural work needs profiling before another cache
+
+`PlanSceneGraph.reconcile` derives cornice cuts and railing runs even for furniture-only edits. The cornice helper caches by whole immutable document identity, so that cache does not survive a new document caused by a chair move. This is provably repeated work; its contribution to the current house's edit latency has not been measured here. It is a follow-up candidate rather than another cache added on assumption. Any optimization must account for wall topology, room height and railing configuration, not just element counts.
+
+There is also no scene-wide geometry budget: a 256-item cabinet containing detailed models can still create thousands of render submissions. Topic 01 fixes diagnostic complexity; it does not establish that every possible 256-item scene is cheap to draw. Topic 05 reduces the demonstrated filler costs without claiming a universal frame-rate improvement.
 
 ### Collision checks remain planning approximations
 
@@ -167,4 +177,46 @@ Sampled paths can miss an obstruction thinner than their sampling interval. The 
 
 Initial evidence was collected on the managed Linux workspace using Node 24 and Three.js 0.186.1. Browser verification uses Chromium with SwiftShader and touch emulation, with HTTP dependencies blocked for offline checks. These checks do not substitute for Safari on a physical iPad.
 
-Final topic results, commit hashes, before/after timings, suite outcomes and remaining limitations will be appended after implementation. All application-changing topic commits must rebuild the root offline editor. No requested saved-plan content may change as part of this audit.
+All application-changing topic commits rebuilt the root offline editor. The included worksite plan remains byte-for-byte unchanged from the plan correction at the start of this review: SHA-256 `9d768bcc94f5e06b6f13052d856d4442817f2868c543a5356a1026e04bae0ad5`.
+
+The source branch remains `wc`; `main` remains `24cf4e5`.
+
+| Check | Result |
+| --- | --- |
+| Application/test TypeScript (`npm run test:types`) | Passed |
+| Production build (`npm run build`) | Passed; Vite still reports the existing large-bundle warning |
+| Final unit run (`npx vitest run --testTimeout 20000`) | 1,019 passed across 47 files; 20-second per-case allowance was a command-line validation setting, not a repository timeout change |
+| Node regressions (`node scripts/run_tests.mjs`) | 80 passed, including repeated offline HTML re-export and persistence failure cases |
+| Selected browser workflows | 33 passed across six files (10.5 minutes), covering live editing and offline touch/export flows |
+| Final checked-in HTML, touch emulation with HTTP blocked | Exact included document; 184 top-level elements, 43 walls, 8 columns, 10 rooms, 123 furniture; ten laminate surfaces loaded; zero HTTP requests and zero page errors |
+| Saved-plan integrity | SHA-256 unchanged; raw embedded JSON also equals the included source |
+| Branch isolation | All review work on `wc`; `main` unchanged |
+
+The selected browser run covers all cases in `cabinet-editor`, `camera-navigation`, `curated-catalogue`, `ikea-accessories`, `kitchen-worktops` and `opening-decor`. It is not a claim that the entire browser suite or physical Safari/iPad validation ran. No profiling hooks, benchmark files or screenshots are added to the production application.
+
+## Reproducing the stack benchmark
+
+Save the following as `work/audit-stack.ts` in either checkout and run `npx tsx work/audit-stack.ts`. Use comparable machine load and repeat runs before drawing device-level conclusions. The regression test uses a position-read bound instead of a wall-clock threshold.
+
+```ts
+import { performance } from 'node:perf_hooks';
+import { cabinetIssues, defaultCabinet } from '../src/domain/cabinet/CabinetLayout';
+const dimensions = { x: .6, y: 2, z: .6 };
+for (const count of [100, 256]) {
+  const cabinet = {
+    ...defaultCabinet({ assetKey: 'cabinet_open', dimensions }, 0),
+    panels: [],
+    contents: Array.from({ length: count }, (_, i) => ({
+      id: `item_${i}`, name: 'Stack object', assetKey: 'fit_toilet_roll',
+      dimensions: { x: .1, y: .005, z: .1 },
+      position: { x: 0, y: 0, z: 0 }, rotationY: 0,
+      supportId: i ? `item_${i - 1}` : 'base',
+    })),
+  };
+  const start = performance.now();
+  const issues = cabinetIssues(cabinet, dimensions);
+  console.log({ count, milliseconds: performance.now() - start, issues: issues.size });
+}
+```
+
+For a CPU profile, run the same script with `node --cpu-prof --import tsx work/audit-stack.ts` and inspect the resulting `.cpuprofile` in the browser's performance tools. Profiles and temporary benchmarks belong under `work/`; they do not add instrumentation to the shipped application.
