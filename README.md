@@ -2,9 +2,9 @@
 
 A 3D interior viewer and editor built with TypeScript, React, and Three.js. Edit walls, columns, doors, furniture, lighting, and surface finishes; save a plan or export a self-contained HTML viewer/editor.
 
-For a ready-to-open copy, download [hview_editor.html](hview_editor.html) using GitHub's **Download raw file** action and open it in your browser. It embeds the working `public/sample.plan` used for the bathroom regression, the current editor, textures, and offline export templates. Regenerate this portable snapshot with `npm ci && npm run build:sample-editor`. Browser storage preserves prior saves for the same file path; **Reset** restores the embedded working plan.
+For a ready-to-open copy, download [hview_editor.html](hview_editor.html) using GitHub's **Download raw file** action and open it in your browser. It embeds the latest uploaded worksite plan from `plans/latest.plan` when available, otherwise the working `public/sample.plan` used for the bathroom regression, together with the current editor, textures, and offline export templates. Regenerate this portable snapshot with `npm ci && npm run build:sample-editor`. Browser storage preserves prior saves for the same file path; **Reset** restores the embedded working plan.
 
-**Required for future changes:** Any change to application code, styles, assets, dependencies, build/export logic, or `public/sample.plan` must include a freshly generated root-level `hview_editor.html` in the same commit or PR. Run `npm run build:sample-editor`, verify the generated editor opens offline, and commit the updated HTML alongside the source changes before pushing. The checked-in HTML must reflect the current source and working plan; do not leave an outdated build in the repository or edit the generated HTML by hand.
+**Required for future changes:** Any change to application code, styles, assets, dependencies, build/export logic, or either `public/sample.plan` or `plans/latest.plan` must include a freshly generated root-level `hview_editor.html` in the same commit or PR. Run `npm run build:sample-editor`, verify the generated editor opens offline, and commit the updated HTML alongside the source changes before pushing. The checked-in HTML must reflect the current source and working plan; do not leave an outdated build in the repository or edit the generated HTML by hand.
 
 **Required delivery:** End every final HView response with a direct, clickable **workspace file download link** to the latest complete offline editor HTML. Do not substitute a GitHub link, including raw files or releases. This also applies to documentation-only changes, which can reuse the current HTML. Preserve uploaded user plans and provide a separate editor copy when embedding them. See [AGENTS.md](AGENTS.md) for the persistent instructions for future agent sessions.
 
@@ -51,6 +51,7 @@ When adding a feature, put its rules on the owning class, expose the user action
 
 Saving is explicit. **Save .plan** captures the current document and locks the application until persistence finishes. Failed saves retain dirty edits for retry. Editing does not trigger backup timers, autosave, or unload writes.
 
+- `plans/latest.plan` preserves the latest uploaded worksite plan unchanged. `npm run build:sample-editor` embeds that file in the root offline editor; keep `public/sample.plan` as the separate regression fixture.
 - The development server saves to `public/sample.plan` through `/api/save-plan`. The root `sample.plan` is the reset baseline.
 - HView saves and **Export .plan** use the versioned `schemaVersion: 1` format. **Open .plan** also accepts historical RemPlanner files. **RemPlanner .plan** exports through the legacy adapter.
 - Standalone editors save to browser storage scoped to their document path and reset to their embedded original plan. They can export updated plans and HTML files offline.
