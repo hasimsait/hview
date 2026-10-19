@@ -27,6 +27,7 @@ Each row is one topic for inspection in a PR. Hashes identify the implementation
 | Intent | Request boundaries, decision ownership and limitations of this audit | `9a865cf` — Review intent alignment and ownership of scope decisions |
 | 08 | Requested cabinet LED loses its controls and independent settings inside a cabinet | `f598171` — Restore independent cabinet light controls and persistence |
 | Verification | Requested workflow checks and corrected cabinet documentation | Record requested workflow verification |
+| 09 | Ground-level openings leave bare strips between room floors | Fill floor gaps at ground-level doorways |
 
 No finding is considered fixed just because this document says it should be. Check the implementation and validation in its mapped commit.
 
@@ -207,6 +208,16 @@ This is an intent-alignment defect: an asset entry and a working standalone lamp
 **Correction:** stored luminaires expose the existing on/off, brightness, preset and custom color controls through the cabinet draft adapter. Settings are additive optional content data, validated without changing the plan version; older contents retain their defaults. Actual light output and diffuser glow use the owning content's settings and fixture type. Different lights remain independent, including under the global spot/chandelier sliders. Light-only edits retain geometry and update appearance, avoiding a cabinet rebuild on each slider event. This does not add another shader, downloaded model, input-selection path or saved-plan rewrite.
 
 **Verification:** ten unit cases exercise independent lights/glow, global fixture sliders, retained geometry, undo/redo, both plan formats, malformed settings and older contents with no settings. The offline browser workflow adds the LED through the catalogue, changes its brightness and color, toggles and undoes it, commits the draft, cancels a later change, exports a complete editor, opens it in touch emulation, changes its custom color, saves and reloads. The focused run passed all 108 unit cases across cabinet, motion, daily-life and lighting files, and the new browser workflow passed. Type checks and the root offline editor build passed.
+
+### 09 — High: room floors stop short of doorways
+
+**Files:** `src/engine/geometry/FloorMeshBuilder.ts`, `src/engine/geometry/FloorDoorways.ts`, `src/engine/nodes/PlanSceneGraph.ts`.
+
+Visual inspection of the actual included save showed dark ground-grid strips across the bedroom, WC and bathroom doorways. Floors used the rooms' inner-face polygons, leaving the wall-thickness region empty even where a door removed the wall. Inspecting with cutaway walls and opening meshes temporarily hidden made the missing strips unambiguous.
+
+**Correction:** extend the finish from each touching polygon edge to the opening's centerline. Adjacency uses the actual boundary, since a long wall's room-side metadata can refer to another room along its length. The patches share the existing floor mesh, material and metric UV origin; no extra floor draw submission, plan polygon rewrite or threshold asset is introduced. Raised windows and solid-wall spans remain untouched. Derived floor coverage refreshes when opening geometry changes, while door angles and unrelated furniture edits retain floor geometry.
+
+**Verification:** inspected matching before/after offline renders of the sample around camera/target `(-0.52, 25, 6.17)` / `(-0.52, 0, 6.17)`, with orthographic zoom 6 and wall cutaway enabled. The dark doorway strips disappear while the adjacent finishes remain distinct. Four floor geometry cases cover both sides, jamb bounds, raised openings, unrelated rooms, misleading room metadata, rotated walls and continuous UVs. A scene-graph case checks opening edits and retained geometry. All 13 floor/scene-graph cases, type checks and the rebuilt offline editor passed. The included plan is unchanged.
 
 ## Additional review observations and limits
 

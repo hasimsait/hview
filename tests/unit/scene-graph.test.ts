@@ -12,6 +12,8 @@ import { ConfigureBalconyRailing, FinishWall, SetCeilingHeight } from '../../src
 import { rawPlan } from './fixtures';
 import { Wall } from '../../src/domain/elements/Wall';
 import { PlanDocument } from '../../src/domain/model/PlanDocument';
+import { Room } from '../../src/domain/elements/Room';
+import { Door } from '../../src/domain/elements/Opening';
 
 function fixture() {
   const resources = new ResourcePool(), picking = new PickRegistry();
@@ -31,6 +33,26 @@ function fixture() {
   return { resources, picking, base, finish, palette, geometry, graph, editor, appearance, walls };
 }
 describe('retained scene node ownership', () => {
+  it('updates doorway floor coverage when an opening moves and retains it for door motion or furniture edits', () => {
+    const { graph, editor, palette } = fixture();
+    const room = new Room({ id: 'room', name: 'Room', area: 12, height: 2.7, polygon: [{ x: 0, y: .05 }, { x: 4, y: .05 }, { x: 4, y: 3 }, { x: 0, y: 3 }] });
+    const door = new Door({ id: 'door', wallId: 'wall', type: 'door', width: 1, height: 2.1, floorHeight: 0, distanceAlongWall: 2, position: { x: 2, y: 0 } });
+    const wall = new Wall({ id: 'wall', p1: { x: 0, y: 0 }, p2: { x: 4, y: 0 }, thickness: .1, height: 2.7, material: 'a_block', openings: [] }, [door]);
+    let document = new PlanDocument([room, wall, ...editor.getDocument().furniture]);
+    graph.reconcile(document);
+    const floor = graph.get(room.id)!.group, original = floor.children[0];
+    document = document.replace(door.withOpenAngle(90));
+    graph.reconcile(document);
+    expect(floor.children[0]).toBe(original);
+    document = document.replace(document.requireWall(wall.id).withOpenings([new Door({ ...door.toData(), distanceAlongWall: 3, position: { x: 3, y: 0 } })]));
+    graph.reconcile(document);
+    expect(floor.children[0]).not.toBe(original);
+    const moved = floor.children[0];
+    document = document.replace(document.furniture[0].withTransform({ x: 1, y: 0, z: 1 }));
+    graph.reconcile(document);
+    expect(floor.children[0]).toBe(moved);
+    graph.dispose(); palette.dispose();
+  });
   it('rebuilds a railing floor when a bounding wall is removed and restores it with undo', () => {
     const { graph, editor, palette } = fixture(); editor.load(new PlanCodec().decode(rawPlan()));
     editor.execute(new ConfigureBalconyRailing('room', { height: 1.05, color: '#30363b' }));

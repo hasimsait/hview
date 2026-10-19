@@ -5,6 +5,7 @@ import { BrowserCanvasFactory,type CanvasFactory } from '../materials/CanvasFact
 import { buildBalconyRailing } from './BalconyRailingGeometry';
 import { openRailingRuns } from '../../domain/model/BalconyRailing';
 import type { WallEntity } from '../../core/types/plan';
+import { floorDoorwayPolygons } from './FloorDoorways';
 
 export class FloorMeshBuilder {
   private readonly surfaces = new WeakSet<THREE.Mesh>();
@@ -30,15 +31,14 @@ export class FloorMeshBuilder {
     // Skip building floor for invalid polygons or tiny spaces/chimneys (< 0.5 m²)
     if (!room.polygon || room.polygon.length < 3 || room.area < 0.5) return group;
 
-    const shape = new THREE.Shape();
-    // Use polygon coordinates
-    shape.moveTo(room.polygon[0].x, -room.polygon[0].y);
-    for (let i = 1; i < room.polygon.length; i++) {
-      shape.lineTo(room.polygon[i].x, -room.polygon[i].y);
-    }
-    shape.closePath();
-
-    const geometry = new THREE.ShapeGeometry(shape);
+    const shapes = [room.polygon, ...floorDoorwayPolygons(room, walls)].map(polygon => {
+      const shape = new THREE.Shape();
+      shape.moveTo(polygon[0].x, -polygon[0].y);
+      for (const point of polygon.slice(1)) shape.lineTo(point.x, -point.y);
+      shape.closePath();
+      return shape;
+    });
+    const geometry = new THREE.ShapeGeometry(shapes);
 
     // Anchor floor UVs to start at (0, 0) at the room's bounding corner for usage estimation
     let minX = Infinity;
