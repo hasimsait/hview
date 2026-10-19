@@ -21,7 +21,7 @@ import { CabinetPlinthControls } from './CabinetPlinthControls';
 import { supportsCabinetPlinth } from '../../domain/cabinet/CabinetPlinth';
 import { CabinetHingeControls } from './CabinetHingeControls';
 import { ConfigureCabinet } from '../../application/commands/CabinetCommands';
-import type { Vector3D } from '../../domain/model/PlanData';
+import type { LightFixtureConfig, Vector3D } from '../../domain/model/PlanData';
 import { Furniture,Shelving } from '../../domain/elements/Furniture';
 import { InspectorPresenter } from '../inspection/InspectorPresenter';
 import { SurfaceFinishPicker } from './SurfaceFinishPicker';
@@ -30,6 +30,7 @@ import { cabinetSurfaceFinish } from '../../domain/model/SurfaceSections';
 export interface InteriorInspectorAdapter {
   transform: (position?: Vector3D, rotation?: number, dimensions?: Vector3D) => void;
   finish: (finish?: SurfaceFinishConfig, section?: string) => void;
+  configureLight: (config: Partial<LightFixtureConfig>) => void;
   remove: () => void;
   sections: string[];
   section: string;
@@ -95,6 +96,11 @@ export const Inspector: React.FC<InspectorProps> = ({
     } else {
       editor.execute(new FinishFurniture(item.id, undefined, activeSection));
     }
+  };
+
+  const configureLight = (config: Partial<LightFixtureConfig>) => {
+    if (interior) interior.configureLight(config);
+    else editor.execute(new ConfigureLuminaire(item.id, config));
   };
 
   const handlePositionChange = (axis: 'x' | 'y' | 'z', value: number) => {
@@ -383,7 +389,7 @@ export const Inspector: React.FC<InspectorProps> = ({
               type="button"
               onClick={() => {
                 const currentEnabled = item.lightConfig?.enabled !== false;
-                editor.execute(new ConfigureLuminaire(item.id, { enabled: !currentEnabled }));
+                configureLight({ enabled: !currentEnabled });
               }}
               className={`px-2.5 py-0.5 rounded text-[11px] font-semibold border transition-all ${item.lightConfig?.enabled !== false
                 ? 'bg-amber-500/20 border-amber-500/50 text-amber-300 shadow-sm'
@@ -403,6 +409,7 @@ export const Inspector: React.FC<InspectorProps> = ({
               </span>
             </div>
             <input
+              aria-label="Fixture brightness"
               type="range"
               min="0"
               max="3"
@@ -410,7 +417,7 @@ export const Inspector: React.FC<InspectorProps> = ({
               value={item.lightConfig?.intensity ?? 1.0}
               onChange={(e) => {
                 const val = parseFloat(e.target.value);
-                editor.execute(new ConfigureLuminaire(item.id, { intensity: val }));
+                configureLight({ intensity: val });
               }}
               className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-400"
             />
@@ -431,7 +438,7 @@ export const Inspector: React.FC<InspectorProps> = ({
                   <button
                     key={preset.label}
                     type="button"
-                    onClick={() => editor.execute(new ConfigureLuminaire(item.id, { color: preset.color }))}
+                    onClick={() => configureLight({ color: preset.color })}
                     className={`py-1 px-1 rounded text-center border transition-all ${isSelected
                       ? 'border-amber-400 bg-amber-500/20 text-amber-200 font-semibold shadow-sm'
                       : 'border-slate-700 bg-slate-800/80 text-slate-300 hover:border-slate-600'
@@ -448,9 +455,10 @@ export const Inspector: React.FC<InspectorProps> = ({
             <div className="flex items-center gap-2 pt-1">
               <span className="text-[10px] text-slate-500">Custom:</span>
               <input
+                aria-label="Fixture color"
                 type="color"
                 value={item.lightConfig?.color || '#fff2dc'}
-                onChange={(e) => editor.execute(new ConfigureLuminaire(item.id, { color: e.target.value }))}
+                onChange={(e) => configureLight({ color: e.target.value })}
                 className="w-6 h-6 rounded border border-slate-700 bg-transparent cursor-pointer"
               />
               <span className="text-[11px] font-mono text-slate-400">

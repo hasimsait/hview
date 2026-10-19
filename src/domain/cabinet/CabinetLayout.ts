@@ -1,4 +1,4 @@
-import type { FurnitureData, SurfaceFinishConfig, Vector3D } from '../model/PlanData';
+import type { FurnitureData, LightFixtureConfig, SurfaceFinishConfig, Vector3D } from '../model/PlanData';
 import { SurfaceFinish } from '../model/SurfaceFinish';
 import { finite, identifier, positive } from '../model/Immutable';
 import { cabinetDrawerTrays, cabinetBasket, cabinetHasDoors, cabinetLeafSettings, cabinetLeaves, type CabinetDoors, type CabinetFrontSection } from './CabinetFronts';
@@ -28,6 +28,7 @@ export interface CabinetContent {
   supportId?: string;
   finish?: SurfaceFinishConfig;
   sectionFinishes?: Record<string, SurfaceFinishConfig>;
+  lightConfig?: LightFixtureConfig;
 }
 export interface CabinetHinge {
   type: 'pivot' | 'straight-arm' | 'half-cranked' | 'fully-cranked';
@@ -117,6 +118,13 @@ export function validateCabinet(layout: CabinetLayout): CabinetLayout {
   for (const o of layout.contents) {
     identifier(o.assetKey); for (const axis of ['x', 'y', 'z'] as const) { positive(o.dimensions?.[axis], 'Content dimensions'); finite(o.position?.[axis], 'Content position'); }
     finite(o.rotationY, 'Content rotation');
+    if (o.lightConfig !== undefined) {
+      const config = o.lightConfig;
+      if (!config || typeof config !== 'object' || Array.isArray(config)) throw new Error('Invalid content light settings');
+      if (config.enabled !== undefined && typeof config.enabled !== 'boolean') throw new Error('Invalid content light state');
+      if (config.color !== undefined && typeof config.color !== 'string') throw new Error('Invalid content light color');
+      if (config.intensity !== undefined && (finite(config.intensity, 'Content light intensity') < 0 || config.intensity > 3)) throw new Error('Content light intensity must be between 0 and 3');
+    }
     const seen = new Set([o.id]);
     let parent = o.supportId;
     while (parent && layout.contents.some(p => p.id === parent)) {

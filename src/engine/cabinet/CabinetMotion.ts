@@ -11,7 +11,8 @@ function equalExcept(a: object, b: object, ignored: readonly string[]): boolean 
 /** Immutable layout shares all boards and contents when only a motion control changes. */
 export function sameCabinetGeometry(a?: CabinetLayout, b?: CabinetLayout): boolean {
   if (a === b) return true;
-  if (!a || !b || !equalExcept(a, b, ['doors', 'frontSections', 'internalDrawers'])) return false;
+  if (!a || !b || !equalExcept(a, b, ['doors', 'frontSections', 'internalDrawers', 'contents'])) return false;
+  if (a.contents !== b.contents && (a.contents.length !== b.contents.length || a.contents.some((content, i) => !equalExcept(content, b.contents[i], ['lightConfig'])))) return false;
   if (!equalExcept(a.doors, b.doors, ['angles'])) return false;
   const frontsA = a.frontSections ?? [], frontsB = b.frontSections ?? [];
   if (frontsA.length !== frontsB.length || frontsA.some((front, i) =>

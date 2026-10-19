@@ -37,7 +37,7 @@ export class FurnitureSceneNode<T extends Furniture = Furniture> extends SceneNo
     if (geometryChanged) this.rebuild(element);
     else {
       if (previous.cabinet !== element.cabinet) applyCabinetMotion(this.group, element);
-      if (previous.finish !== element.finish || previous.sectionFinishes !== element.sectionFinishes || previous.lightConfig !== element.lightConfig) {
+      if (previous.finish !== element.finish || previous.sectionFinishes !== element.sectionFinishes || previous.lightConfig !== element.lightConfig || previous.cabinet?.contents !== element.cabinet?.contents) {
         this.appearance.apply(this.group, element); this.refreshMaterials();
       }
     }

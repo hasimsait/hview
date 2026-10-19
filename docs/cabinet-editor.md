@@ -34,6 +34,12 @@ Door controls work independently outside layout mode and include touch-friendly 
 
 Layouts, content identities, dimensions, support attachments, finishes, independent door angles and hinge settings are included in canonical plans, legacy plans and standalone editor exports. There is no destructive cleanup of invalid layouts when saving.
 
+## Cabinet lighting
+
+Use **Place object** to add a **Cabinet Interior Vertical LED Profile**, then select it to use **Fixture Lighting**, **Fixture brightness**, color presets or **Fixture color**. Each stored light keeps its own on/off state, brightness and color. The actual light and visible diffuser update together; brightness changes retain the cabinet geometry. The global spotlight or chandelier slider still scales lights of that type.
+
+Light settings belong to the cabinet layout draft: **Undo layout** reverses them, **Cancel layout** discards them, and **Done** commits them with the layout. They survive plan saves, both plan formats and offline editor export. Older stored lights without settings remain on at their standard brightness.
+
 ## Stacked fronts and laundry baskets
 
 In **Edit layout**, use **Split front vertically** to divide the cabinet into sections stacked up its height. Enter the split height from the floor in centimetres. Select each section to set its bottom/top, fit its top to the cabinet, choose zero, one or two panels across, and choose side-hinged doors or a **Tilt-out laundry basket**. Sections retain their heights through shell resizing; invalid heights and overlaps turn red. Internal shelves remain independent.

@@ -24,7 +24,8 @@ Each row is one topic for inspection in a PR. Hashes identify the implementation
 | 06 | Catalogue renders and searches all cards on every edit | `b5fe337` — Bound catalogue rendering and reuse its search index |
 | 07 | Hidden moving handles still act as solid colliders | `41425e1` — Ignore hidden moving parts in collision checks |
 | Final | Final results, hashes, limitations and any integration cleanup | `632bc35` — Record audit results and commit map |
-| Intent | Request boundaries, decision ownership and limitations of this audit | Review intent alignment and ownership of scope decisions |
+| Intent | Request boundaries, decision ownership and limitations of this audit | `9a865cf` — Review intent alignment and ownership of scope decisions |
+| 08 | Requested cabinet LED loses its controls and independent settings inside a cabinet | Restore independent cabinet light controls and persistence |
 
 No finding is considered fixed just because this document says it should be. Check the implementation and validation in its mapped commit.
 
@@ -193,6 +194,18 @@ The absence of image thumbnails is not a network bug: these cards intentionally 
 The original motion traversal collects handles and stored-object meshes even if their finish hides them. Visibility is checked for obstacles, but not for moving parts. A deliberately hidden handle can therefore turn a door red when its invisible geometry crosses an obstacle. The included save contains hidden cabinet handles, so this is relevant to the current worksite plan.
 
 **Fix and verification:** the per-motion query skips moving meshes with either a hidden mesh or hidden ancestor. A new unit case tests both and then restores visibility to confirm the real collision still returns. All 33 collision-query, sliding-door and cabinet-layout cases passed; the offline editor was rebuilt. This additional collision finding has its own topic commit rather than being hidden in final report cleanup.
+
+### 08 — High: the cabinet LED is present in the catalogue but incomplete in its intended workflow
+
+**Files:** `src/ui/components/CabinetEditor.tsx`, `src/ui/components/Inspector.tsx`, `src/domain/cabinet/CabinetLayout.ts`, `src/engine/materials/FurnitureAppearance.ts`.
+
+The user requested a vertical LED profile inside cabinets. Its geometry and actual light were implemented, but the cabinet inspector constructed every stored object as `StandardFurniture`. That suppressed the existing luminaire controls. The content record had no light settings, and the renderer applied the parent cabinet's light configuration to every nested emitter. Existing catalogue-level lighting tests passed because they exercised standalone fixtures, not the requested cabinet workflow.
+
+This is an intent-alignment defect: an asset entry and a working standalone lamp did not complete the requested cabinet feature. It belongs in the fix list rather than in a list of things the user must discover while reviewing.
+
+**Correction:** stored luminaires expose the existing on/off, brightness, preset and custom color controls through the cabinet draft adapter. Settings are additive optional content data, validated without changing the plan version; older contents retain their defaults. Actual light output and diffuser glow use the owning content's settings and fixture type. Different lights remain independent, including under the global spot/chandelier sliders. Light-only edits retain geometry and update appearance, avoiding a cabinet rebuild on each slider event. This does not add another shader, downloaded model, input-selection path or saved-plan rewrite.
+
+**Verification:** ten unit cases exercise independent lights/glow, global fixture sliders, retained geometry, undo/redo, both plan formats, malformed settings and older contents with no settings. The offline browser workflow adds the LED through the catalogue, changes its brightness and color, toggles and undoes it, commits the draft, cancels a later change, exports a complete editor, opens it in touch emulation, changes its custom color, saves and reloads. The focused run passed all 108 unit cases across cabinet, motion, daily-life and lighting files, and the new browser workflow passed. Type checks and the root offline editor build passed.
 
 ## Additional review observations and limits
 
