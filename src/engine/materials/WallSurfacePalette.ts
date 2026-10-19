@@ -35,6 +35,7 @@ export class WallSurfacePalette {
     });
 
     applyBasicOcclusionShader(this.wallMaterial, this.wallUniforms, 0.5);
+    applyBasicOcclusionShader(this.edgeMaterial, this.wallUniforms, 0.5);
   }
 
   getMaterial(): THREE.MeshStandardMaterial {

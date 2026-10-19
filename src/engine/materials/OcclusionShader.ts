@@ -25,7 +25,7 @@ export function createOcclusionUniforms(): OcclusionUniforms {
 }
 
 export function applyBasicOcclusionShader(
-  mat: THREE.MeshStandardMaterial | THREE.MeshPhysicalMaterial,
+  mat: THREE.MeshStandardMaterial | THREE.MeshPhysicalMaterial | THREE.LineBasicMaterial,
   uniforms: OcclusionUniforms,
   fadeDistance = 0.5
 ): void {
@@ -90,6 +90,10 @@ export function keepForegroundVisible(material: THREE.Material): void {
 
 export class OcclusionShader {
   private occlusionUniforms = createOcclusionUniforms();
+
+  applyOutline(material: THREE.LineBasicMaterial): void {
+    applyBasicOcclusionShader(material, this.occlusionUniforms);
+  }
   updateOrbitPlane(orbitCenter: THREE.Vector3, cameraDir: THREE.Vector3): void {
     this.occlusionUniforms.uOrbitCenter.value.copy(orbitCenter);
     this.occlusionUniforms.uCameraDir.value.copy(cameraDir);

@@ -53,9 +53,10 @@ export class FurnitureMeshBuilder {
 
 
 
-  get palette(): readonly THREE.Material[] { return Object.values(this.materials); }
+  get palette(): readonly THREE.Material[] { return [...Object.values(this.materials), this.celOutlineMaterial, this.fixedOutlineMaterial]; }
 
   constructor(readonly catalog = new AssetCatalog(), textures = new TextureSource()) {
+    applyBasicOcclusionShader(this.celOutlineMaterial, this.occlusionUniforms, 0.6);
     // Inject orbit-fade shader into every opaque MeshStandardMaterial.
     // MeshBasicMaterial and MeshPhysicalMaterial (glass) are excluded —
     // basics have no lighting pipeline, glass is already transparent.
@@ -211,6 +212,7 @@ export class FurnitureMeshBuilder {
     transparent: true,
     opacity: 0.7,
   });
+  private fixedOutlineMaterial = this.celOutlineMaterial.clone();
 
   private addCelOutlines(parent: THREE.Object3D): void {
     parent.traverse((child) => {
@@ -220,7 +222,7 @@ export class FurnitureMeshBuilder {
         // Skip small light bulbs / spheres and smooth curved hoses
         if (mesh.geometry.type === 'SphereGeometry' || mesh.geometry.type === 'TubeGeometry') return;
         const edges = new THREE.EdgesGeometry(mesh.geometry, 28);
-        const line = new THREE.LineSegments(edges, this.celOutlineMaterial);
+        const line = new THREE.LineSegments(edges, mesh.userData.foregroundOcclusion === false ? this.fixedOutlineMaterial : this.celOutlineMaterial);
         line.name = 'celOutline';
         mesh.add(line);
       }
@@ -228,8 +230,10 @@ export class FurnitureMeshBuilder {
   }
 
   setCelShading(enabled: boolean): void {
-    this.celOutlineMaterial.color.set(enabled ? 0x000000 : 0x0f172a);
-    this.celOutlineMaterial.opacity = enabled ? 1.0 : 0.6;
-    this.celOutlineMaterial.needsUpdate = true;
+    for (const material of [this.celOutlineMaterial, this.fixedOutlineMaterial]) {
+      material.color.set(enabled ? 0x000000 : 0x0f172a);
+      material.opacity = enabled ? 1.0 : 0.6;
+      material.needsUpdate = true;
+    }
   }
 }

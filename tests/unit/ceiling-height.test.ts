@@ -16,7 +16,7 @@ function setup() {
   return { codec, editor };
 }
 const material = new THREE.MeshBasicMaterial();
-const builder = new CeilingMeshBuilder({ getMaterial: () => material } as unknown as SurfaceMaterialFactory);
+const builder = new CeilingMeshBuilder({ getMaterial: () => material, applyOutlineOcclusion() {} } as unknown as SurfaceMaterialFactory);
 
 describe('finished ceiling elevations', () => {
   it('gives clip-in ceilings a 15 cm default drop and leaves smooth ceilings at room height', () => {

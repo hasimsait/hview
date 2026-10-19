@@ -29,7 +29,8 @@ Each row is one topic for inspection in a PR. Hashes identify the implementation
 | Verification | Requested workflow checks and corrected cabinet documentation | `b039c8e` — Record requested workflow verification |
 | 09 | Ground-level openings leave bare strips between room floors | `c58a9e0` — Fill floor gaps at ground-level doorways |
 | 10 | Separate adjoining wall meshes draw artificial borders across the same finish | `734c1f9` — Suppress outlines at matching wall continuations |
-| 11 | Biased wall outlines show hidden columns and openings through solid walls | Keep wall outlines at their true depth |
+| 11 | Biased wall outlines show hidden columns and openings through solid walls | `050962b` — Keep wall outlines at their true depth |
+| 12 | Foreground fade/clip changes surfaces but leaves their wire outlines behind | Fade and clip outlines with their surfaces |
 
 No finding is considered fixed just because this document says it should be. Check the implementation and validation in its mapped commit.
 
@@ -240,6 +241,16 @@ Visual inspection of the actual included save showed dark ground-grid strips acr
 **Correction:** remove the negative polygon offset from the shared wall-outline material. Outlines retain ordinary depth testing, their existing color/opacity, and real contour geometry. No extra render pass, per-frame occlusion query or geometry cache is introduced. Surface-layer controls are unchanged.
 
 **Verification:** rebuilt and visually inspected the same offline sample view used in topic 10. Hidden rectangles and the remaining apparent joint line disappear. Also inspected the bathroom wall, doorway floors and furnished house view. All four views reported zero page errors, and the included plan remains unchanged. The furnished fade view exposes a separate mismatch: mesh bodies fade while their outlines stay dark. That is not attributed to this depth-bias fix.
+
+### 12 — Medium: cutaway views leave wire cages behind
+
+**Files:** `OcclusionShader.ts`, `WallSurfacePalette.ts`, `FurnitureMeshBuilder.ts`, `CeilingMeshBuilder.ts`, `SurfaceMaterialFactory.ts`.
+
+**Evidence:** in the furnished sample, foreground clip mode removed cabinet and wall surfaces while leaving their full dark wire outlines. Transparent mode likewise retained stronger contours than the faded objects. Ceiling outlines had the same missing shader hookup.
+
+**Correction:** apply the existing foreground fade/clip shader to wall, furniture and ceiling outlines, sharing their existing live mode/plane uniforms. Ceiling contours use the finish factory's uniforms. Independent worktops retain their intentional placement-surface visibility and have a separate shared outline material. No per-frame geometry work or additional render submissions are added.
+
+**Verification:** inspected matching close furnished-house views in transparent and clip modes, including visible ceilings, plus the blue wall and bathroom views. The wire cages disappear with their clipped bodies and faded contours recede. All five views reported zero console/page errors. Two new cases check shared live uniforms, line-shader integration and the independent-worktop exception; all 23 relevant outline, ceiling, shader-reuse and worktop cases passed, as did type checks and the rebuilt offline editor. A test fixture initially omitted the required furniture display name; that was corrected before the successful type check. The plan is unchanged. Custom floors disappearing and isolated glass/glowing details remain separate visible defects at this point.
 
 ## Additional review observations and limits
 

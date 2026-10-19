@@ -15,6 +15,7 @@ export class CeilingMeshBuilder {
       transparent: true,
       opacity: 0.6,
     });
+    this.finishService.applyOutlineOcclusion(this.edgeMaterial);
   }
 
   buildCeilings(plan: PlanDocument, isolatedRoomIds?: string[]): THREE.Group {
