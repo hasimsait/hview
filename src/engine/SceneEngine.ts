@@ -305,7 +305,7 @@ export class SceneEngine implements ISceneService {
     if (!change.previous || change.label === 'Load document' || change.added.length > 0) this.needsPreparation = true;
     this.collisionFeedback.clear();
     this.currentPlan = change.document;
-    this.graph.reconcile(change.document);
+    this.graph.reconcile(change.document, this.settings.wallCutaway ? 1.15 : undefined);
     if (this.cabinetEditingId) this.checkCabinetLayout(change.previous ?? undefined);
     else for (const id of change.updated) {
       const now = change.document.get(id), before = change.previous?.get(id);
@@ -341,7 +341,7 @@ export class SceneEngine implements ISceneService {
   renderPlan(plan: PlanDocument): void {
     this.invalidate();
     this.needsPreparation = true; this.ceilingsDirty = true;
-    this.currentPlan = plan; this.graph.reconcile(plan);
+    this.currentPlan = plan; this.graph.reconcile(plan, this.settings.wallCutaway ? 1.15 : undefined);
     this.applyVisibilitySettings(); this.applyLightingSettings(); this.fitPlanInView();
   }
 

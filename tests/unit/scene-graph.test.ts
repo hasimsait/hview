@@ -33,6 +33,24 @@ function fixture() {
   return { resources, picking, base, finish, palette, geometry, graph, editor, appearance, walls };
 }
 describe('retained scene node ownership', () => {
+  it('refreshes matching cutaway joins between walls with different full heights', () => {
+    const { graph, palette } = fixture();
+    const first = new Wall({ id: 'first', p1: { x: 0, y: 0 }, p2: { x: 2, y: 0 }, thickness: .1, height: 2.7, material: 'a_block', openings: [] }, []);
+    const second = new Wall({ ...first.toData(), id: 'second', p1: { x: 2, y: 0 }, p2: { x: 4, y: 0 }, height: 3 }, []);
+    const document = new PlanDocument([first, second]);
+    graph.reconcile(document);
+    const root = graph.get(first.id)!.group, fullHeight = root.children[0];
+    graph.reconcile(document, 1.15);
+    expect(root.children[0]).not.toBe(fullHeight);
+    const original = root.children[0];
+    graph.reconcile(document, 1.15); expect(root.children[0]).toBe(original);
+    graph.reconcile(document.replace(second.withFinish('A', { type: 'paint', color: '#333333' })), 1.15);
+    expect(root.children[0]).not.toBe(original);
+    const painted = root.children[0];
+    graph.reconcile(document, undefined);
+    expect(root.children[0]).not.toBe(painted);
+    graph.dispose(); palette.dispose();
+  });
   it('refreshes a joined wall outline after its neighbor is repainted or removed', () => {
     const { graph, editor, palette } = fixture();
     const first = new Wall({ id: 'first', p1: { x: 0, y: 0 }, p2: { x: 2, y: 0 }, thickness: .1, height: 2.7, material: 'a_block', openings: [] }, []);

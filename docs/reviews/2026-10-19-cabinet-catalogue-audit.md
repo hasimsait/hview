@@ -32,7 +32,8 @@ Each row is one topic for inspection in a PR. Hashes identify the implementation
 | 11 | Biased wall outlines show hidden columns and openings through solid walls | `050962b` — Keep wall outlines at their true depth |
 | 12 | Foreground fade/clip changes surfaces but leaves their wire outlines behind | `bf9fbc5` — Fade and clip outlines with their surfaces |
 | 13 | Custom floor finishes disappear in foreground clip/fade modes | `dcd8e68` — Keep custom floors visible in cutaway views |
-| 14 | Unlit fixture details and default glass float after their housings are clipped | Clip glass and glowing details with their objects |
+| 14 | Unlit fixture details and default glass float after their housings are clipped | `b040dbd` — Clip glass and glowing details with their objects |
+| Visual integration | Joined-wall refresh must use the same cutaway height as its geometry | Refresh joined wall outlines using the active cutaway height |
 
 No finding is considered fixed just because this document says it should be. Check the implementation and validation in its mapped commit.
 
@@ -232,7 +233,7 @@ Visual inspection of the actual included save showed dark ground-grid strips acr
 
 **Correction:** trim only the body-outline segments at a matching, nearly collinear continuation. Keep both independently editable wall bodies and their saved coordinates. Match each face separately, including reversed wall direction; preserve real corners, different finishes, height/thickness steps and exposed portions of neighboring opening jambs. Editing or deleting the neighbor refreshes the affected outline; unrelated furniture edits do not recompute wall joins.
 
-**Verification:** compared the sample's blue wall before/after at eye `(0.5, 1.6, -1.5)` and target `(-1.64, 1.3, -1.36)`, and inspected the bathroom continuation. Geometry cases verify retained body meshes, original IDs, face-specific finish changes, reversed direction, real steps/corners and partially exposed jambs. A scene-graph case verifies repainting/deleting the neighbor restores its border. Thirty-two relevant wall/scene-graph cases and type checks passed; the offline editor was rebuilt. A separate outline depth-bias defect still produces ghost edges in this view and is investigated independently; suppressing split borders does not claim to fix it. Plan bytes remain unchanged.
+**Verification:** compared the sample's blue wall before/after at eye `(0.5, 1.6, -1.5)` and target `(-1.64, 1.3, -1.36)`, and checked a bathroom view for regressions. Geometry cases verify retained body meshes, original IDs, face-specific finish changes, reversed direction, real steps/corners and partially exposed jambs. A scene-graph case verifies repainting/deleting the neighbor restores its border. Thirty-two relevant wall/scene-graph cases and type checks passed; the offline editor was rebuilt. A separate outline depth-bias defect still produces ghost edges in this view and is investigated independently; suppressing split borders does not claim to fix it. Plan bytes remain unchanged.
 
 ### 11 — High: hidden architecture shows through opaque walls
 
@@ -273,6 +274,10 @@ Visual inspection of the actual included save showed dark ground-grid strips acr
 **Correction:** the default furniture glass, screens and glowing details, and default opening glass, now follow the existing foreground plane. Preserve the shader hooks when cloning independently colored fixture glow materials. This controls visible surfaces only: actual light sources, their intensity controls and glass opacity/transmission remain unchanged.
 
 **Verification:** inspected close transparent/clip sample views and a clip view with ceilings visible. The detached diffusers/panes disappear with their objects; opaque mode and the previously repaired blue wall remain covered by the final visual pass. All three views reported zero console/page errors. The new regression case checks a real chandelier through appearance cloning, live mode changes, retained light output and default glass opacity/transmission. All 66 focused lighting, cabinet-light, opening, outline and shader-reuse cases passed, with type checks and a rebuilt offline editor. Plan bytes are unchanged.
+
+### Visual integration — Refresh joins using the rendered wall height
+
+A final review of topic 10 found an edge case in the new outline invalidation: adjoining walls with different full heights can have identical visible heights in cutaway mode. Their join signature must use the active cutaway height too; otherwise repainting the neighbor could leave an outdated border. `SceneEngine` now passes its existing cutaway height into reconciliation. A case checks a height-only mode change, retained geometry for unchanged context, and repainting the taller neighbor. This is integration cleanup for the outline fix, not a saved-plan or wall-height change.
 
 ## Additional review observations and limits
 
@@ -351,6 +356,24 @@ The user requested implementation fixes after the intent review. Topic 08 repair
 No additional functional mismatch was demonstrated in the other checked requirements. Native Safari/device behavior, subjective navigation comfort and exact photographic/product matching remain evidence limits. The originating requests for features outside the available conversation remain unestablished; this pass does not delete or redesign those features on an assumption.
 
 **Follow-up results:** 139 focused unit cases passed across ten files. All 21 browser cases passed across cabinet editing, camera navigation and kitchen worktops: the new LED workflow passed separately, followed by the other 20 cases. Type checks, the rebuilt root offline editor and its independent worksite-plan check passed. These are follow-up results, not a claim that the earlier full unit or Node regression suites were rerun. The worksite plan SHA-256 remains `9d768bcc94f5e06b6f13052d856d4442817f2868c543a5356a1026e04bae0ad5`; `main` remains `24cf4e5`.
+
+## Visual follow-up validation
+
+The user's subsequent request explicitly added visual checks for floor gaps and cel-shading defects in the included working save. Topics 09–14 and the cutaway integration correction implement the defects reproduced in that pass. No plan file, persistent workflow instruction, dependency or asset was changed.
+
+| Final check | Result |
+| --- | --- |
+| Full unit suite (`npx vitest run --testTimeout 20000`) | 1,044 passed across 51 files |
+| Strengthened cutaway context case, focused rerun | All 11 scene-graph cases passed |
+| Type checks | Passed |
+| Latest complete offline editor | Rebuilt from current source; 2,294,101 bytes |
+| Desktop offline visual pass | Seven views: overhead, close doorways, furnished fade/clip, ceilings, blue wall and bathroom; zero console/page errors |
+| Tablet touch visual pass | Doorways, furnished clip and blue wall; zero console/page errors |
+| Independent offline tablet document check | Exact included document, 184 elements, 43 walls, 10 rooms, 123 furniture and ten laminate surfaces; zero network requests or browser errors |
+| Included plan integrity | SHA-256 remains `9d768bcc94f5e06b6f13052d856d4442817f2868c543a5356a1026e04bae0ad5` |
+| Branch isolation | Changes committed only to `wc`; `main` remains `24cf4e5` |
+
+The visual checks used Chromium on Linux, with SwiftShader and tablet touch emulation where specified. Screenshots and isolation scripts remain under ignored `work/`, not in the production application. The faint lighting difference from the sample's very slightly bent blue-wall geometry is distinct from its removed black split contour; saved coordinates are preserved. Real corners, finish boundaries and solid-wall footprints remain represented.
 
 ## Reproducing the stack benchmark
 

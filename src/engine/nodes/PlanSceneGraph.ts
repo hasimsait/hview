@@ -31,6 +31,7 @@ export class PlanSceneGraph {
   private roomLayouts = new Map<string, string>();
   private outlineWalls: readonly Wall[] = [];
   private outlineLayouts = new Map<string, string>();
+  private outlineHeight?: number;
 
   constructor(
     private readonly factory: SceneNodeFactory,
@@ -45,13 +46,14 @@ export class PlanSceneGraph {
     return this.nodes.values();
   }
 
-  reconcile(document: PlanDocument): void {
+  reconcile(document: PlanDocument, cutawayHeight?: number): void {
     const changedOutlines = new Set<string>();
-    if (document.walls.length !== this.outlineWalls.length || document.walls.some((wall, i) => wall !== this.outlineWalls[i])) {
-      const next = new Map(document.walls.map(wall => [wall.id, JSON.stringify(wallOutlineJoins(wall, document.walls))]));
+    if (cutawayHeight !== this.outlineHeight || document.walls.length !== this.outlineWalls.length || document.walls.some((wall, i) => wall !== this.outlineWalls[i])) {
+      const next = new Map(document.walls.map(wall => [wall.id, JSON.stringify(wallOutlineJoins(wall, document.walls, cutawayHeight))]));
       for (const [id, signature] of next) if (signature !== this.outlineLayouts.get(id)) changedOutlines.add(id);
       this.outlineWalls = document.walls;
       this.outlineLayouts = next;
+      this.outlineHeight = cutawayHeight;
     }
     const railingWalls = [...document.walls, ...document.columns.map(column => column.wallShape(document.totalHeight))];
     const roomLayouts = new Map(document.rooms.map(room => [room.id, JSON.stringify({
