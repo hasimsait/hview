@@ -28,7 +28,8 @@ Each row is one topic for inspection in a PR. Hashes identify the implementation
 | 08 | Requested cabinet LED loses its controls and independent settings inside a cabinet | `f598171` — Restore independent cabinet light controls and persistence |
 | Verification | Requested workflow checks and corrected cabinet documentation | `b039c8e` — Record requested workflow verification |
 | 09 | Ground-level openings leave bare strips between room floors | `c58a9e0` — Fill floor gaps at ground-level doorways |
-| 10 | Separate adjoining wall meshes draw artificial borders across the same finish | Suppress outlines at matching wall continuations |
+| 10 | Separate adjoining wall meshes draw artificial borders across the same finish | `734c1f9` — Suppress outlines at matching wall continuations |
+| 11 | Biased wall outlines show hidden columns and openings through solid walls | Keep wall outlines at their true depth |
 
 No finding is considered fixed just because this document says it should be. Check the implementation and validation in its mapped commit.
 
@@ -229,6 +230,16 @@ Visual inspection of the actual included save showed dark ground-grid strips acr
 **Correction:** trim only the body-outline segments at a matching, nearly collinear continuation. Keep both independently editable wall bodies and their saved coordinates. Match each face separately, including reversed wall direction; preserve real corners, different finishes, height/thickness steps and exposed portions of neighboring opening jambs. Editing or deleting the neighbor refreshes the affected outline; unrelated furniture edits do not recompute wall joins.
 
 **Verification:** compared the sample's blue wall before/after at eye `(0.5, 1.6, -1.5)` and target `(-1.64, 1.3, -1.36)`, and inspected the bathroom continuation. Geometry cases verify retained body meshes, original IDs, face-specific finish changes, reversed direction, real steps/corners and partially exposed jambs. A scene-graph case verifies repainting/deleting the neighbor restores its border. Thirty-two relevant wall/scene-graph cases and type checks passed; the offline editor was rebuilt. A separate outline depth-bias defect still produces ghost edges in this view and is investigated independently; suppressing split borders does not claim to fix it. Plan bytes remain unchanged.
+
+### 11 — High: hidden architecture shows through opaque walls
+
+**File:** `WallSurfacePalette.ts`.
+
+**Evidence:** the sample's blue wall showed rectangles and vertical contours from a column and openings behind it, even with foreground fading off. The wall bodies were opaque and line depth testing was enabled. Runtime isolation showed that removing the outline material's polygon depth bias alone eliminated the ghost edges; material opacity and draw-order changes did not.
+
+**Correction:** remove the negative polygon offset from the shared wall-outline material. Outlines retain ordinary depth testing, their existing color/opacity, and real contour geometry. No extra render pass, per-frame occlusion query or geometry cache is introduced. Surface-layer controls are unchanged.
+
+**Verification:** rebuilt and visually inspected the same offline sample view used in topic 10. Hidden rectangles and the remaining apparent joint line disappear. Also inspected the bathroom wall, doorway floors and furnished house view. All four views reported zero page errors, and the included plan remains unchanged. The furnished fade view exposes a separate mismatch: mesh bodies fade while their outlines stay dark. That is not attributed to this depth-bias fix.
 
 ## Additional review observations and limits
 
