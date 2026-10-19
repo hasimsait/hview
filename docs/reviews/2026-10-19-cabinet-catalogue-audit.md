@@ -26,8 +26,9 @@ Each row is one topic for inspection in a PR. Hashes identify the implementation
 | Final | Final results, hashes, limitations and any integration cleanup | `632bc35` — Record audit results and commit map |
 | Intent | Request boundaries, decision ownership and limitations of this audit | `9a865cf` — Review intent alignment and ownership of scope decisions |
 | 08 | Requested cabinet LED loses its controls and independent settings inside a cabinet | `f598171` — Restore independent cabinet light controls and persistence |
-| Verification | Requested workflow checks and corrected cabinet documentation | Record requested workflow verification |
-| 09 | Ground-level openings leave bare strips between room floors | Fill floor gaps at ground-level doorways |
+| Verification | Requested workflow checks and corrected cabinet documentation | `b039c8e` — Record requested workflow verification |
+| 09 | Ground-level openings leave bare strips between room floors | `c58a9e0` — Fill floor gaps at ground-level doorways |
+| 10 | Separate adjoining wall meshes draw artificial borders across the same finish | Suppress outlines at matching wall continuations |
 
 No finding is considered fixed just because this document says it should be. Check the implementation and validation in its mapped commit.
 
@@ -218,6 +219,16 @@ Visual inspection of the actual included save showed dark ground-grid strips acr
 **Correction:** extend the finish from each touching polygon edge to the opening's centerline. Adjacency uses the actual boundary, since a long wall's room-side metadata can refer to another room along its length. The patches share the existing floor mesh, material and metric UV origin; no extra floor draw submission, plan polygon rewrite or threshold asset is introduced. Raised windows and solid-wall spans remain untouched. Derived floor coverage refreshes when opening geometry changes, while door angles and unrelated furniture edits retain floor geometry.
 
 **Verification:** inspected matching before/after offline renders of the sample around camera/target `(-0.52, 25, 6.17)` / `(-0.52, 0, 6.17)`, with orthographic zoom 6 and wall cutaway enabled. The dark doorway strips disappear while the adjacent finishes remain distinct. Four floor geometry cases cover both sides, jamb bounds, raised openings, unrelated rooms, misleading room metadata, rotated walls and continuous UVs. A scene-graph case checks opening edits and retained geometry. All 13 floor/scene-graph cases, type checks and the rebuilt offline editor passed. The included plan is unchanged.
+
+### 10 — Medium: split walls outline an uninterrupted surface
+
+**Files:** `WallMeshBuilder.ts`, new `WallOutlineJoins.ts`, `PlanSceneGraph.ts`.
+
+**Evidence:** the sample's blue wall is stored as `_k2vy1_a_a` and `_k2vy1_a_b`. Each body previously outlined its end cap, even though both adjoining faces have the same finish, thickness and height. The resulting vertical ink border described a saved-model split rather than a visible architectural edge. The bathroom wall has the same class of defect.
+
+**Correction:** trim only the body-outline segments at a matching, nearly collinear continuation. Keep both independently editable wall bodies and their saved coordinates. Match each face separately, including reversed wall direction; preserve real corners, different finishes, height/thickness steps and exposed portions of neighboring opening jambs. Editing or deleting the neighbor refreshes the affected outline; unrelated furniture edits do not recompute wall joins.
+
+**Verification:** compared the sample's blue wall before/after at eye `(0.5, 1.6, -1.5)` and target `(-1.64, 1.3, -1.36)`, and inspected the bathroom continuation. Geometry cases verify retained body meshes, original IDs, face-specific finish changes, reversed direction, real steps/corners and partially exposed jambs. A scene-graph case verifies repainting/deleting the neighbor restores its border. Thirty-two relevant wall/scene-graph cases and type checks passed; the offline editor was rebuilt. A separate outline depth-bias defect still produces ghost edges in this view and is investigated independently; suppressing split borders does not claim to fix it. Plan bytes remain unchanged.
 
 ## Additional review observations and limits
 

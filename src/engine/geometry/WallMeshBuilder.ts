@@ -4,6 +4,7 @@ import type { SurfaceMaterialFactory } from '../materials/SurfaceMaterialFactory
 import { WallSurfacePalette } from '../materials/WallSurfacePalette';
 import { WallTrimsBuilder } from './WallTrimsBuilder';
 import type { CorniceCuts } from './CorniceGeometry';
+import { trimWallOutlineJoins } from './WallOutlineJoins';
 export interface WallOpeningCut {
   start: number;
   end: number;
@@ -140,7 +141,8 @@ export class WallMeshBuilder {
     cutouts?: { start: number; end: number }[],
     recessHoles?: { start: number; end: number; floorHeight: number; topHeight: number }[],
     corniceHeights?: Partial<Record<'A' | 'B', number>>,
-    corniceCuts?: Partial<Record<'A' | 'B', CorniceCuts>>
+    corniceCuts?: Partial<Record<'A' | 'B', CorniceCuts>>,
+    neighbors: readonly WallEntity[] = []
   ): THREE.Group {
     const group = new THREE.Group();
     group.name = `wall_${wall.id}`;
@@ -245,6 +247,7 @@ export class WallMeshBuilder {
 
       const edges = new THREE.EdgesGeometry(geom, 25);
       const edgeLine = new THREE.LineSegments(edges, this.materials.getEdgeMaterial());
+      edgeLine.name = 'wallOutline';
       mesh.add(edgeLine);
 
       group.add(mesh);
@@ -257,6 +260,7 @@ export class WallMeshBuilder {
         group.add(baseboardGroup);
       }
       group.add(this.trims.buildWallCornice(wall, length, maxHeight, thickness, angle, corniceHeights, corniceCuts));
+      trimWallOutlineJoins(group, wall, neighbors, cutawayHeight);
       return group;
     }
 
@@ -342,6 +346,7 @@ export class WallMeshBuilder {
 
         const edges = new THREE.EdgesGeometry(geom, 25);
         const edgeLine = new THREE.LineSegments(edges, this.materials.getEdgeMaterial());
+        edgeLine.name = 'wallOutline';
         mesh.add(edgeLine);
 
         group.add(mesh);
@@ -495,6 +500,7 @@ export class WallMeshBuilder {
         isWallEnd
       );
       const edgeLine = new THREE.LineSegments(edgeGeom, this.materials.getEdgeMaterial());
+      edgeLine.name = 'wallOutline';
       edgeLine.position.set(wall.p1.x, 0, wall.p1.y);
       edgeLine.rotation.y = -angle;
       group.add(edgeLine);
@@ -511,6 +517,7 @@ export class WallMeshBuilder {
     }
     group.add(this.trims.buildWallCornice(wall, length, maxHeight, thickness, angle, corniceHeights, corniceCuts));
 
+    trimWallOutlineJoins(group, wall, neighbors, cutawayHeight);
     return group;
   }
 

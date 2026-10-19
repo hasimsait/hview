@@ -9,6 +9,7 @@ import { roomCeilingHeight } from '../../domain/model/Ceiling';
 import { wallCorniceLayouts } from '../geometry/WallCorniceLayout';
 import { openRailingRuns } from '../../domain/model/BalconyRailing';
 import { floorDoorwayPolygons } from '../geometry/FloorDoorways';
+import { wallOutlineJoins } from '../geometry/WallOutlineJoins';
 import type { PlanDocument } from '../../domain/model/PlanDocument';
 import { FurnitureSceneNode } from './FurnitureSceneNode';
 import type { SceneNode } from './SceneNode';
@@ -28,6 +29,8 @@ export class PlanSceneGraph {
   private readonly nodes = new Map<string, SceneNode>();
   private corniceLayouts = new Map<string, string>();
   private roomLayouts = new Map<string, string>();
+  private outlineWalls: readonly Wall[] = [];
+  private outlineLayouts = new Map<string, string>();
 
   constructor(
     private readonly factory: SceneNodeFactory,
@@ -43,6 +46,13 @@ export class PlanSceneGraph {
   }
 
   reconcile(document: PlanDocument): void {
+    const changedOutlines = new Set<string>();
+    if (document.walls.length !== this.outlineWalls.length || document.walls.some((wall, i) => wall !== this.outlineWalls[i])) {
+      const next = new Map(document.walls.map(wall => [wall.id, JSON.stringify(wallOutlineJoins(wall, document.walls))]));
+      for (const [id, signature] of next) if (signature !== this.outlineLayouts.get(id)) changedOutlines.add(id);
+      this.outlineWalls = document.walls;
+      this.outlineLayouts = next;
+    }
     const railingWalls = [...document.walls, ...document.columns.map(column => column.wallShape(document.totalHeight))];
     const roomLayouts = new Map(document.rooms.map(room => [room.id, JSON.stringify({
       railing: room.railing ? openRailingRuns(room.polygon, railingWalls, room.railing.edges) : undefined,
@@ -108,7 +118,7 @@ export class PlanSceneGraph {
       if (!node) {
         node = element.accept(this.factory);
         this.nodes.set(element.id, node);
-      } else if (node instanceof WallSceneNode && element instanceof Wall && changedCornices.has(element.id)) {
+      } else if (node instanceof WallSceneNode && element instanceof Wall && (changedCornices.has(element.id) || changedOutlines.has(element.id))) {
         node.reconcile(element, true);
       } else if (node instanceof RoomSceneNode && element instanceof Room && changedRooms.has(element.id)) {
         node.reconcile(element, true);

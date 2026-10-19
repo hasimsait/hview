@@ -183,7 +183,7 @@ export class SceneEngine implements ISceneService {
       furniture: { build: element => this.furnitureBuilder.build(element, element instanceof WallRecess && element.hostId ? this.currentPlan?.requireRecessHost(element.hostId).thickness : undefined) }, appearance: this.appearance,
       wall: { build: wall => {
         const layout = wallCorniceLayouts(this.currentPlan!).get(wall.id);
-        return this.wallBuilder.buildWall(wall, this.settings.wallCutaway ? 1.15 : undefined, undefined, this.getRecessHolesForWall(wall), layout?.heights, layout?.cuts);
+        return this.wallBuilder.buildWall(wall, this.settings.wallCutaway ? 1.15 : undefined, undefined, this.getRecessHolesForWall(wall), layout?.heights, layout?.cuts, this.currentPlan!.walls);
       }, applyMaterials: (root, wall) => this.wallBuilder.materials.applyMaterials(root, wall) },
       column: { build: column => this.wallBuilder.buildWall(column.wallShape(this.currentPlan!.totalHeight), this.settings.wallCutaway ? 1.15 : undefined, undefined, this.getRecessHolesForWall(column.wallShape(this.currentPlan!.totalHeight))), applyMaterials: (root, column) => this.wallBuilder.materials.applyMaterials(root, column.wallShape(this.currentPlan!.totalHeight)) },
       room: { build: room => this.floorBuilder.buildFloor(room, this.settings.showRoomLabels, [...(this.currentPlan?.walls ?? []), ...(this.currentPlan?.columns.map(column => column.wallShape(this.currentPlan!.totalHeight)) ?? [])]), applyMaterials: (root, room) => this.floorBuilder.applyMaterials(root, room) },
