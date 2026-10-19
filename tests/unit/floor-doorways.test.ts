@@ -6,6 +6,7 @@ import { Room } from '../../src/domain/elements/Room';
 import { Wall } from '../../src/domain/elements/Wall';
 import { Door } from '../../src/domain/elements/Opening';
 import type { CanvasFactory } from '../../src/engine/materials/CanvasFactory';
+import { SurfaceMaterialFactory } from '../../src/engine/materials/SurfaceMaterialFactory';
 
 const canvas = { create: () => ({ width: 0, height: 0, getContext: () => ({ fillRect() {}, strokeRect() {} }) }) } as unknown as CanvasFactory;
 const builder = new FloorMeshBuilder(undefined, canvas);
@@ -18,6 +19,28 @@ const covered = (root: THREE.Object3D, x: number, z: number) => {
 };
 
 describe('floors through doorways', () => {
+  it('keeps custom floors visible in foreground clip/fade modes, including after repainting', () => {
+    const finishes = new SurfaceMaterialFactory(), builder = new FloorMeshBuilder(finishes, canvas);
+    const finish = { type: 'paint' as const, color: '#c6b9a4' };
+    const original = room(1).withFloorFinish(finish), root = builder.buildFloor(original);
+    const mesh = root.children.find(child => child instanceof THREE.Mesh) as THREE.Mesh;
+    const compile = (material: THREE.Material) => {
+      const shader = { vertexShader: THREE.ShaderLib.standard.vertexShader, fragmentShader: THREE.ShaderLib.standard.fragmentShader, uniforms: {} as Record<string, { value: any }> };
+      material.onBeforeCompile(shader as any, {} as THREE.WebGLRenderer); return shader;
+    };
+    const floor = compile(mesh.material as THREE.Material), wall = compile(finishes.getMaterial(finish));
+    for (const [mode, value] of [['clip', 2], ['transparent', 1]] as const) {
+      finishes.setForegroundMode(mode);
+      expect(wall.uniforms.uForegroundMode.value).toBe(value);
+      expect(floor.uniforms.uForegroundMode.value).toBe(0);
+    }
+    const geometry = mesh.geometry;
+    builder.applyMaterials(root, original.withFloorFinish({ type: 'paint', color: '#112233' }));
+    expect(mesh.geometry).toBe(geometry);
+    expect(compile(mesh.material as THREE.Material).uniforms.uForegroundMode.value).toBe(0);
+    expect((mesh.material as THREE.MeshStandardMaterial).color.getHexString()).toBe('112233');
+    finishes.dispose();
+  });
   it('fills both halves of a doorway without filling the solid wall or changing the room polygon', () => {
     for (const side of [-1, 1]) {
       const original = room(side), polygon = structuredClone(original.polygon);

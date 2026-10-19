@@ -59,7 +59,7 @@ export class FloorMeshBuilder {
     // Floor material selection based on custom floorFinish or room type
     const isWetZone = /bath|toilet|wc|san|shower/i.test(room.name);
     const material = room.floorFinish && this.finishService
-      ? this.finishService.getMaterial(room.floorFinish, { side: THREE.DoubleSide })
+      ? this.finishService.getMaterial(room.floorFinish, { side: THREE.DoubleSide, foregroundOcclusion: false })
       : this.getMaterial(isWetZone ? 'tile' : 'parquet');
 
     const mesh = new THREE.Mesh(geometry, material);
@@ -87,7 +87,7 @@ export class FloorMeshBuilder {
 
   applyMaterials(root: THREE.Object3D, room: RoomEntity): void {
     const wetZone = /bath|toilet|wc|san|shower/i.test(room.name);
-    const material = room.floorFinish && this.finishService ? this.finishService.getMaterial(room.floorFinish, { side: THREE.DoubleSide }) : this.getMaterial(wetZone ? 'tile' : 'parquet');
+    const material = room.floorFinish && this.finishService ? this.finishService.getMaterial(room.floorFinish, { side: THREE.DoubleSide, foregroundOcclusion: false }) : this.getMaterial(wetZone ? 'tile' : 'parquet');
     root.traverse(object => { if (object instanceof THREE.Mesh && this.surfaces.has(object)) object.material = material; });
   }
 

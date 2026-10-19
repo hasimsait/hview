@@ -30,7 +30,8 @@ Each row is one topic for inspection in a PR. Hashes identify the implementation
 | 09 | Ground-level openings leave bare strips between room floors | `c58a9e0` — Fill floor gaps at ground-level doorways |
 | 10 | Separate adjoining wall meshes draw artificial borders across the same finish | `734c1f9` — Suppress outlines at matching wall continuations |
 | 11 | Biased wall outlines show hidden columns and openings through solid walls | `050962b` — Keep wall outlines at their true depth |
-| 12 | Foreground fade/clip changes surfaces but leaves their wire outlines behind | Fade and clip outlines with their surfaces |
+| 12 | Foreground fade/clip changes surfaces but leaves their wire outlines behind | `bf9fbc5` — Fade and clip outlines with their surfaces |
+| 13 | Custom floor finishes disappear in foreground clip/fade modes | Keep custom floors visible in cutaway views |
 
 No finding is considered fixed just because this document says it should be. Check the implementation and validation in its mapped commit.
 
@@ -250,7 +251,17 @@ Visual inspection of the actual included save showed dark ground-grid strips acr
 
 **Correction:** apply the existing foreground fade/clip shader to wall, furniture and ceiling outlines, sharing their existing live mode/plane uniforms. Ceiling contours use the finish factory's uniforms. Independent worktops retain their intentional placement-surface visibility and have a separate shared outline material. No per-frame geometry work or additional render submissions are added.
 
-**Verification:** inspected matching close furnished-house views in transparent and clip modes, including visible ceilings, plus the blue wall and bathroom views. The wire cages disappear with their clipped bodies and faded contours recede. All five views reported zero console/page errors. Two new cases check shared live uniforms, line-shader integration and the independent-worktop exception; all 23 relevant outline, ceiling, shader-reuse and worktop cases passed, as did type checks and the rebuilt offline editor. A test fixture initially omitted the required furniture display name; that was corrected before the successful type check. The plan is unchanged. Custom floors disappearing and isolated glass/glowing details remain separate visible defects at this point.
+**Verification:** inspected matching close furnished-house views in transparent and clip modes, including visible ceilings, plus the blue wall and bathroom views. The wire cages disappear with their clipped bodies and faded contours recede. All five views reported zero console/page errors. Two new cases check shared live uniforms, line-shader integration and the independent-worktop exception; all 23 relevant outline, ceiling, shader-reuse and worktop cases passed, as did type checks and the rebuilt offline editor. The plan is unchanged. Custom floors disappearing and isolated glass/glowing details remain separate visible defects at this point.
+
+### 13 — High: choosing a custom finish makes floors disappear in cutaway views
+
+**File:** `FloorMeshBuilder.ts`.
+
+**Evidence:** the sample's custom kitchen, hallway and bathroom finishes were subject to the foreground wall/furniture clipping plane. In the close house clip view, large portions disappeared to the background while adjacent default parquet remained visible. Transparent mode faded the same custom floors. The inconsistency depended on material choice, not floor geometry.
+
+**Correction:** custom floor materials now use the existing foreground-visibility exemption, both when built and when their finish changes. They retain their saved texture, UVs, surface layers and geometry. Wall/furniture clipping remains active.
+
+**Verification:** inspected matching close offline house views in clip and transparent modes: the kitchen, hall and bathroom floor coverage stays visible. A new case checks live clip/fade uniforms, independent wall behavior and repainting without geometry replacement. All 17 focused floor/scene-graph/outline cases, type checks and the offline rebuild passed; both visual views reported zero console/page errors. The included plan is unchanged. Bare footprints of clipped solid wall spans are distinct from missing room floors; this change does not move room boundaries or fill unrelated solid-wall space.
 
 ## Additional review observations and limits
 
