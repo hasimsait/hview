@@ -57,10 +57,9 @@ export class FurnitureMeshBuilder {
 
   constructor(readonly catalog = new AssetCatalog(), textures = new TextureSource()) {
     applyBasicOcclusionShader(this.celOutlineMaterial, this.occlusionUniforms, 0.6);
-    // Inject orbit-fade shader into every opaque MeshStandardMaterial.
-    // MeshBasicMaterial and MeshPhysicalMaterial (glass) are excluded —
-    // basics have no lighting pipeline, glass is already transparent.
-    const opaqueMats: THREE.MeshStandardMaterial[] = [
+    // Every visible part follows the same foreground plane, including unlit
+    // diffusers, screens and glass that would otherwise float after clipping.
+    const foregroundMaterials = [
       this.materials.whitePaint, this.materials.woodBlackBrown, this.materials.plasticBeige, this.materials.glassBlack,
       this.materials.woodLight, this.materials.woodDark,
       this.materials.fabricLight, this.materials.fabricBlue,
@@ -70,8 +69,9 @@ export class FurnitureMeshBuilder {
       this.materials.ceramicWhite, this.materials.graniteCounter,
       this.materials.mirror, this.materials.mirrorNonReflective,
       this.materials.cabinetSage,
+      this.materials.glass, this.materials.screen, this.materials.ledGlow, this.materials.warmLightGlow,
     ];
-    for (const mat of opaqueMats) {
+    for (const mat of foregroundMaterials) {
       mat.transparent = true;
       applyBasicOcclusionShader(mat, this.occlusionUniforms, 0.6);
     }

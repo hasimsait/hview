@@ -25,7 +25,7 @@ export function createOcclusionUniforms(): OcclusionUniforms {
 }
 
 export function applyBasicOcclusionShader(
-  mat: THREE.MeshStandardMaterial | THREE.MeshPhysicalMaterial | THREE.LineBasicMaterial,
+  mat: THREE.MeshStandardMaterial | THREE.MeshPhysicalMaterial | THREE.MeshBasicMaterial | THREE.LineBasicMaterial,
   uniforms: OcclusionUniforms,
   fadeDistance = 0.5
 ): void {

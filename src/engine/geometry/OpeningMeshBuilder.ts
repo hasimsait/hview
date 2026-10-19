@@ -69,8 +69,7 @@ export class OpeningMeshBuilder {
       applyBasicOcclusionShader(material, this.occlusionUniforms, .6); return material;
     });
 
-    // Apply orbit-fade shader to all opaque standard materials (glass excluded)
-    for (const mat of [this.frameMaterial, this.doorMaterial, this.handleMaterial, this.sillMaterial, this.curtainMaterial]) {
+    for (const mat of [this.frameMaterial, this.doorMaterial, this.handleMaterial, this.sillMaterial, this.curtainMaterial, this.glassMaterial]) {
       applyBasicOcclusionShader(mat, this.occlusionUniforms, 0.6);
     }
   }

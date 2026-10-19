@@ -31,7 +31,8 @@ Each row is one topic for inspection in a PR. Hashes identify the implementation
 | 10 | Separate adjoining wall meshes draw artificial borders across the same finish | `734c1f9` — Suppress outlines at matching wall continuations |
 | 11 | Biased wall outlines show hidden columns and openings through solid walls | `050962b` — Keep wall outlines at their true depth |
 | 12 | Foreground fade/clip changes surfaces but leaves their wire outlines behind | `bf9fbc5` — Fade and clip outlines with their surfaces |
-| 13 | Custom floor finishes disappear in foreground clip/fade modes | Keep custom floors visible in cutaway views |
+| 13 | Custom floor finishes disappear in foreground clip/fade modes | `dcd8e68` — Keep custom floors visible in cutaway views |
+| 14 | Unlit fixture details and default glass float after their housings are clipped | Clip glass and glowing details with their objects |
 
 No finding is considered fixed just because this document says it should be. Check the implementation and validation in its mapped commit.
 
@@ -262,6 +263,16 @@ Visual inspection of the actual included save showed dark ground-grid strips acr
 **Correction:** custom floor materials now use the existing foreground-visibility exemption, both when built and when their finish changes. They retain their saved texture, UVs, surface layers and geometry. Wall/furniture clipping remains active.
 
 **Verification:** inspected matching close offline house views in clip and transparent modes: the kitchen, hall and bathroom floor coverage stays visible. A new case checks live clip/fade uniforms, independent wall behavior and repainting without geometry replacement. All 17 focused floor/scene-graph/outline cases, type checks and the offline rebuild passed; both visual views reported zero console/page errors. The included plan is unchanged. Bare footprints of clipped solid wall spans are distinct from missing room floors; this change does not move room boundaries or fill unrelated solid-wall space.
+
+### 14 — Medium: glass panes and glowing fixture details float in empty space
+
+**Files:** `FurnitureMeshBuilder.ts`, `OpeningMeshBuilder.ts`, `FurnitureAppearance.ts`, `OcclusionShader.ts`.
+
+**Evidence:** after correcting the wire outlines, the close sample clip view still showed detached ring diffusers, small lamp faces and glass panes where their housings/frames had disappeared. Unlit basic materials and default glass were deliberately excluded from the foreground shader. Per-fixture glow cloning would also drop any shader hooks added to its source material.
+
+**Correction:** the default furniture glass, screens and glowing details, and default opening glass, now follow the existing foreground plane. Preserve the shader hooks when cloning independently colored fixture glow materials. This controls visible surfaces only: actual light sources, their intensity controls and glass opacity/transmission remain unchanged.
+
+**Verification:** inspected close transparent/clip sample views and a clip view with ceilings visible. The detached diffusers/panes disappear with their objects; opaque mode and the previously repaired blue wall remain covered by the final visual pass. All three views reported zero console/page errors. The new regression case checks a real chandelier through appearance cloning, live mode changes, retained light output and default glass opacity/transmission. All 66 focused lighting, cabinet-light, opening, outline and shader-reuse cases passed, with type checks and a rebuilt offline editor. Plan bytes are unchanged.
 
 ## Additional review observations and limits
 

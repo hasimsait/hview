@@ -1,19 +1,54 @@
 import * as THREE from 'three';
 import { describe, expect, it } from 'vitest';
-import { StandardFurniture } from '../../src/domain/elements/Furniture';
+import { Luminaire, StandardFurniture } from '../../src/domain/elements/Furniture';
 import { FurnitureMeshBuilder } from '../../src/engine/assets/FurnitureMeshBuilder';
 import { CeilingMeshBuilder } from '../../src/engine/geometry/CeilingMeshBuilder';
 import { WallSurfacePalette } from '../../src/engine/materials/WallSurfacePalette';
 import { SurfaceMaterialFactory } from '../../src/engine/materials/SurfaceMaterialFactory';
+import { FurnitureAppearance } from '../../src/engine/materials/FurnitureAppearance';
+import { OpeningMeshBuilder } from '../../src/engine/geometry/OpeningMeshBuilder';
+import { ResourcePool } from '../../src/engine/resources/ResourcePool';
+import { isFixtureLight } from '../../src/engine/lighting/FixtureLight';
+import type { ViewportSettings } from '../../src/core/types/services';
 
 function compile(material: THREE.Material) {
-  const source = material instanceof THREE.LineBasicMaterial ? THREE.ShaderLib.basic : THREE.ShaderLib.standard;
+  const source = material instanceof THREE.LineBasicMaterial || material instanceof THREE.MeshBasicMaterial ? THREE.ShaderLib.basic : THREE.ShaderLib.standard;
   const shader = { vertexShader: source.vertexShader, fragmentShader: source.fragmentShader, uniforms: {} as Record<string, { value: any }> };
   material.onBeforeCompile(shader as any, {} as THREE.WebGLRenderer);
   return shader;
 }
 
 describe('outlines follow foreground visibility', () => {
+  it('clips cloned lamp diffusers and default glass without changing light output or glass opacity', () => {
+    const builder = new FurnitureMeshBuilder(), finishes = new SurfaceMaterialFactory();
+    const lamp = new Luminaire({ id: 'lamp', assetKey: 'chandelier', name: 'chandelier', displayName: 'Lamp', category: 'fixture', dimensions: { x: .7, y: .7, z: .7 }, position: { x: 0, y: 0, z: 0 }, rotationY: 0 });
+    const root = builder.build(lamp), glow: THREE.Mesh[] = [];
+    root.traverse(object => { if (object instanceof THREE.Mesh && object.userData.isLightEmissive) glow.push(object); });
+    expect(glow.length).toBeGreaterThan(0);
+    const original = glow[0].material as THREE.Material, source = compile(original);
+    const appearance = new FurnitureAppearance(finishes, new ResourcePool(), () => ({ spotLightIntensity: 1, chandelierIntensity: 1 } as ViewportSettings), () => undefined);
+    appearance.apply(root, lamp);
+    const clone = glow[0].material as THREE.Material, shader = compile(clone);
+    expect(clone).not.toBe(original);
+    expect(shader.uniforms.uForegroundMode).toBe(source.uniforms.uForegroundMode);
+    expect(shader.fragmentShader).toContain('if (dist > 0.1) discard');
+    const intensities: number[] = [];
+    root.traverse(object => { if (isFixtureLight(object)) intensities.push(object.intensity); });
+    expect(intensities.length).toBeGreaterThan(0);
+    builder.setForegroundMode('clip'); expect(shader.uniforms.uForegroundMode.value).toBe(2);
+    const after: number[] = []; root.traverse(object => { if (isFixtureLight(object)) after.push(object.intensity); });
+    expect(after).toEqual(intensities);
+    builder.setForegroundMode('off'); expect(shader.uniforms.uForegroundMode.value).toBe(0);
+    const openings = new OpeningMeshBuilder();
+    for (const [owner, palette] of [[builder, builder.palette], [openings, openings.palette]] as const) {
+      const glass = palette.find(material => material instanceof THREE.MeshPhysicalMaterial) as THREE.MeshPhysicalMaterial;
+      const opacity = glass.opacity, transmission = glass.transmission, shader = compile(glass);
+      owner.setForegroundMode('clip'); expect(shader.uniforms.uForegroundMode.value).toBe(2);
+      owner.setForegroundMode('off'); expect(shader.uniforms.uForegroundMode.value).toBe(0);
+      expect(glass.opacity).toBe(opacity); expect(glass.transmission).toBe(transmission);
+    }
+    finishes.dispose();
+  });
   it('uses live wall and ceiling planes/modes for both surfaces and their outlines', () => {
     const finishes = new SurfaceMaterialFactory(), walls = new WallSurfacePalette(finishes), ceilings = new CeilingMeshBuilder(finishes);
     const wall = compile(walls.getMaterial()), edge = compile(walls.getEdgeMaterial());

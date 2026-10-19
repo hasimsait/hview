@@ -24,7 +24,10 @@ export class FurnitureAppearance {
         }
         // Remember original default material
         if (child.userData.isLightEmissive && !this.glowMaterials.has(child)) {
-          child.material = (child.material as THREE.Material).clone();
+          const original = child.material as THREE.Material, material = original.clone();
+          material.onBeforeCompile = original.onBeforeCompile;
+          material.customProgramCacheKey = original.customProgramCacheKey;
+          child.material = material;
           this.glowMaterials.add(child);
         }
         this.resources.rememberOriginal(child);
