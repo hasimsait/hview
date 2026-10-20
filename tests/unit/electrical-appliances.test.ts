@@ -21,6 +21,46 @@ function item(asset: AssetDefinition) {
 }
 
 describe('electrical fittings and household appliances', () => {
+  it('keeps the supplied water-appliance sizes, separate finishes and wall elevation through editing and both saves', () => {
+    const purifier = catalog.get('water_treatment_unit')!, heater = catalog.get('demirdokum_dt4_65l')!;
+    expect(purifier.defaultDimensions).toEqual({ x: .35, y: .67, z: .49 });
+    expect(heater.defaultDimensions).toEqual({ x: .5, y: .72, z: .5 });
+    expect(purifier.placement?.mount).toBe('floor'); expect(heater.placement?.mount).toBe('wall');
+    expect(catalog.canonicalKey('water_softener')).toBe(purifier.key);
+    expect(catalog.canonicalKey('dt4')).toBe(heater.key);
+    const editor = new EditorSession(codec.factory); editor.load(codec.decode(rawPlan()));
+    for (const asset of [purifier, heater]) {
+      editor.execute(new AddFurniture(item(asset).toData()));
+      const scaled = { x: asset.defaultDimensions.x * 1.2, y: asset.defaultDimensions.y * .9, z: asset.defaultDimensions.z * .8 };
+      editor.execute(new TransformFurniture(asset.key, undefined, undefined, scaled));
+      editor.execute(new FinishFurniture(asset.key, { type: 'paint', color: '#8899aa' }, asset === purifier ? 'Cabinet' : 'Tank'));
+      const edited = editor.getDocument().requireFurniture(asset.key), bounds = new THREE.Box3().setFromObject(builder.build(edited));
+      for (const axis of ['x', 'y', 'z'] as const) expect(bounds.getSize(new THREE.Vector3())[axis]).toBeCloseTo(scaled[axis], 4);
+      for (const encoded of [codec.encode(editor.getDocument()), new LegacyPlanWriter().encode(editor.getDocument())]) {
+        const saved = codec.decode(encoded).requireFurniture(asset.key);
+        expect(saved).toMatchObject({ id: edited.id, assetKey: edited.assetKey, position: edited.position, rotationY: edited.rotationY, sectionFinishes: edited.sectionFinishes });
+        for (const axis of ['x', 'y', 'z'] as const) expect(saved.dimensions[axis]).toBeCloseTo(scaled[axis], 6);
+      }
+    }
+    expect(editor.getDocument().requireFurniture(heater.key).position.y).toBe(heater.placement!.defaultElevation);
+  });
+
+  it('renders a white treatment cabinet with a black louvered hood and a vertical heater with accessible controls and two connections', () => {
+    const purifier = builder.build(item(catalog.get('water_treatment_unit')!));
+    const front = (root: THREE.Object3D, y: number) => {
+      root.updateMatrixWorld(true);
+      return new THREE.Raycaster(new THREE.Vector3(0, y, 1), new THREE.Vector3(0, 0, -1)).intersectObject(root, true).find(hit => hit.object instanceof THREE.Mesh)?.object as THREE.Mesh;
+    };
+    expect(front(purifier, .67 * .3).userData.section).toBe('Cabinet');
+    expect((front(purifier, .67 * .3).material as THREE.MeshStandardMaterial).color.getHexString()).toBe('f3f1eb');
+    expect(front(purifier, .67 * .85).userData.section).toBe('Hood Louvers');
+    const heater = builder.build(item(catalog.get('demirdokum_dt4_65l')!));
+    expect(['Control Panel', 'Display']).toContain(front(heater, .72 * .22).userData.section);
+    expect(heater.children.filter(child => child.userData.section === 'Water Connections')).toHaveLength(2);
+    const collars = heater.children.filter(child => child.userData.section === 'Connection Collars') as THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>[];
+    expect(collars.map(mesh => mesh.material.color.getHexString()).sort()).toEqual(['387bb6', 'bc4540']);
+  });
+
   it.each([...ELECTRICAL_ASSETS, ...HOUSEHOLD_APPLIANCES])('$name has real geometry, bounded dimensions and owned GPU resources', asset => {
     const model = builder.build(item(asset)), bounds = new THREE.Box3().setFromObject(model), dims = asset.defaultDimensions;
     for (const axis of ['x', 'y', 'z'] as const) {
