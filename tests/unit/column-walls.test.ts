@@ -36,7 +36,7 @@ describe('first-class columns with one solid footprint', () => {
     }
   });
   it('detects legacy column outlines once and preserves ordinary short walls on reload', () => {
-    const raw = JSON.parse(readFileSync('public/sample.plan', 'utf8')); delete raw.plan.columns;
+    const raw = JSON.parse(readFileSync('sample.plan', 'utf8')); delete raw.plan.columns;
     const document = codec.decode(raw);
     expect(document.columns.length).toBeGreaterThan(0);
     const restored = codec.decode(codec.encode(document));

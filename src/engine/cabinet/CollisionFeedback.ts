@@ -1,6 +1,11 @@
 import * as THREE from 'three';
 import { OBB } from 'three/examples/jsm/math/OBB.js';
 
+function visibleInScene(object: THREE.Object3D): boolean {
+  for (let parent: THREE.Object3D | null = object; parent; parent = parent.parent) if (!parent.visible) return false;
+  return true;
+}
+
 /** Temporary, nonblocking feedback. Never mutates a finish or enables global collision checks. */
 export class CollisionFeedback {
   private readonly material = new THREE.MeshStandardMaterial({ color: '#ff2424', emissive: '#991010', emissiveIntensity: .35, roughness: .7 });
@@ -9,6 +14,9 @@ export class CollisionFeedback {
   clear(): void { for (const [mesh, material] of this.originals) { mesh.material = material; delete mesh.userData.collision; } this.originals.clear(); }
   mark(root: THREE.Object3D): void { root.traverse(o => { if (o instanceof THREE.Mesh) { if (!this.originals.has(o)) this.originals.set(o, o.material); o.material = this.material; o.userData.collision = true; } }); }
   dispose(): void { this.clear(); this.material.dispose(); }
+  prepare(movingRoot: THREE.Object3D, candidates: readonly THREE.Object3D[]): CollisionQuery {
+    return new CollisionQuery(this, movingRoot, candidates);
+  }
   private obb(mesh: THREE.Mesh): OBB {
     if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox();
     const box = new OBB().fromBox3(mesh.geometry.boundingBox!);
@@ -86,5 +94,31 @@ export class CollisionFeedback {
       solidAngle += 2 * Math.atan2(u.dot(cross.crossVectors(v, w)), lu * lv * lw + u.dot(v) * lw + v.dot(w) * lu + w.dot(u) * lv);
     }
     return Math.abs(solidAngle) > 2 * Math.PI;
+  }
+}
+
+/** Static obstacle bounds live only for one sampled motion, never across edits. */
+export class CollisionQuery {
+  private readonly obstacles: { mesh: THREE.Mesh; bounds: THREE.Box3 }[] = [];
+  private readonly bounds = new THREE.Box3();
+  constructor(private readonly feedback: CollisionFeedback, movingRoot: THREE.Object3D, candidates: readonly THREE.Object3D[]) {
+    const moving = new Set<THREE.Object3D>(); movingRoot.traverse(object => moving.add(object));
+    for (const mesh of candidates) {
+      if (!(mesh instanceof THREE.Mesh) || !mesh.geometry || moving.has(mesh)) continue;
+      if (!visibleInScene(mesh)) continue;
+      if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox();
+      this.obstacles.push({ mesh, bounds: mesh.geometry.boundingBox!.clone().applyMatrix4(mesh.matrixWorld) });
+    }
+  }
+  intersects(moving: readonly THREE.Mesh[]): boolean {
+    for (const mesh of moving) {
+      if (!visibleInScene(mesh)) continue;
+      if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox();
+      this.bounds.copy(mesh.geometry.boundingBox!).applyMatrix4(mesh.matrixWorld);
+      for (const obstacle of this.obstacles) {
+        if (this.bounds.intersectsBox(obstacle.bounds) && this.feedback.intersects(mesh, obstacle.mesh)) return true;
+      }
+    }
+    return false;
   }
 }

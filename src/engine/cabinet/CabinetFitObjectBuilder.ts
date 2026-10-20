@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import type { AssetBuildContext } from '../assets/builders/AssetBuildContext';
 import { accessoryParts } from '../assets/builders/IkeaAccessoryBuilder';
+import { mergeStaticParts } from '../geometry/MergeStaticParts';
 export function buildCabinetFitObject(c: AssetBuildContext): void {
   const p = accessoryParts(c), key = c.entity.assetKey, m = c.materials;
   const plastic = c.coloredMaterial?.('#638987', m.whitePaint) ?? m.whitePaint;
@@ -11,6 +12,7 @@ export function buildCabinetFitObject(c: AssetBuildContext): void {
     const palette = pants ? ['#344458', '#555c66', '#aa9273'] : towel ? ['#ded5c4', '#94aaa5', '#c4a69c', '#b2b9c2', '#f0e9dc'] : sweatshirt ? ['#a1aca8', '#d1b6a0', '#515d72', '#a57f7c', '#d1c9b8'] : ['#ece7de', '#7b91a2', '#b5bba8', '#bd9185', '#434c5e'];
     const garment = pants ? 'Pants' : towel ? 'Towel' : sweatshirt ? 'Sweatshirt' : 'T-shirt';
     for (let i = 0; i < count; i++) {
+      const firstPart = c.parent.children.length;
       const section = `${garment} ${i + 1}`, material = c.coloredMaterial?.(palette[i % palette.length], m.fabricLight) ?? m.fabricLight;
       const y = i * step, shift = count > 1 ? (i % 2 ? .012 : -.012) : 0;
       const rounded = (x: number, cy: number, z: number, w: number, h: number, d: number) => p.add(new RoundedBoxGeometry(w, h, d, 2, Math.min(h / 3, .035)), material, section, x, cy, z);
@@ -29,6 +31,7 @@ export function buildCabinetFitObject(c: AssetBuildContext): void {
         p.ring(.065, .009 * step, material, section, shift, y + step * .98, -.30);
         p.box(shift, y + step * .15, .482, .85, step * .035, .007, m.fabricDark, section);
       }
+      mergeStaticParts(c.parent.children.slice(firstPart).filter((part): part is THREE.Mesh => part instanceof THREE.Mesh));
     }
   } else if (key === 'fit_toilet_roll' || key === 'fit_toilet_rolls_3') {
     const count = key === 'fit_toilet_rolls_3' ? 3 : 1;

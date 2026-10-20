@@ -42,8 +42,80 @@ async function chooseObject(page: Page, name: string) {
   await page.getByPlaceholder('Search assets (e.g. towel, fan, sconce, bed, sink)...').fill(name);
   await page.getByRole('button').filter({ has: page.getByRole('heading', { name, exact: true }) }).click();
 }
+async function cabinetLight(page: Page, draft = false) {
+  return page.evaluate(draft => {
+    const root = document.getElementById('root') as any, key = Object.keys(root).find(k => k.startsWith('__reactContainer$'))!, runtimes: any[] = [];
+    function scan(f: any) { if (!f) return; const value = f.memoizedProps?.value; if (value?.editor && value?.scene && !runtimes.includes(value)) runtimes.push(value); scan(f.child); scan(f.sibling); }
+    scan(root[key].stateNode.current);
+    const runtime = runtimes[draft ? 1 : 0], item = runtime.editor.getDocument().requireFurniture('cabinet');
+    const content = item.cabinet.contents.find((c: any) => c.assetKey === 'lighting_cabinet_vertical');
+    const lights: { intensity: number; color: string }[] = [], glow: string[] = [];
+    runtime.scene.getCabinetPart(item.id, content.id)?.traverse((child: any) => {
+      if (child.userData.isFixtureLight) lights.push({ intensity: child.intensity, color: child.color.getHexString() });
+      if (child.isMesh && child.userData.isLightEmissive) glow.push(child.material.color.getHexString());
+    });
+    return { config: content.lightConfig, lights, glow };
+  }, draft);
+}
 test.beforeEach(async ({ page, request }) => { original = await (await request.get('/sample.plan')).text(); await request.post('/api/save-plan', { data: fixture() }); await page.route(/^https:\/\/fonts\./, r => r.abort()); await page.goto('/'); await ready(page); });
 test.afterEach(async ({ page, request }) => { await page.close(); await request.post('/api/save-plan', { data: Buffer.from(original), headers: { 'Content-Type': 'application/json' } }); });
+
+test('cabinet LED controls survive draft undo, cancellation, offline export and touch reload', async ({ page, context, request, browser }, info) => {
+  const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
+  const template = await (await request.get('/hview_editor_template.html')).text();
+  const html = packStandaloneHtml(setScriptContent(template, 'plan-data', escapeScriptJson(JSON.stringify(fixture()))));
+  const url = 'http://127.0.0.1:3100/__offline__/cabinet-light.html';
+  await context.route(/^https?:/, route => route.request().url() === url ? route.fulfill({ contentType: 'text/html', body: html }) : route.abort());
+  await page.goto(url); await expect.poll(async () => (await snapshot(page))?.status).toBe('ready');
+  await openLayout(page);
+  await page.getByRole('button', { name: 'Place object', exact: true }).click();
+  await page.getByRole('button', { name: 'All', exact: true }).click();
+  await page.getByPlaceholder('Search assets (e.g. towel, fan, sconce, bed, sink)...').fill('Cabinet Interior Vertical LED Profile');
+  await page.getByRole('button').filter({ has: page.getByRole('heading', { name: 'Cabinet Interior Vertical LED Profile', exact: true }) }).click();
+  await expect(page.getByRole('slider', { name: 'Fixture brightness', exact: true })).toBeVisible();
+  await page.getByRole('slider', { name: 'Fixture brightness', exact: true }).fill('1.7');
+  await page.getByRole('button', { name: /5500K/ }).click();
+  const expected = { intensity: 1.7, color: '#e2f0ff' };
+  await expect.poll(async () => (await cabinetLight(page, true)).config).toEqual(expected);
+  await expect.poll(async () => (await cabinetLight(page, true)).glow).toEqual(['e2f0ff']);
+  const lit = (await cabinetLight(page, true)).lights[0].intensity;
+  expect(lit).toBeGreaterThan(0);
+  await page.getByRole('button', { name: '💡 ON', exact: true }).click();
+  await expect.poll(async () => (await cabinetLight(page, true)).lights[0].intensity).toBe(0);
+  await page.getByRole('button', { name: 'Undo layout', exact: true }).click();
+  await expect.poll(async () => (await cabinetLight(page, true)).lights[0].intensity).toBe(lit);
+  await page.getByRole('button', { name: 'Done', exact: true }).click();
+  expect((await cabinetLight(page)).config).toEqual(expected);
+  await openLayout(page);
+  await page.getByRole('button', { name: 'Cabinet Interior Vertical LED Profile', exact: true }).click();
+  await page.getByRole('button', { name: '💡 ON', exact: true }).click();
+  await page.getByRole('button', { name: 'Cancel layout', exact: true }).click();
+  expect((await cabinetLight(page)).config).toEqual(expected);
+  expect((await cabinetLight(page)).lights[0].intensity).toBe(lit);
+  const downloading = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Full Editor (.html)', exact: true }).click();
+  const path = info.outputPath('cabinet-light.html'); await (await downloading).saveAs(path);
+  const exported = readFileSync(path, 'utf8');
+  expect(JSON.parse(standaloneBlockText(exported, 'plan-data')).document.elements.find((e: any) => e.data.id === 'cabinet').data.cabinet.contents[0].lightConfig).toEqual(expected);
+  const touch = await browser.newContext({ viewport: { width: 1024, height: 768 }, hasTouch: true, isMobile: true });
+  const tabletErrors: string[] = [];
+  await touch.route(/^https?:/, route => route.request().url() === url ? route.fulfill({ contentType: 'text/html', body: exported }) : route.abort());
+  const tablet = await touch.newPage(); tablet.on('pageerror', error => tabletErrors.push(error.message));
+  await tablet.goto(url); await expect.poll(async () => (await snapshot(tablet))?.status).toBe('ready');
+  expect((await cabinetLight(tablet)).config).toEqual(expected);
+  await openLayout(tablet);
+  await tablet.getByRole('button', { name: 'Cabinet Interior Vertical LED Profile', exact: true }).click();
+  await expect(tablet.getByRole('slider', { name: 'Fixture brightness', exact: true })).toHaveValue('1.7');
+  await tablet.getByLabel('Fixture color', { exact: true }).fill('#ed794c');
+  await expect.poll(async () => (await cabinetLight(tablet, true)).glow).toEqual(['ed794c']);
+  await tablet.getByRole('button', { name: 'Done', exact: true }).click();
+  await tablet.getByRole('button', { name: 'Save .plan', exact: true }).click();
+  await expect(tablet.getByRole('button', { name: 'Save .plan', exact: true })).toBeEnabled();
+  await tablet.reload(); await expect.poll(async () => (await snapshot(tablet))?.status).toBe('ready');
+  expect((await cabinetLight(tablet)).config).toEqual({ ...expected, color: '#ed794c' });
+  expect(errors).toEqual([]); expect(tabletErrors).toEqual([]);
+  await touch.close();
+});
 
 test('desktop builds partial dividers, drops contents onto shelves and commits one reversible layout', async ({ page }, info) => {
   const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));

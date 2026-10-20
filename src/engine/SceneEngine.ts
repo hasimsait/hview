@@ -27,7 +27,7 @@ import { FloorMeshBuilder } from "./geometry/FloorMeshBuilder";
 import { OpeningMeshBuilder } from "./geometry/OpeningMeshBuilder";
 import { SurfaceMaterialFactory } from "./materials/SurfaceMaterialFactory";
 import { CollisionFeedback } from './cabinet/CollisionFeedback';
-import { cabinetDoorPose, cabinetIssues, footprint, interiorOrigin, moveCabinetPart, resolveContent, resolvePanel } from '../domain/cabinet/CabinetLayout';
+import { cabinetDoorPose, cabinetIssues, footprint, interiorOrigin, moveCabinetPart, resolveContents, resolvePanel } from '../domain/cabinet/CabinetLayout';
 import { roomCeilingHeight } from '../domain/model/Ceiling';
 import { wallCorniceLayouts } from './geometry/WallCorniceLayout';
 import { cabinetInternalDrawer, cabinetLeaves } from '../domain/cabinet/CabinetFronts';
@@ -183,7 +183,7 @@ export class SceneEngine implements ISceneService {
       furniture: { build: element => this.furnitureBuilder.build(element, element instanceof WallRecess && element.hostId ? this.currentPlan?.requireRecessHost(element.hostId).thickness : undefined) }, appearance: this.appearance,
       wall: { build: wall => {
         const layout = wallCorniceLayouts(this.currentPlan!).get(wall.id);
-        return this.wallBuilder.buildWall(wall, this.settings.wallCutaway ? 1.15 : undefined, undefined, this.getRecessHolesForWall(wall), layout?.heights, layout?.cuts);
+        return this.wallBuilder.buildWall(wall, this.settings.wallCutaway ? 1.15 : undefined, undefined, this.getRecessHolesForWall(wall), layout?.heights, layout?.cuts, this.currentPlan!.walls);
       }, applyMaterials: (root, wall) => this.wallBuilder.materials.applyMaterials(root, wall) },
       column: { build: column => this.wallBuilder.buildWall(column.wallShape(this.currentPlan!.totalHeight), this.settings.wallCutaway ? 1.15 : undefined, undefined, this.getRecessHolesForWall(column.wallShape(this.currentPlan!.totalHeight))), applyMaterials: (root, column) => this.wallBuilder.materials.applyMaterials(root, column.wallShape(this.currentPlan!.totalHeight)) },
       room: { build: room => this.floorBuilder.buildFloor(room, this.settings.showRoomLabels, [...(this.currentPlan?.walls ?? []), ...(this.currentPlan?.columns.map(column => column.wallShape(this.currentPlan!.totalHeight)) ?? [])]), applyMaterials: (root, room) => this.floorBuilder.applyMaterials(root, room) },
@@ -305,7 +305,7 @@ export class SceneEngine implements ISceneService {
     if (!change.previous || change.label === 'Load document' || change.added.length > 0) this.needsPreparation = true;
     this.collisionFeedback.clear();
     this.currentPlan = change.document;
-    this.graph.reconcile(change.document);
+    this.graph.reconcile(change.document, this.settings.wallCutaway ? 1.15 : undefined);
     if (this.cabinetEditingId) this.checkCabinetLayout(change.previous ?? undefined);
     else for (const id of change.updated) {
       const now = change.document.get(id), before = change.previous?.get(id);
@@ -341,7 +341,7 @@ export class SceneEngine implements ISceneService {
   renderPlan(plan: PlanDocument): void {
     this.invalidate();
     this.needsPreparation = true; this.ceilingsDirty = true;
-    this.currentPlan = plan; this.graph.reconcile(plan);
+    this.currentPlan = plan; this.graph.reconcile(plan, this.settings.wallCutaway ? 1.15 : undefined);
     this.applyVisibilitySettings(); this.applyLightingSettings(); this.fitPlanInView();
   }
 
@@ -1027,9 +1027,10 @@ export class SceneEngine implements ISceneService {
       object.position.set(origin.x + box.position.x + box.dimensions.x / 2, origin.y + box.position.y + box.dimensions.y / 2, origin.z + box.position.z + box.dimensions.z / 2);
       object.scale.set(box.dimensions.x / previous.dimensions.x, box.dimensions.y / previous.dimensions.y, box.dimensions.z / previous.dimensions.z);
     }
+    const contents = resolveContents(c, item.dimensions);
     for (const o of c.contents) {
       const object = this.getCabinetPart(id, o.id); if (!object) continue;
-      const box = resolveContent(c, item.dimensions, o), f = footprint(o.dimensions, o.rotationY);
+      const box = contents.get(o.id)!, f = footprint(o.dimensions, o.rotationY);
       object.position.set(origin.x + box.position.x + f.x / 2, origin.y + box.position.y, origin.z + box.position.z + f.z / 2); object.rotation.y = o.rotationY;
       const offset = object.userData.cabinetClosedOffset;
       if (offset) object.position.sub(new THREE.Vector3(offset.x, offset.y, offset.z));
@@ -1080,23 +1081,24 @@ export class SceneEngine implements ISceneService {
     // Opening angles are unsigned in the document; hinge orientation supplies sign.
     const from = previousAngle === undefined ? final : (pivot.userData.swingSign ?? Math.sign(final || 1)) * previousAngle;
     const sliding = pivot.userData.slide && door !== undefined && item instanceof Furniture && item.cabinet;
+    const roomSlide = item instanceof Opening && item.type === 'door_coupe' && pivot.userData.slideAxis === 'x';
+    const roomSlideFrom = previousAngle === undefined ? finalPosition.x : pivot.userData.slideSign * pivot.userData.slideDistance * THREE.MathUtils.clamp(previousAngle / (Math.PI / 2), 0, 1);
     const slideFinal = sliding ? cabinetLeaves(item.cabinet!, item.dimensions)[door!].angle : 0;
     const slideFrom = previousAngle === undefined ? slideFinal : previousAngle * 180 / Math.PI;
-    const steps = sliding ? Math.max(1, Math.ceil(Math.abs(slideFinal - slideFrom) / 2)) : Math.max(1, Math.ceil(Math.abs(final - from) / (Math.PI / 90)));
-    const obstacles = this.picking.getCandidates().filter((o): o is THREE.Mesh => o instanceof THREE.Mesh && !pivot.getObjectById(o.id));
+    const steps = roomSlide ? Math.max(1, Math.ceil(Math.abs(finalPosition.x - roomSlideFrom) / .02))
+      : sliding ? Math.max(1, Math.ceil(Math.abs(slideFinal - slideFrom) / 2)) : Math.max(1, Math.ceil(Math.abs(final - from) / (Math.PI / 90)));
     let collides = false; this.scene.updateMatrixWorld(true);
+    const query = this.collisionFeedback.prepare(pivot, this.picking.getCandidates());
     for (let step = 1; step <= steps && !collides; step++) {
       const angle = from + (final - from) * step / steps;
-      pivot.rotation[axis] = angle;
+      if (roomSlide) pivot.position.x = THREE.MathUtils.lerp(roomSlideFrom, finalPosition.x, step / steps);
+      else pivot.rotation[axis] = angle;
       if (door !== undefined && item instanceof Furniture && item.cabinet) {
         const pose = cabinetDoorPose(item.dimensions, item.cabinet, door, sliding ? slideFrom + (slideFinal - slideFrom) * step / steps : Math.abs(angle) * 180 / Math.PI);
         pivot.position.set(pose.position.x, pose.position.y, pose.position.z); pivot.rotation.set(pose.rotationX, pose.rotationY, 0);
       }
       pivot.updateWorldMatrix(true, true);
-      for (const other of obstacles) {
-        let visible = true; for (let p: THREE.Object3D | null = other; p; p = p.parent) if (!p.visible) visible = false;
-        if (visible && moving.some(part => this.collisionFeedback.intersects(part, other))) { collides = true; break; }
-      }
+      collides = query.intersects(moving);
     }
     pivot.rotation.copy(finalRotation); pivot.position.copy(finalPosition); pivot.updateWorldMatrix(true, true);
     if (collides) this.collisionFeedback.mark(pivot);
@@ -1110,15 +1112,12 @@ export class SceneEngine implements ISceneService {
     if (!drawer || !pivot) return;
     const tray = cabinetInternalDrawer(item.cabinet, item.dimensions, drawer), final = pivot.position.z;
     const moving: THREE.Mesh[] = []; pivot.traverse(o => { if (o instanceof THREE.Mesh) moving.push(o); });
-    const obstacles = this.picking.getCandidates().filter((o): o is THREE.Mesh => o instanceof THREE.Mesh && !pivot.getObjectById(o.id));
     const from = final - (drawer.extension - previous) * tray.travel, steps = Math.max(1, Math.ceil(Math.abs(final - from) / .02));
     let collides = false; this.scene.updateMatrixWorld(true);
+    const query = this.collisionFeedback.prepare(pivot, this.picking.getCandidates());
     for (let step = 1; step <= steps && !collides; step++) {
       pivot.position.z = from + (final - from) * step / steps; pivot.updateWorldMatrix(true, true);
-      for (const other of obstacles) {
-        let visible = true; for (let p: THREE.Object3D | null = other; p; p = p.parent) if (!p.visible) visible = false;
-        if (visible && moving.some(part => this.collisionFeedback.intersects(part, other))) { collides = true; break; }
-      }
+      collides = query.intersects(moving);
     }
     pivot.position.z = final; pivot.updateWorldMatrix(true, true);
     if (collides) this.collisionFeedback.mark(pivot);

@@ -24,7 +24,10 @@ export class FurnitureAppearance {
         }
         // Remember original default material
         if (child.userData.isLightEmissive && !this.glowMaterials.has(child)) {
-          child.material = (child.material as THREE.Material).clone();
+          const original = child.material as THREE.Material, material = original.clone();
+          material.onBeforeCompile = original.onBeforeCompile;
+          material.customProgramCacheKey = original.customProgramCacheKey;
+          child.material = material;
           this.glowMaterials.add(child);
         }
         this.resources.rememberOriginal(child);
@@ -74,14 +77,19 @@ export class FurnitureAppearance {
   }
 
   applyLighting(mesh: THREE.Object3D, entity?: FurnitureEntity): void {
-    const config = entity?.lightConfig;
-    const isEnabled = config?.enabled !== false;
-    const customIntensity = config?.intensity ?? 1.0;
-    const customColor = config?.color;
-    let fixtureType = (entity?.assetKey ?? '').includes('chandelier') ? 'chandelier' : 'spot';
-    mesh.traverse(child => { if (isFixtureLight(child)) fixtureType = child.userData.fixtureType ?? fixtureType; });
+    const contents = new Map(entity?.cabinet?.contents.map(content => [content.id, content]));
+    const fixtureTypes = new Map<string | undefined, string>();
+    mesh.traverse(child => {
+      if (isFixtureLight(child)) fixtureTypes.set(child.userData.cabinetContent?.id, child.userData.fixtureType ?? 'spot');
+    });
 
     mesh.traverse((child) => {
+      const content = child.userData.cabinetContent as import('../../domain/cabinet/CabinetLayout').CabinetContent | undefined;
+      const config = content ? (contents.get(content.id) ?? content).lightConfig : entity?.lightConfig;
+      const isEnabled = config?.enabled !== false;
+      const customIntensity = config?.intensity ?? 1.0;
+      const customColor = config?.color;
+      const fixtureType = fixtureTypes.get(content?.id) ?? ((entity?.assetKey ?? '').includes('chandelier') ? 'chandelier' : 'spot');
       // 1. Actual room lights, including directional spotlight beams.
       if (isFixtureLight(child)) {
         const pointLight = child;

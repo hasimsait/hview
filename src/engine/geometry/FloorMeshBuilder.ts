@@ -5,6 +5,7 @@ import { BrowserCanvasFactory,type CanvasFactory } from '../materials/CanvasFact
 import { buildBalconyRailing } from './BalconyRailingGeometry';
 import { openRailingRuns } from '../../domain/model/BalconyRailing';
 import type { WallEntity } from '../../core/types/plan';
+import { floorDoorwayPolygons } from './FloorDoorways';
 
 export class FloorMeshBuilder {
   private readonly surfaces = new WeakSet<THREE.Mesh>();
@@ -30,15 +31,14 @@ export class FloorMeshBuilder {
     // Skip building floor for invalid polygons or tiny spaces/chimneys (< 0.5 m²)
     if (!room.polygon || room.polygon.length < 3 || room.area < 0.5) return group;
 
-    const shape = new THREE.Shape();
-    // Use polygon coordinates
-    shape.moveTo(room.polygon[0].x, -room.polygon[0].y);
-    for (let i = 1; i < room.polygon.length; i++) {
-      shape.lineTo(room.polygon[i].x, -room.polygon[i].y);
-    }
-    shape.closePath();
-
-    const geometry = new THREE.ShapeGeometry(shape);
+    const shapes = [room.polygon, ...floorDoorwayPolygons(room, walls)].map(polygon => {
+      const shape = new THREE.Shape();
+      shape.moveTo(polygon[0].x, -polygon[0].y);
+      for (const point of polygon.slice(1)) shape.lineTo(point.x, -point.y);
+      shape.closePath();
+      return shape;
+    });
+    const geometry = new THREE.ShapeGeometry(shapes);
 
     // Anchor floor UVs to start at (0, 0) at the room's bounding corner for usage estimation
     let minX = Infinity;
@@ -59,7 +59,7 @@ export class FloorMeshBuilder {
     // Floor material selection based on custom floorFinish or room type
     const isWetZone = /bath|toilet|wc|san|shower/i.test(room.name);
     const material = room.floorFinish && this.finishService
-      ? this.finishService.getMaterial(room.floorFinish, { side: THREE.DoubleSide })
+      ? this.finishService.getMaterial(room.floorFinish, { side: THREE.DoubleSide, foregroundOcclusion: false })
       : this.getMaterial(isWetZone ? 'tile' : 'parquet');
 
     const mesh = new THREE.Mesh(geometry, material);
@@ -87,7 +87,7 @@ export class FloorMeshBuilder {
 
   applyMaterials(root: THREE.Object3D, room: RoomEntity): void {
     const wetZone = /bath|toilet|wc|san|shower/i.test(room.name);
-    const material = room.floorFinish && this.finishService ? this.finishService.getMaterial(room.floorFinish, { side: THREE.DoubleSide }) : this.getMaterial(wetZone ? 'tile' : 'parquet');
+    const material = room.floorFinish && this.finishService ? this.finishService.getMaterial(room.floorFinish, { side: THREE.DoubleSide, foregroundOcclusion: false }) : this.getMaterial(wetZone ? 'tile' : 'parquet');
     root.traverse(object => { if (object instanceof THREE.Mesh && this.surfaces.has(object)) object.material = material; });
   }
 

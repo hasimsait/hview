@@ -10,7 +10,7 @@ import { buildIkeaAccessory } from './builders/IkeaAccessoryBuilder';
 import { buildBathroomAccessory } from './builders/BathroomAccessoryBuilder';
 import { buildFurnitureProduct } from './builders/FurnitureProductBuilder';
 import { buildElectricalFitting } from './builders/ElectricalBuilders';
-import { buildAirPurifier, buildRobotVacuum } from './builders/HouseholdBuilders';
+import { buildAirPurifier, buildRobotVacuum, buildWaterTreatmentUnit, buildStorageWaterHeater } from './builders/HouseholdBuilders';
 import { buildArchitecturalFinish } from './builders/ArchitecturalFinishBuilder';
 import { buildLightingComponent } from './builders/LightingComponentBuilder';
 import { buildFloorDrain } from './builders/FloorDrainBuilder';
@@ -34,6 +34,8 @@ export const FURNITURE_GEOMETRY: Readonly<Record<AssetRecipeId, AssetBuilderFn>>
   electrical_fitting: buildElectricalFitting,
   robot_vacuum: buildRobotVacuum,
   air_purifier: buildAirPurifier,
+  water_treatment_unit: buildWaterTreatmentUnit,
+  storage_water_heater: buildStorageWaterHeater,
   ikea_accessory: buildIkeaAccessory,
   angled_range_hood: Catalogue.buildAngledHood,
   gas_cooktop: Catalogue.buildGasCooktop,

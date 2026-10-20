@@ -21,7 +21,7 @@ function junction() {
 }
 
 describe('wall junction geometry', () => {
-  it.each(['sample.plan', 'public/sample.plan'])('keeps the door-wall corner solid in %s', file => {
+  it.each(['sample.plan', 'tests/fixtures/reported-geometry.json'])('keeps the door-wall corner solid in %s', file => {
     const document = codec.decode(readFileSync(file, 'utf8'));
     const doorWall = document.requireWall(file === 'sample.plan' ? '_w5f7a' : '_w5f7a_a');
     const builder = new WallMeshBuilder({ getMaterial: () => new THREE.MeshStandardMaterial() } as any);
@@ -47,7 +47,7 @@ describe('wall junction geometry', () => {
   });
 
   it('repairs stale canonical junction offsets without moving coordinates or losing finishes', () => {
-    const source = codec.decode(readFileSync('public/sample.plan', 'utf8'));
+    const source = codec.decode(readFileSync('tests/fixtures/reported-geometry.json', 'utf8'));
     const saved = JSON.parse(codec.encode(source));
     const entry = saved.document.elements.find((element: { data: { id: string } }) => element.data.id === '_w5f7a_a');
     entry.data.startOffset = -0.04958251372095414;

@@ -191,6 +191,10 @@ export class SurfaceMaterialFactory implements ISurfaceFinishService {
     return variant === 'square' || variant === 'subway' ? 1 : 2;
   }
 
+  applyOutlineOcclusion(material: THREE.LineBasicMaterial): void {
+    this.shader.applyOutline(material);
+  }
+
   getMaterial(
     config: SurfaceFinishConfig,
     options?: { side?: THREE.Side; depthWrite?: boolean; projection?: 'world' | 'local'; foregroundOcclusion?: boolean }
