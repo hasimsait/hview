@@ -49,3 +49,11 @@ The **Tilt-Out Laundry Cabinet** catalogue asset starts with two laundry baskets
 Set a stored object's **Supporting shelf** to a basket to place it on that basket's floor. Deliberate moves also settle onto basket floors. Removing a front or converting it to side-hinged doors detaches its contents at their closed-cabinet positions, so nothing is deleted. Basket depth is editable; oversized baskets and unsupported or penetrating contents remain visible in red. The basket is planning geometry, not a simulation of a particular manufacturer's linkage.
 
 Front sections, hinge settings, basket depths, angles and support attachments persist in both plan formats and the full offline editor on desktop and iPad.
+
+## Drawers and organizers
+
+Split the front into sections and choose **Pull-out drawer** for a section. Facade height is independent of drawer-box height and depth. The clear-volume readout subtracts the 12 mm box walls and 8 mm bottom. Extension uses 0–100%; swing and tilt-out fronts use degrees. **Place object in drawer** attaches contents, including stacks, to its moving floor.
+
+**Add internal drawer** creates a box behind the outer front. Edit its bottom, height, depth, setback and extension. Open the outer door before extending it; reposition or remove shelves that intersect the box. Moving fronts and boxes receive the existing collision feedback.
+
+The cutlery organizer retains 8.5 × 22 cm compartments. Resizing removes whole modules and leaves any unused strip; it does not shrink the compartments. Pull-out trouser racks likewise retain their bar spacing.

@@ -71,10 +71,10 @@ HView saves use the validated, versioned `schemaVersion: 1` envelope. Imports ac
 
 Standalone templates are build artifacts in `dist/`, not checked-in application inputs. The development server builds them from current source on demand and invalidates them when source changes. Downloaded editors retain embedded templates, textures, and the tile catalog, allowing offline save/reload and repeated editor/viewer exports without HTTP access.
 
-## Removed predecessors
+Portable builds resize photos to at most 512 pixels, choose JPEG/WebP per image, preserve transparency and deduplicate identical images without modifying the originals. CSS previews and rendering share binary image resources/object URLs; compatible textures also share decoded images while retaining independent samplers.
 
-The old recess snapping helper and renderer proximity searches, the public cache-only save API, the mutable `PlanManagerService`, old parser/exporter, DI container/tokens, rendering-coupled domain hierarchy, universal object inspector, second asset-builder registry, per-entity update channels, and ancestry-based picking helper have been removed. No compatibility manager or synchronization bridge remains in the application.
+JavaScript and plan JSON are gzip-compressed inside portable HTML, with a bundled decoder that works without browser decompression APIs. Consumed scripts leave the DOM; compressed source bytes remain available for Reset and offline re-export. Editors reuse their embedded application runtime and unpack the viewer when requested. Touch rendering limits pixel density, furniture outlines, shadow/transmission passes and contributing fixture lights. Shader preparation and context restoration happen through `SceneEngine`.
 
 ## Verification
 
-See [../tests/README.md](../tests/README.md) for commands and coverage scope, and [../tests/RESULTS.md](../tests/RESULTS.md) for validation results. Regression checks cover command atomicity, topology, subtype/format round trips, save races, retained geometry/resource ownership, and real browser editing/offline export workflows.
+See [../tests/README.md](../tests/README.md) for commands and coverage scope. Regression checks cover command atomicity, topology, subtype/format round trips, save races, retained geometry/resource ownership, and browser editing/offline export workflows.

@@ -1,83 +1,28 @@
 # Catalogue references
 
-These editable procedural models use retailer dimensions and visual references. They are planning models, not manufacturer CAD files. All catalogue names and descriptions are English; official product URLs retain their original slugs. Dimensions below are width × depth × height in centimetres.
+Catalogue entries contain the maintained product identities, dimensions, source URLs and estimate notes. Procedural models are planning references, not manufacturer CAD. Published dimensions and estimated missing extents are distinguished in each entry's `source` metadata; retailer links do not establish current availability.
 
-## BAUHAUS accessories
+## Maintained data
 
-| Item | Dimensions | Source |
-| --- | --- | --- |
-| Primanova Biga soap dispenser, black/chrome, 420 ml | 7.5 × 7.5 × 20 | [BAUHAUS 61160743](https://www.bauhaus.com.tr/primanova-biga-sivi-sabunluk-siyah-krom-61160743) |
-| Primanova Lenox toothbrush tumbler, white | 8 × 8 × 10.5 | [BAUHAUS 60953621](https://www.bauhaus.com.tr/primanova-lenox-dis-fircalik-beyaz-60953621) |
-| Primanova Lenox soap dish, white | 13 × 13 × 3 | [BAUHAUS 60953612](https://www.bauhaus.com.tr/primanova-lenox-sabunluk-beyaz-60953612) |
-| Primanova Lenox pedal bin, black, 5 L | 21 × 21 × 28 | [BAUHAUS 61263217](https://www.bauhaus.com.tr/primanova-lenox-5l-pedalli-cop-kovasi-siyah-61263217) |
-| Primanova Lenox toilet brush set, beige | 8.5 × 8.5 × 33 | [BAUHAUS 61331080](https://www.bauhaus.com.tr/primanova-lenox-tuvalet-fircasi-bej-61331080) |
-| Penta Leaf towel rail, chrome | **Estimated** 60 × 8 × 5 | [BAUHAUS 61360996](https://www.bauhaus.com.tr/penta-leaf-uzun-havluluk-61360996); dimensions not published |
-| Primanova under-cabinet paper towel holder, black | 24 × 10.5 × 8.7 | [BAUHAUS 61478668](https://www.bauhaus.com.tr/primanova-kagit-havlu-askisi-siyah-61478668) |
+| Catalogue | Data and references |
+| --- | --- |
+| BAUHAUS accessories, IKEA bookcases and reference kitchen appliances | [CuratedAssets.ts](../src/domain/catalog/CuratedAssets.ts) |
+| IKEA accessories | [IkeaAccessories.ts](../src/domain/catalog/IkeaAccessories.ts) |
+| IKEA bathroom and shower articles | [IkeaBathroomProducts.json](../src/domain/catalog/IkeaBathroomProducts.json), with metadata conversion in [IkeaBathroomProducts.ts](../src/domain/catalog/IkeaBathroomProducts.ts) |
+| Popular Products | [PopularProducts.json](../src/domain/catalog/PopularProducts.json): planning dimensions and model settings |
+| Electrical fittings | [ElectricalAssets.ts](../src/domain/catalog/ElectricalAssets.ts) |
+| Water-treatment and household appliances | [HouseholdAppliances.ts](../src/domain/catalog/HouseholdAppliances.ts) |
+| Pet care, vanity and wardrobe objects | [DailyLifeAssets.ts](../src/domain/catalog/DailyLifeAssets.ts) |
+| Tile sizes and finish defaults | [tiles.json](../public/textures/tiles/tiles.json) |
 
-## IKEA bookcases
+Runtime dimensions use metres: `x` is width, `y` height and `z` depth. Product `size` arrays in the IKEA datasets use width × depth × height in centimetres. Installed depths, folded/hanging thicknesses, foliage spread and other unpublished extents may be estimates; package dimensions are not substituted for product dimensions.
 
-The expanded accessory catalogue and all 136 additional product references are listed in [IKEA accessory references](ikea-accessories.md).
+## Additional reference notes
 
-| Item | Dimensions | Source |
-| --- | --- | --- |
-| HEMNES, white stain/light brown | 90 × 37 × 197 | [IKEA 60413502](https://www.ikea.com.tr/en/product/hemnes-white-stain-light-brown-90x197-cm-bookcase-60413502) |
-| HEMNES, black-brown/light brown | 90 × 37 × 197 | [IKEA 20452294](https://www.ikea.com.tr/en/product/hemnes-black-brown-brown-90x197-cm-bookcase-20452294) |
-| HEMNES narrow, white stain | 49 × 37 × 197 | [IKEA 40371763](https://www.ikea.com/de/en/p/hemnes-bookcase-white-stain-40371763/) |
-| HEMNES narrow, light brown | 49 × 37 × 197 | [IKEA 30371711](https://www.ikea.com.tr/en/product/hemnes-light-brown-49x197-cm-bookcase-30371711) |
-| BILLY, white | 80 × 28 × 202 | [IKEA 00263850](https://www.ikea.com.tr/en/product/billy-white-80x28x202-cm-bookcase-00263850) |
+- VIKO Karre face sizes were checked against the [manufacturer catalogue](https://viko.panasonic.com/Uploads/File/panasonic-general-product-catalogue_1.pdf) and [double-socket listing](https://www.trendyol.com/en/viko/viko-karre-double-grounded-socket-90967x56-white-p-40496935). Visible projection excludes the concealed mechanism and is estimated. Per-product links remain in the catalogue data.
+- The angled hood, gas cooktop and built-in oven use standard-size estimates from unidentified reference photographs.
+- The water-treatment unit uses the supplied photograph's 35 W × 67 H × 49 D cm envelope. The DT4 65 L heater uses the supplied 50 W × 72 H × 50 D cm envelope; its exterior geometry is a reference representation.
+- The kitchen laminate and Ivory & Taupe Striped Mosaic are reconstructed from photographs. Mosaic pitch is estimated at 25 × 12.5 mm, repeated over a 30 × 30 cm sheet. Internal joints are in the texture; sheet-boundary grout defaults to zero. Color, grain scale and gloss remain approximations.
+- Generic trim, soft furnishings, pet-care objects, footwear and practical fittings have adjustable planning envelopes. Shoe labels do not establish the measured size of a particular pair. Cloth patterns are neutral visual cues rather than reproductions of product artwork.
 
-HEMNES models include framed sides, posts/feet, crown trim, a contrasting wood top on the wide versions, and adjustable shelves. BILLY has simple sides and a recessed plinth. Wood finishes approximate the product photographs. All support the existing shelf-count and front-lid controls.
-
-The wide two-tone HEMNES variants use natural wood on the top, shelves and smooth back panel, with a painted or dark frame. Select **Back panel**, **Shelves**, **Frame** or **Top** under **Bookcase finishes** to choose each colour or material independently. These saved finishes also carry into the cabinet layout editor. The back has no raised decorative strips to interfere with cel outlines.
-
-## User image references
-
-- Black angled glass range hood: estimated 60 × 35 × 75 cm, with a chimney and inclined canopy.
-- Black glass four-burner gas cooktop: estimated 60 × 52 × 5.5 cm, with pan supports and side controls.
-- Black built-in electric oven: estimated 59.5 × 57 × 59.5 cm, with glazed door, racks, twin knobs and steel handle.
-- Decorative ceiling cornices are configured on the host wall under **Wall Framing → Top corner / cornice**. They span the whole wall at the finished ceiling height, with plain square, cove, stepped and ogee profiles. Existing window cornices migrate to one wall cornice; visibility and removal remain independent of curtains. Standalone catalogue pieces remain available for custom arrangements.
-
-The appliance photographs do not identify exact product codes, so these entries use standard-size estimates, marked “Approx.” in the catalogue. Countertop accessories and the cooktop start at 90 cm elevation and can be moved to match the plan's counters.
-
-## Pet care, vanity, wardrobe storage and drawer inserts
-
-These are generic procedural planning models with reference dimensions, not
-manufacturer-verified product replicas. All names, descriptions and UI labels are
-in English, including requirements translated from Turkish prompts.
-
-- Pet care: a scratching tower with hideaway, food/water tray, covered litter box,
-  stainless-steel drinking fountain, automatic feeder, and an elevated cat house
-  on scratching columns. The elevated house is 130 cm tall with its floor
-  approximately 87 cm above ground.
-- Vanity accessories: perfume/skin-care set (10 cm deep), hot-air styling brush
-  (6.5 cm deep, generic Philips-style form), and jewelry/key dish (10 cm deep).
-  These fit within the usable depth of the 16 cm upper mirror cabinet. That
-  cabinet now supports Edit layout with its asymmetric mirrored fronts preserved.
-- Wardrobe storage: short shirt/jacket and long-coat garment envelopes, EU 47
-  ankle boots and sneakers, women’s tall boots and sneakers. Shoe sizes describe
-  approximate outer planning envelopes; confirm actual footwear dimensions.
-- Drawer inserts: a modular cutlery organizer and a pull-out trouser rack. The
-  organizer keeps 8.5 × 22 cm compartment modules at their physical size; resizing
-  removes whole modules and leaves any remaining strip unused. It does not scale
-  compartments smaller. The rack keeps its bars at fixed spacing.
-- Lighting: a vertical cabinet LED profile with visible diffuser and controllable
-  illumination. It remains entirely embedded in offline exports.
-
-### Cabinet drawer workflow
-
-In Edit layout, split the front into sections and choose **Pull-out drawer** for
-an individual section. Front section height remains independent of drawer box
-height and depth. The clear-volume readout subtracts the 12 mm box walls and
-8 mm bottom. Extension is a separate 0–100% value; swing and tilt-out fronts keep
-using degrees. **Place object in drawer** attaches contents to the moving box,
-including stacks of objects.
-
-**Add internal drawer** creates a separate box behind the outer front. Its bottom,
-height, depth, front setback and extension are editable. Open the outer door before
-extending an internal drawer; moving fronts and boxes receive collision feedback
-against visible surrounding objects. Shelves remain independent and may need to
-be repositioned or removed if they intersect a drawer box.
-
-Three-drawer and deep-pan base cabinet presets, plus a wardrobe with internal
-pull-out drawers, are available in Modular cabinets. Drawer configuration and
-contents survive canonical plans, legacy plan exports and self-contained HTML.
+Placement and editing instructions are in the [editor guide](editor-guide.md) and [cabinet guide](cabinet-editor.md). Catalogue geometry and referenced textures are bundled into portable HTML; opening a product's retailer link is optional.
