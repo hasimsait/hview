@@ -6,6 +6,7 @@ import { PlanCodec } from '../../src/domain/codec/PlanCodec';
 import { LegacyPlanWriter } from '../../src/domain/codec/LegacyPlanWriter';
 import { addFixtureLight, addStripAreaLight } from '../../src/engine/lighting/FixtureLight';
 import { whiteLightColor } from '../../src/engine/lighting/WhiteLight';
+import { whiteBalanceMatrix } from '../../src/engine/lighting/WhiteBalance';
 import { FurnitureAppearance } from '../../src/engine/materials/FurnitureAppearance';
 import { SurfaceMaterialFactory } from '../../src/engine/materials/SurfaceMaterialFactory';
 import { ResourcePool } from '../../src/engine/resources/ResourcePool';
@@ -18,6 +19,15 @@ function lamp() {
 }
 
 describe('white-light color and photometric controls', () => {
+  it('keeps the approved 6500 K view unchanged and adapts a warm neutral surface to that reference',()=>{
+    expect(whiteBalanceMatrix(6500).elements).toEqual(new THREE.Matrix3().elements);
+    const reference=whiteLightColor(6500);
+    for(const kelvin of [2700,3000,3500,4000,5500]){
+      const source=whiteLightColor(kelvin);
+      const adapted=new THREE.Vector3(source.r,source.g,source.b).applyMatrix3(whiteBalanceMatrix(kelvin));
+      expect(adapted.x).toBeCloseTo(reference.r,6);expect(adapted.y).toBeCloseTo(reference.g,6);expect(adapted.z).toBeCloseTo(reference.b,6);
+    }
+  });
   it.each([[2700,.45931,.41066],[6500,.31349,.32366]])('approximates the %i K locus independently of display gamma', (kelvin,x,y) => {
     const c=whiteLightColor(kelvin);
     const X=.4124564*c.r+.3575761*c.g+.1804375*c.b;

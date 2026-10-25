@@ -56,6 +56,11 @@ test('white-light output, preview and exposure work without geometry rebuilds an
   const cool=await state(page), warm=configured.lights[0].color;
   expect(cool.lights[0].color[0]/cool.lights[0].color[2]).toBeLessThan(warm[0]/warm[2]/2);
   expect(cool.config).toEqual(configured.config);expect(cool.plan).toBe(configured.plan);expect(cool.exposure).toBe(1);
+  await page.getByLabel('Viewing white balance',{exact:true}).selectOption('2700');
+  const balanced=await state(page);
+  expect(balanced.config).toEqual(cool.config);expect(balanced.plan).toBe(cool.plan);expect(balanced.lights).toEqual(cool.lights);
+  await page.getByRole('button',{name:'Match white balance to preview',exact:true}).click();
+  expect((await state(page)).settings.whiteBalanceKelvin).toBe(6500);
   await page.getByRole('slider',{name:'Lighting exposure',exact:true}).fill('1');expect((await state(page)).exposure).toBe(2);
   await page.getByLabel('Color rendering',{exact:true}).selectOption('aces');expect((await state(page)).tone).toBe(4);
   await page.getByRole('button',{name:'Reset color controls',exact:true}).click();expect((await state(page)).tone).toBe(7);
@@ -71,6 +76,8 @@ test('white-light output, preview and exposure work without geometry rebuilds an
     expect((await state(touch)).config).toEqual(configured.config);
     await touch.getByRole('button',{name:/Lighting: Daylight/}).tap();
     await touch.getByLabel('White light preview',{exact:true}).selectOption('2700');
+    await touch.getByRole('button',{name:'Match white balance to preview',exact:true}).tap();
+    expect((await state(touch)).settings.whiteBalanceKelvin).toBe(2700);
     await touch.getByRole('slider',{name:'Lighting exposure',exact:true}).fill('0.5');
     expect((await state(touch)).exposure).toBeCloseTo(Math.SQRT2,6);
     await touch.screenshot({path:info.outputPath('touch-lighting-controls.png')});
@@ -85,28 +92,40 @@ test('reference red and green paints respond to warm and cool white light with u
   await page.getByRole('button',{name:'ON',exact:true}).click();
   await page.getByRole('button',{name:/Lighting: Night/}).click();
   for(const [name,color] of [['gunbatimi','#864954'],['kaktus-60','#82a686']]) {
-    const patch=await page.evaluate(async color=>{
+    const patches=await page.evaluate(async color=>{
       const path='/src/main.tsx',commands='/src/application/commands/StructuralCommands.ts',lightCommands='/src/application/commands/FurnitureCommands.ts';
       const {runtime}=await import(path),{FinishWall}=await import(commands),{ConfigureLuminaire,TransformFurniture}=await import(lightCommands);
       runtime.editor.execute(new FinishWall('wall',{type:'paint',color}));
       runtime.editor.execute(new TransformFurniture('sofa',{x:2,y:2.4,z:1.5},0));
       runtime.editor.execute(new ConfigureLuminaire('sofa',{lumens:806,temperatureKelvin:2700}));
       const scene=runtime.scene;scene.updateSettings({foregroundOcclusionMode:'off',exposure:1/8});
+      const threePath='/node_modules/.vite/deps/three.js';const THREE=await import(threePath);
+      scene.getScene().getObjectByName('neutral_reference')?.removeFromParent();
+      const neutral=new THREE.Mesh(new THREE.PlaneGeometry(.45,.45),new THREE.MeshStandardMaterial({color:'#cccccc',metalness:0,roughness:.85}));
+      neutral.name='neutral_reference';neutral.position.set(3.3,1.5,.102);scene.getScene().add(neutral);
       const camera=scene.getCamera();camera.position.set(2,1.5,5);scene.getControls().target.set(2,1.5,0);scene.getControls().update();
-      camera.updateMatrixWorld(true);const p=camera.position.clone().set(2,1.5,.11).project(camera),rect=scene.getDomElement().getBoundingClientRect();
-      return {x:Math.round(rect.left+(p.x+1)*rect.width/2-20),y:Math.round(rect.top+(1-p.y)*rect.height/2-20),width:40,height:40};
+      camera.updateMatrixWorld(true);const rect=scene.getDomElement().getBoundingClientRect();
+      const patch=(x:number)=>{const p=camera.position.clone().set(x,1.5,.11).project(camera);return {x:Math.round(rect.left+(p.x+1)*rect.width/2-20),y:Math.round(rect.top+(1-p.y)*rect.height/2-20),width:40,height:40};};
+      return {paint:patch(2),neutral:patch(3.3)};
     },color);
-    const samples:number[][]=[];
+    const samples:number[][]=[], neutrals:number[][]=[];
     for(const temperature of [2700,6500]) {
       const frame=await page.evaluate(async temperature=>{
         const path='/src/main.tsx';const {runtime}=await import(path);const frame=runtime.scene.renderer.info.render.frame;
-        runtime.scene.updateSettings({fixtureTemperatureKelvin:temperature});return frame;
+        runtime.scene.updateSettings({fixtureTemperatureKelvin:temperature,whiteBalanceKelvin:temperature});return frame;
       },temperature);
       await page.waitForFunction(async frame=>{const path='/src/main.tsx';const {runtime}=await import(path);return !runtime.scene.preparing&&runtime.scene.renderer.info.render.frame>frame;},frame);
-      const stats=await sharp(await page.screenshot({clip:patch})).stats();samples.push(stats.channels.slice(0,3).map(channel=>channel.mean));
+      const stats=await sharp(await page.screenshot({clip:patches.paint})).stats();samples.push(stats.channels.slice(0,3).map(channel=>channel.mean));
+      const neutral=await sharp(await page.screenshot({clip:patches.neutral})).stats();neutrals.push(neutral.channels.slice(0,3).map(channel=>channel.mean));
+      await page.evaluate(temperature=>{
+        let label=document.getElementById('lighting-review-label');if(!label){label=document.createElement('div');label.id='lighting-review-label';document.body.append(label);}
+        label.style.cssText='position:fixed;top:210px;left:24px;z-index:100;background:#0f172a;color:#fff;padding:10px;font:14px Arial';
+        label.textContent=`Lamp: ${temperature} K | White balance: ${temperature} K | Exposure: -3 EV | Gray reference patch at right`;
+      },temperature);
       await page.screenshot({path:info.outputPath(`${name}-${temperature}.png`)});
     }
-    expect(samples[0][0]/samples[0][2]).toBeGreaterThan(samples[1][0]/samples[1][2]*1.3);
+    for(const neutral of neutrals)expect(Math.max(...neutral)-Math.min(...neutral)).toBeLessThan(10);
+    for(let channel=0;channel<3;channel++)expect(Math.abs(neutrals[0][channel]-neutrals[1][channel])).toBeLessThan(5);
     if(name==='kaktus-60')expect(samples[1][1]).toBeGreaterThan(samples[1][2]);
     const plan=JSON.parse((await state(page)).plan);expect(plan.find((element:any)=>element.data.id==='wall').data.finishSideA.color).toBe(color);
   }

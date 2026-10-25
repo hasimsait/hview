@@ -12,6 +12,7 @@ import type { FurnitureMeshBuilder } from './assets/FurnitureMeshBuilder';
 import { PlanCameraFocus } from './camera/PlanCameraFocus';
 import { WallMeshBuilder } from "./geometry/WallMeshBuilder";
 import { SceneLighting } from './lighting/SceneLighting';
+import { WhiteBalancePass } from './lighting/WhiteBalance';
 import { isFixtureLight, type FixtureLight } from './lighting/FixtureLight';
 import { FurnitureAppearance } from './materials/FurnitureAppearance';
 import { PlanSceneGraph } from './nodes/PlanSceneGraph';
@@ -36,6 +37,7 @@ import { mobileRendering } from './RenderQuality';
 export interface SceneStatus { readonly state: 'loading' | 'ready' | 'recovering' | 'error'; readonly message: string; }
 
 export class SceneEngine implements ISceneService {
+  private readonly whiteBalance = new WhiteBalancePass();
   private readonly collisionFeedback = new CollisionFeedback();
   private cabinetEditingId: string | null = null;
   private readonly mobile = mobileRendering();
@@ -265,6 +267,7 @@ export class SceneEngine implements ISceneService {
   }
 
   dispose(): void {
+    this.whiteBalance.dispose();
     this.collisionFeedback.dispose();
     this.disposed = true; this.preparationVersion++;
     this.graph.dispose(); this.ceilingLease?.dispose(); this.paletteLease.dispose();
@@ -991,7 +994,7 @@ export class SceneEngine implements ISceneService {
     }
     if (this.renderer) {
       this.updateFixtureLightBudget();
-      this.renderer.render(this.scene, this.activeCamera);
+      this.whiteBalance.render(this.renderer, this.scene, this.activeCamera, this.settings.whiteBalanceKelvin ?? 6500);
       this.setStatus('ready', '');
     }
   }

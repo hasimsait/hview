@@ -17,6 +17,17 @@ export function LightingColorControls() {
         <option value="neutral">PBR Neutral</option><option value="aces">ACES comparison</option>
       </select>
     </label>
+    <label className="flex justify-between items-center gap-2 text-[11px] text-slate-300">
+      White balance
+      <select aria-label="Viewing white balance" value={settings.whiteBalanceKelvin ?? 6500}
+        onChange={event => update({whiteBalanceKelvin:Number(event.target.value)})}
+        className="bg-slate-800 border border-slate-700 rounded px-1 py-1">
+        {[6500,5500,4000,3500,3000,2700].map(kelvin=><option key={kelvin} value={kelvin}>{kelvin} K{kelvin===6500?' (reference)':''}</option>)}
+      </select>
+    </label>
+    <button type="button" onClick={()=>update({whiteBalanceKelvin:settings.fixtureTemperatureKelvin || 6500})}
+      className="text-[11px] text-sky-400 hover:text-sky-300">Match white balance to preview</button>
+    <p className="text-[10px] text-slate-500">White balance represents adaptation to the room light. It affects the whole view, including mixed lights; lamp Kelvin and lumens stay unchanged.</p>
     <label className="block text-[11px] text-slate-300">
       <span className="flex justify-between">Exposure <span>{Math.log2(settings.exposure ?? 1).toFixed(1)} EV</span></span>
       <input aria-label="Lighting exposure" type="range" min="-6" max="2" step="0.1" value={Math.log2(settings.exposure ?? 1)}
@@ -31,7 +42,7 @@ export function LightingColorControls() {
       </select>
     </label>
     <p className="text-[10px] text-slate-500">Preview changes fixture light colors without editing the plan. Compare lamps in Night mode. Exposure stays fixed when changing temperature.</p>
-    <button type="button" onClick={() => update({ exposure: 1, toneMapping: 'neutral', fixtureTemperatureKelvin: 0 })}
+    <button type="button" onClick={() => update({ exposure: 1, toneMapping: 'neutral', fixtureTemperatureKelvin: 0, whiteBalanceKelvin:6500 })}
       className="text-[11px] text-sky-400 hover:text-sky-300">Reset color controls</button>
   </section>;
 }

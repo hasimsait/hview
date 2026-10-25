@@ -51,6 +51,7 @@ export interface ViewportSettings {
   exposure?: number; // Fixed display exposure, 1/64–4 (default 1).
   toneMapping?: 'neutral' | 'aces';
   fixtureTemperatureKelvin?: number; // Temporary white-light preview; 0 uses each fixture's settings.
+  whiteBalanceKelvin?: number; // Viewing white relative to the unchanged 6500 K reference.
 }
 
 export interface ISceneService {
