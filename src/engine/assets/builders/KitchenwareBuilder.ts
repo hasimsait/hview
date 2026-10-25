@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { buildKitchenTool } from './KitchenToolBuilder';
 import type { AssetBuildContext } from './AssetBuildContext';
 
 /** Metric parts preserve circular vessels even when the envelope includes a long handle. */
@@ -7,8 +8,36 @@ export function buildKitchenware(c: AssetBuildContext): void {
   const model = c.definition?.kitchenware;
   if (!model) throw new Error(`Missing kitchenware model for ${c.entity.assetKey}`);
   const { w, h, d, materials: m } = c;
-  const palette = { ceramic: m.ceramicWhite, glass: m.glass, steel: m.metalChrome, plastic: m.whitePaint, wood: m.woodLight };
-  const tint = (base: THREE.MeshStandardMaterial, color = model.color) => c.coloredMaterial?.(color, base) ?? base;
+  if (model.kind === 'set') {
+    for (const component of model.components ?? []) {
+      const group = new THREE.Group(), [cw, cd, ch] = component.size, [x, z, y] = component.at;
+      group.position.set((x + cw / 2 - .5) * w, y * h, (z + cd / 2 - .5) * d);
+      c.parent.add(group);
+      buildKitchenware({ ...c, parent: group, w: cw * w, h: ch * h, d: cd * d,
+        definition: { ...c.definition!, kitchenware: component.model } });
+    }
+    return;
+  }
+  if ((model.count ?? 1) > 1) {
+    const count = model.count!, step = Math.min(model.stackStep ?? .12, (1 - 1e-6) / (count - 1)), cols = model.columns ?? 1, rows = model.rows ?? Math.ceil(count / cols), grid = model.columns !== undefined;
+    const pieceHeight = grid ? h : h * (1 - step * (count - 1));
+    const prototype = new THREE.Group();
+    buildKitchenware({ ...c, parent: prototype, w: grid ? w / cols : w, d: grid ? d / rows : d, h: pieceHeight, definition: { ...c.definition!, kitchenware: { ...model, count: undefined } } });
+    prototype.updateMatrixWorld(true);
+    prototype.traverse(part => {
+      if (!(part instanceof THREE.Mesh)) return;
+      const mesh = new THREE.InstancedMesh(part.geometry, part.material, count);
+      mesh.userData = { ...part.userData, skipOutline: true };
+      for (let i = 0; i < count; i++) {
+        const x = grid ? -w / 2 + w / cols * (i % cols + .5) : 0, z = grid ? -d / 2 + d / rows * (Math.floor(i / cols) + .5) : 0;
+        mesh.setMatrixAt(i, new THREE.Matrix4().makeTranslation(x, grid ? 0 : i * step * h, z).multiply(part.matrixWorld));
+      }
+      mesh.instanceMatrix.needsUpdate = true; c.parent.add(mesh);
+    });
+    return;
+  }
+  const palette = { ceramic: m.ceramicWhite, glass: m.glass, steel: m.metalChrome, plastic: m.whitePaint, wood: m.woodLight, fabric: m.fabricLight, stone: m.whitePaint, cork: m.woodLight };
+  const tint = (base: THREE.MeshStandardMaterial, color = model.color) => { const material = c.coloredMaterial?.(color, base) ?? base.clone(); material.color.set(color); return material; };
   const metallic = (color: string) => {
     const material = c.coloredMaterial?.(color, m.metalChrome) ?? m.metalChrome.clone();
     material.color.set(color);
@@ -16,7 +45,8 @@ export function buildKitchenware(c: AssetBuildContext): void {
     material.metalness = .35; material.roughness = .4; return material;
   };
   const steel = metallic('#b5babc');
-  const body = model.material === 'steel' ? model.color === '#343837' ? tint(m.metalBlack) : metallic(model.color) : tint(palette[model.material]);
+  const body = model.transparent ? tint(m.glass) : model.material === 'steel' ? model.color === '#343837' ? tint(m.metalBlack) : metallic(model.color) : tint(palette[model.material]);
+  if (model.matte) body.roughness = .65;
   const lidMat = (model.lidMaterial ?? model.material) === 'steel' ? metallic(model.lidColor ?? model.color) : tint(palette[model.lidMaterial ?? model.material], model.lidColor ?? model.color);
   const grip = model.material === 'wood' ? body : tint(m.whitePaint, '#353b3b');
   const dark = tint(m.metalBlack, '#303536');
@@ -133,7 +163,7 @@ export function buildKitchenware(c: AssetBuildContext): void {
       } break;
     }
     case 'pan': case 'pot': {
-      const pot = model.kind === 'pot', diameter = Math.min(d, w), lh = model.withLid ? Math.min(h * .28, .04) : 0, bh = h - lh;
+      const pot = model.kind === 'pot', diameter = model.bodyWidthRatio ? w * model.bodyWidthRatio : Math.min(d, w), lh = model.withLid ? model.bodyHeightRatio ? h * (1 - model.bodyHeightRatio) : Math.min(h * .28, .04) : 0, bh = h - lh;
       const x = pot ? 0 : -w / 2 + diameter / 2;
       if (model.round === false) { openBox(diameter, bh, d, 0, body, 'Body', x); }
       else {
@@ -172,13 +202,18 @@ export function buildKitchenware(c: AssetBuildContext): void {
       break;
     }
     case 'board': {
-      if (model.style === 'lazy_susan') { disc(0, h * .65, 0, w / 2, h * .7); disc(0, h * .15, 0, w * .3, h * .3, body, 'Base'); }
+      if (model.style === 'corner') {
+        const shape = new THREE.Shape(); shape.moveTo(-w / 2, -d / 2); shape.lineTo(w / 2, -d / 2); shape.lineTo(w / 2, d * .1); shape.lineTo(w * .1, d / 2); shape.lineTo(-w / 2, d / 2); shape.closePath();
+        const geo = new THREE.ExtrudeGeometry(shape, { depth: h, bevelEnabled: false }); geo.rotateX(-Math.PI / 2); add(geo, body, 'Shelf');
+      } else if (model.style === 'lazy_susan') { disc(0, h * .65, 0, w / 2, h * .7); disc(0, h * .15, 0, w * .3, h * .3, body, 'Base'); }
       else if (model.style === 'raised') {
         slab(w, h * .22, d, h * .78);
         for (const x of [-w * .38, w * .38]) box(x, h * .4, 0, w * .07, h * .8, d * .92, body, 'Legs');
       } else slab(w, h, d, 0); break;
     }
     case 'utensil': {
+      if (['peeler', 'corkscrew', 'tenderizer', 'pastry_brush'].includes(model.style ?? '')) { buildKitchenTool(c); break; }
+      if (model.style === 'rod') { const geo = new THREE.CylinderGeometry(.5, .5, 1, 16); geo.rotateX(Math.PI / 2); geo.scale(w, h, d); add(geo, body, 'Shaft', 0, h / 2); break; }
       const style = model.style, y = h / 2, r = Math.min(w * .06, h * .25), headz = -d * .3;
       box(0, y, d * .16, w * (style === 'knife' ? .5 : .22), h * .45, d * .68, body, 'Handle');
       if (style === 'knife') {
@@ -212,6 +247,7 @@ export function buildKitchenware(c: AssetBuildContext): void {
       } break;
     }
     case 'grater': {
+      if (model.style === 'box') { buildKitchenTool(c); break; }
       box(0, h * .5, d * .32, w * .45, h * .65, d * .36, grip, 'Handle');
       const shape = rect(w, d * .68, w * .08), radius = Math.min(w * .07, d * .018);
       for (let i = 0; i < 3; i++) for (let j = 0; j < 7; j++) {
@@ -232,9 +268,9 @@ export function buildKitchenware(c: AssetBuildContext): void {
     }
     case 'cutlery_tray': {
       openBox(w, h, d);
-      const t = Math.min(w * .012, .004), cols = Math.max(2, Math.floor(w / .085)), split = -d * .18;
+      const t = Math.min(w * .012, .004), cols = Math.max(1, Math.floor(w / .085)), split = -d * .18;
       const parts: THREE.BufferGeometry[] = [];
-      for (let i = 1; i < cols; i++) parts.push(new THREE.BoxGeometry(t, h * .88, d * .66).translate(-w / 2 + i * w / cols, h * .5, d * .15));
+      for (let i = 1; i < cols; i++) parts.push(new THREE.BoxGeometry(t, h * .88, d * .66).translate(-w / 2 + i * .085, h * .5, d * .15));
       parts.push(new THREE.BoxGeometry(w * .96, h * .88, t).translate(0, h * .5, split)); merge(parts, body, 'Compartment Dividers'); break;
     }
     case 'shelf_insert': {
@@ -258,5 +294,6 @@ export function buildKitchenware(c: AssetBuildContext): void {
       }
       merge(parts, body, 'Rack Frame'); break;
     }
+    default: buildKitchenTool(c);
   }
 }

@@ -61,12 +61,16 @@ test('IKEA kitchenware can be placed and stacked in cabinets, exported and reope
   // Move the organizer clear of the pan, using the actual interior editor controls.
   const xLabel = page.getByText('X (Horiz.)', { exact: true }).locator('..').locator('input');
   await xLabel.fill('.5');
+  await page.getByRole('button', { name: 'Shelf 2', exact: true }).click();
+  await place('60201251');
+  await xLabel.fill('.8');
   await expect(page.getByRole('dialog', { name: 'Cabinet layout editor' }).getByRole('status')).toContainText('No collisions or unsupported objects');
   await page.screenshot({ path: info.outputPath('kitchen-cabinet-contents.png') });
   await page.getByRole('button', { name: 'Done', exact: true }).click(); await ready(page);
   const saved = await cabinetData(page);
-  expect(saved.cabinet.contents).toHaveLength(5);
+  expect(saved.cabinet.contents).toHaveLength(6);
   expect(saved.cabinet.contents.filter((o: any) => o.assetKey === 'ikea_10597103')).toHaveLength(3);
+  expect(saved.cabinet.contents.some((o: any) => o.assetKey === 'ikea_60201251')).toBe(true);
   const download = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Full Editor (.html)', exact: true }).click();
   const path = info.outputPath('kitchen-editor.html'); await (await download).saveAs(path);
@@ -103,6 +107,35 @@ test('representative kitchenware renders offline with open vessels, handles and 
     }, { script: runtimeScript, z });
     await ready(page); await page.waitForTimeout(100);
     await page.screenshot({ path: info.outputPath(`kitchen-gallery-${group}.png`) });
+  }
+  expect(errors).toEqual([]); expect(network).toEqual([]);
+});
+
+test('expanded prep tools, storage sets and wall organizers render without network access', async ({ page, request, context }, info) => {
+  const codes = ['60201251', '10561712', '60629644', '40480154', '90528691', '00521948', '40429580', '60534226', '40328557', '00089163', '66916200', '10497212', '50607341', '80628337', '40623742', '10346831', '20103016', '70343938', '70465736', '60465751', '20448834', '80433882', '70333722', '50609241', '90524179', '70619017', '70032451', '20530744', '40449168', '90207402', '10597099', '40454560'];
+  const items = codes.map((code, i) => {
+    const asset = catalog.get(`ikea_${code}`)!;
+    return codec.factory.furniture({ id: code, name: asset.key, assetKey: asset.key, displayName: asset.name, category: 'kitchen', dimensions: asset.defaultDimensions, position: { x: (i % 4) * .8, y: 0, z: Math.floor(i / 4) * .8 }, rotationY: 0 });
+  });
+  const template = await (await request.get('/hview_editor_template.html')).text();
+  const html = packStandaloneHtml(setScriptContent(template, 'plan-data', escapeScriptJson(codec.encode(new PlanDocument(items)))));
+  const url = 'http://127.0.0.1:3100/__offline__/expanded-kitchen.html', network: string[] = [], errors: string[] = [];
+  await context.route(/^https?:/, route => route.request().url() === url ? route.fulfill({ contentType: 'text/html', body: html }) : (network.push(route.request().url()), route.abort()));
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto(url); await ready(page);
+  expect(await page.evaluate(({ script, codes }) => {
+    const r = new Function(script)();
+    return codes.filter(code => r.scene.getRenderObject(code)?.children.length > 0).length;
+  }, { script: runtimeScript, codes })).toBe(codes.length);
+  for (let group = 0; group < 4; group++) {
+    await page.evaluate(({ script, group }) => {
+      const s = new Function(script)().scene, camera = s.getCamera(), controls = s.getControls();
+      s.updateSettings({ showFloor: false, foregroundOcclusionMode: 'off' });
+      controls.target.set(1.2, .07, group * 1.6 + .4); camera.position.set(1.5, 2.2, group * 1.6 + 2.8);
+      camera.zoom = 1.35; camera.updateProjectionMatrix(); controls.update(); s.invalidate();
+    }, { script: runtimeScript, group });
+    await ready(page); await page.waitForTimeout(100);
+    await page.screenshot({ path: info.outputPath(`expanded-kitchen-${group}.png`) });
   }
   expect(errors).toEqual([]); expect(network).toEqual([]);
 });

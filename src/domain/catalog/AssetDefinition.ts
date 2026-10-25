@@ -61,7 +61,7 @@ export interface AssetDefinition {
   cabinetDoors?: 0 | 1 | 2;
   collection?: string;
   source?: {
-    retailer: string; url?: string; productCode?: string;
+    retailer: string; url?: string; productCode?: string; categoryPath?: readonly string[];
     dimensions?: 'listed' | 'estimated' | 'reference'; dimensionNotes?: string;
   };
 }

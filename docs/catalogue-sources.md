@@ -18,7 +18,9 @@ Catalogue entries contain the maintained product identities, dimensions, source 
 
 Runtime dimensions use metres: `x` is width, `y` height and `z` depth. Product `size` arrays in the IKEA datasets use width × depth × height in centimetres. Installed depths, folded/hanging thicknesses, foliage spread and other unpublished extents may be estimates; package dimensions are not substituted for product dimensions.
 
-Kitchenware multipacks are represented by individual pieces where component sizes can be identified. Mixed sets without component sizes are omitted. Cookware envelopes include handles; unpublished lid, knob and handle clearances are explicitly estimated. Cups, containers and cookware have hollow procedural interiors, but cabinet collision checks still use conservative outer envelopes. Shelves and racks are layout references; their openings do not provide automatic nesting or extra supporting surfaces.
+The kitchenware dataset contains 1,354 unique article numbers. The expansion uses the retailer's English product sitemap and product-page dimensions, component lists and category breadcrumbs, including food preparation, cookware, kitchen organization and food storage. Articles already in other maintained catalogues are not added again. Source URLs and estimate notes remain available offline with each entry; source pages are not downloaded by the editor.
+
+Kitchenware multipacks are represented by individual pieces where component sizes can be identified. Mixed sets have complete storage arrangements, using source-listed components where available. Missing component extents and representative assortments are explicitly marked as estimates; an arrangement is resized and moved as one object. Cookware envelopes include handles; unpublished lid, knob and handle clearances are explicitly estimated. Cups, containers and cookware have hollow procedural interiors, but cabinet collision checks still use conservative outer envelopes. Shelves and racks are layout references; their openings do not provide automatic nesting or extra supporting surfaces. Repeated pieces in sets share instanced geometry.
 
 ## Additional reference notes
 

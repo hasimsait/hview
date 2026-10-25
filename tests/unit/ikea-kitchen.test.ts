@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { describe, expect, it } from 'vitest';
 import { IKEA_KITCHEN_PRODUCTS } from '../../src/domain/catalog/IkeaKitchenProducts';
-import { IKEA_ACCESSORIES } from '../../src/domain/catalog/IkeaAccessories';
 import { AssetCatalog } from '../../src/domain/catalog/AssetCatalog';
 import { PlanCodec } from '../../src/domain/codec/PlanCodec';
 import { LegacyPlanWriter } from '../../src/domain/codec/LegacyPlanWriter';
@@ -15,17 +14,19 @@ const entity = (code: string, dimensions = article(code).defaultDimensions) => c
 
 describe('IKEA Türkiye kitchenware', () => {
   it('adds individually referenced English articles without replacing existing catalogue objects', () => {
-    expect(IKEA_KITCHEN_PRODUCTS.length).toBeGreaterThanOrEqual(220);
+    expect(IKEA_KITCHEN_PRODUCTS.length).toBeGreaterThanOrEqual(1300);
     expect(new Set(IKEA_KITCHEN_PRODUCTS.map(a => a.key)).size).toBe(IKEA_KITCHEN_PRODUCTS.length);
+    const kitchenKeys = new Set(IKEA_KITCHEN_PRODUCTS.map(a => a.key));
+    const otherArticles = new Set(catalog.all().filter(a => !kitchenKeys.has(a.key)).map(a => a.source?.productCode?.replace(/\D/g, '')));
     for (const asset of IKEA_KITCHEN_PRODUCTS) {
-      expect(IKEA_ACCESSORIES.some(old => old.key === asset.key)).toBe(false);
+      expect(otherArticles.has(asset.source!.productCode), asset.key).toBe(false);
       expect(asset.source?.productCode).toMatch(/^\d{8}$/);
       expect(asset.source?.url).toMatch(new RegExp(`^https://www\\.ikea\\.com\\.tr/en/.*${asset.source!.productCode}$`));
       expect(asset.name).not.toMatch(/\b(tabak|bardak|tencere|kaşık|cam|zuccaciye|dolap)\b/i);
       expect(asset.source?.dimensionNotes).toBeTruthy();
-      expect(asset.source?.dimensions).toBe(/estimated/i.test(asset.source!.dimensionNotes!) ? 'estimated' : 'listed');
+      expect(asset.source?.dimensions).toBe(/estimat/i.test(asset.source!.dimensionNotes!) ? 'estimated' : 'listed');
       expect(catalog.recipe(asset.key)).toBe('kitchenware');
-      expect(asset.placement?.mount).toBe('surface');
+      expect(['surface', 'wall', 'floor']).toContain(asset.placement?.mount);
     }
   });
 
@@ -66,11 +67,29 @@ describe('IKEA Türkiye kitchenware', () => {
           expect(Array.from(positions.array).every(Number.isFinite), asset.key).toBe(true);
           expect(part.geometry.getAttribute('uv')?.count, asset.key).toBe(positions.count);
         });
-        expect(meshes, asset.key).toBeLessThanOrEqual(16);
+        expect(meshes, asset.key).toBeLessThanOrEqual(asset.kitchenware?.kind === 'set' ? 64 : 16);
         const lease = resources.ownTree(root); lease.dispose(); expect(resources.size).toBe(baseline);
       }
     }
     shared.dispose(); expect(resources.size).toBe(0);
+  }, 30000);
+
+  it('represents complete mixed sets, individual multipacks and mounted organizers explicitly', () => {
+    const cookware = article('90207402');
+    expect(cookware.kitchenware?.kind).toBe('set');
+    expect(cookware.kitchenware?.components).toHaveLength(3);
+    expect(cookware.kitchenware?.components?.filter(c => c.model.withLid)).toHaveLength(2);
+    expect(cookware.source?.dimensionNotes).toMatch(/capacities are not product dimensions/);
+    const pruta = article('10597099');
+    expect(pruta.kitchenware?.components?.reduce((sum, c) => sum + (c.model.count ?? 1), 0)).toBe(17);
+    expect(article('70566641').defaultDimensions.x).toBeLessThan(.02);
+    expect(article('70566641').description).toContain('One individually placeable piece');
+    expect(article('80444442').placement?.mount).toBe('wall');
+    expect(article('10327700').kitchenware).toMatchObject({ kind: 'board', style: 'raised' });
+    for (const asset of IKEA_KITCHEN_PRODUCTS.filter(a => a.kitchenware?.kind === 'set')) {
+      expect(asset.kitchenware!.components!.length, asset.key).toBeGreaterThan(0);
+      expect(asset.source?.dimensions, asset.key).toBe('estimated');
+    }
   });
 
   it('keeps cups and food containers hollow, shelf inserts open and pan bodies circular', () => {
@@ -90,12 +109,32 @@ describe('IKEA Türkiye kitchenware', () => {
     expect(hits).toHaveLength(0);
   });
 
+  it('shares repeated set geometry and disposes its instance buffers with the scene lease', () => {
+    const root = builder.build(entity('10597099')), resources = new ResourcePool();
+    let instances = 0, pieces = 0, disposed = 0;
+    root.traverse(part => {
+      if (!(part instanceof THREE.InstancedMesh)) return;
+      instances++; pieces += part.count;
+      part.addEventListener('dispose', () => disposed++);
+    });
+    expect(instances).toBeGreaterThan(0);
+    expect(pieces).toBeGreaterThan(instances);
+    const lease = resources.ownTree(root); lease.dispose();
+    expect(disposed).toBe(instances);
+    expect(resources.size).toBe(0);
+  });
+
   it('round-trips new keys, resized dimensions, placement and lid finishes in both save formats', () => {
     const items = IKEA_KITCHEN_PRODUCTS.map((asset, i) => entity(asset.source!.productCode!).withTransform({ x: i % 8, y: .2, z: Math.floor(i / 8) }, .25).withSectionFinish('Lid', { type: 'paint', color: '#5588aa' }));
     const document = new PlanDocument(items);
     for (const text of [codec.encode(document), new LegacyPlanWriter().encode(document)]) {
       const restored = codec.decode(text);
-      for (const item of items) expect(restored.requireFurniture(item.id)).toMatchObject({ assetKey: item.assetKey, dimensions: item.dimensions, position: item.position, rotationY: item.rotationY, sectionFinishes: item.sectionFinishes });
+      for (const item of items) {
+        const actual = restored.requireFurniture(item.id).toData();
+        expect(actual).toMatchObject({ assetKey: item.assetKey, position: item.position, rotationY: item.rotationY, sectionFinishes: item.sectionFinishes });
+        // The legacy writer stores metres with four decimal places.
+        for (const axis of ['x', 'y', 'z'] as const) expect(actual.dimensions[axis], `${item.id} ${axis}`).toBeCloseTo(item.dimensions[axis], 4);
+      }
     }
   });
 });
