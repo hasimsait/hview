@@ -9,6 +9,7 @@ Catalogue entries contain the maintained product identities, dimensions, source 
 | BAUHAUS accessories, IKEA bookcases and reference kitchen appliances | [CuratedAssets.ts](../src/domain/catalog/CuratedAssets.ts) |
 | IKEA accessories | [IkeaAccessories.ts](../src/domain/catalog/IkeaAccessories.ts) |
 | IKEA bathroom and shower articles | [IkeaBathroomProducts.json](../src/domain/catalog/IkeaBathroomProducts.json), with metadata conversion in [IkeaBathroomProducts.ts](../src/domain/catalog/IkeaBathroomProducts.ts) |
+| IKEA kitchenware | [IkeaKitchenProducts.json](../src/domain/catalog/IkeaKitchenProducts.json): individual articles from [IKEA Türkiye kitchenware](https://www.ikea.com.tr/kategori/zuccaciye), with conversion in [IkeaKitchenProducts.ts](../src/domain/catalog/IkeaKitchenProducts.ts) |
 | Popular Products | [PopularProducts.json](../src/domain/catalog/PopularProducts.json): planning dimensions and model settings |
 | Electrical fittings | [ElectricalAssets.ts](../src/domain/catalog/ElectricalAssets.ts) |
 | Water-treatment and household appliances | [HouseholdAppliances.ts](../src/domain/catalog/HouseholdAppliances.ts) |
@@ -16,6 +17,8 @@ Catalogue entries contain the maintained product identities, dimensions, source 
 | Tile sizes and finish defaults | [tiles.json](../public/textures/tiles/tiles.json) |
 
 Runtime dimensions use metres: `x` is width, `y` height and `z` depth. Product `size` arrays in the IKEA datasets use width × depth × height in centimetres. Installed depths, folded/hanging thicknesses, foliage spread and other unpublished extents may be estimates; package dimensions are not substituted for product dimensions.
+
+Kitchenware multipacks are represented by individual pieces where component sizes can be identified. Mixed sets without component sizes are omitted. Cookware envelopes include handles; unpublished lid, knob and handle clearances are explicitly estimated. Cups, containers and cookware have hollow procedural interiors, but cabinet collision checks still use conservative outer envelopes. Shelves and racks are layout references; their openings do not provide automatic nesting or extra supporting surfaces.
 
 ## Additional reference notes
 

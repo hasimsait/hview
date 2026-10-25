@@ -12,6 +12,7 @@ import { CABINET_FIT_OBJECTS } from './CabinetFitObjects';
 import { CABINET_ASSETS } from './Cabinets';
 import { HOUSEHOLD_DETAILS } from './HouseholdDetails';
 import { SOFT_FURNISHINGS } from './SoftFurnishings';
+import { IKEA_KITCHEN_PRODUCTS } from './IkeaKitchenProducts';
 
 export const DEFAULT_ASSETS: readonly AssetDefinition[] = [
   ...CABINET_ASSETS,
@@ -24,6 +25,7 @@ export const DEFAULT_ASSETS: readonly AssetDefinition[] = [
   ...ARCHITECTURAL_FINISHES,
   ...CURATED_ASSETS,
   ...IKEA_ACCESSORIES,
+  ...IKEA_KITCHEN_PRODUCTS,
   ...ELECTRICAL_ASSETS,
   ...HOUSEHOLD_APPLIANCES,
   ...POPULAR_PRODUCTS,
