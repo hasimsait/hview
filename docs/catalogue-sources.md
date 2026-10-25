@@ -24,6 +24,7 @@ Kitchenware multipacks are represented by individual pieces where component size
 
 ## Additional reference notes
 
+- The Filli Boya Momento Silan palette uses the 1,284 distinct translated shade names from the manufacturer's [product colour selector](https://www.filliboya.com/urun/momento-silan). Labels are in English and retain shade numbers; RGB values are bundled digital references, not measured paint samples. Duplicate spelling variants are merged. Spark 230 uses the dedicated shade page's value where the general selector conflicts; Wicker 15's published red channel of 2419 is clamped to 255, matching CSS rendering.
 - VIKO Karre face sizes were checked against the [manufacturer catalogue](https://viko.panasonic.com/Uploads/File/panasonic-general-product-catalogue_1.pdf) and [double-socket listing](https://www.trendyol.com/en/viko/viko-karre-double-grounded-socket-90967x56-white-p-40496935). Visible projection excludes the concealed mechanism and is estimated. Per-product links remain in the catalogue data.
 - The angled hood, gas cooktop and built-in oven use standard-size estimates from unidentified reference photographs.
 - The water-treatment unit uses the supplied photograph's 35 W × 67 H × 49 D cm envelope. The DT4 65 L heater uses the supplied 50 W × 72 H × 50 D cm envelope; its exterior geometry is a reference representation.
