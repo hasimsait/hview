@@ -79,8 +79,16 @@ for (const offline of [false, true]) {
     await page.mouse.up();
     await expect.poll(async () => delta((await view(page)).direction, beforeMouse.direction)).toBeGreaterThan(.1);
     const afterMouse = await view(page);
+    expect(afterMouse.direction[1]).toBeLessThan(beforeMouse.direction[1]);
     expect(delta(afterMouse.eye, beforeMouse.eye)).toBeLessThan(1e-6);
     expect(afterMouse.distance).toBeCloseTo(beforeMouse.distance, 6);
+    await page.mouse.down();
+    await page.mouse.move(bounds.x + bounds.width * .6, bounds.y + bounds.height * .45, { steps: 8 });
+    await page.mouse.up();
+    const afterUpDrag = await view(page);
+    expect(afterUpDrag.direction[1]).toBeGreaterThan(afterMouse.direction[1]);
+    expect(delta(afterUpDrag.eye, beforeMouse.eye)).toBeLessThan(1e-6);
+    expect(afterUpDrag.distance).toBeCloseTo(beforeMouse.distance, 6);
     const start = await view(page);
     await holdUntil(page, 'ArrowUp', async () => (await view(page)).direction[1] > .4);
     const up = await view(page);
