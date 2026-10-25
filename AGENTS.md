@@ -21,3 +21,7 @@ The user wants a ready-to-open offline editor at the end of every HView response
 - Check that the linked workspace file exists and reflects the current application source; do not assume an artifact path from an earlier session still exists.
 
 This delivery preference persists across sessions unless the user changes it.
+
+## Next-commit cleanup
+
+The commit adding `lighting_samples/` is a temporary review upload. In the immediately following commit, delete that folder and remove this reminder.
