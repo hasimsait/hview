@@ -213,6 +213,18 @@ export const DEFAULT_ASSETS: readonly AssetDefinition[] = [
 
   // Bathroom
   {
+    key: 'squat_toilet',
+    name: 'Squat Toilet',
+    category: 'bathroom',
+    collection: 'Sanitary fixtures',
+    recipe: 'squat_toilet',
+    description: 'Low-profile ceramic squat pan with a recessed bowl, drain opening, two ribbed footplates and a rear flush inlet.',
+    defaultDimensions: { x: .55, y: .1, z: .65 },
+    placement: { mount: 'floor', defaultElevation: 0 },
+    aliases: ['squat_pan', 'floor_toilet', 'squat toilet pan'],
+    source: { retailer: 'Generic', dimensions: 'estimated', dimensionNotes: 'Reference pan envelope: 55 cm wide, 65 cm deep and 10 cm high. Resize to the actual fixture.' },
+  },
+  {
     key: 'toilet',
     name: 'Standard Toilet',
     category: 'bathroom',

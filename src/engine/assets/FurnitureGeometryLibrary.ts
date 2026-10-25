@@ -1,4 +1,5 @@
 import { buildDailyLife } from './builders/DailyLifeBuilder';
+import { buildSquatToilet } from './builders/SquatToiletBuilder';
 import type { AssetRecipeId } from '../../domain/catalog/AssetRecipes';
 import type { AssetBuilderFn } from "./builders/AssetBuildContext";
 import * as Bathroom from "./builders/BathroomBuilders";
@@ -36,6 +37,7 @@ export const FURNITURE_GEOMETRY: Readonly<Record<AssetRecipeId, AssetBuilderFn>>
   air_purifier: buildAirPurifier,
   water_treatment_unit: buildWaterTreatmentUnit,
   storage_water_heater: buildStorageWaterHeater,
+  squat_toilet: buildSquatToilet,
   ikea_accessory: buildIkeaAccessory,
   angled_range_hood: Catalogue.buildAngledHood,
   gas_cooktop: Catalogue.buildGasCooktop,

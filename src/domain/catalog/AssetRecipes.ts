@@ -19,6 +19,7 @@ export const ASSET_RECIPES = [
   { id: 'air_purifier', aliases: [], behavior: 'standard' },
   { id: 'water_treatment_unit', aliases: [], behavior: 'standard' },
   { id: 'storage_water_heater', aliases: [], behavior: 'standard' },
+  { id: 'squat_toilet', aliases: [], behavior: 'standard' },
   { id: 'ikea_accessory', aliases: [], behavior: 'standard' },
   { id: 'angled_range_hood', aliases: [], behavior: 'standard' },
   { id: 'gas_cooktop', aliases: [], behavior: 'standard' },
