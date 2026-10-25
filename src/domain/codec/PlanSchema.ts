@@ -55,7 +55,7 @@ export const furnitureSchema = z.object({
   assetKey: id, position: vector, rotationY: number, dimensions, roomId: id.optional(), customModelUrl: z.string().optional(),
   visible: z.boolean().optional(), hasLids: z.boolean().optional(), shelfCount: number.int().min(Shelving.minShelves).max(Shelving.maxShelves).optional(), recessHostId: id.optional(),
   finish, sectionFinishes: z.record(finishSchema).optional(),
-  lightConfig: z.object({ enabled: z.boolean().optional(), intensity: number.min(0).max(3).optional(), color: z.string().optional() }).optional(),
+  lightConfig: z.object({ enabled: z.boolean().optional(), intensity: number.min(0).max(3).optional(), color: z.string().optional(), temperatureKelvin: number.min(2700).max(6500).optional(), lumens: number.min(0).max(100000).optional() }).optional(),
   windowCoveringOpen: number.min(0).max(1).optional(),
   cabinet: z.custom<CabinetLayout>(value => { try { validateCabinet(value as CabinetLayout); return true; } catch { return false; } }, 'Invalid cabinet layout').optional(),
   rawItem: z.unknown().optional(),

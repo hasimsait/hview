@@ -83,7 +83,7 @@ describe('cabinet content lighting', () => {
     node.dispose(); expect(resources.size).toBe(0);
   });
 
-  it.each([null, [], { enabled: 'no' }, { color: 123 }, { intensity: -1 }, { intensity: 3.1 }, { intensity: NaN }])('rejects malformed nested light settings: %j', config => {
+  it.each([null, [], { enabled: 'no' }, { color: 123 }, { intensity: -1 }, { intensity: 3.1 }, { intensity: NaN }, { temperatureKelvin: 2699 }, { temperatureKelvin: NaN }, { lumens: -1 }, { lumens: Infinity }])('rejects malformed nested light settings: %j', config => {
     const layout = structuredClone(cabinet().cabinet!);
     layout.contents[0].lightConfig = config as unknown as LightFixtureConfig;
     expect(() => validateCabinet(layout)).toThrow();

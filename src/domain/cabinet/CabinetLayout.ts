@@ -124,6 +124,8 @@ export function validateCabinet(layout: CabinetLayout): CabinetLayout {
       if (config.enabled !== undefined && typeof config.enabled !== 'boolean') throw new Error('Invalid content light state');
       if (config.color !== undefined && typeof config.color !== 'string') throw new Error('Invalid content light color');
       if (config.intensity !== undefined && (finite(config.intensity, 'Content light intensity') < 0 || config.intensity > 3)) throw new Error('Content light intensity must be between 0 and 3');
+      if (config.temperatureKelvin !== undefined && (finite(config.temperatureKelvin, 'Content light temperature') < 2700 || config.temperatureKelvin > 6500)) throw new Error('Content light temperature must be between 2700 and 6500 K');
+      if (config.lumens !== undefined && (finite(config.lumens, 'Content light output') < 0 || config.lumens > 100000)) throw new Error('Content light output must be between 0 and 100000 lm');
     }
     const seen = new Set([o.id]);
     let parent = o.supportId;

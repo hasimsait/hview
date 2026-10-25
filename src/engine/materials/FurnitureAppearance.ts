@@ -6,6 +6,7 @@ import { cabinetSurfaceFinish, surfaceSection } from '../../domain/model/Surface
 import type { ResourcePool } from '../resources/ResourcePool';
 import { isFabricStretched,type SurfaceMaterialFactory } from './SurfaceMaterialFactory';
 import { isFixtureLight } from '../lighting/FixtureLight';
+import { whiteLightColor } from '../lighting/WhiteLight';
 export class FurnitureAppearance {
   private readonly glowMaterials = new WeakSet<THREE.Mesh>();
   constructor(private readonly finishService: SurfaceMaterialFactory, private readonly resources: ResourcePool, private readonly settings: () => ViewportSettings, private readonly recessHost: (item: WallRecess) => RecessHost | undefined) { }
@@ -79,16 +80,27 @@ export class FurnitureAppearance {
   applyLighting(mesh: THREE.Object3D, entity?: FurnitureEntity): void {
     const contents = new Map(entity?.cabinet?.contents.map(content => [content.id, content]));
     const fixtureTypes = new Map<string | undefined, string>();
+    const totalPower = new Map<string | undefined, number>();
+    const basePowers = new Map<THREE.Object3D, number>();
     mesh.traverse(child => {
-      if (isFixtureLight(child)) fixtureTypes.set(child.userData.cabinetContent?.id, child.userData.fixtureType ?? 'spot');
+      if (isFixtureLight(child)) {
+        const id = child.userData.cabinetContent?.id;
+        fixtureTypes.set(id, child.userData.fixtureType ?? 'spot');
+        const factor = child instanceof THREE.RectAreaLight ? child.width * child.height * Math.PI : child instanceof THREE.SpotLight ? Math.PI : 4 * Math.PI;
+        const power = (child.userData.baseIntensity ?? .8) * factor;
+        basePowers.set(child, power); totalPower.set(id, (totalPower.get(id) ?? 0) + power);
+      }
     });
 
     mesh.traverse((child) => {
+      if (!isFixtureLight(child) && !(child instanceof THREE.Mesh && child.userData.isLightEmissive)) return;
       const content = child.userData.cabinetContent as import('../../domain/cabinet/CabinetLayout').CabinetContent | undefined;
       const config = content ? (contents.get(content.id) ?? content).lightConfig : entity?.lightConfig;
       const isEnabled = config?.enabled !== false;
       const customIntensity = config?.intensity ?? 1.0;
       const customColor = config?.color;
+      const temperature = this.settings().fixtureTemperatureKelvin || config?.temperatureKelvin;
+      const whiteColor = temperature ? whiteLightColor(temperature) : undefined;
       const fixtureType = fixtureTypes.get(content?.id) ?? ((entity?.assetKey ?? '').includes('chandelier') ? 'chandelier' : 'spot');
       // 1. Actual room lights, including directional spotlight beams.
       if (isFixtureLight(child)) {
@@ -104,13 +116,19 @@ export class FurnitureAppearance {
         if (isEnabled && typeMult > 0 && customIntensity > 0) {
           const finalIntensity = baseInt * typeMult * customIntensity;
           pointLight.intensity = finalIntensity;
-          if ('distance' in pointLight) pointLight.distance = baseDist * Math.sqrt(Math.max(0.2, typeMult * customIntensity));
-          if (customColor) {
+          if (config?.lumens !== undefined) {
+            const power = totalPower.get(content?.id) ?? 0;
+            pointLight.power = power > 0 ? config.lumens * (basePowers.get(child)! / power) * typeMult * customIntensity : 0;
+          }
+          if ('distance' in pointLight) pointLight.distance = baseDist;
+          if (whiteColor) {
+            pointLight.color.copy(whiteColor);
+          } else if (customColor) {
             pointLight.color.set(customColor);
           } else {
             pointLight.color.set(baseColor);
           }
-          pointLight.visible = true;
+          pointLight.visible = pointLight.intensity > 0;
         } else {
           pointLight.intensity = 0;
           pointLight.visible = false;
@@ -123,11 +141,13 @@ export class FurnitureAppearance {
           ? (this.settings().chandelierIntensity ?? 1.0)
           : (this.settings().spotLightIntensity ?? 1.0);
 
-        const isLit = isEnabled && typeMult > 0.05 && customIntensity > 0.05;
+        const isLit = isEnabled && typeMult > 0 && customIntensity > 0 && config?.lumens !== 0;
         if (child.material && 'color' in child.material) {
           const mat = child.material as THREE.MeshBasicMaterial;
           if (isLit) {
-            if (customColor) {
+            if (whiteColor) {
+              mat.color.copy(whiteColor).multiplyScalar(1 / Math.max(whiteColor.r, whiteColor.g, whiteColor.b));
+            } else if (customColor) {
               mat.color.set(customColor);
             } else {
               mat.color.set(0xfff6dd); // warm golden white glow

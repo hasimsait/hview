@@ -48,6 +48,9 @@ export interface ViewportSettings {
   globalLightIntensity: number; // 0.0 - 2.0 (default 1.0)
   spotLightIntensity: number;   // 0.0 - 3.0 (default 1.0)
   chandelierIntensity: number;  // 0.0 - 3.0 (default 1.0)
+  exposure?: number; // Fixed display exposure, 1/64–4 (default 1).
+  toneMapping?: 'neutral' | 'aces';
+  fixtureTemperatureKelvin?: number; // Temporary white-light preview; 0 uses each fixture's settings.
 }
 
 export interface ISceneService {

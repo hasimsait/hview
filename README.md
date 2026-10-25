@@ -37,6 +37,8 @@ Saving is explicit. **Save .plan** captures the current document and locks the a
 
 Portable HTML includes the full catalogue, textures and export templates. It requires no server, asset folder or network connection.
 
+For paint comparisons, use **Lighting → PBR Neutral**, turn daylight off, and compare **White light preview → 2700 K / 6500 K** at a fixed exposure. Preview temperature, exposure and the ACES comparison affect the current viewport only; they reset on reload and do not alter the plan. A fixture's own Kelvin, total lumens and brightness settings are saved in the plan and offline exports. **Use 806 lm** sets the total output of that fixture; multiply by the bulb count when appropriate. Kelvin colors approximate a Planckian source at constant nominal luminance, not a particular LED's spectrum. The renderer does not simulate indirect light bouncing between room surfaces. On an iPhone, disable True Tone, Night Shift and auto-brightness for a consistent comparison.
+
 For iPhone Shortcuts that open HTML through a `data:` URL, the editor never reads the payload-sized pathname for storage keys and never attempts origin-based browser storage. Edits live in the tab; **Save HTML** downloads a new self-contained copy with those edits. **Reset** restores the embedded plan in memory. Ordinary file/hosted copies retain their existing browser saves. No server, service worker, database, or asset fetch is required for a portable copy.
 
 ## Build and test

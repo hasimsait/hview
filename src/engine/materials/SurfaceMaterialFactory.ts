@@ -329,6 +329,9 @@ export class SurfaceMaterialFactory implements ISurfaceFinishService {
           defaultColor = 0xf1f5f9;
           break;
         case 'paint':
+          metalness = config.metalness ?? 0;
+          roughness = config.roughness ?? 0.85;
+          break;
         default:
           roughness = 0.85;
           break;

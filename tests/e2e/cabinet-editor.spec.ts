@@ -75,9 +75,9 @@ test('cabinet LED controls survive draft undo, cancellation, offline export and 
   await expect(page.getByRole('slider', { name: 'Fixture brightness', exact: true })).toBeVisible();
   await page.getByRole('slider', { name: 'Fixture brightness', exact: true }).fill('1.7');
   await page.getByRole('button', { name: /5500K/ }).click();
-  const expected = { intensity: 1.7, color: '#e2f0ff' };
+  const expected = { intensity: 1.7, temperatureKelvin: 5500 };
   await expect.poll(async () => (await cabinetLight(page, true)).config).toEqual(expected);
-  await expect.poll(async () => (await cabinetLight(page, true)).glow).toEqual(['e2f0ff']);
+  expect((await cabinetLight(page, true)).glow).toHaveLength(1);
   const lit = (await cabinetLight(page, true)).lights[0].intensity;
   expect(lit).toBeGreaterThan(0);
   await page.getByRole('button', { name: '💡 ON', exact: true }).click();
@@ -112,7 +112,7 @@ test('cabinet LED controls survive draft undo, cancellation, offline export and 
   await tablet.getByRole('button', { name: 'Save .plan', exact: true }).click();
   await expect(tablet.getByRole('button', { name: 'Save .plan', exact: true })).toBeEnabled();
   await tablet.reload(); await expect.poll(async () => (await snapshot(tablet))?.status).toBe('ready');
-  expect((await cabinetLight(tablet)).config).toEqual({ ...expected, color: '#ed794c' });
+  expect((await cabinetLight(tablet)).config).toEqual({ intensity: expected.intensity, color: '#ed794c' });
   expect(errors).toEqual([]); expect(tabletErrors).toEqual([]);
   await touch.close();
 });

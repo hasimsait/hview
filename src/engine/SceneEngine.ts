@@ -213,8 +213,9 @@ export class SceneEngine implements ISceneService {
     this.renderer.setSize(container.clientWidth, container.clientHeight);
     this.renderer.shadowMap.enabled = !this.mobile;
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.05;
+    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+    this.renderer.toneMapping = THREE.NeutralToneMapping;
+    this.renderer.toneMappingExposure = this.settings.exposure ?? 1;
 
     container.appendChild(this.renderer.domElement);
     this.renderer.domElement.addEventListener('webglcontextlost', this.onContextLost);
@@ -355,6 +356,10 @@ export class SceneEngine implements ISceneService {
     this.ceilingsDirty = false;
   }
   private applyLightingSettings(): void {
+    if (this.renderer) {
+      this.renderer.toneMapping = this.settings.toneMapping === 'aces' ? THREE.ACESFilmicToneMapping : THREE.NeutralToneMapping;
+      this.renderer.toneMappingExposure = THREE.MathUtils.clamp(this.settings.exposure ?? 1, 1 / 64, 4);
+    }
     this.lighting.update(this.settings);
     // Update all fixture lights across the scene
     for (const node of this.graph.values()) if (node.model instanceof Furniture) this.appearance.applyLighting(node.group, node.model);

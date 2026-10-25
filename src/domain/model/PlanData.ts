@@ -154,6 +154,8 @@ export interface LightFixtureConfig {
   enabled?: boolean;
   intensity?: number; // 0.0 to 3.0 multiplier (1.0 = standard)
   color?: string;     // hex color e.g. '#fff2dc'
+  temperatureKelvin?: number; // White-light approximation, 2700–6500 K; overrides color.
+  lumens?: number; // Total fixture output at 100% brightness; absent preserves the asset default.
 }
 
 export interface FurnitureData {
