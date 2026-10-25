@@ -30,6 +30,8 @@ import { SurfaceLayerControl } from './SurfaceLayerControl';
 
 export { PHOTOGRAPHIC_FABRIC_COLLECTIONS,type PhotographicFabricItem };
 
+const normalizePaintSearch = (value: string) => value.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/ı/g, 'i').trim();
+
 export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
   currentFinish,
   onSelectFinish: selectFinish,
@@ -273,7 +275,7 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
               <input
                 type="text"
                 aria-label="Search wall colors"
-                placeholder="Search wall colors (e.g. Andesite 10, Sage, #...)"
+                placeholder="Search wall colors by name or hex code"
                 value={paintSearchQuery}
                 onChange={(e) => { setPaintSearchQuery(e.target.value); setPaintLimit(120); }}
                 className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-7 py-1.5 text-[11px] text-slate-200 placeholder-slate-500 focus:outline-none focus:border-sky-500"
@@ -316,10 +318,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                   : PAINT_CATEGORIES.find((c) => c.id === selectedPaletteCategory)?.colors || [];
 
               if (paintSearchQuery.trim()) {
-                const q = paintSearchQuery.toLowerCase().trim();
+                const q = normalizePaintSearch(paintSearchQuery);
                 const allPaintsWithMetals = PAINT_CATEGORIES.filter((c) => c.id !== 'all').flatMap((c) => c.colors);
                 displayColors = allPaintsWithMetals.filter(
-                  (p) => p.name.toLowerCase().includes(q) || p.hex.toLowerCase().includes(q)
+                  (p) => normalizePaintSearch(p.name).includes(q) || p.hex.toLowerCase().includes(q)
                 );
               }
 
