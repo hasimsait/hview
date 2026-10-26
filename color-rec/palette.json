@@ -3,65 +3,65 @@
     "id": "_y0oj2",
     "roomName": "Living Room (13.3 m²)",
     "area_m2": 13.31,
-    "base": "SİS BULUTU",
-    "baseHex": "#ece6db",
+    "base": "KUMRU",
+    "baseHex": "#eae2d1",
     "boundingSpan_m": [
       3.44,
       3.98
     ],
-    "note": "Continuous warm ivory on all painted walls and column faces. Its cream undertone links the timber and burgundy curtains without adding another visual division to 13.3 m².",
+    "note": "KUMRU: pale warm cream-beige. The yellow-beige undertone continues the golden warmth of Wild Earl in a lighter value, balances the slate-blue sofa, and links the timber desks with the burgundy curtains. Keep all walls and painted column returns continuous in this densely furnished 13.3 m² room.",
     "sheet": "room-sheets/01-living-room-13m2.png"
   },
   {
     "id": "_v7m0m",
     "roomName": "Bedroom (8.3 m²)",
     "area_m2": 8.32,
-    "base": "SİS BULUTU",
-    "baseHex": "#ece6db",
+    "base": "KUMRU",
+    "baseHex": "#eae2d1",
     "boundingSpan_m": [
       3.64,
       2.46
     ],
-    "note": "One continuous pale ivory on all walls and painted column faces. The existing blue bed supplies colour in this 8.3 m² room; no accent wall. A dryer placement still needs a separate clearance and ventilation study.",
+    "note": "KUMRU: the same light warm cream-beige used in the smaller living room and corridor. It warms the blue bed and timber desk without adding a competing hue to 8.3 m². All painted walls and column faces stay the same colour; no cactus, dark end wall or contrasting stripe. A bedroom dryer remains a separate clearance study.",
     "sheet": "room-sheets/02-bedroom-8m2.png"
   },
   {
     "id": "_vzdza",
     "roomName": "Kitchen (8.0 m²)",
     "area_m2": 7.95,
-    "base": "SİS BULUTU",
-    "baseHex": "#ece6db",
+    "base": "KUMRU",
+    "baseHex": "#eae2d1",
     "boundingSpan_m": [
       3.76,
       2.47
     ],
-    "note": "Use the shared warm ivory on painted surfaces; retain green cabinets, mosaic and caramel floor tiles. No new paint tint is purchased just for the kitchen.",
+    "note": "KUMRU: pale warm cream-beige beside the existing muted green cabinets, timber worktop and caramel floor. Its warm undertone connects these finishes to the golden beige living room; avoid introducing another green or a cool grey alongside the cabinets. Preserve the mosaic and tile.",
     "sheet": "room-sheets/03-kitchen.png"
   },
   {
     "id": "_3h613",
     "roomName": "Master Bedroom (11.4 m²)",
     "area_m2": 11.36,
-    "base": "HASIR 310",
-    "baseHex": "#e2dbd4",
+    "base": "BEJ 30",
+    "baseHex": "#ebe1d8",
     "boundingSpan_m": [
       3.67,
       3.19
     ],
-    "note": "Continuous light warm stone on all painted walls and exposed painted columns. This replaces the dark red wall and softens the contrast with the full-height wardrobe in 11.4 m². Keep this warm stone reference for the bedroom; the living room now uses the separately selected Jotun colour.",
+    "note": "BEJ 30: a light peach-beige with a gentle red undertone. This is the softer clay note in the Wild Earl palette, picked up by the rust bedding and balanced by the green pillows; it warms the large taupe wardrobe without making the walls another dark mass. Use continuously on all painted walls and column faces in 11.4 m², with no separate accent.",
     "sheet": "room-sheets/04-master-bedroom.png"
   },
   {
     "id": "_4wyay",
     "roomName": "Hallway / Entry (11.7 m²)",
     "area_m2": 11.72,
-    "base": "SİS BULUTU",
-    "baseHex": "#ece6db",
+    "base": "KUMRU",
+    "baseHex": "#eae2d1",
     "boundingSpan_m": [
       4.31,
       6.07
     ],
-    "note": "Continue the shared warm ivory around the L-shaped corridor, door returns and exposed painted columns. Its warm undertone works with the caramel tile; avoid alternating colours between short wall segments.",
+    "note": "KUMRU: continue the light warm cream-beige through the L-shaped corridor. It links the golden Wild Earl living room with the caramel floor and timber entry door, while keeping the narrow stretches lighter than the main salon. Reuse the same mix as the small living room, small bedroom and kitchen; no alternating wall colours.",
     "sheet": "room-sheets/05-hallway-entry.png"
   },
   {
@@ -74,7 +74,7 @@
       3.21,
       7.03
     ],
-    "note": "Jotun 1876 Wild Earl: muted golden beige continuously on every painted wall and exposed painted column face. Remove the former blue-grey accent entirely. Retain the burgundy upholstery and timber. This is a Jotun colour reference, not a verified Filli Boya tint formula.",
+    "note": "Jotun 1876 Wild Earl is the fixed palette anchor: muted golden beige on all painted walls and exposed painted column faces in the 22 m² salon. The golden undertone links the burgundy seating, cream upholstery and timber shelving. Keep the room continuous rather than adding a grey accent; coordinate the remaining rooms with lighter cream-beige and soft clay-beige.",
     "colourBrand": "Jotun",
     "colourCode": "1876",
     "officialReference": "https://www.jotun.com/tr-tr/decorative/colours/interior/all-interior-colours/1876-wild-earl-interior",
