@@ -1,39 +1,34 @@
-# Room colour recommendations
+# One-colour recommendations for the small home
 
-Native HView cutaway renders of all 10 spaces in the uploaded `hview_1792965122887.plan`, using the application at commit `6463d2c`. Colours are selected from the bundled Filli Boya Momento Silan catalogue. This folder contains concept previews; it does not change the working plan or application.
+This revision replaces the earlier accent-colour study. Use **Filli Boya KIRIK BEYAZ (`#fbfaf5`)** on the painted walls, returns and exposed painted column faces throughout the six included spaces. One colour code avoids a separate accent tint mix and reduces visual breaks between the small rooms. Existing furniture, cabinetry and flooring supply the contrast. Existing ceilings remain unchanged.
 
-## Files
+The 8.3 m² bedroom has **no Kaktüs wall or other accent colour**. The master bedroom has no wine-coloured accent in this proposal. Painted column faces are explicitly included; tiled faces retain their original finishes.
 
-- [Full comparison study (PDF)](room-colour-study.pdf): all rooms, original views, proposed colours, swatches and explanations.
-- [Comparison sheets](comparisons/): five PNG sheets; saved room on the left, proposed painted finishes on the right.
-- [Recommended-colour renders](renders/): one 1400 × 1050 PNG per room.
-- [Palette data](palette.json): exact catalogue names and RGB references, room IDs, accent wall IDs, application scope and notes.
+## Scope
 
-## Palette
+Only the corridor / entry, kitchen, two living rooms and two bedrooms are included. **WC, bathrooms, shower and the 5.5 m² balcony are excluded.** The space labelled Dining / Office in the source is the balcony and is not an interior room recommendation.
 
-| Room / render | Main colour | Accent | Application |
-| --- | --- | --- | --- |
-| [Living Room (13.3 m²)](renders/01-living-room-13m2.png) | SİS BULUTU (#ece6db) | ANDEZİT 25 (#b9bfc2) | Painted walls only |
-| [Bedroom (8.3 m²)](renders/02-bedroom-8m2.png) | KIRIK BEYAZ (#fbfaf5) | KAKTÜS 20 (#b9cbb6) | Painted walls only |
-| [Kitchen (8.0 m²)](renders/03-kitchen.png) | KIRIK BEYAZ (#fbfaf5) | None | Painted walls only |
-| [Master Bedroom (11.4 m²)](renders/04-master-bedroom.png) | HASIR 310 (#e2dbd4) | GÜNBATIMI (#864954) | Painted walls only |
-| [Guest WC (2.1 m²)](renders/05-guest-wc.png) | KUM BEYAZI (#eeedeb) | None | Ceiling / dry trim only |
-| [Hallway / Entry (11.7 m²)](renders/06-hallway-entry.png) | SİS BULUTU (#ece6db) | None | Painted walls only |
-| [Dining / Office (5.5 m²)](renders/07-dining-office.png) | HASIR 340 (#e5dfd7) | None | Painted walls only |
-| [Living Room (22.0 m²)](renders/08-living-room-22m2.png) | HASIR 340 (#e5dfd7) | None | Painted walls only |
-| [Bathroom (1.3 m²)](renders/09-shower.png) | KUM BEYAZI (#eeedeb) | None | Ceiling only; retain tile and glass |
-| [Bathroom (4.2 m²)](renders/10-bathroom.png) | KUM BEYAZI (#eeedeb) | None | Painted walls only |
+| Room / four-view sheet | Area (m²) | Polygon bounding span (m) |
+| --- | --- | --- |
+| [Living Room (13.3 m²)](room-sheets/01-living-room-13m2.png) | 13.31 | 3.44 × 3.98 |
+| [Bedroom (8.3 m²)](room-sheets/02-bedroom-8m2.png) | 8.32 | 3.64 × 2.46 |
+| [Kitchen (8.0 m²)](room-sheets/03-kitchen.png) | 7.95 | 3.76 × 2.47 |
+| [Master Bedroom (11.4 m²)](room-sheets/04-master-bedroom.png) | 11.36 | 3.67 × 3.19 |
+| [Hallway / Entry (11.7 m²)](room-sheets/05-hallway-entry.png) | 11.72 | 4.31 × 6.07 |
+| [Living Room (22.0 m²)](room-sheets/06-living-room-22m2.png) | 22 | 3.21 × 7.03 |
 
-## Render conditions and preserved details
+Bounding spans describe the uploaded polygon's axis-aligned envelope, not clear circulation space; columns, joinery and furniture reduce usable space. In the 8.3 m² bedroom, keeping the walls and column returns the same light colour avoids subdividing an already compact enclosure. The corridor uses that same colour to reduce breaks around doors. The kitchen retains its green cabinetry and backsplash; neither needs another colour. The larger living room's varied upholstery remains the colour focus.
 
-The source upload is preserved unchanged. Room geometry, furniture dimensions and positions, saved visibility, tiles and glass are retained. Foreground walls, their openings and ceilings are omitted to expose each interior; long shared elements are clipped at the isolated room bounds. The lighting is a fixed HView daylight model with PBR Neutral tone mapping and a 6500 K viewing reference. These are model renders, not a measured daylight or spectral paint simulation.
+## Files and views
 
-For the tiled WC and shower, no wall repaint is proposed. KUM BEYAZI is shown as a ceiling / dry-trim colour reference; ceilings are not visible in the cutaway views. Confirm a substrate-appropriate, moisture-rated coating for wet-room painted surfaces and retain tile in direct-spray areas.
+- [PDF study](room-colour-study.pdf): six room sheets.
+- [Room sheets](room-sheets/): four diagonal views of every included room.
+- [Full-size renders](renders/): 24 PNGs, four per room at 1400 × 1050.
+- [Palette](palette.json): room IDs, dimensions, notes and the single catalogue shade.
+- [Column finish map](column-finishes.json): explicitly coloured column faces and adjacent-room ownership.
 
-The laundry stack outside the 4.2 m² bathroom boundary is optional and outside the isolated room crop. A possible alternative placing a dryer in the small bedroom has not been modelled; no appliances have been moved for these renders.
+View 1 is from +X/+Z, view 2 from −X/+Z, view 3 from −X/−Z and view 4 from +X/−Z in model coordinates. These are not compass directions. Each cutaway omits camera-facing walls and ceilings; the four views expose opposing wall pairs. Layout, furniture positions, saved visibility, tile and glass remain unchanged. No bedroom dryer has been added; that remains a separate layout option.
 
-Manufacturer shade names are preserved in their original language. Digital swatches are approximate: approve physical samples under the installed daylight and lamp conditions before ordering paint.
+Native HView renders use fixed model lighting and a neutral viewing reference. Digital RGB swatches do not predict physical paint under every lamp; approve a physical KIRIK BEYAZ sample before ordering. This study changes neither application source nor the included working plan.
 
-Catalogue reference: [Filli Boya Momento Silan colour selector](https://www.filliboya.com/urun/momento-silan).
-
-Source upload SHA-256: `c18f98017dce560c308785128b02aaa69841c5ba3c09eccb825e9e208ea94af8`.
+Catalogue reference: [Filli Boya Momento Silan](https://www.filliboya.com/urun/momento-silan).

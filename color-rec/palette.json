@@ -1,150 +1,80 @@
 [
   {
     "id": "_y0oj2",
-    "base": "SİS BULUTU",
-    "accent": "ANDEZİT 25",
-    "accentWalls": [
-      "_k2vy1_a_a",
-      "_k2vy1_a_b"
-    ],
-    "camera": [
-      1,
-      1
-    ],
-    "note": "Warm off-white softens the slate-blue sofa and burgundy curtains. Use the grey accent on the long wall behind the sofa; keep the remaining walls light.",
-    "baseHex": "#ece6db",
-    "accentHex": "#b9bfc2",
     "roomName": "Living Room (13.3 m²)",
     "area_m2": 13.31,
-    "render": "renders/01-living-room-13m2.png"
+    "base": "KIRIK BEYAZ",
+    "baseHex": "#fbfaf5",
+    "boundingSpan_m": [
+      3.44,
+      3.98
+    ],
+    "note": "Use the same KIRIK BEYAZ on all painted walls, returns and exposed painted column faces. No accent colour or second tint mix. Keep the existing ceiling, furniture, tile and cabinetry unchanged.",
+    "sheet": "room-sheets/01-living-room-13m2.png"
   },
   {
     "id": "_v7m0m",
-    "base": "KIRIK BEYAZ",
-    "accent": "KAKTÜS 20",
-    "accentWalls": [
-      "_ra6yj"
-    ],
-    "camera": [
-      -1,
-      -1
-    ],
-    "note": "Keep this 8.3 m² room mostly light. A muted sage wall adds calm without competing with the blue bed and pale timber.",
-    "baseHex": "#fbfaf5",
-    "accentHex": "#b9cbb6",
     "roomName": "Bedroom (8.3 m²)",
     "area_m2": 8.32,
-    "render": "renders/02-bedroom-8m2.png"
+    "base": "KIRIK BEYAZ",
+    "baseHex": "#fbfaf5",
+    "boundingSpan_m": [
+      3.64,
+      2.46
+    ],
+    "note": "Use the same KIRIK BEYAZ on all painted walls, returns and exposed painted column faces. No accent colour or second tint mix. Keep the existing ceiling, furniture, tile and cabinetry unchanged.",
+    "sheet": "room-sheets/02-bedroom-8m2.png"
   },
   {
     "id": "_vzdza",
-    "base": "KIRIK BEYAZ",
-    "camera": [
-      1,
-      -1
-    ],
-    "note": "The green cabinets and caramel floor already supply the colour. Use a soft warm white on painted walls; retain the striped mosaic backsplash.",
-    "baseHex": "#fbfaf5",
     "roomName": "Kitchen (8.0 m²)",
     "area_m2": 7.95,
-    "render": "renders/03-kitchen.png"
+    "base": "KIRIK BEYAZ",
+    "baseHex": "#fbfaf5",
+    "boundingSpan_m": [
+      3.76,
+      2.47
+    ],
+    "note": "Use the same KIRIK BEYAZ on all painted walls, returns and exposed painted column faces. No accent colour or second tint mix. Keep the existing ceiling, furniture, tile and cabinetry unchanged.",
+    "sheet": "room-sheets/03-kitchen.png"
   },
   {
     "id": "_3h613",
-    "base": "HASIR 310",
-    "accent": "GÜNBATIMI",
-    "accentWalls": [
-      "_tmb2o"
-    ],
-    "camera": [
-      1,
-      -1
-    ],
-    "note": "A pale greige base and one dusty-wine accent soften the current deep red / beige contrast. Keep the other walls and ceiling light.",
-    "baseHex": "#e2dbd4",
-    "accentHex": "#864954",
     "roomName": "Master Bedroom (11.4 m²)",
     "area_m2": 11.36,
-    "render": "renders/04-master-bedroom.png"
-  },
-  {
-    "id": "_qb2a4",
-    "base": "KUM BEYAZI",
-    "scope": "Ceiling / dry trim only",
-    "camera": [
-      1,
-      -1
+    "base": "KIRIK BEYAZ",
+    "baseHex": "#fbfaf5",
+    "boundingSpan_m": [
+      3.67,
+      3.19
     ],
-    "note": "Retain the beige tile. Use this restrained white as the colour reference for the dry ceiling and trim; no additional coloured wall is needed.",
-    "baseHex": "#eeedeb",
-    "roomName": "Guest WC (2.1 m²)",
-    "area_m2": 2.12,
-    "render": "renders/05-guest-wc.png"
+    "note": "Use the same KIRIK BEYAZ on all painted walls, returns and exposed painted column faces. No accent colour or second tint mix. Keep the existing ceiling, furniture, tile and cabinetry unchanged.",
+    "sheet": "room-sheets/04-master-bedroom.png"
   },
   {
     "id": "_4wyay",
-    "base": "SİS BULUTU",
-    "camera": [
-      -1,
-      1
-    ],
-    "note": "One continuous warm off-white connects the long entry and hall, complements the caramel floor and keeps the narrow passages bright.",
-    "baseHex": "#ece6db",
     "roomName": "Hallway / Entry (11.7 m²)",
     "area_m2": 11.72,
-    "render": "renders/06-hallway-entry.png"
-  },
-  {
-    "id": "_8m0m9",
-    "base": "HASIR 340",
-    "camera": [
-      1,
-      1
+    "base": "KIRIK BEYAZ",
+    "baseHex": "#fbfaf5",
+    "boundingSpan_m": [
+      4.31,
+      6.07
     ],
-    "note": "A pale warm greige balances the dark green dining chairs. Avoid a dark long wall in this narrow room; let the furniture provide the accent.",
-    "baseHex": "#e5dfd7",
-    "roomName": "Dining / Office (5.5 m²)",
-    "area_m2": 5.46,
-    "render": "renders/07-dining-office.png"
+    "note": "Use the same KIRIK BEYAZ on all painted walls, returns and exposed painted column faces. No accent colour or second tint mix. Keep the existing ceiling, furniture, tile and cabinetry unchanged.",
+    "sheet": "room-sheets/05-hallway-entry.png"
   },
   {
     "id": "_elc1j",
-    "base": "HASIR 340",
-    "camera": [
-      1,
-      1
-    ],
-    "note": "Use a single quiet warm neutral to connect the burgundy, olive and cream seating, pale bookcases and timber tops. More strong wall colours would add visual competition.",
-    "baseHex": "#e5dfd7",
     "roomName": "Living Room (22.0 m²)",
     "area_m2": 22,
-    "render": "renders/08-living-room-22m2.png"
-  },
-  {
-    "id": "_v2u5b",
-    "base": "KUM BEYAZI",
-    "scope": "Ceiling only; retain tile and glass",
-    "camera": [
-      1,
-      -1
+    "base": "KIRIK BEYAZ",
+    "baseHex": "#fbfaf5",
+    "boundingSpan_m": [
+      3.21,
+      7.03
     ],
-    "note": "Keep the shower tile and glass unchanged. Treat this as a ceiling colour reference; specify a coating approved for wet-room conditions, outside direct spray.",
-    "baseHex": "#eeedeb",
-    "roomName": "Bathroom (1.3 m²)",
-    "area_m2": 1.26,
-    "render": "renders/09-shower.png"
-  },
-  {
-    "id": "_rscdq",
-    "base": "KUM BEYAZI",
-    "camera": [
-      1,
-      -1
-    ],
-    "note": "Use a restrained white only on the untiled dry wall. Retain the beige tile, dark green vanity and white sanitaryware. The laundry stack is optional; a possible dryer in the small bedroom has not been modelled.",
-    "baseHex": "#eeedeb",
-    "roomName": "Bathroom (4.2 m²)",
-    "area_m2": 4.15,
-    "render": "renders/10-bathroom.png"
+    "note": "Use the same KIRIK BEYAZ on all painted walls, returns and exposed painted column faces. No accent colour or second tint mix. Keep the existing ceiling, furniture, tile and cabinetry unchanged.",
+    "sheet": "room-sheets/06-living-room-22m2.png"
   }
 ]
