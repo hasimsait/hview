@@ -1,4 +1,5 @@
 import type { SurfaceFinishConfig, TileLayoutPattern } from '@core/types/plan';
+import filliMomentoSilanColors from './FilliMomentoSilanColors.json';
 
 export const TILE_LAYOUT_PATTERNS: { id: TileLayoutPattern; label: string; description: string }[] = [
   { id: 'grid', label: 'Grid', description: 'Stack bond aligned grid' },
@@ -47,7 +48,7 @@ export interface PaintCategory {
 export const PAINT_CATEGORIES: PaintCategory[] = [
   {
     id: 'all',
-    name: 'All (100)',
+    name: 'All',
     colors: [],
   },
   {
@@ -191,6 +192,11 @@ export const PAINT_CATEGORIES: PaintCategory[] = [
       { name: 'Cashmere', hex: '#c2b6a6' },
       { name: 'Morning Sunshine', hex: '#f0d999' },
     ],
+  },
+  {
+    id: 'filli_momento_silan',
+    name: `Filli Boya Momento Silan (${filliMomentoSilanColors.length})`,
+    colors: filliMomentoSilanColors,
   },
   {
     id: 'metals',

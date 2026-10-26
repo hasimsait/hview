@@ -256,6 +256,8 @@ export class InteractionService implements IInteractionService {
       return;
     }
 
+    // Sliding openings use their openness control, never a rotation gizmo.
+    if (selected.opening.type === 'door_coupe') { this.clearGizmoAttachment(); return; }
     const pivot = this.sceneService.getTransformTarget(selected.opening.id);
     if (pivot?.parent) {
       this.selectedObject = pivot;

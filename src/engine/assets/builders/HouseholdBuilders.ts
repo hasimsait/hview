@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import type { AssetBuildContext } from './AssetBuildContext';
 
 function parts(c: AssetBuildContext) {
@@ -61,4 +62,53 @@ export function buildAirPurifier(c: AssetBuildContext): void {
   }
   box(radius * .5, h * .015, radius * .16, m.metalBlack, 'Control Panel', 0, h * .9925, -radius * .65);
   cylinder(radius * .035, h * .006, m.ledGlow, 'Status Light', 0, h * .995, -radius * .65);
+}
+
+export function buildWaterTreatmentUnit(c: AssetBuildContext): void {
+  const { w, h, d, materials: m } = c, { add } = parts(c);
+  const rounded = (width: number, height: number, depth: number, radius: number, material: THREE.Material, section: string, x: number, y: number, z: number) =>
+    add(new RoundedBoxGeometry(width, height, depth, 3, radius), material, section, x, y, z);
+  rounded(w, h * .77, d * .98, Math.min(w, d) * .12, m.whitePaint, 'Cabinet', 0, h * .385, 0);
+  rounded(w * .99, h * .3, d * .988, Math.min(w, d) * .1, m.metalBlack, 'Hood', 0, h * .85, -d * .006);
+  rounded(w * .96, h * .035, d * .95, Math.min(w, d) * .04, m.glassBlack, 'Lid', 0, h * .9825, 0);
+  // Shallow ribs sit over the hood face without enlarging the reference footprint.
+  for (let i = 0; i < 4; i++) {
+    rounded(w * .85, h * .016, d * .016, h * .006, m.glassBlack, 'Hood Louvers', 0, h * (.755 + i * .05), d * .492);
+  }
+  const recess = c.coloredMaterial?.('#d4d5d1', m.whitePaint) ?? m.plasticBeige;
+  rounded(w * .16, h * .11, d * .012, w * .025, recess, 'Handle Recess', -w * .27, h * .565, d * .493);
+  rounded(w * .14, h * .022, d * .018, h * .008, m.whitePaint, 'Handle', -w * .27, h * .605, d * .491);
+  rounded(w * .09, h * .115, d * .012, w * .01, m.metalBlack, 'Badge', w * .21, h * .57, d * .494);
+}
+
+export function buildStorageWaterHeater(c: AssetBuildContext): void {
+  const { w, h, d, materials: m } = c, { add, box, cylinder } = parts(c);
+  const profile = [new THREE.Vector2(0, h * .07), new THREE.Vector2(w * .39, h * .07)];
+  // Rounded end caps flow into a vertical cylindrical enamel tank.
+  for (let i = 1; i <= 8; i++) {
+    const angle = i / 8 * Math.PI / 2;
+    profile.push(new THREE.Vector2(w * (.39 + .11 * Math.sin(angle)), h * (.16 - .09 * Math.cos(angle))));
+  }
+  profile.push(new THREE.Vector2(w * .5, h * .91));
+  for (let i = 1; i <= 8; i++) {
+    const angle = i / 8 * Math.PI / 2;
+    profile.push(new THREE.Vector2(w * (.39 + .11 * Math.cos(angle)), h * (.91 + .09 * Math.sin(angle))));
+  }
+  profile.push(new THREE.Vector2(0, h));
+  const tank = new THREE.LatheGeometry(profile, 48);
+  tank.scale(1, 1, d * .97 / w);
+  add(tank, m.whitePaint, 'Tank');
+  box(w * .48, h * .04, d * .03, m.metalChrome, 'Wall Brackets', 0, h * .3, -d * .485);
+  box(w * .48, h * .04, d * .03, m.metalChrome, 'Wall Brackets', 0, h * .8, -d * .485);
+  add(new RoundedBoxGeometry(w * .29, h * .1, d * .016, 3, h * .012), m.metalBlack, 'Control Panel', 0, h * .22, d * .489);
+  const display = c.coloredMaterial?.('#6998ab', m.whitePaint) ?? m.glassBlack;
+  box(w * .12, h * .032, d * .004, display, 'Display', -w * .035, h * .23, d * .498);
+  const button = add(new THREE.CircleGeometry(w * .014, 16), m.whitePaint, 'Controls', w * .092, h * .22, d * .5);
+  button.userData.skipOutline = true;
+  box(w * .26, h * .028, d * .012, m.metalChrome, 'Badge', 0, h * .7, d * .49);
+  for (const [x, color] of [[-w * .1, '#387bb6'], [w * .1, '#bc4540']] as const) {
+    cylinder(w * .025, h * .055, m.metalChrome, 'Water Connections', x, h * .0275, 0);
+    const collar = c.coloredMaterial?.(color, m.whitePaint) ?? m.plasticBeige;
+    cylinder(w * .032, h * .035, collar, 'Connection Collars', x, h * .0675, 0);
+  }
 }

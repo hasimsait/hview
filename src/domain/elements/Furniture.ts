@@ -86,6 +86,9 @@ export class Luminaire extends Furniture {
     super(data);
     const intensity = data.lightConfig?.intensity ?? 1;
     if (finite(intensity, 'Light intensity') < 0 || intensity > 3) throw new Error('Light intensity must be between 0 and 3');
+    const temperature = data.lightConfig?.temperatureKelvin, lumens = data.lightConfig?.lumens;
+    if (temperature !== undefined && (finite(temperature, 'Light temperature') < 2700 || temperature > 6500)) throw new Error('Light temperature must be between 2700 and 6500 K');
+    if (lumens !== undefined && (finite(lumens, 'Light output') < 0 || lumens > 100000)) throw new Error('Light output must be between 0 and 100000 lm');
     Object.freeze(this);
   }
   get intensity() { return this.lightConfig?.intensity ?? 1; }

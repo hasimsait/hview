@@ -6,6 +6,8 @@ import { cabinetSurfaceFinish, surfaceSection } from '../../domain/model/Surface
 import type { ResourcePool } from '../resources/ResourcePool';
 import { isFabricStretched,type SurfaceMaterialFactory } from './SurfaceMaterialFactory';
 import { isFixtureLight } from '../lighting/FixtureLight';
+import { whiteLightColor } from '../lighting/WhiteLight';
+import { emitterSurfaceArea } from '../lighting/EmitterSurface';
 export class FurnitureAppearance {
   private readonly glowMaterials = new WeakSet<THREE.Mesh>();
   constructor(private readonly finishService: SurfaceMaterialFactory, private readonly resources: ResourcePool, private readonly settings: () => ViewportSettings, private readonly recessHost: (item: WallRecess) => RecessHost | undefined) { }
@@ -24,7 +26,10 @@ export class FurnitureAppearance {
         }
         // Remember original default material
         if (child.userData.isLightEmissive && !this.glowMaterials.has(child)) {
-          child.material = (child.material as THREE.Material).clone();
+          const original = child.material as THREE.Material, material = original.clone();
+          material.onBeforeCompile = original.onBeforeCompile;
+          material.customProgramCacheKey = original.customProgramCacheKey;
+          child.material = material;
           this.glowMaterials.add(child);
         }
         this.resources.rememberOriginal(child);
@@ -74,14 +79,36 @@ export class FurnitureAppearance {
   }
 
   applyLighting(mesh: THREE.Object3D, entity?: FurnitureEntity): void {
-    const config = entity?.lightConfig;
-    const isEnabled = config?.enabled !== false;
-    const customIntensity = config?.intensity ?? 1.0;
-    const customColor = config?.color;
-    let fixtureType = (entity?.assetKey ?? '').includes('chandelier') ? 'chandelier' : 'spot';
-    mesh.traverse(child => { if (isFixtureLight(child)) fixtureType = child.userData.fixtureType ?? fixtureType; });
+    const contents = new Map(entity?.cabinet?.contents.map(content => [content.id, content]));
+    const fixtureTypes = new Map<string | undefined, string>();
+    const totalPower = new Map<string | undefined, number>();
+    const basePowers = new Map<THREE.Object3D, number>();
+    const emittingAreas = new Map<string | undefined, number>();
+    mesh.traverse(child => {
+      if (child instanceof THREE.Mesh && child.userData.isLightEmissive) {
+        const id = child.userData.cabinetContent?.id;
+        const config = id ? (contents.get(id) ?? child.userData.cabinetContent).lightConfig : entity?.lightConfig;
+        if (config?.lumens !== undefined) emittingAreas.set(id, (emittingAreas.get(id) ?? 0) + emitterSurfaceArea(child));
+      }
+      if (isFixtureLight(child)) {
+        const id = child.userData.cabinetContent?.id;
+        fixtureTypes.set(id, child.userData.fixtureType ?? 'spot');
+        const factor = child instanceof THREE.RectAreaLight ? child.width * child.height * Math.PI : child instanceof THREE.SpotLight ? Math.PI : 4 * Math.PI;
+        const power = (child.userData.baseIntensity ?? .8) * factor;
+        basePowers.set(child, power); totalPower.set(id, (totalPower.get(id) ?? 0) + power);
+      }
+    });
 
     mesh.traverse((child) => {
+      if (!isFixtureLight(child) && !(child instanceof THREE.Mesh && child.userData.isLightEmissive)) return;
+      const content = child.userData.cabinetContent as import('../../domain/cabinet/CabinetLayout').CabinetContent | undefined;
+      const config = content ? (contents.get(content.id) ?? content).lightConfig : entity?.lightConfig;
+      const isEnabled = config?.enabled !== false;
+      const customIntensity = config?.intensity ?? 1.0;
+      const customColor = config?.color;
+      const temperature = this.settings().fixtureTemperatureKelvin || config?.temperatureKelvin;
+      const whiteColor = temperature ? whiteLightColor(temperature) : undefined;
+      const fixtureType = fixtureTypes.get(content?.id) ?? ((entity?.assetKey ?? '').includes('chandelier') ? 'chandelier' : 'spot');
       // 1. Actual room lights, including directional spotlight beams.
       if (isFixtureLight(child)) {
         const pointLight = child;
@@ -96,13 +123,19 @@ export class FurnitureAppearance {
         if (isEnabled && typeMult > 0 && customIntensity > 0) {
           const finalIntensity = baseInt * typeMult * customIntensity;
           pointLight.intensity = finalIntensity;
-          if ('distance' in pointLight) pointLight.distance = baseDist * Math.sqrt(Math.max(0.2, typeMult * customIntensity));
-          if (customColor) {
+          if (config?.lumens !== undefined) {
+            const power = totalPower.get(content?.id) ?? 0;
+            pointLight.power = power > 0 ? config.lumens * (basePowers.get(child)! / power) * typeMult * customIntensity : 0;
+          }
+          if ('distance' in pointLight) pointLight.distance = baseDist;
+          if (whiteColor) {
+            pointLight.color.copy(whiteColor);
+          } else if (customColor) {
             pointLight.color.set(customColor);
           } else {
             pointLight.color.set(baseColor);
           }
-          pointLight.visible = true;
+          pointLight.visible = pointLight.intensity > 0;
         } else {
           pointLight.intensity = 0;
           pointLight.visible = false;
@@ -115,14 +148,23 @@ export class FurnitureAppearance {
           ? (this.settings().chandelierIntensity ?? 1.0)
           : (this.settings().spotLightIntensity ?? 1.0);
 
-        const isLit = isEnabled && typeMult > 0.05 && customIntensity > 0.05;
+        const isLit = isEnabled && typeMult > 0 && customIntensity > 0 && config?.lumens !== 0;
         if (child.material && 'color' in child.material) {
           const mat = child.material as THREE.MeshBasicMaterial;
           if (isLit) {
-            if (customColor) {
+            if (whiteColor) {
+              mat.color.copy(whiteColor).multiplyScalar(1 / Math.max(whiteColor.r, whiteColor.g, whiteColor.b));
+            } else if (customColor) {
               mat.color.set(customColor);
             } else {
               mat.color.set(0xfff6dd); // warm golden white glow
+            }
+            if (config?.lumens !== undefined) {
+              // Lambertian emitters: lumens = pi * area * luminance. A bright
+              // bulb must not become a dim painted surface when exposure drops.
+              const area = emittingAreas.get(content?.id) ?? 0;
+              const luminance = .2126729 * mat.color.r + .7151522 * mat.color.g + .072175 * mat.color.b;
+              if (area > 0 && luminance > 0) mat.color.multiplyScalar(config.lumens * typeMult * customIntensity / (Math.PI * area * luminance));
             }
           } else {
             mat.color.set(0x334155); // dark slate off-bulb

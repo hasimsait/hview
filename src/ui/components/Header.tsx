@@ -22,9 +22,10 @@ Sun,
 Tablet,
 Zap,
 } from 'lucide-react';
-import React,{ useEffect,useRef,useState } from 'react';
+import React,{ useEffect,useLayoutEffect,useRef,useState } from 'react';
 import { RenameRoom } from '../../application/commands/StructuralCommands';
 import { isOpaquePlanSource } from '../../services/plan/PlanRequest';
+import { LightingColorControls } from './LightingColorControls';
 
 interface HeaderProps {
   isViewportFullscreen: boolean;
@@ -84,9 +85,21 @@ export const Header: React.FC<HeaderProps> = ({
   const [fieldOfView, setFieldOfView] = useState(() => sceneService.getFieldOfView());
   const [roomPopoverOpen, setRoomPopoverOpen] = useState(false);
   const [lightingPopoverOpen, setLightingPopoverOpen] = useState(false);
+  const [lightingPopoverOffset, setLightingPopoverOffset] = useState(0);
   const [showCeilings, setShowCeilings] = useState(false);
   const [saveStatus, setSaveStatus] = useState<PlanSaveStatus>(runtime.storage.getSaveStatus() || 'idle');
   const [isExportingViewer, setIsExportingViewer] = useState(false);
+
+  useLayoutEffect(() => {
+    if (!lightingPopoverOpen) return;
+    const position = () => {
+      const right = lightingPopoverRef.current?.getBoundingClientRect().right ?? window.innerWidth;
+      setLightingPopoverOffset(Math.max(0, 16 + Math.min(280, window.innerWidth - 32) - right));
+    };
+    position();
+    window.addEventListener('resize', position);
+    return () => window.removeEventListener('resize', position);
+  }, [lightingPopoverOpen, globalLighting]);
 
   const handleToggleCeilings = () => {
     const next = sceneService.toggleCeilings();
@@ -185,7 +198,7 @@ export const Header: React.FC<HeaderProps> = ({
       : `🏠 ${isolatedRoomIds.length} Rooms`;
 
   return (
-    <header className={`app-header ${isViewportFullscreen ? 'app-header--fullscreen' : ''} min-h-14 shrink-0 border-b border-slate-800 bg-slate-900/90 backdrop-blur px-4 py-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 z-20 select-none`}>
+    <header className={`app-header ${isViewportFullscreen ? 'app-header--fullscreen' : ''} min-h-14 shrink-0 border-b border-slate-800 bg-slate-900/90 backdrop-blur px-4 py-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 ${lightingPopoverOpen || roomPopoverOpen ? 'z-40' : 'z-20'} select-none`}>
       {/* Brand & Stats */}
       <div className="app-header-brand flex items-center gap-3">
         <div className="flex items-center gap-2">
@@ -461,7 +474,11 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
 
           {lightingPopoverOpen && (
-            <div className="absolute top-full right-0 mt-1 z-50 bg-slate-900/95 backdrop-blur-md border border-slate-700/80 rounded-xl shadow-2xl shadow-black/70 p-3 min-w-[280px] space-y-3 text-slate-200">
+            <div className="absolute top-full right-0 mt-1 z-50 bg-slate-900/95 backdrop-blur-md border border-slate-700/80 rounded-xl shadow-2xl shadow-black/70 p-3 max-h-[65dvh] overflow-y-auto space-y-3 text-slate-200"
+              style={{
+                minWidth:'min(280px, calc(100vw - 32px))',
+                transform:`translateX(${lightingPopoverOffset}px)`,
+              }}>
               <div className="flex items-center justify-between pb-1.5 border-b border-slate-800">
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                   <Sliders className="w-3.5 h-3.5 text-sky-400" />
@@ -564,6 +581,8 @@ export const Header: React.FC<HeaderProps> = ({
                   className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-sky-400"
                 />
               </div>
+
+              <LightingColorControls />
 
               {/* Quick Presets */}
               <div className="pt-2 border-t border-slate-800 space-y-1.5">

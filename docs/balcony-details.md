@@ -1,7 +1,0 @@
-# Balcony railings and cornice sides
-
-Select a window to find **Cornice sides**. Side A and B show their adjoining room names. Uncheck the balcony-facing side to remove its cornice while keeping the indoor one. These controls edit the same wall-to-wall cornice as the wall inspector. Turning both sides off retains the profile, size, clearance and finish for later restoration. **Use room-facing sides** returns to automatic placement. Each retained face follows its own finished ceiling height and existing corner joins.
-
-Select the balcony floor, then **Add railing to open edges**. A simple metal railing follows the room polygon where there are no walls, joins adjacent open corners and terminates at existing wall faces. The floor inspector includes a numbered edge map, individual edge switches, height in centimetres, colour and removal. Placement recognizes both wall-centre and inner-face floor boundaries, rotated walls and partially walled edges. Railing layout updates when bounding walls change. Door and window openings in an existing wall do not create floor-edge railing runs.
-
-Railings belong to the selected floor. They are separate from the floor finish and ceiling, persist in both plan formats and portable HTML editors, and support undo/redo. Existing rooms acquire no railing until it is explicitly added. No original floor polygons, walls, furniture or saved cabinet layouts are changed by adding one.

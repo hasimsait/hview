@@ -75,7 +75,7 @@ test('catalogue adds controllable lighting and thin floor drains with independen
   await page.getByRole('button', { name: 'Save .plan', exact: true }).click();
   await expect(page.getByRole('dialog', { name: 'Saving plan' })).toBeHidden();
   await page.reload(); await ready(page);
-  expect((await state(page)).find(i => i.assetKey === 'lighting_track_straight')).toMatchObject({ lightConfig: { enabled: true, color: '#ffffff' }, lightCount: 3, visibleLights: 3 });
+  expect((await state(page)).find(i => i.assetKey === 'lighting_track_straight')).toMatchObject({ lightConfig: { enabled: true, temperatureKelvin: 4000 }, lightCount: 3, visibleLights: 3 });
   expect((await state(page)).find(i => i.assetKey === 'drain_tile_insert')).toMatchObject({ dimensions: { x: 1, y: .005 }, sectionFinishes: { tile_insert: { color: '#f3f1ea' } } });
 });
 
@@ -86,13 +86,16 @@ test('offline editor includes drain covers, pendant lights, task strips and conc
   await context.route(/^https?:/, route => route.request().url() === url ? route.fulfill({ status: 200, contentType: 'text/html', body: html }) : route.abort());
   await page.goto(url); await expect(page.getByRole('button', { name: 'Move', exact: true })).toBeVisible();
   for (const key of ['drain_square_steel', 'lighting_pendant_globe', 'lighting_cabinet_strip', 'lighting_cove_channel']) await choose(page, key);
+  await page.getByRole('button', { name: /6500K/ }).click();
+  await page.getByRole('button', { name: 'Use 806 lm', exact: true }).click();
+  await page.getByRole('slider', { name: 'Fixture brightness', exact: true }).fill('0.5');
   await page.getByRole('button', { name: '💡 ON', exact: true }).click();
   const downloading = page.waitForEvent('download'); await page.getByRole('button', { name: 'Full Editor (.html)', exact: true }).click();
   const path = testInfo.outputPath('lighting-components.html'); await (await downloading).saveAs(path);
   const saved = JSON.parse(standaloneBlockText(readFileSync(path, 'utf8'), 'plan-data'));
   const items = saved.document.elements.filter((e: any) => e.kind.startsWith('furniture.')).map((e: any) => e.data);
   expect(items).toHaveLength(4);
-  expect(items.at(-1)).toMatchObject({ assetKey: 'lighting_cove_channel', lightConfig: { enabled: false }, dimensions: { x: 1.2, y: .08, z: .12 } });
+  expect(items.at(-1)).toMatchObject({ assetKey: 'lighting_cove_channel', lightConfig: { enabled: false, temperatureKelvin: 6500, lumens: 806, intensity: .5 }, dimensions: { x: 1.2, y: .08, z: .12 } });
 });
 
 for (const touch of [false, true]) test(`chandeliers and light components illuminate receiving surfaces (${touch ? 'touch device' : 'desktop'})`, async ({ browser, request }, testInfo) => {

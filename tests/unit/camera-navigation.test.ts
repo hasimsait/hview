@@ -128,14 +128,14 @@ function pointer(target: EventTarget, type: string, x: number, y: number) {
 }
 
 describe('camera navigation', () => {
-  it('mouse drag matches arrow yaw and pitch while preserving camera position and look distance', () => {
+  it('dragging up and left matches arrow-up/left look while retaining the eye and look distance', () => {
     const mouse = setupMouse();
     const keys = setupMouse();
     const start = mouse.camera.position.clone();
     const distance = mouse.camera.position.distanceTo(mouse.controls.target);
     const angle = 1.6 * 0.1;
     pointer(mouse.canvas, 'pointerdown', 0, 0);
-    pointer(window, 'pointermove', -angle * 600 / (2 * Math.PI), angle * 600 / (2 * Math.PI));
+    pointer(window, 'pointermove', -angle * 600 / (2 * Math.PI), -angle * 600 / (2 * Math.PI));
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', code: 'ArrowLeft' }));
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', code: 'ArrowUp' }));
     keys.nav.update(0.1);
@@ -157,7 +157,10 @@ describe('camera navigation', () => {
     pointer(window, 'pointermove', 0, 100000);
     controls.update();
     const direction = controls.target.clone().sub(camera.position).normalize();
-    expect(Math.asin(direction.y)).toBeCloseTo(Math.PI / 2 - 0.04);
+    expect(Math.asin(direction.y)).toBeCloseTo(-MAX_CAMERA_PITCH);
+    pointer(window, 'pointermove', 0, -100000);
+    controls.update();
+    expect(Math.asin(controls.target.clone().sub(camera.position).normalize().y)).toBeCloseTo(MAX_CAMERA_PITCH);
     expect(camera.position.distanceTo(start)).toBeLessThan(1e-10);
     window.dispatchEvent(new Event('blur'));
     expect(controls.enableRotate).toBe(true);

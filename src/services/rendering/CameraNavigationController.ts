@@ -48,7 +48,7 @@ export class CameraNavigationController {
     drag.y = e.clientY;
     if (!drag.controls.enabled || this.getViewMode() === 'topDown') return;
     const scale = 2 * Math.PI * drag.controls.rotateSpeed / Math.max(1, this.pointerElement?.clientHeight ?? 1);
-    this.rotatePerspective(drag.controls, -dx * scale, dy * scale);
+    this.rotatePerspective(drag.controls, -dx * scale, -dy * scale);
     this.onInput();
   };
 

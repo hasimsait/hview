@@ -5,9 +5,9 @@ import { ConfigureCabinet } from '../../application/commands/CabinetCommands';
 import { cabinetIssues, contentDependsOn, stackContent, defaultCabinet, endpoint, interior, moveCabinetPart, removeCabinetPart, resolvePanel, settleContent, shelfClearances, splitDivider, type CabinetContent, type CabinetLayout, type CabinetPanel } from '../../domain/cabinet/CabinetLayout';
 import { cabinetDoorCount } from '../../domain/catalog/Cabinets';
 import type { AssetDefinition } from '../../domain/catalog/AssetDefinition';
-import { Furniture, StandardFurniture } from '../../domain/elements/Furniture';
+import { Furniture, Luminaire, StandardFurniture } from '../../domain/elements/Furniture';
 import { PlanDocument } from '../../domain/model/PlanDocument';
-import type { SurfaceFinishConfig, Vector3D } from '../../domain/model/PlanData';
+import type { LightFixtureConfig, SurfaceFinishConfig, Vector3D } from '../../domain/model/PlanData';
 import { surfaceSection } from '../../domain/model/SurfaceSections';
 import { createElementId } from '../../platform/ElementId';
 import { RuntimeContext, useDocument, useRuntime } from '../context/RuntimeContext';
@@ -90,7 +90,11 @@ function CabinetWorkspace({ original, onCancel, onDone }: { original: Furniture;
     update({ ...layout, contents: previous ? layout.contents.map(o => o.id === previous.id ? settled : o) : [...layout.contents, settled] }, previous ? 'Replace cabinet content' : 'Add cabinet content'); select(value.id); setAdding(false); setReplacing(false); setPlaceOnSelected(false); setSupportTarget(undefined);
   }
   const resolved = panel ? resolvePanel(layout, size, panel) : undefined;
-  const inspected = content ? new StandardFurniture({ id: content.id, name: content.assetKey, assetKey: content.assetKey, displayName: content.name, category: 'decor', position: content.position, rotationY: content.rotationY, dimensions: content.dimensions, finish: content.finish, sectionFinishes: content.sectionFinishes }) : panel && resolved ? new StandardFurniture({ id: panel.id, name: panel.name, assetKey: 'cabinet_open', displayName: panel.name, category: 'storage', position: resolved.position, rotationY: Math.PI, dimensions: resolved.dimensions, finish: panel.finish }) : null;
+  const ContentType = content && runtime.catalog.behavior(content.assetKey) === 'luminaire' ? Luminaire : StandardFurniture;
+  const inspected = content ? new ContentType({ id: content.id, name: content.assetKey, assetKey: content.assetKey, displayName: content.name, category: 'decor', position: content.position, rotationY: content.rotationY, dimensions: content.dimensions, finish: content.finish, sectionFinishes: content.sectionFinishes, lightConfig: content.lightConfig }) : panel && resolved ? new StandardFurniture({ id: panel.id, name: panel.name, assetKey: 'cabinet_open', displayName: panel.name, category: 'storage', position: resolved.position, rotationY: Math.PI, dimensions: resolved.dimensions, finish: panel.finish }) : null;
+  function configureLight(config: Partial<LightFixtureConfig>) {
+    if (content) update({ ...layout, contents: layout.contents.map(o => o.id === content.id ? { ...o, lightConfig: { ...o.lightConfig, ...config } } : o) }, 'Configure cabinet light');
+  }
   function transform(position?: Vector3D, rotation?: number, dimensions?: Vector3D) {
     if (panel && resolved) {
       const next = { ...panel, depth: { ...panel.depth } };
@@ -164,7 +168,7 @@ function CabinetWorkspace({ original, onCancel, onDone }: { original: Furniture;
             <p className="text-slate-400">Copies stay individually editable and follow their supporting object. Red warnings show stacks that do not fit.</p>
           </div>
         </div>}
-        <Inspector item={inspected} className="w-full bg-slate-900 p-4 text-xs" onClose={() => select(null)} onOpenReplaceModal={() => { setReplacing(true); setAdding(true); }} interior={{ panel: !!panel, sections: [...sections], section, selectSection: setSection, transform, finish, remove: () => { update(removeCabinetPart(layout, size, inspected.id), 'Delete cabinet part'); select(null); } }} />
+        <Inspector item={inspected} className="w-full bg-slate-900 p-4 text-xs" onClose={() => select(null)} onOpenReplaceModal={() => { setReplacing(true); setAdding(true); }} interior={{ panel: !!panel, sections: [...sections], section, selectSection: setSection, transform, finish, configureLight, remove: () => { update(removeCabinetPart(layout, size, inspected.id), 'Delete cabinet part'); select(null); } }} />
       </aside>}
     </div>
     <AssetReplacementModal isOpen={adding} mode="add" onClose={() => { setAdding(false); setPlaceOnSelected(false); setSupportTarget(undefined); }} onSelectAsset={chooseAsset} filterAsset={asset => cabinetDoorCount(asset) === undefined} />

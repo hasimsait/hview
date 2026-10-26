@@ -9,6 +9,7 @@ import type { LightingComponentModel } from './LightingComponents';
 import type { FloorDrainModel } from './FloorDrains';
 import type { HouseholdDetailModel } from './HouseholdDetails';
 import type { SoftFurnishingModel } from './SoftFurnishings';
+import type { KitchenwareModel } from './KitchenwareModel';
 
 export interface AssetPlacement {
   mount: 'floor' | 'wall' | 'ceiling' | 'surface';
@@ -50,6 +51,7 @@ export interface AssetDefinition {
   softFurnishing?: SoftFurnishingModel;
   householdDetail?: HouseholdDetailModel;
   dailyLife?: DailyLifeModel;
+  kitchenware?: KitchenwareModel;
   electrical?: {
     series: 'karre' | 'bubble';
     control: 'single_switch' | 'double_switch' | 'socket' | 'double_socket';
@@ -59,7 +61,7 @@ export interface AssetDefinition {
   cabinetDoors?: 0 | 1 | 2;
   collection?: string;
   source?: {
-    retailer: string; url?: string; productCode?: string;
+    retailer: string; url?: string; productCode?: string; categoryPath?: readonly string[];
     dimensions?: 'listed' | 'estimated' | 'reference'; dimensionNotes?: string;
   };
 }

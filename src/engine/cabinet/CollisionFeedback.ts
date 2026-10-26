@@ -1,5 +1,21 @@
 import * as THREE from 'three';
+import { mergedCollisionParts } from '../geometry/MergeStaticParts';
 import { OBB } from 'three/examples/jsm/math/OBB.js';
+
+function visibleInScene(object: THREE.Object3D): boolean {
+  for (let parent: THREE.Object3D | null = object; parent; parent = parent.parent) if (!parent.visible) return false;
+  return true;
+}
+
+/** Instances share geometry, but each occupies its own transformed volume. */
+function* worldTransforms(mesh: THREE.Mesh): Iterable<THREE.Matrix4> {
+  if (mesh instanceof THREE.InstancedMesh) {
+    for (let i = 0; i < mesh.count; i++) {
+      const local = new THREE.Matrix4(); mesh.getMatrixAt(i, local);
+      yield local.premultiply(mesh.matrixWorld);
+    }
+  } else yield mesh.matrixWorld;
+}
 
 /** Temporary, nonblocking feedback. Never mutates a finish or enables global collision checks. */
 export class CollisionFeedback {
@@ -9,11 +25,14 @@ export class CollisionFeedback {
   clear(): void { for (const [mesh, material] of this.originals) { mesh.material = material; delete mesh.userData.collision; } this.originals.clear(); }
   mark(root: THREE.Object3D): void { root.traverse(o => { if (o instanceof THREE.Mesh) { if (!this.originals.has(o)) this.originals.set(o, o.material); o.material = this.material; o.userData.collision = true; } }); }
   dispose(): void { this.clear(); this.material.dispose(); }
-  private obb(mesh: THREE.Mesh): OBB {
+  prepare(movingRoot: THREE.Object3D, candidates: readonly THREE.Object3D[]): CollisionQuery {
+    return new CollisionQuery(this, movingRoot, candidates);
+  }
+  private obb(mesh: THREE.Mesh, matrix: THREE.Matrix4): OBB {
     if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox();
     const box = new OBB().fromBox3(mesh.geometry.boundingBox!);
-    const center = box.center.clone().applyMatrix4(mesh.matrixWorld);
-    box.applyMatrix4(mesh.matrixWorld);
+    const center = box.center.clone().applyMatrix4(matrix);
+    box.applyMatrix4(matrix);
     // Three's OBB transforms the axes but only translates its centre. Imported
     // and extruded geometry often has an off-centre local bounding box.
     box.center.copy(center);
@@ -36,36 +55,48 @@ export class CollisionFeedback {
     this.boxes.set(mesh.geometry, { version: positions.version, isBox });
     return isBox;
   }
-  private orthogonal(mesh: THREE.Mesh): boolean {
-    const e = mesh.matrixWorld.elements;
+  private orthogonal(matrix: THREE.Matrix4): boolean {
+    const e = matrix.elements;
     const x = new THREE.Vector3(e[0], e[1], e[2]).normalize();
     const y = new THREE.Vector3(e[4], e[5], e[6]).normalize();
     const z = new THREE.Vector3(e[8], e[9], e[10]).normalize();
     return Math.max(Math.abs(x.dot(y)), Math.abs(y.dot(z)), Math.abs(z.dot(x))) < 1e-8;
   }
-  intersects(leaf: THREE.Mesh, obstacle: THREE.Mesh): boolean {
+  intersects(leaf: THREE.Mesh, obstacle: THREE.Mesh, leafMatrix?: THREE.Matrix4, obstacleMatrix?: THREE.Matrix4): boolean {
     if (leaf === obstacle || !leaf.geometry || !obstacle.geometry) return false;
-    const a = this.obb(leaf), b = this.obb(obstacle);
-    const orthogonal = this.orthogonal(leaf) && this.orthogonal(obstacle);
+    if ((!leafMatrix && leaf instanceof THREE.InstancedMesh) || (!obstacleMatrix && obstacle instanceof THREE.InstancedMesh)) {
+      for (const a of leafMatrix ? [leafMatrix] : worldTransforms(leaf))
+        for (const b of obstacleMatrix ? [obstacleMatrix] : worldTransforms(obstacle))
+          if (this.intersects(leaf, obstacle, a, b)) return true;
+      return false;
+    }
+    leafMatrix ??= leaf.matrixWorld; obstacleMatrix ??= obstacle.matrixWorld;
+    const a = this.obb(leaf, leafMatrix), b = this.obb(obstacle, obstacleMatrix);
+    const orthogonal = this.orthogonal(leafMatrix) && this.orthogonal(obstacleMatrix);
     if (orthogonal) {
       a.halfSize.subScalar(.0005).max(new THREE.Vector3());
       if (!a.intersectsOBB(b, 1e-10)) return false;
     } else {
       // Nested rotations under nonuniform scale can shear a mesh. Use a
       // conservative broad phase, then its exact local triangles below.
-      const bounds = leaf.geometry.boundingBox!.clone().applyMatrix4(leaf.matrixWorld);
-      if (!bounds.intersectsBox(obstacle.geometry.boundingBox!.clone().applyMatrix4(obstacle.matrixWorld))) return false;
+      const bounds = leaf.geometry.boundingBox!.clone().applyMatrix4(leafMatrix);
+      if (!bounds.intersectsBox(obstacle.geometry.boundingBox!.clone().applyMatrix4(obstacleMatrix))) return false;
     }
+    // Render batching must not fill the spaces between the original solids.
+    const leafParts = mergedCollisionParts(leaf.geometry);
+    if (leafParts) return leafParts.some(part => this.intersects(part, obstacle, leafMatrix.clone().multiply(part.matrix), obstacleMatrix));
+    const obstacleParts = mergedCollisionParts(obstacle.geometry);
+    if (obstacleParts) return obstacleParts.some(part => this.intersects(leaf, part, leafMatrix, obstacleMatrix.clone().multiply(part.matrix)));
     const leafBox = this.isBox(leaf), obstacleBox = this.isBox(obstacle);
     if (orthogonal && leafBox && obstacleBox) return true;
     // Door leaves, handles and drawer panels are boxes. A bounding box alone
     // fills holes in walls, furniture and curved objects with imaginary solids.
-    if (obstacleBox && !leafBox) return this.boxIntersectsMesh(obstacle, leaf);
-    return this.boxIntersectsMesh(leaf, obstacle);
+    if (obstacleBox && !leafBox) return this.boxIntersectsMesh(obstacle, leaf, obstacleMatrix, leafMatrix);
+    return this.boxIntersectsMesh(leaf, obstacle, leafMatrix, obstacleMatrix);
   }
-  private boxIntersectsMesh(boxMesh: THREE.Mesh, surface: THREE.Mesh): boolean {
-    const inverse = boxMesh.matrixWorld.clone().invert().multiply(surface.matrixWorld);
-    const scale = new THREE.Vector3().setFromMatrixScale(boxMesh.matrixWorld);
+  private boxIntersectsMesh(boxMesh: THREE.Mesh, surface: THREE.Mesh, boxMatrix: THREE.Matrix4, surfaceMatrix: THREE.Matrix4): boolean {
+    const inverse = boxMatrix.clone().invert().multiply(surfaceMatrix);
+    const scale = new THREE.Vector3().setFromMatrixScale(boxMatrix);
     const box = boxMesh.geometry.boundingBox!.clone();
     box.min.add(new THREE.Vector3(.0005 / Math.abs(scale.x), .0005 / Math.abs(scale.y), .0005 / Math.abs(scale.z)));
     box.max.sub(new THREE.Vector3(.0005 / Math.abs(scale.x), .0005 / Math.abs(scale.y), .0005 / Math.abs(scale.z)));
@@ -86,5 +117,33 @@ export class CollisionFeedback {
       solidAngle += 2 * Math.atan2(u.dot(cross.crossVectors(v, w)), lu * lv * lw + u.dot(v) * lw + v.dot(w) * lu + w.dot(u) * lv);
     }
     return Math.abs(solidAngle) > 2 * Math.PI;
+  }
+}
+
+/** Static obstacle bounds live only for one sampled motion, never across edits. */
+export class CollisionQuery {
+  private readonly obstacles: { mesh: THREE.Mesh; matrix: THREE.Matrix4; bounds: THREE.Box3 }[] = [];
+  private readonly bounds = new THREE.Box3();
+  constructor(private readonly feedback: CollisionFeedback, movingRoot: THREE.Object3D, candidates: readonly THREE.Object3D[]) {
+    const moving = new Set<THREE.Object3D>(); movingRoot.traverse(object => moving.add(object));
+    for (const mesh of candidates) {
+      if (!(mesh instanceof THREE.Mesh) || !mesh.geometry || moving.has(mesh)) continue;
+      if (!visibleInScene(mesh)) continue;
+      if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox();
+      for (const matrix of worldTransforms(mesh)) this.obstacles.push({ mesh, matrix, bounds: mesh.geometry.boundingBox!.clone().applyMatrix4(matrix) });
+    }
+  }
+  intersects(moving: readonly THREE.Mesh[]): boolean {
+    for (const mesh of moving) {
+      if (!visibleInScene(mesh)) continue;
+      if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox();
+      for (const matrix of worldTransforms(mesh)) {
+        this.bounds.copy(mesh.geometry.boundingBox!).applyMatrix4(matrix);
+        for (const obstacle of this.obstacles) {
+          if (this.bounds.intersectsBox(obstacle.bounds) && this.feedback.intersects(mesh, obstacle.mesh, matrix, obstacle.matrix)) return true;
+        }
+      }
+    }
+    return false;
   }
 }

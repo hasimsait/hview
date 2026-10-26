@@ -23,9 +23,6 @@ export class WallSurfacePalette {
       linewidth: 2,
       transparent: true,
       opacity: 0.8,
-      polygonOffset: true,
-      polygonOffsetFactor: -1,
-      polygonOffsetUnits: -1,
     });
 
     this.wallMaterial = new THREE.MeshStandardMaterial({
@@ -38,6 +35,7 @@ export class WallSurfacePalette {
     });
 
     applyBasicOcclusionShader(this.wallMaterial, this.wallUniforms, 0.5);
+    applyBasicOcclusionShader(this.edgeMaterial, this.wallUniforms, 0.5);
   }
 
   getMaterial(): THREE.MeshStandardMaterial {

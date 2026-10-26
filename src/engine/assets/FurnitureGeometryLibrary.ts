@@ -1,4 +1,6 @@
+import { buildKitchenware } from './builders/KitchenwareBuilder';
 import { buildDailyLife } from './builders/DailyLifeBuilder';
+import { buildSquatToilet } from './builders/SquatToiletBuilder';
 import type { AssetRecipeId } from '../../domain/catalog/AssetRecipes';
 import type { AssetBuilderFn } from "./builders/AssetBuildContext";
 import * as Bathroom from "./builders/BathroomBuilders";
@@ -10,7 +12,7 @@ import { buildIkeaAccessory } from './builders/IkeaAccessoryBuilder';
 import { buildBathroomAccessory } from './builders/BathroomAccessoryBuilder';
 import { buildFurnitureProduct } from './builders/FurnitureProductBuilder';
 import { buildElectricalFitting } from './builders/ElectricalBuilders';
-import { buildAirPurifier, buildRobotVacuum } from './builders/HouseholdBuilders';
+import { buildAirPurifier, buildRobotVacuum, buildWaterTreatmentUnit, buildStorageWaterHeater } from './builders/HouseholdBuilders';
 import { buildArchitecturalFinish } from './builders/ArchitecturalFinishBuilder';
 import { buildLightingComponent } from './builders/LightingComponentBuilder';
 import { buildFloorDrain } from './builders/FloorDrainBuilder';
@@ -20,6 +22,7 @@ import { buildHouseholdDetail } from './builders/HouseholdDetailBuilder';
 import { buildSoftFurnishing } from './builders/SoftFurnishingBuilder';
 
 export const FURNITURE_GEOMETRY: Readonly<Record<AssetRecipeId, AssetBuilderFn>> = {
+  kitchenware: buildKitchenware,
   daily_life: buildDailyLife,
   kitchen_worktop: buildWorktop,
   cabinet_fit_object: buildCabinetFitObject,
@@ -34,6 +37,9 @@ export const FURNITURE_GEOMETRY: Readonly<Record<AssetRecipeId, AssetBuilderFn>>
   electrical_fitting: buildElectricalFitting,
   robot_vacuum: buildRobotVacuum,
   air_purifier: buildAirPurifier,
+  water_treatment_unit: buildWaterTreatmentUnit,
+  storage_water_heater: buildStorageWaterHeater,
+  squat_toilet: buildSquatToilet,
   ikea_accessory: buildIkeaAccessory,
   angled_range_hood: Catalogue.buildAngledHood,
   gas_cooktop: Catalogue.buildGasCooktop,

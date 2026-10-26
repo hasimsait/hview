@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-type Resource = THREE.BufferGeometry | THREE.Material | THREE.Texture;
+type Resource = THREE.BufferGeometry | THREE.Material | THREE.Texture | THREE.InstancedMesh;
 
 /** Shared resource lifetime; a node releases only its own lease. */
 export class ResourcePool {
@@ -32,6 +32,8 @@ export class ResourceLease {
       for (const value of Object.values(material)) if (value instanceof THREE.Texture) next.add(value);
     };
     this.root.traverse(object => {
+      // Instanced meshes own GPU instance buffers in addition to shared geometry.
+      if (object instanceof THREE.InstancedMesh) next.add(object);
       const renderable = object as THREE.Mesh;
       if (renderable.geometry instanceof THREE.BufferGeometry) next.add(renderable.geometry);
       if (renderable.material) for (const material of Array.isArray(renderable.material) ? renderable.material : [renderable.material]) addMaterial(material);

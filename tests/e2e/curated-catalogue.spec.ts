@@ -22,6 +22,26 @@ async function search(page: Page, query: string) {
   await page.getByRole('button', { name: 'Add Asset', exact: true }).click();
   await page.getByPlaceholder('Search assets (e.g. towel, fan, sconce, bed, sink)...').fill(query);
 }
+test('catalogue mounts bounded pages and still searches products beyond the initial page', async ({ page }) => {
+  await page.getByRole('button', { name: 'Add Asset', exact: true }).click();
+  const catalogue = await page.evaluate(async () => {
+    const path = '/src/main.tsx'; const { runtime } = await import(path);
+    const assets = runtime.catalog.all(), asset = assets.at(-1)!; return { total: assets.length, key: asset.key, name: asset.name };
+  });
+  const results = page.getByRole('region', { name: 'Catalogue results', exact: true });
+  await expect(results.getByRole('heading')).toHaveCount(60);
+  await expect(page.getByText(`${catalogue.total} assets available`, { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Show more assets', exact: true }).click();
+  await expect(results.getByRole('heading')).toHaveCount(120);
+  const search = page.getByPlaceholder('Search assets (e.g. towel, fan, sconce, bed, sink)...');
+  await search.fill(catalogue.key); await expect(results.getByRole('heading', { name: catalogue.name, exact: true })).toBeVisible();
+  await search.fill(''); await expect(results.getByRole('heading')).toHaveCount(60);
+  await page.getByRole('button', { name: 'Show more assets', exact: true }).click();
+  await page.getByRole('button', { name: 'Kitchen', exact: true }).click();
+  expect(await results.getByRole('heading').count()).toBeLessThanOrEqual(60);
+  await page.getByRole('button', { name: 'All', exact: true }).click();
+  await expect(results.getByRole('heading')).toHaveCount(60);
+});
 async function items(page: Page): Promise<import('../../src/domain/model/PlanData').FurnitureData[]> {
   return page.evaluate(async () => {
     const path = '/src/main.tsx'; const { runtime } = await import(path);

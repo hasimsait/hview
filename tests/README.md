@@ -29,4 +29,4 @@ Offline checks fulfill downloaded HTML from its bytes in a fresh browser context
 
 `data-url-startup.test.ts` fails if a Shortcut document's pathname is read or percent-encoded, checks bounded keys and unchanged ordinary saved-copy keys, and verifies reset/load without storage or network. `opaque-origin.spec.ts` uses an actual sandboxed opaque origin to exercise import → edit → Save HTML → reopen with `localStorage` throwing `SecurityError` and all HTTP requests blocked. Managed Chromium blocks top-level `data:` navigation, so native iPhone Shortcut navigation and its memory ceiling remain device checks.
 
-[RESULTS.md](RESULTS.md) records validation results. [KNOWN_BUGS.md](KNOWN_BUGS.md) maps resolved defects to retained regression coverage.
+Keep validation results with the relevant commit or PR. Browser traces/screenshots, HTML reports and coverage output belong in the ignored report directories described above.

@@ -30,6 +30,8 @@ import { SurfaceLayerControl } from './SurfaceLayerControl';
 
 export { PHOTOGRAPHIC_FABRIC_COLLECTIONS,type PhotographicFabricItem };
 
+const normalizePaintSearch = (value: string) => value.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/ı/g, 'i').trim();
+
 export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
   currentFinish,
   onSelectFinish: selectFinish,
@@ -57,6 +59,7 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
     currentFinish?.type === 'paint' && currentFinish.color ? currentFinish.color : '#efede8'
   );
   const [paintSearchQuery, setPaintSearchQuery] = useState<string>('');
+  const [paintLimit, setPaintLimit] = useState(120);
   const [selectedLambriSlat, setSelectedLambriSlat] = useState<string>(
     currentFinish?.type === 'lambri' && currentFinish.variant ? currentFinish.variant : 'oak_slats'
   );
@@ -263,23 +266,24 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
           <div>
             <div className="flex items-center justify-between text-[10px] uppercase font-semibold text-slate-400 mb-1.5">
               <span>Architectural Wall Paint</span>
-              <span className="text-[9px] text-sky-400 font-normal">100 curated designer tones</span>
+              <span className="text-[9px] text-sky-400 font-normal">{ALL_CURATED_PAINTS.length} wall colors</span>
             </div>
 
-            {/* Search Input for 100 Wall Colors */}
+            {/* Search all bundled paint palettes. */}
             <div className="relative mb-2">
               <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500" />
               <input
                 type="text"
-                placeholder="Search 100 wall colors (e.g. Alabaster, Sage, Navy, #...)"
+                aria-label="Search wall colors"
+                placeholder="Search wall colors by name or hex code"
                 value={paintSearchQuery}
-                onChange={(e) => setPaintSearchQuery(e.target.value)}
+                onChange={(e) => { setPaintSearchQuery(e.target.value); setPaintLimit(120); }}
                 className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-7 py-1.5 text-[11px] text-slate-200 placeholder-slate-500 focus:outline-none focus:border-sky-500"
               />
               {paintSearchQuery && (
                 <button
                   type="button"
-                  onClick={() => setPaintSearchQuery('')}
+                  onClick={() => { setPaintSearchQuery(''); setPaintLimit(120); }}
                   className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 text-xs"
                 >
                   ✕
@@ -294,13 +298,13 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                   <button
                     key={cat.id}
                     type="button"
-                    onClick={() => setSelectedPaletteCategory(cat.id)}
+                    onClick={() => { setSelectedPaletteCategory(cat.id); setPaintLimit(120); }}
                     className={`px-1.5 py-0.5 rounded text-[9px] font-medium transition-colors ${selectedPaletteCategory === cat.id
                       ? 'bg-sky-500/20 text-sky-400 border border-sky-500/40'
                       : 'bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800'
                       }`}
                   >
-                    {cat.name}
+                    {cat.id === 'all' ? `All (${ALL_CURATED_PAINTS.length})` : cat.name}
                   </button>
                 ))}
               </div>
@@ -314,10 +318,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                   : PAINT_CATEGORIES.find((c) => c.id === selectedPaletteCategory)?.colors || [];
 
               if (paintSearchQuery.trim()) {
-                const q = paintSearchQuery.toLowerCase().trim();
+                const q = normalizePaintSearch(paintSearchQuery);
                 const allPaintsWithMetals = PAINT_CATEGORIES.filter((c) => c.id !== 'all').flatMap((c) => c.colors);
                 displayColors = allPaintsWithMetals.filter(
-                  (p) => p.name.toLowerCase().includes(q) || p.hex.toLowerCase().includes(q)
+                  (p) => normalizePaintSearch(p.name).includes(q) || p.hex.toLowerCase().includes(q)
                 );
               }
 
@@ -330,38 +334,44 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
               }
 
               return (
-                <div className="grid grid-cols-3 gap-1.5 max-h-52 overflow-y-auto pr-0.5">
-                  {displayColors.map((p) => {
-                    const active = isCurrent('paint', undefined, p.hex);
-                    return (
-                      <button
-                        key={`${p.name}_${p.hex}`}
-                        type="button"
-                        onClick={() => {
-                          setCustomHex(p.hex);
-                          onSelectFinish({
-                            type: 'paint',
-                            color: p.hex,
-                            roughness: 0.85,
-                          });
-                        }}
-                        className={`flex items-center gap-1.5 p-1.5 rounded-lg border text-left transition-all ${active
-                          ? 'border-sky-500 bg-sky-500/10 shadow-sm'
-                          : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
-                          }`}
-                        title={`${p.name} (${p.hex})`}
-                      >
-                        <div
-                          className="w-4 h-4 rounded-full border border-slate-700/60 shadow-inner shrink-0"
-                          style={{ backgroundColor: p.hex }}
-                        />
-                        <span className="text-[10px] text-slate-300 truncate font-medium flex-1">
-                          {p.name}
-                        </span>
-                        {active && <Check className="w-3 h-3 text-sky-400 shrink-0" />}
-                      </button>
-                    );
-                  })}
+                <div>
+                  <div className="grid grid-cols-3 gap-1.5 max-h-52 overflow-y-auto pr-0.5" role="region" aria-label="Paint colors">
+                    {displayColors.slice(0, paintLimit).map((p) => {
+                      const active = isCurrent('paint', undefined, p.hex);
+                      return (
+                        <button
+                          key={`${p.name}_${p.hex}`}
+                          type="button"
+                          onClick={() => {
+                            setCustomHex(p.hex);
+                            onSelectFinish({
+                              type: 'paint',
+                              color: p.hex,
+                              roughness: 0.85,
+                            });
+                          }}
+                          className={`flex items-center gap-1.5 p-1.5 rounded-lg border text-left transition-all ${active
+                            ? 'border-sky-500 bg-sky-500/10 shadow-sm'
+                            : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
+                            }`}
+                          title={`${p.name} (${p.hex})`}
+                        >
+                          <div
+                            className="w-4 h-4 rounded-full border border-slate-700/60 shadow-inner shrink-0"
+                            style={{ backgroundColor: p.hex }}
+                          />
+                          <span className="text-[10px] text-slate-300 truncate font-medium flex-1">
+                            {p.name}
+                          </span>
+                          {active && <Check className="w-3 h-3 text-sky-400 shrink-0" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {displayColors.length > paintLimit && <button type="button" onClick={() => setPaintLimit(limit => limit + 120)} className="mt-2 text-xs text-sky-400 hover:text-sky-300">
+                    Show more colors ({paintLimit} of {displayColors.length})
+                  </button>}
+                  {(selectedPaletteCategory === 'filli_momento_silan' || paintSearchQuery.trim()) && <p className="mt-2 text-[10px] text-slate-500">Digital swatches are approximate. Check a physical paint sample for the final color.</p>}
                 </div>
               );
             })()}

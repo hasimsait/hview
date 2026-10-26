@@ -21,7 +21,7 @@ import { CabinetPlinthControls } from './CabinetPlinthControls';
 import { supportsCabinetPlinth } from '../../domain/cabinet/CabinetPlinth';
 import { CabinetHingeControls } from './CabinetHingeControls';
 import { ConfigureCabinet } from '../../application/commands/CabinetCommands';
-import type { Vector3D } from '../../domain/model/PlanData';
+import type { LightFixtureConfig, Vector3D } from '../../domain/model/PlanData';
 import { Furniture,Shelving } from '../../domain/elements/Furniture';
 import { InspectorPresenter } from '../inspection/InspectorPresenter';
 import { SurfaceFinishPicker } from './SurfaceFinishPicker';
@@ -30,6 +30,7 @@ import { cabinetSurfaceFinish } from '../../domain/model/SurfaceSections';
 export interface InteriorInspectorAdapter {
   transform: (position?: Vector3D, rotation?: number, dimensions?: Vector3D) => void;
   finish: (finish?: SurfaceFinishConfig, section?: string) => void;
+  configureLight: (config: Partial<LightFixtureConfig>) => void;
   remove: () => void;
   sections: string[];
   section: string;
@@ -95,6 +96,11 @@ export const Inspector: React.FC<InspectorProps> = ({
     } else {
       editor.execute(new FinishFurniture(item.id, undefined, activeSection));
     }
+  };
+
+  const configureLight = (config: Partial<LightFixtureConfig>) => {
+    if (interior) interior.configureLight(config);
+    else editor.execute(new ConfigureLuminaire(item.id, config));
   };
 
   const handlePositionChange = (axis: 'x' | 'y' | 'z', value: number) => {
@@ -383,7 +389,7 @@ export const Inspector: React.FC<InspectorProps> = ({
               type="button"
               onClick={() => {
                 const currentEnabled = item.lightConfig?.enabled !== false;
-                editor.execute(new ConfigureLuminaire(item.id, { enabled: !currentEnabled }));
+                configureLight({ enabled: !currentEnabled });
               }}
               className={`px-2.5 py-0.5 rounded text-[11px] font-semibold border transition-all ${item.lightConfig?.enabled !== false
                 ? 'bg-amber-500/20 border-amber-500/50 text-amber-300 shadow-sm'
@@ -403,6 +409,7 @@ export const Inspector: React.FC<InspectorProps> = ({
               </span>
             </div>
             <input
+              aria-label="Fixture brightness"
               type="range"
               min="0"
               max="3"
@@ -410,7 +417,7 @@ export const Inspector: React.FC<InspectorProps> = ({
               value={item.lightConfig?.intensity ?? 1.0}
               onChange={(e) => {
                 const val = parseFloat(e.target.value);
-                editor.execute(new ConfigureLuminaire(item.id, { intensity: val }));
+                configureLight({ intensity: val });
               }}
               className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-400"
             />
@@ -418,20 +425,22 @@ export const Inspector: React.FC<InspectorProps> = ({
 
           {/* Color Temperature & Warmth */}
           <div className="space-y-1.5">
-            <div className="text-[10px] uppercase font-medium text-slate-500">Color Warmth</div>
-            <div className="grid grid-cols-4 gap-1">
+            <div className="text-[10px] uppercase font-medium text-slate-500">White Light Temperature</div>
+            <div className="grid grid-cols-3 gap-1">
               {[
-                { label: '2700K', name: 'Warm', color: '#ffe4a0' },
-                { label: '3000K', name: 'Soft', color: '#fff2dc' },
-                { label: '4000K', name: 'Neutral', color: '#ffffff' },
-                { label: '5500K', name: 'Cool', color: '#e2f0ff' },
+                { label: '2700K', name: 'Warm', kelvin: 2700 },
+                { label: '3000K', name: 'Soft', kelvin: 3000 },
+                { label: '3500K', name: 'Warm white', kelvin: 3500 },
+                { label: '4000K', name: 'Neutral', kelvin: 4000 },
+                { label: '5500K', name: 'Daylight', kelvin: 5500 },
+                { label: '6500K', name: 'Cool white', kelvin: 6500 },
               ].map((preset) => {
-                const isSelected = (item.lightConfig?.color?.toLowerCase() || '#fff2dc') === preset.color.toLowerCase();
+                const isSelected = item.lightConfig?.temperatureKelvin === preset.kelvin;
                 return (
                   <button
                     key={preset.label}
                     type="button"
-                    onClick={() => editor.execute(new ConfigureLuminaire(item.id, { color: preset.color }))}
+                    onClick={() => configureLight({ temperatureKelvin: preset.kelvin })}
                     className={`py-1 px-1 rounded text-center border transition-all ${isSelected
                       ? 'border-amber-400 bg-amber-500/20 text-amber-200 font-semibold shadow-sm'
                       : 'border-slate-700 bg-slate-800/80 text-slate-300 hover:border-slate-600'
@@ -448,15 +457,30 @@ export const Inspector: React.FC<InspectorProps> = ({
             <div className="flex items-center gap-2 pt-1">
               <span className="text-[10px] text-slate-500">Custom:</span>
               <input
+                aria-label="Fixture color"
                 type="color"
                 value={item.lightConfig?.color || '#fff2dc'}
-                onChange={(e) => editor.execute(new ConfigureLuminaire(item.id, { color: e.target.value }))}
+                onChange={(e) => configureLight({ color: e.target.value, temperatureKelvin: undefined })}
                 className="w-6 h-6 rounded border border-slate-700 bg-transparent cursor-pointer"
               />
               <span className="text-[11px] font-mono text-slate-400">
                 {item.lightConfig?.color || '#fff2dc'}
               </span>
             </div>
+            <p className="text-[10px] text-slate-500">Approximate white-light color. Actual LED spectra vary.</p>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[11px] text-slate-400 flex items-center justify-between gap-2">
+              Fixture output (lm)
+              <input aria-label="Fixture output (lumens)" type="number" min="0" max="100000" step="1"
+                placeholder="Asset default" value={item.lightConfig?.lumens ?? ''}
+                onChange={event => {
+                  const value = event.target.value === '' ? undefined : Number(event.target.value);
+                  if (value === undefined || Number.isFinite(value) && value >= 0 && value <= 100000) configureLight({ lumens: value });
+                }} className="w-28 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200" />
+            </label>
+            <button type="button" onClick={() => configureLight({ lumens: 806 })} className="text-[11px] text-sky-400 hover:text-sky-300">Use 806 lm</button>
+            <p className="text-[10px] text-slate-500">Total output at 100% brightness. For several bulbs, enter their combined lumens. Clear to use the asset default.</p>
           </div>
         </div>
       )}
