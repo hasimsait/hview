@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { describe, expect, it, vi } from 'vitest';
+import { mergeStaticParts } from '../../src/engine/geometry/MergeStaticParts';
 import { CollisionFeedback } from '../../src/engine/cabinet/CollisionFeedback';
 import { AssetCatalog } from '../../src/domain/catalog/AssetCatalog';
 import { PlanCodec } from '../../src/domain/codec/PlanCodec';
@@ -7,6 +8,44 @@ import { FurnitureMeshBuilder } from '../../src/engine/assets/FurnitureMeshBuild
 import { ResourcePool } from '../../src/engine/resources/ResourcePool';
 
 describe('motion collision broad phase', () => {
+  it.each([false, true])('preserves merged lattice gaps with transformed curved obstacles (moving merged=%s)', movingMerged => {
+    const scene = new THREE.Group(), pivot = new THREE.Group(), lattice = new THREE.Group(); scene.add(pivot);
+    const material = new THREE.MeshBasicMaterial();
+    const bars = [-.2, .2].map(x => {
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(.04, .5, .04), material);
+      mesh.position.x = x; mesh.userData.section = 'Laundry Basket'; lattice.add(mesh); return mesh;
+    });
+    const obstacle = new THREE.Mesh(new THREE.CylinderGeometry(.005, .005, .1, 16), material);
+    obstacle.rotation.x = Math.PI / 2;
+    pivot.add(movingMerged ? lattice : obstacle); scene.add(movingMerged ? obstacle : lattice);
+    scene.rotation.y = .37; scene.scale.set(1.2, .8, .7); scene.updateMatrixWorld(true);
+    const feedback = new CollisionFeedback();
+    expect(bars.some(bar => feedback.intersects(bar, obstacle))).toBe(false);
+    mergeStaticParts(bars); scene.updateMatrixWorld(true);
+    const merged = lattice.children[0] as THREE.Mesh;
+    const moving = movingMerged ? merged : obstacle;
+    expect(feedback.prepare(pivot, [merged, obstacle]).intersects([moving])).toBe(false);
+    obstacle.position.x = .2; scene.updateMatrixWorld(true);
+    expect(feedback.prepare(pivot, [merged, obstacle]).intersects([moving])).toBe(true);
+    feedback.dispose(); new ResourcePool().ownTree(scene).dispose();
+  });
+
+  it('keeps a real laundry basket gap clear of a small cylindrical object', () => {
+    const codec = new PlanCodec(), asset = codec.factory.catalog.get('cabinet_laundry_tiltout')!;
+    const item = codec.factory.furniture({ id: 'basket', name: asset.key, assetKey: asset.key, displayName: asset.name,
+      category: asset.category, dimensions: asset.defaultDimensions, position: { x: 0, y: 0, z: 0 }, rotationY: 0 });
+    const root = new FurnitureMeshBuilder(codec.factory.catalog).build(item), scene = new THREE.Group();
+    const obstacle = new THREE.Mesh(new THREE.CylinderGeometry(.001, .001, .008, 12), new THREE.MeshBasicMaterial());
+    obstacle.position.set(0, .0563666653, -.148); scene.add(root, obstacle); scene.updateMatrixWorld(true);
+    const moving: THREE.Mesh[] = [];
+    root.getObjectByName('cabinet_door_0')!.traverse(object => { if (object instanceof THREE.Mesh) moving.push(object); });
+    const feedback = new CollisionFeedback();
+    expect(feedback.prepare(root, [obstacle]).intersects(moving)).toBe(false);
+    obstacle.position.y = .046; scene.updateMatrixWorld(true);
+    expect(feedback.prepare(root, [obstacle]).intersects(moving)).toBe(true);
+    feedback.dispose(); new ResourcePool().ownTree(scene).dispose();
+  });
+
   it('detects the sixth DAGGASTER dish in both the broad phase and exact triangles', () => {
     const catalog = new AssetCatalog(), codec = new PlanCodec(catalog), asset = catalog.get('ikea_00112090')!;
     const entity = codec.factory.furniture({ id: 'dishes', name: asset.key, assetKey: asset.key, displayName: asset.name,

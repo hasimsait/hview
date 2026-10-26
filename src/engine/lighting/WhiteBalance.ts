@@ -58,8 +58,11 @@ export class WhiteBalancePass {
     }
     renderer.getDrawingBufferSize(this.size);
     this.target ??= new THREE.WebGLRenderTarget(this.size.x,this.size.y,{
-      type:THREE.HalfFloatType, colorSpace:THREE.LinearSRGBColorSpace,
-      samples:renderer.getContext().getContextAttributes()?.antialias ? Math.min(4,renderer.capabilities.maxSamples) : 0,
+      // Small physical emitters exceed half-float's 65504 ceiling before tone
+      // mapping. Float32 keeps that radiance finite. Nearest sampling needs no
+      // float-linear extension; Float32 renderbuffers cannot require MSAA.
+      type:THREE.FloatType, colorSpace:THREE.LinearSRGBColorSpace,
+      minFilter:THREE.NearestFilter, magFilter:THREE.NearestFilter, samples:0,
     });
     this.target.setSize(this.size.x,this.size.y);
     this.material.uniforms.image.value=this.target.texture;

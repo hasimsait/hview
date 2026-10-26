@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { mergedCollisionParts } from '../geometry/MergeStaticParts';
 import { OBB } from 'three/examples/jsm/math/OBB.js';
 
 function visibleInScene(object: THREE.Object3D): boolean {
@@ -81,6 +82,11 @@ export class CollisionFeedback {
       const bounds = leaf.geometry.boundingBox!.clone().applyMatrix4(leafMatrix);
       if (!bounds.intersectsBox(obstacle.geometry.boundingBox!.clone().applyMatrix4(obstacleMatrix))) return false;
     }
+    // Render batching must not fill the spaces between the original solids.
+    const leafParts = mergedCollisionParts(leaf.geometry);
+    if (leafParts) return leafParts.some(part => this.intersects(part, obstacle, leafMatrix.clone().multiply(part.matrix), obstacleMatrix));
+    const obstacleParts = mergedCollisionParts(obstacle.geometry);
+    if (obstacleParts) return obstacleParts.some(part => this.intersects(leaf, part, leafMatrix, obstacleMatrix.clone().multiply(part.matrix)));
     const leafBox = this.isBox(leaf), obstacleBox = this.isBox(obstacle);
     if (orthogonal && leafBox && obstacleBox) return true;
     // Door leaves, handles and drawer panels are boxes. A bounding box alone

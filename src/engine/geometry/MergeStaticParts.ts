@@ -1,6 +1,13 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
+// Retain the original CPU collision geometry without keeping extra GPU leases.
+// Disposing a geometry releases its GPU buffers, not its CPU attributes.
+const collisionParts = new WeakMap<THREE.BufferGeometry, readonly THREE.Mesh[]>();
+export function mergedCollisionParts(geometry: THREE.BufferGeometry): readonly THREE.Mesh[] | undefined {
+  return collisionParts.get(geometry);
+}
+
 /** Construction-only pieces of one editable part; moving pivots stay separate. */
 export function mergeStaticParts(parts: readonly THREE.Mesh[]): void {
   const groups = new Map<string, THREE.Mesh[]>();
@@ -16,6 +23,7 @@ export function mergeStaticParts(parts: readonly THREE.Mesh[]): void {
     const geometry = mergeGeometries(geometries);
     geometries.forEach(part => part.dispose());
     if (!geometry) continue;
+    collisionParts.set(geometry, group);
     const mesh = new THREE.Mesh(geometry, first.material);
     mesh.userData = { ...first.userData }; mesh.castShadow = first.castShadow; mesh.receiveShadow = first.receiveShadow;
     for (const part of group) { parent.remove(part); part.geometry.dispose(); }
