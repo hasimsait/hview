@@ -48,7 +48,7 @@
       3.67,
       3.19
     ],
-    "note": "Continuous light warm stone on all painted walls and exposed painted columns. This replaces the dark red wall and softens the contrast with the full-height wardrobe in 11.4 m². Reuse the same mix as the large living room.",
+    "note": "Continuous light warm stone on all painted walls and exposed painted columns. This replaces the dark red wall and softens the contrast with the full-height wardrobe in 11.4 m². Keep this warm stone reference for the bedroom; the living room now uses the separately selected Jotun colour.",
     "sheet": "room-sheets/04-master-bedroom.png"
   },
   {
@@ -68,18 +68,18 @@
     "id": "_elc1j",
     "roomName": "Living Room (22.0 m²)",
     "area_m2": 22,
-    "base": "HASIR 310",
-    "baseHex": "#e2dbd4",
+    "base": "JOTUN 1876 WILD EARL",
+    "baseHex": "#d4cbb9",
     "boundingSpan_m": [
       3.21,
       7.03
     ],
-    "note": "Light warm stone on the main walls. Use muted blue-grey ANDEZİT 25 only on the uninterrupted long wall behind the burgundy sofa (wall _5k50y), including adjoining painted column faces on that plane. Leave the opposite TV wall light to limit the darker surface in this narrow room.",
-    "accent": "ANDEZİT 25",
-    "accentHex": "#b9bfc2",
-    "accentWalls": [
-      "_5k50y"
-    ],
+    "note": "Jotun 1876 Wild Earl: muted golden beige continuously on every painted wall and exposed painted column face. Remove the former blue-grey accent entirely. Retain the burgundy upholstery and timber. This is a Jotun colour reference, not a verified Filli Boya tint formula.",
+    "colourBrand": "Jotun",
+    "colourCode": "1876",
+    "officialReference": "https://www.jotun.com/tr-tr/decorative/colours/interior/all-interior-colours/1876-wild-earl-interior",
+    "previewHexSource": "https://plan-home.com/color/wild-earl-1876",
+    "previewNote": "Third-party digital approximation; not an official Jotun RGB specification or a verified Filli Boya equivalent.",
     "sheet": "room-sheets/06-living-room-22m2.png"
   }
 ]

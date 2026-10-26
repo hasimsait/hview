@@ -1,5 +1,5 @@
 {
-  "product": "Filli Boya Momento Silan",
+  "product": "Filli Boya Momento Silan for Filli shades; living-room Jotun colour reference has no selected coating product",
   "tds": "https://www.filliboya.com/uploads/TDS_MOMENTOSILAN.pdf",
   "coat_count": 2,
   "reserve_fraction": 0.15,
@@ -20,22 +20,26 @@
     {
       "shade": "HASIR 310",
       "hex": "#e2dbd4",
-      "estimated_surface_m2": 73.78,
-      "two_coats_plus_15_percent_L": 13.57,
-      "purchase_L": 15.0,
+      "estimated_surface_m2": 39.65,
+      "two_coats_plus_15_percent_L": 7.3,
+      "purchase_L": 7.5,
       "packs": {
-        "15": 1
+        "7.5": 1
       }
     },
     {
-      "shade": "ANDEZİT 25",
-      "hex": "#b9bfc2",
-      "estimated_surface_m2": 21.23,
-      "two_coats_plus_15_percent_L": 3.91,
-      "purchase_L": 5.0,
-      "packs": {
+      "shade": "JOTUN 1876 WILD EARL",
+      "hex": "#d4cbb9",
+      "estimated_surface_m2": 55.36,
+      "two_coats_plus_15_percent_L": 10.19,
+      "calculation_status": "Provisional Momento Silan consumption scenario only; selected Jotun coating product and packs not yet specified.",
+      "provisional_pack_scenario_L": 12.5,
+      "provisional_pack_scenario": {
+        "7.5": 1,
         "2.5": 2
-      }
+      },
+      "purchase_L": null,
+      "packs": null
     }
   ],
   "surface_ledger": [
@@ -44,7 +48,7 @@
       "id": "_5k50y",
       "side": "B",
       "room": "_elc1j",
-      "shade": "ANDEZİT 25",
+      "shade": "JOTUN 1876 WILD EARL",
       "gross_m2": 17.874,
       "openings_m2": 0,
       "reveals_m2": 0,
@@ -55,7 +59,7 @@
       "id": "_7dakl",
       "side": "B",
       "room": "_elc1j",
-      "shade": "HASIR 310",
+      "shade": "JOTUN 1876 WILD EARL",
       "gross_m2": 0.8974800000000019,
       "openings_m2": 0,
       "reveals_m2": 0,
@@ -77,7 +81,7 @@
       "id": "_hr4kt",
       "side": "B",
       "room": "_elc1j",
-      "shade": "HASIR 310",
+      "shade": "JOTUN 1876 WILD EARL",
       "gross_m2": 0.9765885938402292,
       "openings_m2": 0,
       "reveals_m2": 0,
@@ -99,7 +103,7 @@
       "id": "_kmn82",
       "side": "B",
       "room": "_elc1j",
-      "shade": "HASIR 310",
+      "shade": "JOTUN 1876 WILD EARL",
       "gross_m2": 7.953245127759717,
       "openings_m2": 0,
       "reveals_m2": 0,
@@ -110,7 +114,7 @@
       "id": "_l8dpu",
       "side": "A",
       "room": "_elc1j",
-      "shade": "HASIR 310",
+      "shade": "JOTUN 1876 WILD EARL",
       "gross_m2": 8.95778697160347,
       "openings_m2": 4.953125,
       "reveals_m2": 0.34906250000000005,
@@ -418,7 +422,7 @@
       "id": "_qtcgs",
       "side": "A",
       "room": "_elc1j",
-      "shade": "HASIR 310",
+      "shade": "JOTUN 1876 WILD EARL",
       "gross_m2": 0.655707355294367,
       "openings_m2": 0,
       "reveals_m2": 0,
@@ -462,7 +466,7 @@
       "id": "_k2vy1_b",
       "side": "A",
       "room": "_elc1j",
-      "shade": "HASIR 310",
+      "shade": "JOTUN 1876 WILD EARL",
       "gross_m2": 8.513209609189708,
       "openings_m2": 1.9134024000000003,
       "reveals_m2": 0.25555720000000004,
@@ -484,7 +488,7 @@
       "id": "_k2vy1_a_a",
       "side": "A",
       "room": "_elc1j",
-      "shade": "HASIR 310",
+      "shade": "JOTUN 1876 WILD EARL",
       "gross_m2": 4.7790617792617,
       "openings_m2": 0,
       "reveals_m2": 0,
@@ -506,7 +510,7 @@
       "id": "_k2vy1_a_b",
       "side": "A",
       "room": "_elc1j",
-      "shade": "HASIR 310",
+      "shade": "JOTUN 1876 WILD EARL",
       "gross_m2": 5.967073913569364,
       "openings_m2": 0,
       "reveals_m2": 0,
@@ -638,7 +642,7 @@
       "id": "col__53l4m__r5gio",
       "face": "finishFront",
       "room": "_elc1j",
-      "shade": "HASIR 310",
+      "shade": "JOTUN 1876 WILD EARL",
       "area_m2": 0.27235986081450814
     },
     {
@@ -646,7 +650,7 @@
       "id": "col__53l4m__r5gio",
       "face": "finishBack",
       "room": "_elc1j",
-      "shade": "HASIR 310",
+      "shade": "JOTUN 1876 WILD EARL",
       "area_m2": 0.27235986081450814
     },
     {
@@ -662,7 +666,7 @@
       "id": "col__53l4m__r5gio",
       "face": "finishRight",
       "room": "_elc1j",
-      "shade": "HASIR 310",
+      "shade": "JOTUN 1876 WILD EARL",
       "area_m2": 1.1398667384626673
     },
     {
@@ -670,7 +674,7 @@
       "id": "col__3xn1i__h6n3s",
       "face": "finishFront",
       "room": "_elc1j",
-      "shade": "ANDEZİT 25",
+      "shade": "JOTUN 1876 WILD EARL",
       "area_m2": 1.4093997730792194
     },
     {
@@ -678,7 +682,7 @@
       "id": "col__3xn1i__h6n3s",
       "face": "finishBack",
       "room": "_elc1j",
-      "shade": "ANDEZİT 25",
+      "shade": "JOTUN 1876 WILD EARL",
       "area_m2": 1.4093997730792194
     },
     {
@@ -686,7 +690,7 @@
       "id": "col__3xn1i__h6n3s",
       "face": "finishLeft",
       "room": "_elc1j",
-      "shade": "ANDEZİT 25",
+      "shade": "JOTUN 1876 WILD EARL",
       "area_m2": 0.27027226940702986
     },
     {
@@ -694,7 +698,7 @@
       "id": "col__3xn1i__h6n3s",
       "face": "finishRight",
       "room": "_elc1j",
-      "shade": "ANDEZİT 25",
+      "shade": "JOTUN 1876 WILD EARL",
       "area_m2": 0.27027226940702986
     },
     {
@@ -722,5 +726,5 @@
       "area_m2": 1.6196097723308471
     }
   ],
-  "purchase_note": "30 L of the main shade uses two 15 L pails. A lower-volume alternative is 27.5 L (15 + 7.5 + 2.5 + 2.5), which uses more pails; compare actual dealer quotes. No price saving is assumed."
+  "living_room_product_note": "Wild Earl litre and pack figures use the previous Momento Silan consumption assumption for comparison only. They are not a verified Jotun product specification. If ordering Jotun paint, recalculate from the chosen product TDS and available packs; if ordering a Filli match, approve a physical matched sample first. No exact cross-brand tint formula is claimed."
 }
