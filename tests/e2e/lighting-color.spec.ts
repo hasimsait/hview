@@ -59,8 +59,11 @@ test('white-light output, preview and exposure work without geometry rebuilds an
   await page.getByLabel('Viewing white balance',{exact:true}).selectOption('2700');
   const balanced=await state(page);
   expect(balanced.config).toEqual(cool.config);expect(balanced.plan).toBe(cool.plan);expect(balanced.lights).toEqual(cool.lights);
-  await page.getByRole('button',{name:'Match white balance to preview',exact:true}).click();
+  await page.getByRole('button',{name:'Adapt to preview light',exact:true}).click();
   expect((await state(page)).settings.whiteBalanceKelvin).toBe(6500);
+  await page.getByRole('slider',{name:'Viewing adaptation',exact:true}).fill('0.35');
+  const partial=await state(page);expect(partial.settings.whiteBalanceAdaptation).toBe(.35);
+  expect(partial.lights).toEqual(cool.lights);expect(partial.plan).toBe(cool.plan);
   await page.getByRole('slider',{name:'Lighting exposure',exact:true}).fill('1');expect((await state(page)).exposure).toBe(2);
   await page.getByLabel('Color rendering',{exact:true}).selectOption('aces');expect((await state(page)).tone).toBe(4);
   await page.getByRole('button',{name:'Reset color controls',exact:true}).click();expect((await state(page)).tone).toBe(7);
@@ -76,8 +79,10 @@ test('white-light output, preview and exposure work without geometry rebuilds an
     expect((await state(touch)).config).toEqual(configured.config);
     await touch.getByRole('button',{name:/Lighting: Daylight/}).tap();
     await touch.getByLabel('White light preview',{exact:true}).selectOption('2700');
-    await touch.getByRole('button',{name:'Match white balance to preview',exact:true}).tap();
+    await touch.getByRole('button',{name:'Adapt to preview light',exact:true}).tap();
     expect((await state(touch)).settings.whiteBalanceKelvin).toBe(2700);
+    await touch.getByRole('slider',{name:'Viewing adaptation',exact:true}).fill('0.65');
+    expect((await state(touch)).settings.whiteBalanceAdaptation).toBe(.65);
     await touch.getByRole('slider',{name:'Lighting exposure',exact:true}).fill('0.5');
     expect((await state(touch)).exposure).toBeCloseTo(Math.SQRT2,6);
     await touch.screenshot({path:info.outputPath('touch-lighting-controls.png')});
@@ -112,7 +117,7 @@ test('reference red and green paints respond to warm and cool white light with u
     for(const temperature of [2700,6500]) {
       const frame=await page.evaluate(async temperature=>{
         const path='/src/main.tsx';const {runtime}=await import(path);const frame=runtime.scene.renderer.info.render.frame;
-        runtime.scene.updateSettings({fixtureTemperatureKelvin:temperature,whiteBalanceKelvin:temperature});return frame;
+        runtime.scene.updateSettings({fixtureTemperatureKelvin:temperature,whiteBalanceKelvin:temperature,whiteBalanceAdaptation:.5});return frame;
       },temperature);
       await page.waitForFunction(async frame=>{const path='/src/main.tsx';const {runtime}=await import(path);return !runtime.scene.preparing&&runtime.scene.renderer.info.render.frame>frame;},frame);
       const stats=await sharp(await page.screenshot({clip:patches.paint})).stats();samples.push(stats.channels.slice(0,3).map(channel=>channel.mean));
@@ -120,12 +125,21 @@ test('reference red and green paints respond to warm and cool white light with u
       await page.evaluate(temperature=>{
         let label=document.getElementById('lighting-review-label');if(!label){label=document.createElement('div');label.id='lighting-review-label';document.body.append(label);}
         label.style.cssText='position:fixed;top:210px;left:24px;z-index:100;background:#0f172a;color:#fff;padding:10px;font:14px Arial';
-        label.textContent=`Lamp: ${temperature} K | White balance: ${temperature} K | Exposure: -3 EV | Gray reference patch at right`;
+        label.textContent=`Lamp: ${temperature} K | Viewing white: ${temperature} K at 50% adaptation | Exposure: -3 EV | Gray reference patch at right`;
       },temperature);
       await page.screenshot({path:info.outputPath(`${name}-${temperature}.png`)});
     }
-    for(const neutral of neutrals)expect(Math.max(...neutral)-Math.min(...neutral)).toBeLessThan(10);
-    for(let channel=0;channel<3;channel++)expect(Math.abs(neutrals[0][channel]-neutrals[1][channel])).toBeLessThan(5);
+    // Warm viewing retains a yellow tint; full neutralization would hide it.
+    expect(neutrals[0][0]-neutrals[0][1]).toBeGreaterThan(10);
+    expect(neutrals[0][1]-neutrals[0][2]).toBeGreaterThan(10);
+    expect(Math.max(...neutrals[1])-Math.min(...neutrals[1])).toBeLessThan(10);
+    const frame=await page.evaluate(async()=>{
+      const path='/src/main.tsx';const {runtime}=await import(path);const frame=runtime.scene.renderer.info.render.frame;
+      runtime.scene.updateSettings({fixtureTemperatureKelvin:2700,whiteBalanceKelvin:2700,whiteBalanceAdaptation:1});return frame;
+    });
+    await page.waitForFunction(async frame=>{const path='/src/main.tsx';const {runtime}=await import(path);return !runtime.scene.preparing&&runtime.scene.renderer.info.render.frame>frame;},frame);
+    const fullyAdapted=(await sharp(await page.screenshot({clip:patches.neutral})).stats()).channels.slice(0,3).map(channel=>channel.mean);
+    for(let channel=0;channel<3;channel++)expect(Math.abs(fullyAdapted[channel]-neutrals[1][channel])).toBeLessThan(5);
     if(name==='kaktus-60')expect(samples[1][1]).toBeGreaterThan(samples[1][2]);
     const plan=JSON.parse((await state(page)).plan);expect(plan.find((element:any)=>element.data.id==='wall').data.finishSideA.color).toBe(color);
   }

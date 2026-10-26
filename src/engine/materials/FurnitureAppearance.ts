@@ -7,6 +7,7 @@ import type { ResourcePool } from '../resources/ResourcePool';
 import { isFabricStretched,type SurfaceMaterialFactory } from './SurfaceMaterialFactory';
 import { isFixtureLight } from '../lighting/FixtureLight';
 import { whiteLightColor } from '../lighting/WhiteLight';
+import { emitterSurfaceArea } from '../lighting/EmitterSurface';
 export class FurnitureAppearance {
   private readonly glowMaterials = new WeakSet<THREE.Mesh>();
   constructor(private readonly finishService: SurfaceMaterialFactory, private readonly resources: ResourcePool, private readonly settings: () => ViewportSettings, private readonly recessHost: (item: WallRecess) => RecessHost | undefined) { }
@@ -82,7 +83,13 @@ export class FurnitureAppearance {
     const fixtureTypes = new Map<string | undefined, string>();
     const totalPower = new Map<string | undefined, number>();
     const basePowers = new Map<THREE.Object3D, number>();
+    const emittingAreas = new Map<string | undefined, number>();
     mesh.traverse(child => {
+      if (child instanceof THREE.Mesh && child.userData.isLightEmissive) {
+        const id = child.userData.cabinetContent?.id;
+        const config = id ? (contents.get(id) ?? child.userData.cabinetContent).lightConfig : entity?.lightConfig;
+        if (config?.lumens !== undefined) emittingAreas.set(id, (emittingAreas.get(id) ?? 0) + emitterSurfaceArea(child));
+      }
       if (isFixtureLight(child)) {
         const id = child.userData.cabinetContent?.id;
         fixtureTypes.set(id, child.userData.fixtureType ?? 'spot');
@@ -151,6 +158,13 @@ export class FurnitureAppearance {
               mat.color.set(customColor);
             } else {
               mat.color.set(0xfff6dd); // warm golden white glow
+            }
+            if (config?.lumens !== undefined) {
+              // Lambertian emitters: lumens = pi * area * luminance. A bright
+              // bulb must not become a dim painted surface when exposure drops.
+              const area = emittingAreas.get(content?.id) ?? 0;
+              const luminance = .2126729 * mat.color.r + .7151522 * mat.color.g + .072175 * mat.color.b;
+              if (area > 0 && luminance > 0) mat.color.multiplyScalar(config.lumens * typeMult * customIntensity / (Math.PI * area * luminance));
             }
           } else {
             mat.color.set(0x334155); // dark slate off-bulb

@@ -9,6 +9,7 @@ import { PlanDocument } from '../../src/domain/model/PlanDocument';
 import type { LightFixtureConfig } from '../../src/domain/model/PlanData';
 import { FurnitureMeshBuilder } from '../../src/engine/assets/FurnitureMeshBuilder';
 import { isFixtureLight, type FixtureLight } from '../../src/engine/lighting/FixtureLight';
+import { emitterSurfaceArea } from '../../src/engine/lighting/EmitterSurface';
 import { FurnitureAppearance } from '../../src/engine/materials/FurnitureAppearance';
 import type { SurfaceMaterialFactory } from '../../src/engine/materials/SurfaceMaterialFactory';
 import { FurnitureSceneNode } from '../../src/engine/nodes/FurnitureSceneNode';
@@ -34,6 +35,26 @@ function parts(root: THREE.Object3D, id: string) {
   return { lights, glow };
 }
 describe('cabinet content lighting', () => {
+  it('keeps the physical glow output of nested fixtures independent', () => {
+    const original = cabinet(), layout = structuredClone(original.cabinet!);
+    layout.contents[0].lightConfig = { lumens: 80, temperatureKelvin: 2700, intensity: .25 };
+    layout.contents[1].lightConfig = { lumens: 806, temperatureKelvin: 6500, intensity: .5 };
+    const item = original.withCabinet(layout), root = builder.build(item), resources = new ResourcePool();
+    const appearance = new FurnitureAppearance({} as SurfaceMaterialFactory, resources,
+      () => ({ spotLightIntensity: 2, chandelierIntensity: .5 } as ViewportSettings), () => undefined);
+    appearance.apply(root, item);
+    for (const [id, output] of [['led', 40], ['second', 201.5]] as const) {
+      const fixture = parts(root, id);
+      const visibleOutput = fixture.glow.reduce((sum, mesh) => {
+        const c = (mesh.material as THREE.MeshBasicMaterial).color;
+        return sum + Math.PI * emitterSurfaceArea(mesh) * (.2126729*c.r + .7151522*c.g + .072175*c.b);
+      }, 0);
+      expect(visibleOutput).toBeCloseTo(output, 6);
+      expect(fixture.lights.reduce((sum, light) => sum + light.power, 0)).toBeCloseTo(output, 6);
+    }
+    resources.ownTree(root).dispose();
+  });
+
   it('controls each nested light and diffuser independently, with the correct global fixture slider', () => {
     const resources = new ResourcePool(), settings = { spotLightIntensity: 2, chandelierIntensity: .25 } as ViewportSettings;
     const appearance = new FurnitureAppearance({} as SurfaceMaterialFactory, resources, () => settings, () => undefined);

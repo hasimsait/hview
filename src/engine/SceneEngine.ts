@@ -994,7 +994,7 @@ export class SceneEngine implements ISceneService {
     }
     if (this.renderer) {
       this.updateFixtureLightBudget();
-      this.whiteBalance.render(this.renderer, this.scene, this.activeCamera, this.settings.whiteBalanceKelvin ?? 6500);
+      this.whiteBalance.render(this.renderer, this.scene, this.activeCamera, this.settings.whiteBalanceKelvin ?? 6500, this.settings.whiteBalanceAdaptation ?? .5);
       this.setStatus('ready', '');
     }
   }

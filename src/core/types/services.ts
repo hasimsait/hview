@@ -52,6 +52,7 @@ export interface ViewportSettings {
   toneMapping?: 'neutral' | 'aces';
   fixtureTemperatureKelvin?: number; // Temporary white-light preview; 0 uses each fixture's settings.
   whiteBalanceKelvin?: number; // Viewing white relative to the unchanged 6500 K reference.
+  whiteBalanceAdaptation?: number; // 0 = unadapted; 1 = fully neutralize the viewing white.
 }
 
 export interface ISceneService {

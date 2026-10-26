@@ -7,6 +7,7 @@ import { LegacyPlanWriter } from '../../src/domain/codec/LegacyPlanWriter';
 import { addFixtureLight, addStripAreaLight } from '../../src/engine/lighting/FixtureLight';
 import { whiteLightColor } from '../../src/engine/lighting/WhiteLight';
 import { whiteBalanceMatrix } from '../../src/engine/lighting/WhiteBalance';
+import { emitterSurfaceArea } from '../../src/engine/lighting/EmitterSurface';
 import { FurnitureAppearance } from '../../src/engine/materials/FurnitureAppearance';
 import { SurfaceMaterialFactory } from '../../src/engine/materials/SurfaceMaterialFactory';
 import { ResourcePool } from '../../src/engine/resources/ResourcePool';
@@ -35,6 +36,58 @@ describe('white-light color and photometric controls', () => {
     const Z=.0193339*c.r+.119192*c.g+.9503041*c.b;
     expect(X/(X+Y+Z)).toBeCloseTo(x,4);expect(Y/(X+Y+Z)).toBeCloseTo(y,4);
     expect(Y).toBeCloseTo(1,6);
+  });
+
+  it('retains a warm neutral at partial adaptation without changing luminance or the cool reference', () => {
+    const source = whiteLightColor(2700), reference = whiteLightColor(6500);
+    const unadapted = new THREE.Vector3(source.r, source.g, source.b);
+    expect(unadapted.clone().applyMatrix3(whiteBalanceMatrix(2700, 0)).toArray()).toEqual(unadapted.toArray());
+    const partial = unadapted.clone().applyMatrix3(whiteBalanceMatrix(2700, .75));
+    const expected = unadapted.clone().lerp(new THREE.Vector3(reference.r, reference.g, reference.b), .75);
+    expect(partial.distanceTo(expected)).toBeLessThan(1e-6);
+    expect(partial.x / partial.z).toBeGreaterThan(1.3);
+    expect(.2126729 * partial.x + .7151522 * partial.y + .072175 * partial.z).toBeCloseTo(1, 6);
+    expect(whiteBalanceMatrix(6500, .75).elements).toEqual(new THREE.Matrix3().elements);
+  });
+
+  it('makes visible emitters follow physical output, dimming and resized surface area', () => {
+    const root = new THREE.Group(), settings = { chandelierIntensity: 1 } as ViewportSettings;
+    addFixtureLight(root, [0, 1, 0], 20, 9, 'chandelier');
+    const panels = [1, 2].map(width => {
+      const panel = new THREE.Mesh(new THREE.PlaneGeometry(width, 1), new THREE.MeshBasicMaterial());
+      panel.userData.isLightEmissive = true; root.add(panel); return panel;
+    });
+    const resources = new ResourcePool();
+    const appearance = new FurnitureAppearance({} as SurfaceMaterialFactory, resources, () => settings, () => undefined);
+    const entity = lamp();
+    const luminance = (panel: typeof panels[number]) => {
+      const c = panel.material.color; return .2126729 * c.r + .7151522 * c.g + .072175 * c.b;
+    };
+    const power = () => panels.reduce((sum, panel) => sum + Math.PI * emitterSurfaceArea(panel) * luminance(panel), 0);
+    appearance.applyLighting(root, entity);
+    expect(power()).toBeCloseTo(806, 6);
+    expect(panels[0].material.color.r / panels[0].material.color.b).toBeCloseTo(whiteLightColor(2700).r / whiteLightColor(2700).b, 6);
+    panels[0].scale.set(2, 3, 1); root.scale.set(2, 1, 1);
+    appearance.applyLighting(root, entity);
+    expect(emitterSurfaceArea(panels[0])).toBeCloseTo(12, 6);
+    expect(power()).toBeCloseTo(806, 6);
+    settings.chandelierIntensity = .5;
+    appearance.applyLighting(root, entity.withEmission({ intensity: .25 }));
+    expect(power()).toBeCloseTo(806 / 8, 6);
+    appearance.applyLighting(root, entity.withEmission({ lumens: 0 }));
+    expect(panels[0].material.color.getHex()).toBe(0x334155);
+    resources.ownTree(root).dispose();
+  });
+
+  it('invalidates emitting area after geometry edits and index replacement', () => {
+    const geometry = new THREE.BufferGeometry();
+    const position = new THREE.Float32BufferAttribute([0,0,0, 2,0,0, 0,1,0, 0,2,0], 3);
+    geometry.setAttribute('position', position); geometry.setIndex([0,1,2]);
+    const panel = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial());
+    expect(emitterSurfaceArea(panel)).toBe(1);
+    geometry.setIndex([0,1,3]); expect(emitterSurfaceArea(panel)).toBe(2);
+    position.setY(3, 3); position.needsUpdate = true; expect(emitterSurfaceArea(panel)).toBe(3);
+    geometry.dispose(); panel.material.dispose();
   });
 
   it('keeps nominal luminance constant across the supported temperatures', () => {

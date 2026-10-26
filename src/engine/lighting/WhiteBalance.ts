@@ -9,14 +9,19 @@ const bradford = new THREE.Matrix3().set(.8951,.2664,-.1614, -.7502,1.7135,.0367
 /** Viewing adaptation is separate from physical lamp output. Keep the approved
  * 6500 K rendering unchanged; adapt other viewing whites to that same baseline.
  */
-export function whiteBalanceMatrix(kelvin: number): THREE.Matrix3 {
-  if (kelvin === 6500) return new THREE.Matrix3();
+export function whiteBalanceMatrix(kelvin: number, adaptation = 1): THREE.Matrix3 {
+  const degree = THREE.MathUtils.clamp(adaptation, 0, 1);
+  if (kelvin === 6500 || degree === 0) return new THREE.Matrix3();
   const cone = (temperature: number) => {
     const color = whiteLightColor(temperature);
     return new THREE.Vector3(color.r,color.g,color.b).applyMatrix3(rgbToXYZ).applyMatrix3(bradford);
   };
   const source = cone(kelvin), reference = cone(6500);
-  const scale = new THREE.Matrix3().set(reference.x/source.x,0,0, 0,reference.y/source.y,0, 0,0,reference.z/source.z);
+  // Partial von Kries adaptation blends cone-response gains with identity.
+  // Full adaptation removes the illuminant tint entirely; it is not a faithful
+  // default for judging how warm-white light feels in a room.
+  const gain = (target: number, source: number) => 1 + degree * (target / source - 1);
+  const scale = new THREE.Matrix3().set(gain(reference.x,source.x),0,0, 0,gain(reference.y,source.y),0, 0,0,gain(reference.z,source.z));
   return rgbToXYZ.clone().invert().multiply(bradford.clone().invert()).multiply(scale).multiply(bradford).multiply(rgbToXYZ);
 }
 
@@ -26,6 +31,7 @@ export function whiteBalanceMatrix(kelvin: number): THREE.Matrix3 {
 export class WhiteBalancePass {
   private target?: THREE.WebGLRenderTarget;
   private temperature?: number;
+  private adaptation?: number;
   private readonly size = new THREE.Vector2();
   private readonly camera = new THREE.Camera();
   private readonly quadScene = new THREE.Scene();
@@ -44,8 +50,8 @@ export class WhiteBalancePass {
   private readonly geometry = new THREE.PlaneGeometry(2,2);
   constructor(){ this.quadScene.add(new THREE.Mesh(this.geometry,this.material)); }
 
-  render(renderer:THREE.WebGLRenderer,scene:THREE.Scene,camera:THREE.Camera,kelvin=6500):void {
-    if(kelvin===6500){
+  render(renderer:THREE.WebGLRenderer,scene:THREE.Scene,camera:THREE.Camera,kelvin=6500,adaptation=.5):void {
+    if(kelvin===6500 || adaptation<=0){
       this.target?.dispose();this.target=undefined;
       this.material.uniforms.image.value=null;
       renderer.render(scene,camera);return;
@@ -57,7 +63,9 @@ export class WhiteBalancePass {
     });
     this.target.setSize(this.size.x,this.size.y);
     this.material.uniforms.image.value=this.target.texture;
-    if(this.temperature!==kelvin){this.material.uniforms.balance.value.copy(whiteBalanceMatrix(kelvin));this.temperature=kelvin;}
+    if(this.temperature!==kelvin || this.adaptation!==adaptation){
+      this.material.uniforms.balance.value.copy(whiteBalanceMatrix(kelvin,adaptation));this.temperature=kelvin;this.adaptation=adaptation;
+    }
     const previous=renderer.getRenderTarget();
     try {
       renderer.setRenderTarget(this.target);renderer.render(scene,camera);
