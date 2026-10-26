@@ -3,67 +3,67 @@
     "column": "col__azlp2__vwg0k__6v6w8",
     "face": "finishFront",
     "room": "_y0oj2",
-    "colour": "#ebc3c8"
+    "colour": "#eae2d1"
   },
   {
     "column": "col__azlp2__vwg0k__6v6w8",
     "face": "finishLeft",
     "room": "_y0oj2",
-    "colour": "#ebc3c8"
+    "colour": "#eae2d1"
   },
   {
     "column": "col__azlp2__vwg0k__6v6w8",
     "face": "finishRight",
     "room": "_y0oj2",
-    "colour": "#ebc3c8"
+    "colour": "#eae2d1"
   },
   {
     "column": "col__qsaea__688py",
     "face": "finishFront",
     "room": "_y0oj2",
-    "colour": "#ebc3c8"
+    "colour": "#eae2d1"
   },
   {
     "column": "col__qsaea__688py",
     "face": "finishBack",
     "room": "_vzdza",
-    "colour": "#f4d7b0"
+    "colour": "#fbfaf5"
   },
   {
     "column": "col__qsaea__688py",
     "face": "finishLeft",
     "room": "_vzdza",
-    "colour": "#f4d7b0"
+    "colour": "#fbfaf5"
   },
   {
     "column": "col__qsaea__688py",
     "face": "finishRight",
     "room": "_vzdza",
-    "colour": "#f4d7b0"
+    "colour": "#fbfaf5"
   },
   {
     "column": "col__lu17y__2v725__3g5dh",
     "face": "finishFront",
     "room": "_3h613",
-    "colour": "#b9cbb6"
+    "colour": "#dcc8db"
   },
   {
     "column": "col__lu17y__2v725__3g5dh",
     "face": "finishBack",
     "room": "_v7m0m",
-    "colour": "#fbfaf5"
+    "colour": "#eae2d1"
   },
   {
     "column": "col__lu17y__2v725__3g5dh",
     "face": "finishLeft",
     "room": "_v7m0m",
-    "colour": "#fbfaf5"
+    "colour": "#eae2d1"
   },
   {
     "column": "col__lu17y__2v725__3g5dh",
     "face": "finishRight",
     "room": "_v7m0m",
-    "colour": "#fbfaf5"
+    "colour": "#eae2d1"
   },
   {
     "column": "col__53l4m__r5gio",
@@ -81,7 +81,7 @@
     "column": "col__53l4m__r5gio",
     "face": "finishLeft",
     "room": "_y0oj2",
-    "colour": "#ebc3c8"
+    "colour": "#eae2d1"
   },
   {
     "column": "col__53l4m__r5gio",
@@ -117,7 +117,7 @@
     "column": "_uh7hb",
     "face": "finishFront",
     "room": "_v7m0m",
-    "colour": "#fbfaf5"
+    "colour": "#eae2d1"
   },
   {
     "column": "_uh7hb",
@@ -129,6 +129,6 @@
     "column": "_uh7hb",
     "face": "finishRight",
     "room": "_vzdza",
-    "colour": "#f4d7b0"
+    "colour": "#fbfaf5"
   }
 ]

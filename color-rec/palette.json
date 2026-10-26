@@ -3,15 +3,15 @@
     "id": "_y0oj2",
     "roomName": "Living Room (13.3 m²)",
     "area_m2": 13.31,
-    "base": "KORAL 80",
-    "baseHex": "#ebc3c8",
+    "base": "KUMRU",
+    "baseHex": "#eae2d1",
     "boundingSpan_m": [
       3.44,
       3.98
     ],
-    "note": "KORAL 80: light dusty pink, visibly distinct from the sand-beige salon. It complements the slate-blue sofa and connects to the burgundy curtains through a lighter red-family hue. Timber desks add warmth. Use one continuous pink on the painted walls and exposed painted columns in the densely furnished 13.3 m² room; no second accent surface.",
-    "paintedSurface_m2": 39.9,
-    "twoCoatsPlus15Percent_L": 7.34,
+    "note": "KUMRU: continuous warm cream on painted walls and exposed column faces. It warms the slate-blue sofa and timber desks and relates to the burgundy curtains. Share the same tint with the small bedroom.",
+    "paintedSurface_m2": 33.9,
+    "twoCoatsPlus15Percent_L": 6.24,
     "product": "Filli Boya Momento Silan",
     "sheet": "room-sheets/01-living-room-13m2.png"
   },
@@ -19,15 +19,15 @@
     "id": "_v7m0m",
     "roomName": "Bedroom (8.3 m²)",
     "area_m2": 8.32,
-    "base": "KIRIK BEYAZ",
-    "baseHex": "#fbfaf5",
+    "base": "KUMRU",
+    "baseHex": "#eae2d1",
     "boundingSpan_m": [
       3.64,
       2.46
     ],
-    "note": "KIRIK BEYAZ: warm off-white on all painted walls and column faces. The blue bed and timber desk provide colour in just 8.3 m². Keep this tiny room light and continuous; no green wall or dark end wall. The same paint is used in the corridor. A dryer placement remains a separate clearance study.",
-    "paintedSurface_m2": 33.16,
-    "twoCoatsPlus15Percent_L": 6.1,
+    "note": "KUMRU: the same light warm cream as the smaller living room, alongside the blue bed and timber desk. All painted walls and column faces stay continuous in 8.3 m². No green accent or dark end wall. A bedroom dryer remains a separate clearance study.",
+    "paintedSurface_m2": 29.87,
+    "twoCoatsPlus15Percent_L": 5.5,
     "product": "Filli Boya Momento Silan",
     "sheet": "room-sheets/02-bedroom-8m2.png"
   },
@@ -35,15 +35,15 @@
     "id": "_vzdza",
     "roomName": "Kitchen (8.0 m²)",
     "area_m2": 7.95,
-    "base": "KEHRİBAR 50",
-    "baseHex": "#f4d7b0",
+    "base": "KIRIK BEYAZ",
+    "baseHex": "#fbfaf5",
     "boundingSpan_m": [
       3.76,
       2.47
     ],
-    "note": "KEHRİBAR 50: light honey yellow, a distinct yellow-family colour beside the muted green cabinets. It picks up the caramel floor and timber worktop, while the sand-beige salon provides a quieter warm neighbour. Retain the mosaic and tile; apply only to painted walls and column faces.",
-    "paintedSurface_m2": 23.57,
-    "twoCoatsPlus15Percent_L": 4.34,
+    "note": "KIRIK BEYAZ: warm off-white on painted walls and column faces, shared with the corridor. Existing green cabinets, caramel floor and timber worktop provide colour. Retain the mosaic and tile.",
+    "paintedSurface_m2": 19.17,
+    "twoCoatsPlus15Percent_L": 3.53,
     "product": "Filli Boya Momento Silan",
     "sheet": "room-sheets/03-kitchen.png"
   },
@@ -51,15 +51,15 @@
     "id": "_3h613",
     "roomName": "Master Bedroom (11.4 m²)",
     "area_m2": 11.36,
-    "base": "KAKTÜS 20",
-    "baseHex": "#b9cbb6",
+    "base": "HİBİSKUS 20",
+    "baseHex": "#dcc8db",
     "boundingSpan_m": [
       3.67,
       3.19
     ],
-    "note": "KAKTÜS 20: soft sage green on the painted walls and column faces of the 11.4 m² master bedroom. It complements the rust bedding, echoes the green pillows and contrasts gently with the large taupe wardrobe. This green belongs to the master bedroom, not the 8.3 m² bedroom. Keep it continuous with no dark feature wall.",
-    "paintedSurface_m2": 39.65,
-    "twoCoatsPlus15Percent_L": 7.3,
+    "note": "HİBİSKUS 20: light lilac on painted walls and column returns. The clear lavender hue adds character beside the taupe wardrobe and green pillows while retaining a light enclosure. Only about 2.5 m of width remains after the wardrobe, so the rejected dark brick-red scheme is not used. Keep the existing light ceiling and a single continuous wall colour; furniture and textiles stay unchanged.",
+    "paintedSurface_m2": 33.27,
+    "twoCoatsPlus15Percent_L": 6.12,
     "product": "Filli Boya Momento Silan",
     "sheet": "room-sheets/04-master-bedroom.png"
   },
@@ -73,9 +73,9 @@
       4.31,
       6.07
     ],
-    "note": "KIRIK BEYAZ: warm off-white through the L-shaped corridor. It creates a light transition between the sand-beige salon, dusty-pink living room, sage bedroom and honey-yellow kitchen, while the caramel floor and timber entry door keep it warm. Painted columns and returns stay the same white.",
-    "paintedSurface_m2": 40.64,
-    "twoCoatsPlus15Percent_L": 7.48,
+    "note": "KIRIK BEYAZ: warm off-white throughout the L-shaped corridor, including painted column faces and returns. Its limited daylight and narrow stretches favour a light transition; the caramel floor and timber door keep it warm. Share the tint with the kitchen.",
+    "paintedSurface_m2": 45.96,
+    "twoCoatsPlus15Percent_L": 8.46,
     "product": "Filli Boya Momento Silan",
     "sheet": "room-sheets/05-hallway-entry.png"
   },
@@ -89,14 +89,14 @@
       3.21,
       7.03
     ],
-    "note": "Jotun 1876 Wild Earl: the fixed golden sand-beige on all painted walls and column faces of the 22 m² main salon. It links burgundy seating, cream upholstery and timber shelving. The surrounding rooms bring genuinely different pink, green and yellow hues; the corridor provides a quiet warm-white transition.",
+    "note": "Jotun 1876 Wild Earl: the fixed golden sand-beige on all painted walls and column faces of the 22 m² salon. It connects burgundy seating, cream upholstery and timber shelves. Keep the existing light ceiling and furniture.",
     "colourBrand": "Jotun",
     "colourCode": "1876",
     "officialReference": "https://www.jotun.com/tr-tr/decorative/colours/interior/all-interior-colours/1876-wild-earl-interior",
     "previewHexSource": "https://plan-home.com/color/wild-earl-1876",
     "previewNote": "Digital preview approximation; buy Jotun 1876 in the specified coating, not an unverified cross-brand substitute.",
-    "paintedSurface_m2": 55.36,
-    "twoCoatsPlus15Percent_L": 13.26,
+    "paintedSurface_m2": 49.65,
+    "twoCoatsPlus15Percent_L": 11.9,
     "product": "Jotun Fenomastic Güzel Evim Zengin Mat Yeni",
     "sheet": "room-sheets/06-living-room-22m2.png"
   }
