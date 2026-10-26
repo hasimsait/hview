@@ -1,45 +1,166 @@
 {
-  "product": "Filli Boya Momento Silan for Filli shades; living-room Jotun colour reference has no selected coating product",
-  "tds": "https://www.filliboya.com/uploads/TDS_MOMENTOSILAN.pdf",
   "coat_count": 2,
   "reserve_fraction": 0.15,
-  "consumption_L_per_m2_per_coat": 0.08,
-  "formula": "surface_m2 × 0.08 × 2 × 1.15",
-  "method": "Wall centreline length × model height minus rectangular openings, plus half-depth opening reveals on each painted side, plus full selected painted column faces. Does not subtract fixed cabinetry, wardrobes, or column overlaps with walls; conservative model estimate, not a measured site bill. Ceilings, tiles, glass, WC/bathrooms and balcony excluded. Primer is separate. Quantities are undiluted paint; water does not reduce purchase quantity. Manufacturer coverage and packs are in litres; no unsupported kg conversion.",
+  "method": "Wall centreline length × model height minus rectangular openings, plus half-depth opening reveals on each painted side, plus full selected painted column faces. Does not subtract fixed cabinetry, wardrobes, or column overlaps with walls; conservative model estimate, not a measured site bill. Ceilings, tiles, glass, WC/bathrooms and balcony excluded. Primer separate. Quantities are undiluted paint; no kg-to-litre assumption. Pool shared colours across rooms before rounding to packs.",
+  "product_assumptions": {
+    "Filli Boya Momento Silan": "80 ml/m² per coat, the upper TDS consumption endpoint.",
+    "Jotun Fenomastic Güzel Evim Zengin Mat Yeni": "9.6 m²/L per coat, the lower TDS coverage endpoint. Selected for the two Wild Earl salons; not the previously used Momento consumption assumption."
+  },
   "colours": [
     {
-      "shade": "KUMRU",
-      "hex": "#eae2d1",
-      "estimated_surface_m2": 137.27,
-      "two_coats_plus_15_percent_L": 25.26,
-      "purchase_L": 30,
+      "shade": "JOTUN 1876 WILD EARL",
+      "hex": "#d4cbb9",
+      "product": "Jotun Fenomastic Güzel Evim Zengin Mat Yeni",
+      "tds": "https://jotundatasheetsprod.blob.core.windows.net/tds/TDS%C2%A442882%C2%A4Fenomastic%20G%C3%BCzel%20Evim%20Zengin%20Mat%20Yeni%C2%A4tr-TR%C2%A4TR.pdf",
+      "consumption_L_per_m2_per_coat": 0.10416666666666667,
+      "estimated_surface_m2": 55.36,
+      "two_coats_plus_15_percent_L": 13.26,
+      "purchase_L": 15.0,
       "packs": {
-        "15": 2
-      }
+        "15": 1
+      },
+      "roomIds": [
+        "_elc1j"
+      ]
     },
     {
-      "shade": "BEJ 30",
-      "hex": "#ebe1d8",
+      "shade": "KORAL 80",
+      "hex": "#ebc3c8",
+      "product": "Filli Boya Momento Silan",
+      "tds": "https://www.filliboya.com/uploads/TDS_MOMENTOSILAN.pdf",
+      "consumption_L_per_m2_per_coat": 0.08,
+      "estimated_surface_m2": 39.9,
+      "two_coats_plus_15_percent_L": 7.34,
+      "purchase_L": 7.5,
+      "packs": {
+        "7.5": 1
+      },
+      "roomIds": [
+        "_y0oj2"
+      ]
+    },
+    {
+      "shade": "KAKTÜS 20",
+      "hex": "#b9cbb6",
+      "product": "Filli Boya Momento Silan",
+      "tds": "https://www.filliboya.com/uploads/TDS_MOMENTOSILAN.pdf",
+      "consumption_L_per_m2_per_coat": 0.08,
       "estimated_surface_m2": 39.65,
       "two_coats_plus_15_percent_L": 7.3,
       "purchase_L": 7.5,
       "packs": {
         "7.5": 1
-      }
+      },
+      "roomIds": [
+        "_3h613"
+      ]
     },
     {
-      "shade": "JOTUN 1876 WILD EARL",
-      "hex": "#d4cbb9",
-      "estimated_surface_m2": 55.36,
-      "two_coats_plus_15_percent_L": 10.19,
-      "calculation_status": "Provisional Momento Silan consumption scenario only; Jotun coating product and packs not specified.",
-      "provisional_pack_scenario_L": 12.5,
-      "provisional_pack_scenario": {
-        "7.5": 1,
+      "shade": "KEHRİBAR 50",
+      "hex": "#f4d7b0",
+      "product": "Filli Boya Momento Silan",
+      "tds": "https://www.filliboya.com/uploads/TDS_MOMENTOSILAN.pdf",
+      "consumption_L_per_m2_per_coat": 0.08,
+      "estimated_surface_m2": 23.57,
+      "two_coats_plus_15_percent_L": 4.34,
+      "purchase_L": 5.0,
+      "packs": {
         "2.5": 2
       },
-      "purchase_L": null,
-      "packs": null
+      "roomIds": [
+        "_vzdza"
+      ]
+    },
+    {
+      "shade": "KIRIK BEYAZ",
+      "hex": "#fbfaf5",
+      "product": "Filli Boya Momento Silan",
+      "tds": "https://www.filliboya.com/uploads/TDS_MOMENTOSILAN.pdf",
+      "consumption_L_per_m2_per_coat": 0.08,
+      "estimated_surface_m2": 73.8,
+      "two_coats_plus_15_percent_L": 13.58,
+      "purchase_L": 15.0,
+      "packs": {
+        "15": 1
+      },
+      "roomIds": [
+        "_v7m0m",
+        "_4wyay"
+      ]
+    }
+  ],
+  "rooms": [
+    {
+      "room": "_y0oj2",
+      "name": "Living Room (13.3 m²)",
+      "floor_m2": 13.31,
+      "shade": "KORAL 80",
+      "wall_gross_m2": 42.04,
+      "openings_deducted_m2": 7.62,
+      "reveals_added_m2": 1.07,
+      "column_faces_added_m2": 4.42,
+      "estimated_surface_m2": 39.9,
+      "two_coats_plus_15_percent_L": 7.34
+    },
+    {
+      "room": "_v7m0m",
+      "name": "Bedroom (8.3 m²)",
+      "floor_m2": 8.32,
+      "shade": "KIRIK BEYAZ",
+      "wall_gross_m2": 32.55,
+      "openings_deducted_m2": 3.74,
+      "reveals_added_m2": 0.52,
+      "column_faces_added_m2": 3.82,
+      "estimated_surface_m2": 33.16,
+      "two_coats_plus_15_percent_L": 6.1
+    },
+    {
+      "room": "_vzdza",
+      "name": "Kitchen (8.0 m²)",
+      "floor_m2": 7.95,
+      "shade": "KEHRİBAR 50",
+      "wall_gross_m2": 26.04,
+      "openings_deducted_m2": 7.22,
+      "reveals_added_m2": 1.03,
+      "column_faces_added_m2": 3.73,
+      "estimated_surface_m2": 23.57,
+      "two_coats_plus_15_percent_L": 4.34
+    },
+    {
+      "room": "_3h613",
+      "name": "Master Bedroom (11.4 m²)",
+      "floor_m2": 11.36,
+      "shade": "KAKTÜS 20",
+      "wall_gross_m2": 41.47,
+      "openings_deducted_m2": 3.78,
+      "reveals_added_m2": 0.52,
+      "column_faces_added_m2": 1.43,
+      "estimated_surface_m2": 39.65,
+      "two_coats_plus_15_percent_L": 7.3
+    },
+    {
+      "room": "_4wyay",
+      "name": "Hallway / Entry (11.7 m²)",
+      "floor_m2": 11.72,
+      "shade": "KIRIK BEYAZ",
+      "wall_gross_m2": 49.02,
+      "openings_deducted_m2": 11.27,
+      "reveals_added_m2": 1.28,
+      "column_faces_added_m2": 1.62,
+      "estimated_surface_m2": 40.64,
+      "two_coats_plus_15_percent_L": 7.48
+    },
+    {
+      "room": "_elc1j",
+      "name": "Living Room (22.0 m²)",
+      "floor_m2": 22,
+      "shade": "JOTUN 1876 WILD EARL",
+      "wall_gross_m2": 56.57,
+      "openings_deducted_m2": 6.87,
+      "reveals_added_m2": 0.6,
+      "column_faces_added_m2": 5.04,
+      "estimated_surface_m2": 55.36,
+      "two_coats_plus_15_percent_L": 13.26
     }
   ],
   "surface_ledger": [
@@ -70,7 +191,7 @@
       "id": "_hr4kt",
       "side": "A",
       "room": "_4wyay",
-      "shade": "KUMRU",
+      "shade": "KIRIK BEYAZ",
       "gross_m2": 0.9765885938402292,
       "openings_m2": 0,
       "reveals_m2": 0,
@@ -92,7 +213,7 @@
       "id": "_kmn82",
       "side": "A",
       "room": "_4wyay",
-      "shade": "KUMRU",
+      "shade": "KIRIK BEYAZ",
       "gross_m2": 7.953245127759717,
       "openings_m2": 0,
       "reveals_m2": 0,
@@ -125,7 +246,7 @@
       "id": "_mgltn",
       "side": "A",
       "room": "_y0oj2",
-      "shade": "KUMRU",
+      "shade": "KORAL 80",
       "gross_m2": 0.9791598073407681,
       "openings_m2": 0,
       "reveals_m2": 0,
@@ -136,7 +257,7 @@
       "id": "_mgltn",
       "side": "B",
       "room": "_vzdza",
-      "shade": "KUMRU",
+      "shade": "KEHRİBAR 50",
       "gross_m2": 0.9791598073407681,
       "openings_m2": 0,
       "reveals_m2": 0,
@@ -147,7 +268,7 @@
       "id": "_ule1b",
       "side": "A",
       "room": "_y0oj2",
-      "shade": "KUMRU",
+      "shade": "KORAL 80",
       "gross_m2": 8.439701516569851,
       "openings_m2": 2.121,
       "reveals_m2": 0.2605,
@@ -158,7 +279,7 @@
       "id": "_ule1b",
       "side": "B",
       "room": "_vzdza",
-      "shade": "KUMRU",
+      "shade": "KEHRİBAR 50",
       "gross_m2": 8.439701516569851,
       "openings_m2": 2.121,
       "reveals_m2": 0.2605,
@@ -169,7 +290,7 @@
       "id": "_g9657",
       "side": "A",
       "room": "_y0oj2",
-      "shade": "KUMRU",
+      "shade": "KORAL 80",
       "gross_m2": 0.13507613392328538,
       "openings_m2": 0,
       "reveals_m2": 0,
@@ -180,7 +301,7 @@
       "id": "_rxf4v",
       "side": "A",
       "room": "_y0oj2",
-      "shade": "KUMRU",
+      "shade": "KORAL 80",
       "gross_m2": 9.368303439350095,
       "openings_m2": 1.785,
       "reveals_m2": 0.26899999999999996,
@@ -191,7 +312,7 @@
       "id": "_4la13",
       "side": "A",
       "room": "_4wyay",
-      "shade": "KUMRU",
+      "shade": "KIRIK BEYAZ",
       "gross_m2": 4.8421821425886185,
       "openings_m2": 1.6917768,
       "reveals_m2": 0.2502804,
@@ -202,7 +323,7 @@
       "id": "_4la13",
       "side": "B",
       "room": "_vzdza",
-      "shade": "KUMRU",
+      "shade": "KEHRİBAR 50",
       "gross_m2": 4.8421821425886185,
       "openings_m2": 1.6917768,
       "reveals_m2": 0.2502804,
@@ -213,7 +334,7 @@
       "id": "_kzq4r",
       "side": "A",
       "room": "_v7m0m",
-      "shade": "KUMRU",
+      "shade": "KIRIK BEYAZ",
       "gross_m2": 8.693011405583313,
       "openings_m2": 0,
       "reveals_m2": 0,
@@ -224,7 +345,7 @@
       "id": "_54f0m",
       "side": "A",
       "room": "_v7m0m",
-      "shade": "KUMRU",
+      "shade": "KIRIK BEYAZ",
       "gross_m2": 0.3099527401999918,
       "openings_m2": 0,
       "reveals_m2": 0,
@@ -235,7 +356,7 @@
       "id": "_pnu8l",
       "side": "A",
       "room": "_v7m0m",
-      "shade": "KUMRU",
+      "shade": "KIRIK BEYAZ",
       "gross_m2": 0.376110464612036,
       "openings_m2": 0,
       "reveals_m2": 0,
@@ -246,7 +367,7 @@
       "id": "_23lv1",
       "side": "B",
       "room": "_vzdza",
-      "shade": "KUMRU",
+      "shade": "KEHRİBAR 50",
       "gross_m2": 6.257425589758354,
       "openings_m2": 1.77,
       "reveals_m2": 0.26799999999999996,
@@ -257,7 +378,7 @@
       "id": "_nbso8",
       "side": "A",
       "room": "_vzdza",
-      "shade": "KUMRU",
+      "shade": "KEHRİBAR 50",
       "gross_m2": 1.664008897099285,
       "openings_m2": 0,
       "reveals_m2": 0,
@@ -268,7 +389,7 @@
       "id": "_nbso8",
       "side": "B",
       "room": "_y0oj2",
-      "shade": "KUMRU",
+      "shade": "KORAL 80",
       "gross_m2": 1.664008897099285,
       "openings_m2": 0,
       "reveals_m2": 0,
@@ -279,7 +400,7 @@
       "id": "_f1kbv",
       "side": "B",
       "room": "_vzdza",
-      "shade": "KUMRU",
+      "shade": "KEHRİBAR 50",
       "gross_m2": 3.8540834507742128,
       "openings_m2": 1.6380000000000001,
       "reveals_m2": 0.24900000000000003,
@@ -290,7 +411,7 @@
       "id": "_a0wf4",
       "side": "A",
       "room": "_4wyay",
-      "shade": "KUMRU",
+      "shade": "KIRIK BEYAZ",
       "gross_m2": 6.371467133002067,
       "openings_m2": 2.016,
       "reveals_m2": 0.258,
@@ -301,7 +422,7 @@
       "id": "_a0wf4",
       "side": "B",
       "room": "_v7m0m",
-      "shade": "KUMRU",
+      "shade": "KIRIK BEYAZ",
       "gross_m2": 6.371467133002067,
       "openings_m2": 2.016,
       "reveals_m2": 0.258,
@@ -312,7 +433,7 @@
       "id": "_nsq8v",
       "side": "B",
       "room": "_v7m0m",
-      "shade": "KUMRU",
+      "shade": "KIRIK BEYAZ",
       "gross_m2": 6.898919509191386,
       "openings_m2": 1.7249999999999999,
       "reveals_m2": 0.26500000000000007,
@@ -323,7 +444,7 @@
       "id": "_ra6yj",
       "side": "A",
       "room": "_3h613",
-      "shade": "BEJ 30",
+      "shade": "KAKTÜS 20",
       "gross_m2": 9.900847593798062,
       "openings_m2": 0,
       "reveals_m2": 0,
@@ -334,7 +455,7 @@
       "id": "_ra6yj",
       "side": "B",
       "room": "_v7m0m",
-      "shade": "KUMRU",
+      "shade": "KIRIK BEYAZ",
       "gross_m2": 9.900847593798062,
       "openings_m2": 0,
       "reveals_m2": 0,
@@ -345,7 +466,7 @@
       "id": "_tmb2o",
       "side": "B",
       "room": "_3h613",
-      "shade": "BEJ 30",
+      "shade": "KAKTÜS 20",
       "gross_m2": 8.489836445529951,
       "openings_m2": 2.1,
       "reveals_m2": 0.26,
@@ -356,7 +477,7 @@
       "id": "_l6kfb",
       "side": "B",
       "room": "_3h613",
-      "shade": "BEJ 30",
+      "shade": "KAKTÜS 20",
       "gross_m2": 10.179678111437552,
       "openings_m2": 0,
       "reveals_m2": 0,
@@ -367,7 +488,7 @@
       "id": "_0jsab",
       "side": "B",
       "room": "_3h613",
-      "shade": "BEJ 30",
+      "shade": "KAKTÜS 20",
       "gross_m2": 8.674020000000068,
       "openings_m2": 1.6755999999999998,
       "reveals_m2": 0.25999999999999995,
@@ -378,7 +499,7 @@
       "id": "_h1edo",
       "side": "B",
       "room": "_3h613",
-      "shade": "BEJ 30",
+      "shade": "KAKTÜS 20",
       "gross_m2": 4.229366106171097,
       "openings_m2": 0,
       "reveals_m2": 0,
@@ -389,7 +510,7 @@
       "id": "_ojjeh_b",
       "side": "B",
       "room": "_4wyay",
-      "shade": "KUMRU",
+      "shade": "KIRIK BEYAZ",
       "gross_m2": 2.8287383896197187,
       "openings_m2": 1.7429999999999999,
       "reveals_m2": 0.12575,
@@ -400,7 +521,7 @@
       "id": "_u3jaj",
       "side": "A",
       "room": "_4wyay",
-      "shade": "KUMRU",
+      "shade": "KIRIK BEYAZ",
       "gross_m2": 3.355327227059434,
       "openings_m2": 0,
       "reveals_m2": 0,
@@ -411,7 +532,7 @@
       "id": "_zxsqn",
       "side": "A",
       "room": "_4wyay",
-      "shade": "KUMRU",
+      "shade": "KIRIK BEYAZ",
       "gross_m2": 4.808123839727138,
       "openings_m2": 1.764,
       "reveals_m2": 0.126,
@@ -433,7 +554,7 @@
       "id": "_qtcgs",
       "side": "B",
       "room": "_4wyay",
-      "shade": "KUMRU",
+      "shade": "KIRIK BEYAZ",
       "gross_m2": 0.655707355294367,
       "openings_m2": 0,
       "reveals_m2": 0,
@@ -444,7 +565,7 @@
       "id": "_81pgi",
       "side": "B",
       "room": "_4wyay",
-      "shade": "KUMRU",
+      "shade": "KIRIK BEYAZ",
       "gross_m2": 4.749876117195281,
       "openings_m2": 0,
       "reveals_m2": 0,
@@ -455,7 +576,7 @@
       "id": "_n4rjf",
       "side": "B",
       "room": "_4wyay",
-      "shade": "KUMRU",
+      "shade": "KIRIK BEYAZ",
       "gross_m2": 3.9644075324695454,
       "openings_m2": 2.1420000000000003,
       "reveals_m2": 0.26100000000000007,
@@ -477,7 +598,7 @@
       "id": "_k2vy1_b",
       "side": "B",
       "room": "_4wyay",
-      "shade": "KUMRU",
+      "shade": "KIRIK BEYAZ",
       "gross_m2": 8.513209609189708,
       "openings_m2": 1.9134024000000003,
       "reveals_m2": 0.25555720000000004,
@@ -499,7 +620,7 @@
       "id": "_k2vy1_a_a",
       "side": "B",
       "room": "_y0oj2",
-      "shade": "KUMRU",
+      "shade": "KORAL 80",
       "gross_m2": 4.7790617792617,
       "openings_m2": 0,
       "reveals_m2": 0,
@@ -521,7 +642,7 @@
       "id": "_k2vy1_a_b",
       "side": "B",
       "room": "_y0oj2",
-      "shade": "KUMRU",
+      "shade": "KORAL 80",
       "gross_m2": 5.967073913569364,
       "openings_m2": 0,
       "reveals_m2": 0,
@@ -532,7 +653,7 @@
       "id": "_w5f7a_a",
       "side": "A",
       "room": "_y0oj2",
-      "shade": "KUMRU",
+      "shade": "KORAL 80",
       "gross_m2": 4.779000762711804,
       "openings_m2": 1.6170000000000002,
       "reveals_m2": 0.24850000000000005,
@@ -543,7 +664,7 @@
       "id": "_w5f7a_b",
       "side": "A",
       "room": "_y0oj2",
-      "shade": "KUMRU",
+      "shade": "KORAL 80",
       "gross_m2": 5.9238,
       "openings_m2": 2.0999999999999996,
       "reveals_m2": 0.29000000000000004,
@@ -554,7 +675,7 @@
       "id": "col__azlp2__vwg0k__6v6w8",
       "face": "finishFront",
       "room": "_y0oj2",
-      "shade": "KUMRU",
+      "shade": "KORAL 80",
       "area_m2": 1.231994995909308
     },
     {
@@ -562,7 +683,7 @@
       "id": "col__azlp2__vwg0k__6v6w8",
       "face": "finishLeft",
       "room": "_y0oj2",
-      "shade": "KUMRU",
+      "shade": "KORAL 80",
       "area_m2": 0.4399181065803147
     },
     {
@@ -570,7 +691,7 @@
       "id": "col__azlp2__vwg0k__6v6w8",
       "face": "finishRight",
       "room": "_y0oj2",
-      "shade": "KUMRU",
+      "shade": "KORAL 80",
       "area_m2": 0.4399181065803147
     },
     {
@@ -578,7 +699,7 @@
       "id": "col__qsaea__688py",
       "face": "finishFront",
       "room": "_y0oj2",
-      "shade": "KUMRU",
+      "shade": "KORAL 80",
       "area_m2": 1.172152860403006
     },
     {
@@ -586,7 +707,7 @@
       "id": "col__qsaea__688py",
       "face": "finishBack",
       "room": "_vzdza",
-      "shade": "KUMRU",
+      "shade": "KEHRİBAR 50",
       "area_m2": 1.172152860403006
     },
     {
@@ -594,7 +715,7 @@
       "id": "col__qsaea__688py",
       "face": "finishLeft",
       "room": "_vzdza",
-      "shade": "KUMRU",
+      "shade": "KEHRİBAR 50",
       "area_m2": 0.46706227207791706
     },
     {
@@ -602,7 +723,7 @@
       "id": "col__qsaea__688py",
       "face": "finishRight",
       "room": "_vzdza",
-      "shade": "KUMRU",
+      "shade": "KEHRİBAR 50",
       "area_m2": 0.46706227207791706
     },
     {
@@ -610,7 +731,7 @@
       "id": "col__lu17y__2v725__3g5dh",
       "face": "finishFront",
       "room": "_3h613",
-      "shade": "BEJ 30",
+      "shade": "KAKTÜS 20",
       "area_m2": 1.4348379573744088
     },
     {
@@ -618,7 +739,7 @@
       "id": "col__lu17y__2v725__3g5dh",
       "face": "finishBack",
       "room": "_v7m0m",
-      "shade": "KUMRU",
+      "shade": "KIRIK BEYAZ",
       "area_m2": 1.4348379573744088
     },
     {
@@ -626,7 +747,7 @@
       "id": "col__lu17y__2v725__3g5dh",
       "face": "finishLeft",
       "room": "_v7m0m",
-      "shade": "KUMRU",
+      "shade": "KIRIK BEYAZ",
       "area_m2": 0.4904648057576325
     },
     {
@@ -634,7 +755,7 @@
       "id": "col__lu17y__2v725__3g5dh",
       "face": "finishRight",
       "room": "_v7m0m",
-      "shade": "KUMRU",
+      "shade": "KIRIK BEYAZ",
       "area_m2": 0.4904648057576325
     },
     {
@@ -658,7 +779,7 @@
       "id": "col__53l4m__r5gio",
       "face": "finishLeft",
       "room": "_y0oj2",
-      "shade": "KUMRU",
+      "shade": "KORAL 80",
       "area_m2": 1.1398667384626673
     },
     {
@@ -706,7 +827,7 @@
       "id": "_uh7hb",
       "face": "finishFront",
       "room": "_v7m0m",
-      "shade": "KUMRU",
+      "shade": "KIRIK BEYAZ",
       "area_m2": 1.4078470136379702
     },
     {
@@ -714,7 +835,7 @@
       "id": "_uh7hb",
       "face": "finishLeft",
       "room": "_4wyay",
-      "shade": "KUMRU",
+      "shade": "KIRIK BEYAZ",
       "area_m2": 1.6196097723308471
     },
     {
@@ -722,9 +843,8 @@
       "id": "_uh7hb",
       "face": "finishRight",
       "room": "_vzdza",
-      "shade": "KUMRU",
+      "shade": "KEHRİBAR 50",
       "area_m2": 1.6196097723308471
     }
-  ],
-  "living_room_product_note": "Wild Earl litre and pack figures use the previous Momento Silan consumption assumption for comparison only. They are not a verified Jotun product specification. If ordering Jotun paint, recalculate from the chosen product TDS and available packs; if ordering a Filli match, approve a physical matched sample first. No exact cross-brand tint formula is claimed."
+  ]
 }
