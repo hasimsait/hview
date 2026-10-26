@@ -3,78 +3,83 @@
     "id": "_y0oj2",
     "roomName": "Living Room (13.3 m²)",
     "area_m2": 13.31,
-    "base": "KIRIK BEYAZ",
-    "baseHex": "#fbfaf5",
+    "base": "SİS BULUTU",
+    "baseHex": "#ece6db",
     "boundingSpan_m": [
       3.44,
       3.98
     ],
-    "note": "Use the same KIRIK BEYAZ on all painted walls, returns and exposed painted column faces. No accent colour or second tint mix. Keep the existing ceiling, furniture, tile and cabinetry unchanged.",
+    "note": "Continuous warm ivory on all painted walls and column faces. Its cream undertone links the timber and burgundy curtains without adding another visual division to 13.3 m².",
     "sheet": "room-sheets/01-living-room-13m2.png"
   },
   {
     "id": "_v7m0m",
     "roomName": "Bedroom (8.3 m²)",
     "area_m2": 8.32,
-    "base": "KIRIK BEYAZ",
-    "baseHex": "#fbfaf5",
+    "base": "SİS BULUTU",
+    "baseHex": "#ece6db",
     "boundingSpan_m": [
       3.64,
       2.46
     ],
-    "note": "Use the same KIRIK BEYAZ on all painted walls, returns and exposed painted column faces. No accent colour or second tint mix. Keep the existing ceiling, furniture, tile and cabinetry unchanged.",
+    "note": "One continuous pale ivory on all walls and painted column faces. The existing blue bed supplies colour in this 8.3 m² room; no accent wall. A dryer placement still needs a separate clearance and ventilation study.",
     "sheet": "room-sheets/02-bedroom-8m2.png"
   },
   {
     "id": "_vzdza",
     "roomName": "Kitchen (8.0 m²)",
     "area_m2": 7.95,
-    "base": "KIRIK BEYAZ",
-    "baseHex": "#fbfaf5",
+    "base": "SİS BULUTU",
+    "baseHex": "#ece6db",
     "boundingSpan_m": [
       3.76,
       2.47
     ],
-    "note": "Use the same KIRIK BEYAZ on all painted walls, returns and exposed painted column faces. No accent colour or second tint mix. Keep the existing ceiling, furniture, tile and cabinetry unchanged.",
+    "note": "Use the shared warm ivory on painted surfaces; retain green cabinets, mosaic and caramel floor tiles. No new paint tint is purchased just for the kitchen.",
     "sheet": "room-sheets/03-kitchen.png"
   },
   {
     "id": "_3h613",
     "roomName": "Master Bedroom (11.4 m²)",
     "area_m2": 11.36,
-    "base": "KIRIK BEYAZ",
-    "baseHex": "#fbfaf5",
+    "base": "HASIR 310",
+    "baseHex": "#e2dbd4",
     "boundingSpan_m": [
       3.67,
       3.19
     ],
-    "note": "Use the same KIRIK BEYAZ on all painted walls, returns and exposed painted column faces. No accent colour or second tint mix. Keep the existing ceiling, furniture, tile and cabinetry unchanged.",
+    "note": "Continuous light warm stone on all painted walls and exposed painted columns. This replaces the dark red wall and softens the contrast with the full-height wardrobe in 11.4 m². Reuse the same mix as the large living room.",
     "sheet": "room-sheets/04-master-bedroom.png"
   },
   {
     "id": "_4wyay",
     "roomName": "Hallway / Entry (11.7 m²)",
     "area_m2": 11.72,
-    "base": "KIRIK BEYAZ",
-    "baseHex": "#fbfaf5",
+    "base": "SİS BULUTU",
+    "baseHex": "#ece6db",
     "boundingSpan_m": [
       4.31,
       6.07
     ],
-    "note": "Use the same KIRIK BEYAZ on all painted walls, returns and exposed painted column faces. No accent colour or second tint mix. Keep the existing ceiling, furniture, tile and cabinetry unchanged.",
+    "note": "Continue the shared warm ivory around the L-shaped corridor, door returns and exposed painted columns. Its warm undertone works with the caramel tile; avoid alternating colours between short wall segments.",
     "sheet": "room-sheets/05-hallway-entry.png"
   },
   {
     "id": "_elc1j",
     "roomName": "Living Room (22.0 m²)",
     "area_m2": 22,
-    "base": "KIRIK BEYAZ",
-    "baseHex": "#fbfaf5",
+    "base": "HASIR 310",
+    "baseHex": "#e2dbd4",
     "boundingSpan_m": [
       3.21,
       7.03
     ],
-    "note": "Use the same KIRIK BEYAZ on all painted walls, returns and exposed painted column faces. No accent colour or second tint mix. Keep the existing ceiling, furniture, tile and cabinetry unchanged.",
+    "note": "Light warm stone on the main walls. Use muted blue-grey ANDEZİT 25 only on the uninterrupted long wall behind the burgundy sofa (wall _5k50y), including adjoining painted column faces on that plane. Leave the opposite TV wall light to limit the darker surface in this narrow room.",
+    "accent": "ANDEZİT 25",
+    "accentHex": "#b9bfc2",
+    "accentWalls": [
+      "_5k50y"
+    ],
     "sheet": "room-sheets/06-living-room-22m2.png"
   }
 ]

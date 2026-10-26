@@ -1,34 +1,46 @@
-# One-colour recommendations for the small home
+# Shared paint palette and purchase quantities
 
-This revision replaces the earlier accent-colour study. Use **Filli Boya KIRIK BEYAZ (`#fbfaf5`)** on the painted walls, returns and exposed painted column faces throughout the six included spaces. One colour code avoids a separate accent tint mix and reduces visual breaks between the small rooms. Existing furniture, cabinetry and flooring supply the contrast. Existing ceilings remain unchanged.
+Use **two shared main colours plus one restrained accent** across the six included spaces. This replaces the all-KIRIK BEYAZ proposal. The purchase plan groups rooms by tint, rather than buying a separate colour for every room.
 
-The 8.3 m² bedroom has **no Kaktüs wall or other accent colour**. The master bedroom has no wine-coloured accent in this proposal. Painted column faces are explicitly included; tiled faces retain their original finishes.
+| Room / four-view sheet | Floor area | Painted surfaces |
+| --- | ---: | --- |
+| [Living room](room-sheets/01-living-room-13m2.png) | 13.31 m² | SİS BULUTU: warm ivory, continuous walls and painted columns; existing slate-blue sofa and burgundy curtains supply contrast |
+| [Small bedroom](room-sheets/02-bedroom-8m2.png) | 8.32 m² | SİS BULUTU on all painted walls and column faces; no accent wall; retain the blue bed |
+| [Kitchen](room-sheets/03-kitchen.png) | 7.95 m² | SİS BULUTU on painted surfaces; retain green cabinets, mosaic and floor tile |
+| [Master bedroom](room-sheets/04-master-bedroom.png) | 11.36 m² | HASIR 310: light warm stone throughout; replace the dark red wall; keep the wardrobe and bedding |
+| [Hallway / entry](room-sheets/05-hallway-entry.png) | 11.72 m² | SİS BULUTU continuously through the L-shaped corridor, including painted columns and returns |
+| [Large living room](room-sheets/06-living-room-22m2.png) | 22.00 m² | HASIR 310 main walls, ANDEZİT 25 muted blue-grey on the uninterrupted sofa wall `_5k50y` and its adjoining painted column faces |
 
-## Scope
+The 8.3 m² bedroom stays visually continuous, with no green or dark accent. The master bedroom receives a warmer stone tone that reduces contrast around the large wardrobe. The large living room is approximately 3.21 × 7.03 m in polygon bounding span: concentrate the blue-grey on one sofa backdrop, while keeping the opposite TV wall and remaining enclosure light. The blue-grey connects to the burgundy upholstery without repeating another red surface. Do not carry it around all four walls. These spans describe polygon envelopes, not clear circulation space.
 
-Only the corridor / entry, kitchen, two living rooms and two bedrooms are included. **WC, bathrooms, shower and the 5.5 m² balcony are excluded.** The space labelled Dining / Office in the source is the balcony and is not an interior room recommendation.
+## Momento Silan specification and quantity calculation
 
-| Room / four-view sheet | Area (m²) | Polygon bounding span (m) |
-| --- | --- | --- |
-| [Living Room (13.3 m²)](room-sheets/01-living-room-13m2.png) | 13.31 | 3.44 × 3.98 |
-| [Bedroom (8.3 m²)](room-sheets/02-bedroom-8m2.png) | 8.32 | 3.64 × 2.46 |
-| [Kitchen (8.0 m²)](room-sheets/03-kitchen.png) | 7.95 | 3.76 × 2.47 |
-| [Master Bedroom (11.4 m²)](room-sheets/04-master-bedroom.png) | 11.36 | 3.67 × 3.19 |
-| [Hallway / Entry (11.7 m²)](room-sheets/05-hallway-entry.png) | 11.72 | 4.31 × 6.07 |
-| [Living Room (22.0 m²)](room-sheets/06-living-room-22m2.png) | 22 | 3.21 × 7.03 |
+Checked against the manufacturer's [Momento Silan technical data sheet](https://www.filliboya.com/uploads/TDS_MOMENTOSILAN.pdf) and [official product page](https://www.filliboya.com/urun/momento-silan) on 26 October 2026. The TDS gives **45–80 ml/m² per coat**, also expressed approximately as 13–22 m²/L for one coat. It recommends at least two coats over the appropriate primer. Use the conservative **80 ml/m²** endpoint, then add the requested **15% reserve**:
 
-Bounding spans describe the uploaded polygon's axis-aligned envelope, not clear circulation space; columns, joinery and furniture reduce usable space. In the 8.3 m² bedroom, keeping the walls and column returns the same light colour avoids subdividing an already compact enclosure. The corridor uses that same colour to reduce breaks around doors. The kitchen retains its green cabinetry and backsplash; neither needs another colour. The larger living room's varied upholstery remains the colour focus.
+**Undiluted paint required (L) = painted surface (m²) × 0.080 × 2 coats × 1.15.**
 
-## Files and views
+| Shared tint | Estimated painted surface | Two coats + 15% reserve | Practical purchase |
+| --- | ---: | ---: | --- |
+| SİS BULUTU `#ece6db` | 137.27 m² | 25.26 L | 2 × 15 L = **30 L** |
+| HASIR 310 `#e2dbd4` | 73.78 m² | 13.57 L | 1 × 15 L = **15 L** |
+| ANDEZİT 25 `#b9bfc2` | 21.23 m² | 3.91 L | 2 × 2.5 L = **5 L** |
+| Total | 232.28 m² | **42.74 L** | **50 L**, three tint codes |
+
+A lower-volume SİS BULUTU option is **27.5 L** (15 + 7.5 + 2.5 + 2.5 L), bringing the total purchase to 47.5 L but adding two pails. Compare dealer quotes before choosing between the two pack combinations; no price saving is assumed. There is no need to buy a large pail just for an accent. The manufacturer's pack sizes and coverage are in **litres**; kg cannot be converted to litres without the particular product/base density.
+
+Areas use model wall centreline lengths and actual heights (2.7 m), subtract rectangular door/window openings, add half-depth reveals per painted room side, and add all selected painted column faces. This is a **conservative model estimate**, not a measured site bill: fixed cabinetry, wardrobes and any overlap between wall and column surfaces are not deducted. A face-by-face calculation is supplied in [paint-quantities.json](paint-quantities.json). The 15% reserve is applied once, after both coats, before rounding to packs. The brochure's optimistic two-coat coverage table is not multiplied by two again.
+
+Quantities exclude ceilings and primer. The former dark red bedroom surface needs appropriate preparation and primer; two finish coats assume a sound, suitably primed substrate. The TDS specifies up to 10% water by volume for brush/roller application and 4–6 hours between coats at 20°C / 65% RH. Added water does not reduce the amount of paint to buy. Final consumption depends on surface absorbency and a controlled test patch.
+
+## Scope and deliverables
+
+Only the corridor / entry, kitchen, two living rooms and two bedrooms are included. **WC, bathrooms, shower and the 5.5 m² balcony are excluded.** The source label Dining / Office refers to the balcony. Preserve all tile and glass finishes. Existing ceilings and furniture remain unchanged. The optional dryer in the small bedroom has not been placed; its clearance and ventilation remain a separate layout decision.
 
 - [PDF study](room-colour-study.pdf): six room sheets.
-- [Room sheets](room-sheets/): four diagonal views of every included room.
+- [Room sheets](room-sheets/): four diagonal views per room.
 - [Full-size renders](renders/): 24 PNGs, four per room at 1400 × 1050.
-- [Palette](palette.json): room IDs, dimensions, notes and the single catalogue shade.
-- [Column finish map](column-finishes.json): explicitly coloured column faces and adjacent-room ownership.
+- [Palette](palette.json): official catalogue shades, dimensions and room-specific notes.
+- [Column finish map](column-finishes.json): 22 explicitly coloured column faces, matched to their adjoining room / accent plane.
+- [Quantity schedule](paint-quantities.json): formula, purchase packs and surface ledger.
 
-View 1 is from +X/+Z, view 2 from −X/+Z, view 3 from −X/−Z and view 4 from +X/−Z in model coordinates. These are not compass directions. Each cutaway omits camera-facing walls and ceilings; the four views expose opposing wall pairs. Layout, furniture positions, saved visibility, tile and glass remain unchanged. No bedroom dryer has been added; that remains a separate layout option.
-
-Native HView renders use fixed model lighting and a neutral viewing reference. Digital RGB swatches do not predict physical paint under every lamp; approve a physical KIRIK BEYAZ sample before ordering. This study changes neither application source nor the included working plan.
-
-Catalogue reference: [Filli Boya Momento Silan](https://www.filliboya.com/urun/momento-silan).
+Views use +X/+Z, −X/+Z, −X/−Z and +X/−Z model coordinates, not compass directions. Camera-facing walls and ceilings are omitted to reveal opposing wall pairs. Native HView renders use fixed model lighting; physical samples should be checked under the installed lamps. This study changes neither application source nor `public/sample.plan`.
