@@ -32,6 +32,12 @@ export function buildCabinet(c: AssetBuildContext, buildContent?: (entity: Furni
   box('shell_base', 'Frame', 0, baseHeight + t / 2, carcassZ, c.w - 2 * t, t, carcassDepth);
   box('shell_top', bookcase ? 'Top' : 'Frame', 0, c.h - t / 2, carcassZ, c.w - 2 * t, t, carcassDepth, bookcase?.top);
   box('shell_back', 'Back Panel', 0, baseHeight + bodyHeight / 2, -c.d / 2 + b / 2, c.w - 2 * t, bodyHeight - 2 * t, b, bookcase?.back);
+  const cornice = layout.frontDetail?.corniceHeight ?? 0;
+  if (cornice > 0) {
+    box('cornice_fascia', 'Frame', 0, c.h - cornice / 2, c.d / 2 - t / 2, c.w, cornice, t);
+    box('cornice_crown', 'Frame', 0, c.h - .012, c.d / 2, c.w, .024, t + .025);
+    box('cornice_lower_bead', 'Frame', 0, c.h - cornice + .006, c.d / 2, c.w, .012, t + .012);
+  }
   const addPart = (p: CabinetBox, section: string) => box(p.id, section, origin.x + p.position.x + p.dimensions.x / 2, origin.y + p.position.y + p.dimensions.y / 2, origin.z + p.position.z + p.dimensions.z / 2, p.dimensions.x, p.dimensions.y, p.dimensions.z, section === 'Shelves' ? bookcase?.shelves : undefined);
   for (const panel of layout.panels) { const group = addPart(resolvePanel(layout, c.entity.dimensions, panel), panel.kind === 'shelf' ? 'Shelves' : 'Dividers'); group.traverse(child => { child.userData.cabinetPanel = panel; }); }
   const leaves = cabinetLeaves(layout, c.entity.dimensions), pivots = new Map<string, THREE.Group>();
@@ -48,7 +54,27 @@ export function buildCabinet(c: AssetBuildContext, buildContent?: (entity: Furni
     };
     const leaf = mesh(new THREE.BoxGeometry(Math.max(.001, width), height, t), mirrorCabinet ? c.materials.mirrorNonReflective : body, mirrorCabinet ? 'Mirrors' : `Door ${index + 1}`, (tilt || drawer) ? 0 : (left ? 1 : -1) * width / 2, (tilt || drawer) ? height / 2 : (height + .004) / 2, pose.leafOffsetZ);
     leaf.userData.isSwingLeaf = true;
-    if (!mirrorCabinet) mesh(new THREE.BoxGeometry((tilt || drawer) ? Math.min(.128, width * .6) : .012, (tilt || drawer) ? .012 : Math.min(.128, height / 3), .025), c.materials.metalChrome, 'Handles', (tilt || drawer) ? 0 : (left ? 1 : -1) * (width - .035), drawer ? height * .70 : tilt ? height - .04 : height / 2, pose.leafOffsetZ + t / 2 + .0125);
+    if (layout.frontDetail && !mirrorCabinet) {
+      const detail = layout.frontDetail, centreX = leaf.position.x, centreY = leaf.position.y;
+      // Shallow raised rails leave a recessed field, with the same opening pivot as the door.
+      const rail = .035, inset = .025, faceZ = pose.leafOffsetZ + t / 2 + .002;
+      for (const sign of [-1, 1]) {
+        mesh(new THREE.BoxGeometry(rail, Math.max(.001, height - 2 * inset), .004), body, `Door ${index + 1}`, centreX + sign * (width / 2 - inset - rail / 2), centreY, faceZ);
+        mesh(new THREE.BoxGeometry(Math.max(.001, width - 2 * (inset + rail)), rail, .004), body, `Door ${index + 1}`, centreX, centreY + sign * (height / 2 - inset - rail / 2), faceZ);
+      }
+      const horizontal = drawer || tilt, centres = Math.max(.001, Math.min(detail.handleCentres, (horizontal ? width : height) - .08));
+      const pullX = horizontal ? 0 : (left ? 1 : -1) * (width - .045);
+      const pullY = drawer ? height * .65 : door.bottom >= 1.5 ? .13 : height / 2;
+      const offsets = drawer && detail.pairedDrawerPulls ? [-width / 2 + .16, width / 2 - .16] : [pullX];
+      for (const x of offsets) {
+        const points = Array.from({ length: 17 }, (_, i) => {
+          const fraction = i / 16, along = (fraction - .5) * centres;
+          return new THREE.Vector3(x + (horizontal ? along : 0), pullY + (horizontal ? 0 : along), pose.leafOffsetZ + t / 2 + .006 + .022 * Math.sin(Math.PI * fraction));
+        });
+        mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points), 16, .0035, 6, false), c.materials.metalChrome, 'Handles', 0, 0, 0);
+        for (const end of [-1, 1]) mesh(new THREE.SphereGeometry(.005, 8, 6), c.materials.metalChrome, 'Handles', x + (horizontal ? end * centres / 2 : 0), pullY + (horizontal ? 0 : end * centres / 2), pose.leafOffsetZ + t / 2 + .006);
+      }
+    } else if (!mirrorCabinet) mesh(new THREE.BoxGeometry((tilt || drawer) ? Math.min(.128, width * .6) : .012, (tilt || drawer) ? .012 : Math.min(.128, height / 3), .025), c.materials.metalChrome, 'Handles', (tilt || drawer) ? 0 : (left ? 1 : -1) * (width - .035), drawer ? height * .70 : tilt ? height - .04 : height / 2, pose.leafOffsetZ + t / 2 + .0125);
     const basket = cabinetBasket(layout, c.entity.dimensions, door);
     if (basket) {
       pivots.set(basket.floor.id, pivot);

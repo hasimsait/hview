@@ -53,6 +53,8 @@ export interface CabinetInternalDrawer {
 }
 export interface CabinetLayout {
   version: 1;
+  /** Optional traditional fronts; fixing centres are measured between pull feet. */
+  frontDetail?: { profile: 'framed'; handleCentres: number; pairedDrawerPulls: boolean; corniceHeight?: number };
   panelThickness: number;
   backThickness: number;
   plinth?: CabinetPlinth;
@@ -66,6 +68,8 @@ export interface CabinetBox { id: string; name: string; position: Vector3D; dime
 export const CABINET_EPSILON = .0005;
 export function validateCabinet(layout: CabinetLayout): CabinetLayout {
   if (!layout || layout.version !== 1) throw new Error('Unsupported cabinet layout');
+  if (layout.frontDetail && (layout.frontDetail.profile !== 'framed' || !Number.isFinite(layout.frontDetail.handleCentres) || layout.frontDetail.handleCentres < .032 || layout.frontDetail.handleCentres > .32 || typeof layout.frontDetail.pairedDrawerPulls !== 'boolean')) throw new Error('Invalid cabinet front detail');
+  if (layout.frontDetail?.corniceHeight !== undefined && (finite(layout.frontDetail.corniceHeight, 'Cornice height') < 0 || layout.frontDetail.corniceHeight > .25)) throw new Error('Invalid cabinet cornice height');
   for (const [key, value] of [['Panel', layout.panelThickness], ['Back', layout.backThickness]] as const) if (positive(value, `${key} thickness`) > .1) throw new Error('Cabinet panels must be at most 100 mm thick');
   if (layout.plinth) {
     if (positive(layout.plinth.height, 'Plinth height') > .5) throw new Error('Plinth height must be at most 50 cm');
