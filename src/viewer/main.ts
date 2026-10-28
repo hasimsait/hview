@@ -1,3 +1,4 @@
+import { bauhausPanel } from '../domain/catalog/BauhausPanelling';
 import { FurnitureEntity,OpeningEntity,PlanDocument,RoomEntity,SurfaceFinishConfig,WallEntity } from '@core/types/plan';
 import { TileCatalogService } from '@services/tile-catalog/TileCatalogService';
 import * as THREE from 'three';
@@ -446,6 +447,8 @@ export class StandaloneViewerApp {
   private formatFinishName(finish?: SurfaceFinishConfig): string {
     if (!finish) return 'Plaster & Paint';
     if (finish.type === 'lambri') {
+      const panel = bauhausPanel(finish.variant);
+      if (panel) return `${panel.name} (reference match; 25 mm slats / 15 mm felt)`;
       return `Acoustic Lambri (${finish.variant || 'Wood Slats'} on ${finish.backingColor || 'Dark Felt'})`;
     }
     if (finish.type === 'tile') {

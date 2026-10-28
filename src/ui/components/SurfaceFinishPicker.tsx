@@ -1,3 +1,4 @@
+import { ReferencePanelPicker } from './ReferencePanelPicker';
 import { SurfaceFinishConfig } from '@core/types/plan';
 import type { TileEntry } from '@core/types/services';
 import { preserveSurfaceLayer } from '@core/types/surfaceLayer';
@@ -459,6 +460,7 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
       {/* Tab 2: Wood & Parquet (Furniture Hardwoods, Flooring, and Dual-Tone Lambri) */}
       {activeTab === 'lambri' && (
         <div className="space-y-4">
+          <ReferencePanelPicker current={currentFinish} onSelect={onSelectFinish} />
           {currentFinish?.type === 'wood' && (
             <div className="space-y-2 rounded-lg border border-slate-800 bg-slate-950 p-2">
               <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-300">

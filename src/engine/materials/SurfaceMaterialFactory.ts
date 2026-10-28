@@ -1,3 +1,5 @@
+import { bauhausPanel, panelTextureWidth, PANEL_TEXTURE_HEIGHT } from '../../domain/catalog/BauhausPanelling';
+import { ReferencePanelTextureStrategy } from './strategies/ReferencePanelTextureStrategy';
 import { ensureLocalMetricBounds,ensureStretchedUvs } from '../geometry/UVProjector';
 import { BrowserCanvasFactory,type CanvasFactory } from './CanvasFactory';
 import { OcclusionShader, keepForegroundVisible } from './OcclusionShader';
@@ -130,6 +132,7 @@ export class SurfaceMaterialFactory implements ISurfaceFinishService {
 
   private readonly tileTextureStrategy: TileTextureStrategy;
   private readonly slatTextureStrategy: SlatTextureStrategy;
+  private readonly referencePanelTextureStrategy: ReferencePanelTextureStrategy;
   private readonly woodTextureStrategy: WoodTextureStrategy;
   private readonly coatingTextureStrategy: CoatingTextureStrategy;
   private readonly fabricTextureStrategy: FabricTextureStrategy;
@@ -141,6 +144,7 @@ export class SurfaceMaterialFactory implements ISurfaceFinishService {
   constructor(private readonly tileCatalog?: ITileCatalogService, canvas: CanvasFactory = new BrowserCanvasFactory(), readonly textures = new TextureSource()) {
     this.tileTextureStrategy = new TileTextureStrategy(canvas, tileCatalog, textures);
     this.slatTextureStrategy = new SlatTextureStrategy(canvas);
+    this.referencePanelTextureStrategy = new ReferencePanelTextureStrategy(canvas, textures);
     this.woodTextureStrategy = new WoodTextureStrategy(canvas, textures);
     this.coatingTextureStrategy = new CoatingTextureStrategy(canvas);
     this.fabricTextureStrategy = new FabricTextureStrategy(canvas, textures);
@@ -159,7 +163,7 @@ export class SurfaceMaterialFactory implements ISurfaceFinishService {
   }
 
   getTileTexture(variant: string = 'subway'): THREE.Texture { return this.tileTextureStrategy.getTileTexture(variant); }
-  getLambriTexture(variant: string = 'oak_slats', slatColor?: string, backingColor?: string): THREE.Texture { return this.slatTextureStrategy.getLambriTexture(variant, slatColor, backingColor); }
+  getLambriTexture(variant: string = 'oak_slats', slatColor?: string, backingColor?: string): THREE.Texture { const panel = bauhausPanel(variant); return panel ? this.referencePanelTextureStrategy.get(panel) : this.slatTextureStrategy.getLambriTexture(variant, slatColor, backingColor); }
   resolveWoodPhotoInfo(variant?: string): { url: string; name: string } { return this.woodTextureStrategy.resolveWoodPhotoInfo(variant); }
   getWoodTexture(variant: string = 'natural_oak'): THREE.Texture { return this.woodTextureStrategy.getWoodTexture(variant); }
   getPlasterTexture(variant: string = 'stucco'): THREE.Texture { return this.coatingTextureStrategy.getPlasterTexture(variant); }
@@ -177,6 +181,7 @@ export class SurfaceMaterialFactory implements ISurfaceFinishService {
     this.materials.clear(); this.layerMaterials.clear();
     this.tileTextureStrategy.dispose();
     this.slatTextureStrategy.dispose();
+    this.referencePanelTextureStrategy.dispose();
     this.woodTextureStrategy.dispose();
     this.coatingTextureStrategy.dispose();
     this.fabricTextureStrategy.dispose();
@@ -337,7 +342,8 @@ export class SurfaceMaterialFactory implements ISurfaceFinishService {
           break;
       }
 
-      const color = config.color ? new THREE.Color(config.color) : new THREE.Color(defaultColor);
+      const referencePanel = config.type === 'lambri' ? bauhausPanel(config.variant) : undefined;
+      const color = referencePanel ? new THREE.Color(0xffffff) : config.color ? new THREE.Color(config.color) : new THREE.Color(defaultColor);
 
       if (config.type === 'porcelain') {
         const physMat = new THREE.MeshPhysicalMaterial({
@@ -439,12 +445,15 @@ export class SurfaceMaterialFactory implements ISurfaceFinishService {
           return new THREE.Vector2(2.5, 2.5);
         }
         return new THREE.Vector2(1.0, 1.0);
-      case 'lambri':
+      case 'lambri': {
+        const panel = bauhausPanel(config.variant);
+        if (panel) return new THREE.Vector2(1 / panelTextureWidth(panel), 1 / PANEL_TEXTURE_HEIGHT);
         if (config.variant === 'fluted_panel' || config.variant === 'fluted_cabinet') {
           return new THREE.Vector2(1.0 / 0.8, 1.0 / 0.8); // 14 flutes across 0.8m cabinet width
         }
         // Standard acoustic slat panel: 16 slats per 0.5m panel (each slat ~2.5-3cm)
         return new THREE.Vector2(2.0, 2.0); // 1 repeat per 0.5m = 2.0 repeats/m
+      }
       case 'tile': {
         // Derive scale directly from catalog dimensions — no per-tile hardcoding.
         const entry = this.tileCatalog?.getById(config.variant ?? '');
