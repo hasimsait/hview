@@ -9,7 +9,7 @@ function inCategory(asset: AssetDefinition, category: string): boolean {
     case 'lighting': return !!asset.capabilities?.lighting;
     case 'cabinets': return asset.cabinetDoors !== undefined;
     case 'pets': return !!asset.dailyLife?.kind.startsWith('cat_');
-    case 'wardrobe_items': return !!asset.dailyLife && /^(garment|boots|sneakers)_/.test(asset.dailyLife.kind);
+    case 'wardrobe_items': return asset.key.startsWith('fit_clothes_rail_') || !!asset.dailyLife && /^(garment|boots|sneakers)_/.test(asset.dailyLife.kind);
     case 'vanity': return asset.collection === 'Vanity accessories';
     case 'drawer_inserts': return asset.collection === 'Drawer inserts';
     case 'household': return (!!asset.householdDetail && !asset.householdDetail.practical) || !!asset.dailyLife;

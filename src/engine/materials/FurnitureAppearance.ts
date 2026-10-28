@@ -17,6 +17,7 @@ export class FurnitureAppearance {
 
     mesh.traverse((child) => {
       if (child instanceof THREE.Mesh && !(child as any).isLineSegments) {
+        if (child.userData.fixedFinish) return;
         // Tag section if not already tagged
         if (!child.userData.section) {
           const matSec = (child.material as any)?.__section as string | undefined;

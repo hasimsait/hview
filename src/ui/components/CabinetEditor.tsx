@@ -119,7 +119,7 @@ function CabinetWorkspace({ original, onCancel, onDone }: { original: Furniture;
     }
   }
   const sections = new Set<string>();
-  if (content) runtime.scene.getCabinetPart(item.id, content.id)?.traverse(o => { if (o instanceof THREE.Mesh && o.userData.section) sections.add(surfaceSection(o.userData.section)); });
+  if (content) runtime.scene.getCabinetPart(item.id, content.id)?.traverse(o => { if (o instanceof THREE.Mesh && !o.userData.fixedFinish && o.userData.section) sections.add(surfaceSection(o.userData.section)); });
   const editPanel = (patch: Partial<CabinetPanel>) => panel && update({ ...layout, panels: layout.panels.map(p => p.id === panel.id ? { ...p, ...patch } : p) });
   const bounds = panel ? layout.panels.filter(p => p.kind !== panel.kind && p.id !== panel.id) : [];
   const clearance = panel ? shelfClearances(layout, size, panel.id) : { below: 0, above: 0 };

@@ -1,3 +1,4 @@
+import { buildClothesRail } from './ClothesRailBuilder';
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import type { AssetBuildContext } from '../assets/builders/AssetBuildContext';
@@ -6,7 +7,8 @@ import { mergeStaticParts } from '../geometry/MergeStaticParts';
 export function buildCabinetFitObject(c: AssetBuildContext): void {
   const p = accessoryParts(c), key = c.entity.assetKey, m = c.materials;
   const plastic = c.coloredMaterial?.('#638987', m.whitePaint) ?? m.whitePaint;
-  if (key.startsWith('fit_folded_')) {
+  if (key.startsWith('fit_clothes_rail_')) { buildClothesRail(c); }
+  else if (key.startsWith('fit_folded_')) {
     const count = Number(key.match(/_(\d+)$/)?.[1] ?? 1), step = 1 / count;
     const pants = key.includes('pants'), towel = key.includes('towel'), sweatshirt = key.includes('sweatshirt');
     const palette = pants ? ['#344458', '#555c66', '#aa9273'] : towel ? ['#ded5c4', '#94aaa5', '#c4a69c', '#b2b9c2', '#f0e9dc'] : sweatshirt ? ['#a1aca8', '#d1b6a0', '#515d72', '#a57f7c', '#d1c9b8'] : ['#ece7de', '#7b91a2', '#b5bba8', '#bd9185', '#434c5e'];

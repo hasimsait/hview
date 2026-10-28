@@ -461,7 +461,7 @@ export class SceneEngine implements ISceneService {
     if (!mesh) return [];
     const sections = new Set<string>();
     mesh.traverse((child) => {
-      if (child instanceof THREE.Mesh && !(child as any).isLineSegments) {
+      if (child instanceof THREE.Mesh && !(child as any).isLineSegments && !child.userData.fixedFinish) {
         if (!child.userData.section) {
           const matSec = (child.material as any)?.__section as string | undefined;
           if (matSec) {

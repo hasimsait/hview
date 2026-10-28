@@ -1,5 +1,7 @@
 import type { AssetDefinition } from './AssetDefinition';
 export const CABINET_FIT_OBJECTS: readonly AssetDefinition[] = [
+  ['fit_clothes_rail_shirts', 'Rail with 10 Shirts on Hangers', .80, .95, .50],
+  ['fit_clothes_rail_dresses', 'Rail with 10 Dresses on Hangers', .80, 1.50, .50],
   ['fit_toilet_roll', 'Toilet Paper Roll', .12, .10, .12],
   ['fit_toilet_rolls_3', '3 Stacked Toilet Paper Rolls', .12, .30, .12],
   ['fit_folded_tshirt', 'Folded T-shirt', .28, .025, .32],
@@ -17,4 +19,4 @@ export const CABINET_FIT_OBJECTS: readonly AssetDefinition[] = [
   ['fit_flat_mop', 'Microfibre Flat Mop', .42, 1.40, .13],
   ['fit_mop_set', 'Flat Mop and Wringer Bucket Set', .38, 1.40, .30],
   ['fit_spin_mop_set', 'Spin Mop and Bucket Set', .50, 1.40, .30],
-].map(([key, name, x, y, z]) => ({ key: key as string, name: name as string, category: 'decor', collection: 'Cabinet fit objects', recipe: 'cabinet_fit_object', aliases: String(key).includes('folded') ? [String(name).toLowerCase().replace('t-shirt', 'tshirt'), 'folded clothes', 'laundry', 'wardrobe storage'] : key === 'fit_mop_set' ? ['vileda', 'vileda flat mop'] : key === 'fit_spin_mop_set' ? ['vileda turbo', 'vileda spin mop', 'rotating mop'] : undefined, defaultDimensions: { x: x as number, y: y as number, z: z as number }, placement: { mount: 'floor' }, source: { retailer: 'Generic' } }));
+].map(([key, name, x, y, z]) => ({ key: key as string, name: name as string, category: 'decor', collection: 'Cabinet fit objects', recipe: 'cabinet_fit_object', description: String(key).startsWith('fit_clothes_rail_') ? 'Ten mixed-colour garments on ten hangers. Finish the rail independently; clothing colours are fixed. Place with the bottoms of the clothes resting on the cabinet base or shelf.' : undefined, capabilities: String(key).startsWith('fit_clothes_rail_') ? { customSections: ['Rail'] } : undefined, aliases: String(key).startsWith('fit_clothes_rail_') ? ['clothes rail', 'hanging clothes', 'wardrobe storage', 'hangers', String(key).includes('dresses') ? 'dresses' : 'shirts'] : String(key).includes('folded') ? [String(name).toLowerCase().replace('t-shirt', 'tshirt'), 'folded clothes', 'laundry', 'wardrobe storage'] : key === 'fit_mop_set' ? ['vileda', 'vileda flat mop'] : key === 'fit_spin_mop_set' ? ['vileda turbo', 'vileda spin mop', 'rotating mop'] : undefined, defaultDimensions: { x: x as number, y: y as number, z: z as number }, placement: { mount: 'floor' }, source: { retailer: 'Generic' } }));
