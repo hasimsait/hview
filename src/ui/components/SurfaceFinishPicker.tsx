@@ -1,3 +1,5 @@
+import { FinishColorInput } from './FinishColorInput';
+import { bauhausPanel } from '../../domain/catalog/BauhausPanelling';
 import { ReferencePanelPicker } from './ReferencePanelPicker';
 import { SurfaceFinishConfig } from '@core/types/plan';
 import type { TileEntry } from '@core/types/services';
@@ -56,9 +58,6 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
   );
   const [selectedFabricCategory, setSelectedFabricCategory] = useState<string>('velvet_reds');
   const [selectedPaletteCategory, setSelectedPaletteCategory] = useState<string>('all');
-  const [customHex, setCustomHex] = useState(
-    currentFinish?.type === 'paint' && currentFinish.color ? currentFinish.color : '#efede8'
-  );
   const [paintSearchQuery, setPaintSearchQuery] = useState<string>('');
   const [paintLimit, setPaintLimit] = useState(120);
   const [selectedLambriSlat, setSelectedLambriSlat] = useState<string>(
@@ -67,17 +66,22 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
   const [selectedLambriBacking, setSelectedLambriBacking] = useState<string>(
     currentFinish?.type === 'lambri' && currentFinish.backingColor ? currentFinish.backingColor : '#121212'
   );
-  const [customBackingHex, setCustomBackingHex] = useState<string>(selectedLambriBacking);
-
   useEffect(() => {
     if (currentFinish?.type === 'lambri') {
       if (currentFinish.variant) setSelectedLambriSlat(currentFinish.variant);
-      if (currentFinish.backingColor) {
-        setSelectedLambriBacking(currentFinish.backingColor);
-        setCustomBackingHex(currentFinish.backingColor);
-      }
+      setSelectedLambriBacking(currentFinish.backingColor ?? bauhausPanel(currentFinish.variant)?.backingColor ?? '#121212');
     }
   }, [currentFinish]);
+
+  const applyLambriBacking = (backingColor: string) => {
+    setSelectedLambriBacking(backingColor);
+    if (currentFinish?.type === 'lambri') {
+      onSelectFinish({ ...currentFinish, backingColor });
+    } else {
+      const slat = ACOUSTIC_SLAT_VARIANTS.find(s => s.variant === selectedLambriSlat) ?? ACOUSTIC_SLAT_VARIANTS[0];
+      onSelectFinish({ type: 'lambri', variant: slat.variant, color: slat.color, backingColor, roughness: .7 });
+    }
+  };
 
   // Tile catalog — loaded async from public/textures/tiles/tiles.json
   const tileCatalogService = runtime.tiles;
@@ -263,6 +267,7 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
       {/* Tab 1: Paint & Plaster */}
       {activeTab === 'paint' && (
         <div className="space-y-3">
+          <FinishColorInput label="Paint color" value={(currentFinish?.type === 'paint' || currentFinish?.type === 'plaster') ? currentFinish.color ?? '#efede8' : '#efede8'} onChange={color => onSelectFinish({ ...(currentFinish?.type === 'paint' || currentFinish?.type === 'plaster' ? currentFinish : { type: 'paint', roughness: .85 }), color })} />
           {/* Curated Paint Colors */}
           <div>
             <div className="flex items-center justify-between text-[10px] uppercase font-semibold text-slate-400 mb-1.5">
@@ -344,7 +349,6 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                           key={`${p.name}_${p.hex}`}
                           type="button"
                           onClick={() => {
-                            setCustomHex(p.hex);
                             onSelectFinish({
                               type: 'paint',
                               color: p.hex,
@@ -376,43 +380,6 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                 </div>
               );
             })()}
-          </div>
-
-          {/* Custom Hex Color Picker */}
-          <div className="flex items-center gap-2 pt-1 border-t border-slate-800/80">
-            <input
-              type="color"
-              value={customHex}
-              onChange={(e) => {
-                const hex = e.target.value;
-                setCustomHex(hex);
-                onSelectFinish({
-                  type: 'paint',
-                  color: hex,
-                  roughness: 0.85,
-                });
-              }}
-              className="w-7 h-7 rounded border border-slate-700 bg-slate-800 cursor-pointer p-0.5"
-            />
-            <div className="flex-1">
-              <input
-                type="text"
-                value={customHex}
-                onChange={(e) => {
-                  const hex = e.target.value;
-                  setCustomHex(hex);
-                  if (/^#[0-9A-Fa-f]{6}$/.test(hex)) {
-                    onSelectFinish({
-                      type: 'paint',
-                      color: hex,
-                      roughness: 0.85,
-                    });
-                  }
-                }}
-                placeholder="#RRGGBB"
-                className="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-slate-200 text-xs font-mono outline-none focus:border-sky-500"
-              />
-            </div>
           </div>
 
           {/* Textured Plasters */}
@@ -460,6 +427,10 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
       {/* Tab 2: Wood & Parquet (Furniture Hardwoods, Flooring, and Dual-Tone Lambri) */}
       {activeTab === 'lambri' && (
         <div className="space-y-4">
+          {currentFinish?.type === 'lambri' && !bauhausPanel(currentFinish.variant) && <div className="space-y-2 rounded border border-slate-700 p-2">
+            <FinishColorInput label="Slat color" value={currentFinish.color ?? '#d4b996'} onChange={color => onSelectFinish({ ...currentFinish, color })} />
+            <FinishColorInput label="Felt color" value={currentFinish.backingColor ?? '#121212'} onChange={backingColor => onSelectFinish({ ...currentFinish, backingColor })} />
+          </div>}
           <ReferencePanelPicker current={currentFinish} onSelect={onSelectFinish} />
           {currentFinish?.type === 'wood' && (
             <div className="space-y-2 rounded-lg border border-slate-800 bg-slate-950 p-2">
@@ -684,20 +655,7 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                     <button
                       key={b.id}
                       type="button"
-                      onClick={() => {
-                        setSelectedLambriBacking(b.hex);
-                        setCustomBackingHex(b.hex);
-                        const currentSlatObj =
-                          ACOUSTIC_SLAT_VARIANTS.find((s) => s.variant === selectedLambriSlat) ||
-                          ACOUSTIC_SLAT_VARIANTS[0];
-                        onSelectFinish({
-                          type: 'lambri',
-                          variant: currentSlatObj.variant,
-                          color: currentSlatObj.color,
-                          backingColor: b.hex,
-                          roughness: 0.55,
-                        });
-                      }}
+                      onClick={() => applyLambriBacking(b.hex)}
                       className={`flex flex-col items-center gap-1 p-1 rounded border text-center transition-all ${active
                         ? 'border-amber-400 bg-amber-500/20 shadow-sm'
                         : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
@@ -717,56 +675,7 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
               </div>
 
               {/* Custom Backing Color Picker */}
-              <div className="flex items-center gap-2 pt-1 border-t border-slate-800/60">
-                <span className="text-[9px] text-slate-400 shrink-0">Custom Felt Hex:</span>
-                <input
-                  type="color"
-                  value={
-                    customBackingHex.startsWith('#') && customBackingHex.length === 7
-                      ? customBackingHex
-                      : '#121212'
-                  }
-                  onChange={(e) => {
-                    const hex = e.target.value;
-                    setCustomBackingHex(hex);
-                    setSelectedLambriBacking(hex);
-                    const currentSlatObj =
-                      ACOUSTIC_SLAT_VARIANTS.find((s) => s.variant === selectedLambriSlat) ||
-                      ACOUSTIC_SLAT_VARIANTS[0];
-                    onSelectFinish({
-                      type: 'lambri',
-                      variant: currentSlatObj.variant,
-                      color: currentSlatObj.color,
-                      backingColor: hex,
-                      roughness: 0.55,
-                    });
-                  }}
-                  className="w-6 h-6 rounded cursor-pointer border border-slate-700 bg-transparent p-0"
-                />
-                <input
-                  type="text"
-                  value={customBackingHex}
-                  onChange={(e) => {
-                    const hex = e.target.value;
-                    setCustomBackingHex(hex);
-                    if (/^#[0-9a-fA-F]{6}$/.test(hex)) {
-                      setSelectedLambriBacking(hex);
-                      const currentSlatObj =
-                        ACOUSTIC_SLAT_VARIANTS.find((s) => s.variant === selectedLambriSlat) ||
-                        ACOUSTIC_SLAT_VARIANTS[0];
-                      onSelectFinish({
-                        type: 'lambri',
-                        variant: currentSlatObj.variant,
-                        color: currentSlatObj.color,
-                        backingColor: hex,
-                        roughness: 0.55,
-                      });
-                    }
-                  }}
-                  className="w-20 bg-slate-950 border border-slate-800 rounded px-1.5 py-0.5 text-[10px] text-slate-200 font-mono focus:outline-none focus:border-amber-500"
-                  placeholder="#121212"
-                />
-              </div>
+              <FinishColorInput label="Custom felt color" value={selectedLambriBacking} onChange={applyLambriBacking} />
             </div>
           </div>
         </div>

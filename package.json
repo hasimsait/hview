@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "test:state": "node scripts/run_tests.mjs",
+    "test:colors:browser": "node scripts/check_surface_colors.mjs",
     "test:layers:browser": "node scripts/check_surface_layers.mjs",
     "dev": "vite",
     "build:viewer": "npx tsx scripts/build_standalone_viewer.ts",

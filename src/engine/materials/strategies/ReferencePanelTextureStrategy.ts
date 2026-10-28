@@ -1,3 +1,4 @@
+import { colorCanvasTexture } from '../SurfaceColor';
 import * as THREE from 'three';
 import { type BauhausPanelFinish, matchGrainColour, panelGrainUrl, PANEL_TEXTURE_SLATS } from '../../../domain/catalog/BauhausPanelling';
 import { type CanvasFactory, seededRandom } from '../CanvasFactory';
@@ -9,14 +10,16 @@ export class ReferencePanelTextureStrategy {
   private readonly textures = new TextureCache();
   constructor(private readonly canvas: CanvasFactory, private readonly source: TextureSource) {}
   dispose(): void { this.textures.dispose(); }
-  get(panel: BauhausPanelFinish): THREE.Texture {
-    const cached = this.textures.get(panel.id); if (cached) return cached;
+  get(reference: BauhausPanelFinish, woodColor?: string, backingColor?: string): THREE.Texture {
+    const panel = { ...reference, color: woodColor ?? reference.color, backingColor: backingColor ?? reference.backingColor };
+    const key = `${panel.id}_${panel.color}_${panel.backingColor}`;
+    const cached = this.textures.get(key); if (cached) return cached;
     const canvas = this.canvas.create(); canvas.width = canvas.height = 1024;
     const ctx = canvas.getContext('2d')!;
     ctx.fillStyle = panel.backingColor; ctx.fillRect(0, 0, 1024, 1024);
-    const texture = new THREE.CanvasTexture(canvas);
+    const texture = colorCanvasTexture(canvas);
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping; texture.colorSpace = THREE.SRGBColorSpace;
-    this.textures.set(panel.id, texture);
+    this.textures.set(key, texture);
     const random = seededRandom(panel.id), pitch = 1024 / PANEL_TEXTURE_SLATS;
     const face = pitch * panel.slatWidth / (panel.slatWidth + panel.gapWidth);
     const draw = (grain?: HTMLCanvasElement) => {
@@ -40,7 +43,7 @@ export class ReferencePanelTextureStrategy {
     };
     draw();
     this.source.imageLoader().load(panelGrainUrl(panel), image => {
-      if (this.textures.get(panel.id) !== texture) return;
+      if (this.textures.get(key) !== texture) return;
       const grain = this.canvas.create(); grain.width = grain.height = 1024;
       const g = grain.getContext('2d', { willReadFrequently: true })!;
       g.save();

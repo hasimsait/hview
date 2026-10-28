@@ -33,7 +33,7 @@ describe('motion collision broad phase', () => {
   it('keeps a real laundry basket gap clear of a small cylindrical object', () => {
     const codec = new PlanCodec(), asset = codec.factory.catalog.get('cabinet_laundry_tiltout')!;
     const item = codec.factory.furniture({ id: 'basket', name: asset.key, assetKey: asset.key, displayName: asset.name,
-      category: asset.category, dimensions: asset.defaultDimensions, position: { x: 0, y: 0, z: 0 }, rotationY: 0 });
+      category: 'storage', dimensions: asset.defaultDimensions, position: { x: 0, y: 0, z: 0 }, rotationY: 0 });
     const root = new FurnitureMeshBuilder(codec.factory.catalog).build(item), scene = new THREE.Group();
     const obstacle = new THREE.Mesh(new THREE.CylinderGeometry(.001, .001, .008, 12), new THREE.MeshBasicMaterial());
     obstacle.position.set(0, .0563666653, -.148); scene.add(root, obstacle); scene.updateMatrixWorld(true);

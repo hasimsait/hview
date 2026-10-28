@@ -1,3 +1,4 @@
+import { colorCanvasTexture } from '../SurfaceColor';
 import * as THREE from 'three';
 import type { CanvasFactory } from '../CanvasFactory';
 import { seededRandom } from '../CanvasFactory';
@@ -69,7 +70,7 @@ export class CoatingTextureStrategy {
       }
     }
 
-    const tex = new THREE.CanvasTexture(canvas);
+    const tex = colorCanvasTexture(canvas);
     tex.wrapS = THREE.RepeatWrapping;
     tex.wrapT = THREE.RepeatWrapping;
     tex.repeat.set(1, 1);

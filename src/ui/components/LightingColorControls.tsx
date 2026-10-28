@@ -10,6 +10,10 @@ export function LightingColorControls() {
     setSettings(scene.getSettings());
   };
   return <section aria-label="Lighting color controls" className="border-t border-slate-800 pt-2 space-y-2">
+    <button type="button" aria-pressed={settings.surfaceColors ?? false} onClick={() => update({ surfaceColors: !settings.surfaceColors })}
+      className="w-full rounded border border-sky-600 px-2 py-1.5 text-xs text-sky-300 aria-pressed:bg-sky-700 aria-pressed:text-white">Compare surface colors</button>
+    <p className="text-[10px] text-slate-400">Compare paint and wood without room lights, shadows or exposure shifts. Turn off to judge them under room lighting.</p>
+    <fieldset disabled={settings.surfaceColors} className="space-y-2 disabled:opacity-50">
     <label className="flex justify-between items-center gap-2 text-[11px] text-slate-300">
       Color rendering
       <select aria-label="Color rendering" value={settings.toneMapping ?? 'neutral'} onChange={event => update({ toneMapping: event.target.value as 'neutral' | 'aces' })}
@@ -49,5 +53,6 @@ export function LightingColorControls() {
     <p className="text-[10px] text-slate-500">Preview changes fixture light colors without editing the plan. Compare lamps in Night mode. Exposure stays fixed when changing temperature.</p>
     <button type="button" onClick={() => update({ exposure: 1, toneMapping: 'neutral', fixtureTemperatureKelvin: 0, whiteBalanceKelvin:6500, whiteBalanceAdaptation:.5 })}
       className="text-[11px] text-sky-400 hover:text-sky-300">Reset color controls</button>
+    </fieldset>
   </section>;
 }

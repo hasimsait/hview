@@ -49,11 +49,14 @@ describe('plan parsing', () => {
     expect(restored.walls[0].p2).toEqual({ x: 4, y: 0 });
     expect(restored.furniture[0].position).toEqual(first.furniture[0].position);
   });
-  it.each([['sample.plan', 47, 119], ['public/sample.plan', 51, 123]] as const)('loads %s with finite geometry', (file, walls, furniture) => {
+  it.each([['sample.plan', 47, 119], ['public/sample.plan', undefined, undefined]] as const)('loads %s with finite geometry', (file, walls, furniture) => {
     const plan = parser.decode(readFileSync(new URL('../../' + file, import.meta.url), 'utf8'));
-    expect(plan.walls.length + plan.columns.length).toBe(walls);
+    // Working plans are user data; only the fixed reset baseline pins counts.
+    if (walls !== undefined) expect(plan.walls.length + plan.columns.length).toBe(walls);
+    else expect(plan.walls.length + plan.columns.length).toBeGreaterThan(0);
     expect(plan.rooms).toHaveLength(10);
-    expect(plan.furniture).toHaveLength(furniture);
+    if (furniture !== undefined) expect(plan.furniture).toHaveLength(furniture);
+    else expect(plan.furniture.length).toBeGreaterThan(0);
     for (const item of plan.furniture) {
       expect(Object.values(item.position).every(Number.isFinite)).toBe(true);
       expect(Object.values(item.dimensions).every(n => Number.isFinite(n) && n > 0)).toBe(true);

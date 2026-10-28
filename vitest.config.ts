@@ -5,6 +5,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@core': fileURLToPath(new URL('./src/core', import.meta.url)),
+      '@ui': fileURLToPath(new URL('./src/ui', import.meta.url)),
       '@services': fileURLToPath(new URL('./src/services', import.meta.url)),
     }
   },

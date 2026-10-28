@@ -37,6 +37,7 @@ export interface SurfaceFinishConfig {
   groutColor?: string; // Grout joint hex color e.g. '#d1d5db'
   mappingMode?: 'stretched' | 'tiled'; // Mapping mode: 'stretched' (fitted 0..1) or 'tiled' (repeating metric/pattern)
   scale?: number; // Texture repeat scale multiplier (e.g. 1.0, 2.5, 3.5, 4.0)
+  woodColor?: string; // Target wood colour for photographic lambri; felt is independent.
   backingColor?: string; // Acoustic felt backing / background color for lambri
 }
 

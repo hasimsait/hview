@@ -1,3 +1,4 @@
+import { configureColorView, SurfaceColorView } from './materials/SurfaceColorView';
 import { FurnitureEntity,OpeningEntity,PlanDocument,RoomEntity,WallEntity } from '@core/types/plan';
 import { ISceneService,ISurfaceFinishService,ViewMode,ViewportSettings } from '@core/types/services';
 import * as THREE from 'three';
@@ -38,6 +39,7 @@ export interface SceneStatus { readonly state: 'loading' | 'ready' | 'recovering
 
 export class SceneEngine implements ISceneService {
   private readonly whiteBalance = new WhiteBalancePass();
+  private readonly surfaceColors = new SurfaceColorView();
   private readonly collisionFeedback = new CollisionFeedback();
   private cabinetEditingId: string | null = null;
   private readonly mobile = mobileRendering();
@@ -216,8 +218,7 @@ export class SceneEngine implements ISceneService {
     this.renderer.shadowMap.enabled = !this.mobile;
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
-    this.renderer.toneMapping = THREE.NeutralToneMapping;
-    this.renderer.toneMappingExposure = this.settings.exposure ?? 1;
+    configureColorView(this.renderer, this.settings);
 
     container.appendChild(this.renderer.domElement);
     this.renderer.domElement.addEventListener('webglcontextlost', this.onContextLost);
@@ -267,6 +268,7 @@ export class SceneEngine implements ISceneService {
   }
 
   dispose(): void {
+    this.surfaceColors.dispose();
     this.whiteBalance.dispose();
     this.collisionFeedback.dispose();
     this.disposed = true; this.preparationVersion++;
@@ -360,8 +362,7 @@ export class SceneEngine implements ISceneService {
   }
   private applyLightingSettings(): void {
     if (this.renderer) {
-      this.renderer.toneMapping = this.settings.toneMapping === 'aces' ? THREE.ACESFilmicToneMapping : THREE.NeutralToneMapping;
-      this.renderer.toneMappingExposure = THREE.MathUtils.clamp(this.settings.exposure ?? 1, 1 / 64, 4);
+      configureColorView(this.renderer, this.settings);
     }
     this.lighting.update(this.settings);
     // Update all fixture lights across the scene
@@ -422,6 +423,7 @@ export class SceneEngine implements ISceneService {
     void this.finishService.textures.ready().then(async () => {
       if (this.disposed || version !== this.preparationVersion) return;
       this.applyLightingSettings();
+      this.surfaceColors.update(this.scene, this.settings.surfaceColors ?? false);
       if (this.mobile) {
         const materials = new Set<THREE.Material>();
         this.scene.traverse(object => {
@@ -734,10 +736,10 @@ export class SceneEngine implements ISceneService {
 
       this.wallBuilder.materials.setCelShading(false);
       this.furnitureBuilder.setCelShading(false);
-      this.wallBuilder.materials.setForegroundMode(this.settings.foregroundOcclusionMode);
-      this.openingBuilder.setForegroundMode(this.settings.foregroundOcclusionMode);
-      this.furnitureBuilder.setForegroundMode(this.settings.foregroundOcclusionMode);
-      this.finishService.setForegroundMode(this.settings.foregroundOcclusionMode);
+      this.wallBuilder.materials.setForegroundMode(this.settings.surfaceColors ? 'off' : this.settings.foregroundOcclusionMode);
+      this.openingBuilder.setForegroundMode(this.settings.surfaceColors ? 'off' : this.settings.foregroundOcclusionMode);
+      this.furnitureBuilder.setForegroundMode(this.settings.surfaceColors ? 'off' : this.settings.foregroundOcclusionMode);
+      this.finishService.setForegroundMode(this.settings.surfaceColors ? 'off' : this.settings.foregroundOcclusionMode);
     }
 
     this.applyLightingSettings();
@@ -776,13 +778,13 @@ export class SceneEngine implements ISceneService {
       for (const ceiling of child.children) ceiling.visible = this.settings.isolatedRoomIds.length === 0 || this.settings.isolatedRoomIds.includes(ceiling.userData.id);
     }
 
-    const fgMode = this.settings.viewMode === 'topDown' ? 'off' : this.settings.foregroundOcclusionMode;
+    const fgMode = this.settings.surfaceColors || this.settings.viewMode === 'topDown' ? 'off' : this.settings.foregroundOcclusionMode;
     this.wallBuilder.materials.setForegroundMode(fgMode);
     this.openingBuilder.setForegroundMode(fgMode);
     this.furnitureBuilder.setForegroundMode(fgMode);
     this.finishService.setForegroundMode(fgMode);
-    this.wallBuilder.materials.setWallOpacity(this.settings.wallOpacity);
-    this.finishService.setForegroundOpacity(this.settings.wallOpacity);
+    this.wallBuilder.materials.setWallOpacity(this.settings.surfaceColors ? 1 : this.settings.wallOpacity);
+    this.finishService.setForegroundOpacity(this.settings.surfaceColors ? 1 : this.settings.wallOpacity);
   }
 
   isolateRooms(roomIds: string[]): void {
@@ -994,7 +996,9 @@ export class SceneEngine implements ISceneService {
     }
     if (this.renderer) {
       this.updateFixtureLightBudget();
-      this.whiteBalance.render(this.renderer, this.scene, this.activeCamera, this.settings.whiteBalanceKelvin ?? 6500, this.settings.whiteBalanceAdaptation ?? .5);
+      const compare = this.settings.surfaceColors ?? false;
+      this.surfaceColors.update(this.scene, compare);
+      this.whiteBalance.render(this.renderer, this.scene, this.activeCamera, compare ? 6500 : this.settings.whiteBalanceKelvin ?? 6500, compare ? 0 : this.settings.whiteBalanceAdaptation ?? .5);
       this.setStatus('ready', '');
     }
   }
@@ -1144,7 +1148,7 @@ export class SceneEngine implements ISceneService {
   }
 
   isPointForegroundOccluded(worldPoint: THREE.Vector3): boolean {
-    if (this.settings.viewMode !== 'perspective' || this.settings.foregroundOcclusionMode === 'off') {
+    if (this.settings.surfaceColors || this.settings.viewMode !== 'perspective' || this.settings.foregroundOcclusionMode === 'off') {
       return false;
     }
     if (!this.controls) return false;

@@ -1,3 +1,4 @@
+import { surfaceColor } from './SurfaceColor';
 import { bauhausPanel, panelTextureWidth, PANEL_TEXTURE_HEIGHT } from '../../domain/catalog/BauhausPanelling';
 import { ReferencePanelTextureStrategy } from './strategies/ReferencePanelTextureStrategy';
 import { ensureLocalMetricBounds,ensureStretchedUvs } from '../geometry/UVProjector';
@@ -163,7 +164,7 @@ export class SurfaceMaterialFactory implements ISurfaceFinishService {
   }
 
   getTileTexture(variant: string = 'subway'): THREE.Texture { return this.tileTextureStrategy.getTileTexture(variant); }
-  getLambriTexture(variant: string = 'oak_slats', slatColor?: string, backingColor?: string): THREE.Texture { const panel = bauhausPanel(variant); return panel ? this.referencePanelTextureStrategy.get(panel) : this.slatTextureStrategy.getLambriTexture(variant, slatColor, backingColor); }
+  getLambriTexture(variant: string = 'oak_slats', slatColor?: string, backingColor?: string, woodColor?: string): THREE.Texture { const panel = bauhausPanel(variant); return panel ? this.referencePanelTextureStrategy.get(panel, woodColor, backingColor) : this.slatTextureStrategy.getLambriTexture(variant, slatColor, backingColor); }
   resolveWoodPhotoInfo(variant?: string): { url: string; name: string } { return this.woodTextureStrategy.resolveWoodPhotoInfo(variant); }
   getWoodTexture(variant: string = 'natural_oak'): THREE.Texture { return this.woodTextureStrategy.getWoodTexture(variant); }
   getPlasterTexture(variant: string = 'stucco'): THREE.Texture { return this.coatingTextureStrategy.getPlasterTexture(variant); }
@@ -218,7 +219,7 @@ export class SurfaceMaterialFactory implements ISurfaceFinishService {
     const scaleStr = config.scale !== undefined ? `s${config.scale}` : 'sdef';
     const backingColorStr = config.backingColor ? `b${config.backingColor}` : 'bdef';
     const layer = normalizeSurfaceLayer(config.layer);
-    const key = `${config.type}_${config.variant || 'default'}_${config.color || 'none'}_${backingColorStr}_${roughnessStr}_${metalnessStr}_${rotation}_${pattern}_${groutWidth}_${groutColor}_${mappingModeStr}_${scaleStr}_${side}_${depthWrite}_${projection}_${layer}_${options?.foregroundOcclusion !== false}`;
+    const key = `${config.type}_${config.variant || 'default'}_${config.color || 'none'}_${backingColorStr}_${config.woodColor ?? 'native'}_${roughnessStr}_${metalnessStr}_${rotation}_${pattern}_${groutWidth}_${groutColor}_${mappingModeStr}_${scaleStr}_${side}_${depthWrite}_${projection}_${layer}_${options?.foregroundOcclusion !== false}`;
 
     if (this.materials.has(key)) {
       return this.materials.get(key)!;
@@ -305,9 +306,9 @@ export class SurfaceMaterialFactory implements ISurfaceFinishService {
           break;
         }
         case 'lambri':
-          texture = this.getLambriTexture(config.variant, config.color, config.backingColor);
-          roughness = 0.55;
-          metalness = 0.02;
+          texture = this.getLambriTexture(config.variant, config.color, config.backingColor, config.woodColor);
+          roughness = config.roughness ?? 0.7;
+          metalness = config.metalness ?? 0;
           defaultColor = 0xffffff;
           break;
         case 'wood':
@@ -317,8 +318,8 @@ export class SurfaceMaterialFactory implements ISurfaceFinishService {
           defaultColor = 0xffffff;
           break;
         case 'plaster':
-          texture = this.getPlasterTexture(config.variant);
-          roughness = 0.9;
+          roughness = config.roughness ?? 0.9;
+          metalness = 0;
           break;
         case 'fabric': {
           texture = this.getFabricTexture(config.variant, config.color);
@@ -342,8 +343,7 @@ export class SurfaceMaterialFactory implements ISurfaceFinishService {
           break;
       }
 
-      const referencePanel = config.type === 'lambri' ? bauhausPanel(config.variant) : undefined;
-      const color = referencePanel ? new THREE.Color(0xffffff) : config.color ? new THREE.Color(config.color) : new THREE.Color(defaultColor);
+      const color = surfaceColor(config, defaultColor, texture !== null);
 
       if (config.type === 'porcelain') {
         const physMat = new THREE.MeshPhysicalMaterial({
@@ -403,6 +403,10 @@ export class SurfaceMaterialFactory implements ISurfaceFinishService {
           transparent: true,
           depthWrite,
         });
+        if (config.type === 'plaster') {
+          stdMat.bumpMap = this.getPlasterTexture(config.variant);
+          stdMat.bumpScale = .0004;
+        }
         const tilingScale = this.getTilingScale(config);
         const entry = config.type === 'tile' ? this.tileCatalog?.getById(config.variant ?? '') : undefined;
         const numVariants = entry && entry.textures.length > 0 ? entry.textures.length : 1;

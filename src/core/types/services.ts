@@ -50,6 +50,7 @@ export interface ViewportSettings {
   chandelierIntensity: number;  // 0.0 - 3.0 (default 1.0)
   exposure?: number; // Fixed display exposure, 1/64–4 (default 1).
   toneMapping?: 'neutral' | 'aces';
+  surfaceColors?: boolean; // Compare material colours without room lighting or display adaptation.
   fixtureTemperatureKelvin?: number; // Temporary white-light preview; 0 uses each fixture's settings.
   whiteBalanceKelvin?: number; // Viewing white relative to the unchanged 6500 K reference.
   whiteBalanceAdaptation?: number; // 0 = unadapted; 1 = fully neutralize the viewing white.

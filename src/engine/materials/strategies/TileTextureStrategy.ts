@@ -1,3 +1,4 @@
+import { colorCanvasTexture } from '../SurfaceColor';
 import * as THREE from 'three';
 import type { ITileCatalogService,TileEntry } from '../../../services/tile-catalog/TileCatalogService';
 import type { CanvasFactory } from '../CanvasFactory';
@@ -15,7 +16,7 @@ function makeMissingAssetTexture(canvasFactory: CanvasFactory): THREE.Texture {
   ctx.fillStyle = '#000000';
   ctx.fillRect(0, 0, half, half);
   ctx.fillRect(half, half, half, half);
-  const tex = new THREE.CanvasTexture(canvas);
+  const tex = colorCanvasTexture(canvas);
   tex.wrapS = THREE.RepeatWrapping;
   tex.wrapT = THREE.RepeatWrapping;
   return tex;
@@ -155,7 +156,7 @@ export class TileTextureStrategy {
       }
     }
 
-    const tex = new THREE.CanvasTexture(canvas);
+    const tex = colorCanvasTexture(canvas);
     tex.wrapS = THREE.RepeatWrapping;
     tex.wrapT = THREE.RepeatWrapping;
     tex.repeat.set(1, 1);
@@ -176,7 +177,7 @@ export class TileTextureStrategy {
     ctx.fillStyle = entry.color || '#ded8cc';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const atlasTexture = new THREE.CanvasTexture(canvas);
+    const atlasTexture = colorCanvasTexture(canvas);
     atlasTexture.wrapS = THREE.RepeatWrapping;
     atlasTexture.wrapT = THREE.RepeatWrapping;
     atlasTexture.repeat.set(1, 1);

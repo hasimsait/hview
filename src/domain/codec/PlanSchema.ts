@@ -15,6 +15,7 @@ export const finishSchema = z.object({
   metalness: number.min(0).max(1).optional(), rotation: number.optional(), layer: number.int().optional(),
   pattern: z.enum(['grid', 'running_bond', 'diagonal_herringbone', 'herringbone', 'french_pattern', 'vertical_stack']).optional(),
   groutWidth: number.nonnegative().optional(), groutColor: z.string().optional(), scale: positive.optional(),
+  woodColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
   mappingMode: z.enum(['stretched', 'tiled']).optional(), backingColor: z.string().optional(),
 }).passthrough();
 const finish = finishSchema.optional();

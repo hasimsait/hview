@@ -1,3 +1,4 @@
+import { colorCanvasTexture } from '../SurfaceColor';
 import * as THREE from 'three';
 import type { CanvasFactory } from '../CanvasFactory';
 import { TextureCache } from '../TextureCache';
@@ -128,7 +129,7 @@ export class SlatTextureStrategy {
       }
     }
 
-    const tex = new THREE.CanvasTexture(canvas);
+    const tex = colorCanvasTexture(canvas);
     tex.wrapS = THREE.RepeatWrapping;
     tex.wrapT = THREE.RepeatWrapping;
     tex.repeat.set(1, 1);
