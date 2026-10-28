@@ -53,10 +53,10 @@ export class SceneLighting {
       this.sunLight.castShadow = false;
       this.hemiLight.intensity = 0.0;
       this.topLight.visible = false;
-      // Soft dark night ambient baseline so unlit corners have subtle visual depth
-      this.ambientLight.intensity = 0.02 * Math.max(0.1, globalMultiplier);
+      // Night has no artificial fill: only enabled fixtures illuminate surfaces.
+      this.ambientLight.intensity = 0;
       if ('environmentIntensity' in this.scene) {
-        (this.scene as any).environmentIntensity = 0.03;
+        (this.scene as any).environmentIntensity = 0;
       }
     } else {
       // Global lighting ON:

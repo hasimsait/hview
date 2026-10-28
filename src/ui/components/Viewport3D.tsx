@@ -10,6 +10,7 @@ export const Viewport3D: React.FC<{ disabled?: boolean; hideControls?: boolean }
   const interactionService = runtime.interaction;
   const editor = runtime.editor;
   const status = useSyncExternalStore(sceneService.subscribeStatus, sceneService.getStatus);
+  const settings = useSyncExternalStore(sceneService.subscribeSettings, sceneService.getSettingsSnapshot);
 
   const [gizmoMode, setGizmoMode] = useState<'translate' | 'rotate'>('translate');
   const [hasPlan, setHasPlan] = useState<boolean>(false);
@@ -67,6 +68,10 @@ export const Viewport3D: React.FC<{ disabled?: boolean; hideControls?: boolean }
     <div className="relative w-full h-full overflow-hidden bg-slate-950">
       {/* Three.js Canvas Container */}
       <div ref={containerRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
+      {settings.surfaceColors && <div role="status" className="absolute bottom-16 left-4 z-10 rounded border border-sky-600 bg-slate-950/95 p-2 text-xs text-sky-200">
+        Surface color comparison — room lighting is bypassed.
+        <button type="button" className="ml-3 underline" onClick={() => sceneService.updateSettings({ surfaceColors: false })}>Return to room lighting</button>
+      </div>}
       {status.state !== 'ready' && (
         <div role={status.state === 'error' ? 'alert' : 'status'} className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-slate-950/90 p-6 text-center text-sm text-slate-200">
           {status.state !== 'error' && <div className="h-8 w-8 animate-spin rounded-full border-4 border-sky-500/20 border-t-sky-500" />}

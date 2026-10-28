@@ -13,7 +13,7 @@ Sparkles,
 Trash2,
 X,
 } from 'lucide-react';
-import React,{ useCallback,useState } from 'react';
+import React,{ useCallback,useState,useSyncExternalStore } from 'react';
 import { ConfigureLuminaire,ConfigureShelving,FinishFurniture,RemoveElement,TransformFurniture,SetWindowCoveringOpen } from '../../application/commands/FurnitureCommands';
 import { cabinetDoorCount } from '../../domain/catalog/Cabinets';
 import { defaultCabinet } from '../../domain/cabinet/CabinetLayout';
@@ -55,6 +55,7 @@ export const Inspector: React.FC<InspectorProps> = ({
   const editor = runtime.editor;
   const interactionService = runtime.interaction;
   const sceneService = runtime.scene;
+  const lightingSettings = useSyncExternalStore(sceneService.subscribeSettings, sceneService.getSettingsSnapshot);
   const selection = useSelection();
 
   const [showYGizmo, setShowYGizmo] = useState(false);
@@ -99,6 +100,7 @@ export const Inspector: React.FC<InspectorProps> = ({
   };
 
   const configureLight = (config: Partial<LightFixtureConfig>) => {
+    if (sceneService.getSettings().surfaceColors) sceneService.updateSettings({ surfaceColors: false });
     if (interior) interior.configureLight(config);
     else editor.execute(new ConfigureLuminaire(item.id, config));
   };
@@ -399,6 +401,8 @@ export const Inspector: React.FC<InspectorProps> = ({
               {item.lightConfig?.enabled !== false ? '💡 ON' : 'OFF'}
             </button>
           </div>
+
+          {lightingSettings.fixtureTemperatureKelvin ? <p className="text-[10px] text-amber-300">Global preview overrides this fixture to {lightingSettings.fixtureTemperatureKelvin} K. <button type="button" className="underline" onClick={() => sceneService.updateSettings({ fixtureTemperatureKelvin: 0 })}>Use fixture temperatures</button></p> : null}
 
           {/* Intensity Slider */}
           <div className="space-y-1">

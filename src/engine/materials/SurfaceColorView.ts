@@ -1,9 +1,10 @@
 import * as THREE from 'three';
 import type { ViewportSettings } from '../../core/types/services';
+import { lightingExposure } from '../lighting/Exposure';
 
-export function configureColorView(renderer: Pick<THREE.WebGLRenderer, 'toneMapping' | 'toneMappingExposure'>, settings: Pick<ViewportSettings, 'surfaceColors' | 'toneMapping' | 'exposure'>): void {
+export function configureColorView(renderer: Pick<THREE.WebGLRenderer, 'toneMapping' | 'toneMappingExposure'>, settings: Pick<ViewportSettings, 'surfaceColors' | 'toneMapping' | 'exposure'> & Partial<Pick<ViewportSettings, 'globalLighting' | 'globalLightIntensity'>>): void {
   renderer.toneMapping = settings.surfaceColors ? THREE.NoToneMapping : settings.toneMapping === 'aces' ? THREE.ACESFilmicToneMapping : THREE.NeutralToneMapping;
-  renderer.toneMappingExposure = settings.surfaceColors ? 1 : THREE.MathUtils.clamp(settings.exposure ?? 1, 1 / 64, 4);
+  renderer.toneMappingExposure = settings.surfaceColors ? 1 : THREE.MathUtils.clamp(lightingExposure(settings), 1 / 64, 4);
 }
 
 /** Compare the same decoded albedo on every surface, independently of room light.
@@ -29,7 +30,7 @@ export class SurfaceColorView {
             shader.fragmentShader = shader.fragmentShader.replace('#include <opaque_fragment>', 'if (uSurfaceColors > 0.5) outgoingLight = diffuseColor.rgb;\n#include <opaque_fragment>');
           }
         };
-        material.customProgramCacheKey = () => programKey.endsWith('_surface-colors-v1') ? programKey : `${programKey}_surface-colors-v1`;
+        material.customProgramCacheKey = () => programKey.includes('_surface-colors-v1') ? programKey : `${programKey}_surface-colors-v1`;
         const disposed = () => { this.originals.delete(material); material.removeEventListener('dispose', disposed); };
         this.originals.set(material, { compile, key, disposed }); material.addEventListener('dispose', disposed);
         material.needsUpdate = true;

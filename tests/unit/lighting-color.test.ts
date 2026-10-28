@@ -29,7 +29,7 @@ describe('white-light color and photometric controls', () => {
       expect(adapted.x).toBeCloseTo(reference.r,6);expect(adapted.y).toBeCloseTo(reference.g,6);expect(adapted.z).toBeCloseTo(reference.b,6);
     }
   });
-  it.each([[2700,.45931,.41066],[6500,.31349,.32366]])('approximates the %i K locus independently of display gamma', (kelvin,x,y) => {
+  it.each([[2700,.45931,.41066],[3500,.40534,.39085],[6500,.31349,.32366]])('approximates the %i K locus independently of display gamma', (kelvin,x,y) => {
     const c=whiteLightColor(kelvin);
     const X=.4124564*c.r+.3575761*c.g+.1804375*c.b;
     const Y=.2126729*c.r+.7151522*c.g+.072175*c.b;

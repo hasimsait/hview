@@ -55,7 +55,7 @@ test('white-light output, preview and exposure work without geometry rebuilds an
   await page.getByLabel('White light preview',{exact:true}).selectOption('6500');
   const cool=await state(page), warm=configured.lights[0].color;
   expect(cool.lights[0].color[0]/cool.lights[0].color[2]).toBeLessThan(warm[0]/warm[2]/2);
-  expect(cool.config).toEqual(configured.config);expect(cool.plan).toBe(configured.plan);expect(cool.exposure).toBe(1);
+  expect(cool.config).toEqual(configured.config);expect(cool.plan).toBe(configured.plan);expect(cool.exposure).toBeCloseTo(Math.PI/100,8);
   await page.getByLabel('Viewing white balance',{exact:true}).selectOption('2700');
   const balanced=await state(page);
   expect(balanced.config).toEqual(cool.config);expect(balanced.plan).toBe(cool.plan);expect(balanced.lights).toEqual(cool.lights);
