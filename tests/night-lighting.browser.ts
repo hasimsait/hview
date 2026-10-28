@@ -3,7 +3,8 @@ import { PlanDocument } from '../src/domain/model/PlanDocument';
 import { Wall } from '../src/domain/elements/Wall';
 import { Door } from '../src/domain/elements/Opening';
 import { Luminaire } from '../src/domain/elements/Furniture';
-import { FixtureOcclusion } from '../src/engine/lighting/FixtureOcclusion';
+import { RoomFixtureLighting } from '../src/engine/lighting/RoomFixtureLighting';
+import { Room } from '../src/domain/elements/Room';
 import { SceneLighting } from '../src/engine/lighting/SceneLighting';
 import { WhiteBalancePass } from '../src/engine/lighting/WhiteBalance';
 import { addFixtureLight, addStripAreaLight } from '../src/engine/lighting/FixtureLight';
@@ -23,7 +24,7 @@ async function check() {
   const settings = { globalLighting: false, globalLightIntensity: 1, viewMode: 'perspective', chandelierIntensity: 1, spotLightIntensity: 1 } as ViewportSettings;
   const lights = new SceneLighting(scene); lights.update(settings); configureColorView(renderer, settings);
   const exposure = renderer.toneMappingExposure;
-  const factory = new SurfaceMaterialFactory(), occlusion = new FixtureOcclusion(), balance = new WhiteBalancePass();
+  const factory = new SurfaceMaterialFactory(), roomLighting = new RoomFixtureLighting(), balance = new WhiteBalancePass();
   const resources = new ResourcePool(), appearance = new FurnitureAppearance(factory, resources, () => settings, () => undefined);
   const shades = [{ name: 'KUMRU', color: '#eae2d1' }, { name: 'GÜNBATIMI', color: '#864954' }];
   shades.forEach((shade, i) => {
@@ -35,9 +36,12 @@ async function check() {
   const other = addFixtureLight(neighbour, [0, 1.4, 3.2], 20, 9, 'chandelier');
   const lamp = new Luminaire({ id: 'lamp', name: 'Lamp', displayName: 'Lamp', assetKey: 'chandelier', category: 'decor', position: { x: 0, y: 0, z: 0 }, dimensions: { x: .5, y: .5, z: .5 }, rotationY: 0, lightConfig: { temperatureKelvin: 3500, lumens: 806 } });
   const wall = new Wall({ id: 'partition', p1: { x: -3, y: 2 }, p2: { x: 3, y: 2 }, height: 3, thickness: .2, material: 'brick', openings: [] }, []);
-  const plan = new PlanDocument([wall]); occlusion.rebuild(plan, scene); occlusion.update(scene);
+  const rooms = [new Room({ id: 'bedroom', name: 'Bedroom', area: 18, height: 3, polygon: [{ x: -3, y: -1 }, { x: 3, y: -1 }, { x: 3, y: 2 }, { x: -3, y: 2 }] }),
+    new Room({ id: 'next-room', name: 'Next room', area: 18, height: 3, polygon: [{ x: -3, y: 2 }, { x: 3, y: 2 }, { x: 3, y: 5 }, { x: -3, y: 5 }] })];
+  const plan = new PlanDocument([wall, ...rooms]); roomLighting.rebuild(plan); roomLighting.update(scene);
   const pixels = new Uint8Array(640 * 320 * 4), results: Record<string, unknown> = {};
   const record = (name: string, kelvin = 3500, adaptation = .5) => {
+    roomLighting.update(scene);
     balance.render(renderer, scene, camera, kelvin, adaptation);
     const gl = renderer.getContext(); gl.readPixels(0, 0, 640, 320, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
     const measured = [-.65, .65].map(x => {
@@ -55,12 +59,11 @@ async function check() {
   appearance.applyLighting(local, lamp.withEmission({ intensity: 0 })); appearance.applyLighting(neighbour, lamp);
   const dark = record('Chandelier at zero, neighbour on');
   if (dark.flat().some(c => c > 1)) throw new Error('Neighbour light leaked through solid partition');
-  // A solid wall should also block spots and area lights, including on phones
-  // where shadow maps are disabled. These sources use the same shader path.
+  // Every fixture type is confined to its room, without shadow maps.
   other.visible = false;
   const spot = addFixtureLight(neighbour, [0, 1.4, 3.2], 30, 9, 'spot', [0, 0, -1]);
   const area = addStripAreaLight(neighbour, [0, 1.4, 3.2], 1, .2); area.rotation.set(0, 0, 0); area.power = 806;
-  occlusion.update(scene);
+  roomLighting.update(scene);
   if (record('Neighbour spot and area blocked').flat().some(c => c > 1)) throw new Error('Spot or area light leaked through solid partition');
   spot.visible = area.visible = false; other.visible = true;
   appearance.applyLighting(local, lamp);
@@ -71,20 +74,20 @@ async function check() {
   if (warm[0][0] / warm[0][2] <= cool[0][0] / cool[0][2]) throw new Error('3500 K did not retain warmth at partial adaptation');
   appearance.applyLighting(local, lamp.withEmission({ enabled: false }));
   const doorway = new Door({ id: 'door', type: 'door', wallId: wall.id, width: 2.5, height: 2.3, floorHeight: 0, distanceAlongWall: 3, position: { x: 0, y: 2 }, openAngle: 0 });
-  const withDoor = wall.withOpenings([doorway]), doorPlan = new PlanDocument([withDoor]);
-  occlusion.rebuild(doorPlan, scene);
-  if (record('Open aperture admits neighbour light').flat().every(c => c < 3)) throw new Error('Doorway incorrectly blocked light');
+  const withDoor = wall.withOpenings([doorway]), doorPlan = new PlanDocument([withDoor, ...rooms]);
+  roomLighting.rebuild(doorPlan);
+  if (record('Open aperture keeps room isolation').flat().some(c => c > 1)) throw new Error('Light crossed room boundary through an aperture');
   const openingBuilder = new OpeningMeshBuilder(factory), leaf = openingBuilder.buildOpening(doorway, withDoor); scene.add(leaf);
-  occlusion.rebuild(doorPlan, scene); occlusion.update(scene);
+  roomLighting.rebuild(doorPlan); roomLighting.update(scene);
   if (record('Closed door blocks neighbour light').flat().some(c => c > 1)) throw new Error('Closed door leaked light');
   const open = doorway.withOpenAngle(90); openingBuilder.update(leaf, open);
-  occlusion.rebuild(new PlanDocument([wall.withOpenings([open])]), scene);
-  if (record('Door opened admits neighbour light').flat().every(c => c < 3)) throw new Error('Open door did not admit light');
+  roomLighting.rebuild(new PlanDocument([wall.withOpenings([open]), ...rooms]));
+  if (record('Open door keeps room isolation').flat().some(c => c > 1)) throw new Error('Light crossed room boundary through an open door');
   scene.remove(leaf);
-  occlusion.rebuild(plan, scene); appearance.applyLighting(neighbour, lamp.withEmission({ enabled: false }));
+  roomLighting.rebuild(plan); appearance.applyLighting(neighbour, lamp.withEmission({ enabled: false }));
   if (record('All lamps off').flat().some(c => c > 1)) throw new Error('Night still has artificial ambient fill');
   if (renderer.toneMappingExposure !== exposure) throw new Error('Exposure changed while switching lamps');
-  occlusion.dispose(); balance.dispose(); lights.dispose(); factory.dispose(); renderer.dispose();
+  roomLighting.dispose(); balance.dispose(); lights.dispose(); factory.dispose(); renderer.dispose();
   return { ok: true, exposure, results };
 }
 void check().then(result => { document.getElementById('results')!.textContent = JSON.stringify(result); }).catch(error => { document.getElementById('results')!.textContent = JSON.stringify({ ok: false, error: String(error) }); });

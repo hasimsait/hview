@@ -1,5 +1,5 @@
 import { configureColorView, SurfaceColorView } from './materials/SurfaceColorView';
-import { FixtureOcclusion } from './lighting/FixtureOcclusion';
+import { RoomFixtureLighting } from './lighting/RoomFixtureLighting';
 import { FurnitureEntity,OpeningEntity,PlanDocument,RoomEntity,WallEntity } from '@core/types/plan';
 import { ISceneService,ISurfaceFinishService,ViewMode,ViewportSettings } from '@core/types/services';
 import * as THREE from 'three';
@@ -41,7 +41,7 @@ export interface SceneStatus { readonly state: 'loading' | 'ready' | 'recovering
 export class SceneEngine implements ISceneService {
   private readonly whiteBalance = new WhiteBalancePass();
   private readonly surfaceColors = new SurfaceColorView();
-  private readonly fixtureOcclusion = new FixtureOcclusion();
+  private readonly roomLighting = new RoomFixtureLighting();
   private readonly collisionFeedback = new CollisionFeedback();
   private cabinetEditingId: string | null = null;
   private readonly mobile = mobileRendering();
@@ -275,7 +275,7 @@ export class SceneEngine implements ISceneService {
 
   dispose(): void {
     this.surfaceColors.dispose();
-    this.fixtureOcclusion.dispose();
+    this.roomLighting.dispose();
     this.whiteBalance.dispose();
     this.collisionFeedback.dispose();
     this.disposed = true; this.preparationVersion++;
@@ -347,7 +347,8 @@ export class SceneEngine implements ISceneService {
       }
     }
     if (!change.previous || change.previous.rooms.length !== change.document.rooms.length || change.document.rooms.some((room, index) => room !== change.previous!.rooms[index])) this.ceilingsDirty = true;
-    this.fixtureOcclusion.rebuild(change.document, this.scene);
+    this.roomLighting.rebuild(change.document);
+    this.roomLighting.update(this.scene);
     this.applyVisibilitySettings(); this.applyLightingSettings();
     if (!change.previous || change.label === 'Load document') this.fitPlanInView();
   }
@@ -356,7 +357,7 @@ export class SceneEngine implements ISceneService {
     this.invalidate();
     this.needsPreparation = true; this.ceilingsDirty = true;
     this.currentPlan = plan; this.graph.reconcile(plan, this.settings.wallCutaway ? 1.15 : undefined);
-    this.fixtureOcclusion.rebuild(plan, this.scene);
+    this.roomLighting.rebuild(plan);
     this.applyVisibilitySettings(); this.applyLightingSettings(); this.fitPlanInView();
   }
 
@@ -432,7 +433,7 @@ export class SceneEngine implements ISceneService {
     void this.finishService.textures.ready().then(async () => {
       if (this.disposed || version !== this.preparationVersion) return;
       this.applyLightingSettings();
-      this.fixtureOcclusion.update(this.scene);
+      this.roomLighting.update(this.scene);
       this.surfaceColors.update(this.scene, this.settings.surfaceColors ?? false);
       if (this.mobile) {
         const materials = new Set<THREE.Material>();
@@ -978,6 +979,7 @@ export class SceneEngine implements ISceneService {
     if (this.resourcesDirty) {
       this.resourcesDirty = false;
       this.paletteLease.refresh(); this.graph.refreshResources();
+      this.roomLighting.update(this.scene);
     }
     if (!this.currentPlan) return;
     if (this.needsPreparation) { this.prepareMaterials(); return; }
@@ -1011,7 +1013,7 @@ export class SceneEngine implements ISceneService {
     if (this.renderer) {
       this.updateFixtureLightBudget();
       const compare = this.settings.surfaceColors ?? false;
-      this.fixtureOcclusion.update(this.scene);
+      this.roomLighting.update(this.scene, false);
       this.surfaceColors.update(this.scene, compare);
       this.whiteBalance.render(this.renderer, this.scene, this.activeCamera, compare ? 6500 : this.settings.whiteBalanceKelvin ?? 6500, compare ? 0 : this.settings.whiteBalanceAdaptation ?? .5);
       this.setStatus('ready', '');
