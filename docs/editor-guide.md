@@ -6,6 +6,10 @@ Save/export behavior and setup are in the [README](../README.md). Cabinet interi
 
 Use **Add Asset** to search by name, model or article code, then narrow by category, source or collection. **Show more assets** expands the visible results; search includes the whole catalogue. Select an object to edit its position, rotation, dimensions and individual finish sections.
 
+**Duplicate Asset** is near the top of the object inspector. It selects an independent copy with the same dimensions, rotation, finishes, light settings and cabinet contents, shifted 15 cm sideways for placement. Undo removes the copy. Inside the cabinet editor, Duplicate Asset also copies a selected stored object with its support attachment intact.
+
+Search **BILLY / OXBERG** for the panel/glass-door bookcase in White, Walnut Effect or Oak Effect. Its nominal case is 80 × 30 × 202 cm, with two 192 cm doors above a recessed 10 cm plinth; knobs project 24 mm beyond the nominal front. Doors open through the existing hinge controls, and shelves/contents remain editable. Upper glazing retains its transparency when the whole bookcase is recoloured. The **BILLY** finish options have separate identifiers from generic hardwoods and are also available in the wood finish picker. Wood-effect tones are visually matched to the supplied photos using bundled photographic veneer grain; they are planning references rather than product texture scans.
+
 Dimensions describe the outside planning envelope. Floor, wall, ceiling and surface objects start at their catalogue placement height; adjust elevation for the actual room or support. Independent catalogue objects do not automatically attach to furniture, fit an opening or follow later wall edits. Pipes, hoses and cables are visual route envelopes, without automatic connections or routing.
 
 Electrical fittings use the **Sockets** visibility toggle. Bubble fittings keep their circular 10 cm face; frame and insert finishes remain independent. Rugs, bedding, curtains, practical fittings and architectural trim use the same selection and finish controls. Source dimensions and estimates are described in [Catalogue references](catalogue-sources.md).

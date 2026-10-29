@@ -47,7 +47,7 @@ export class FurnitureAppearance {
         const content = child.userData.cabinetContent as import('../../domain/cabinet/CabinetLayout').CabinetContent | undefined;
         const panel = child.userData.cabinetPanel as import('../../domain/cabinet/CabinetLayout').CabinetPanel | undefined;
         const activeFinish = content ? (section ? content.sectionFinishes?.[section] : undefined) ?? content.finish : panel?.finish ?? secFinish ?? (
-          child.userData.isLightEmissive || sec === 'Diffuser' || sec === 'Lens' || sec === 'Bulb'
+          child.userData.isLightEmissive || child.userData.isGlazing || sec === 'Diffuser' || sec === 'Lens' || sec === 'Bulb'
             ? undefined
             : entity.finish
         );

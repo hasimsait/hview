@@ -7,6 +7,7 @@ import { cabinetDrawer, cabinetInternalDrawer, cabinetBasket, cabinetHasDoors, c
 import { cabinetBaseHeight } from '../../domain/cabinet/CabinetPlinth';
 import { bookcaseMaterials } from '../assets/builders/BookcaseMaterials';
 import { mergeStaticParts } from '../geometry/MergeStaticParts';
+import { panelGlassDoor } from './PanelGlassDoor';
 
 export function buildCabinet(c: AssetBuildContext, buildContent?: (entity: Furniture) => THREE.Object3D): void {
   const layout = c.entity.cabinet ?? defaultCabinet(c.entity.toData(), c.definition?.cabinetDoors ?? 2), t = layout.panelThickness, b = layout.backThickness;
@@ -41,8 +42,11 @@ export function buildCabinet(c: AssetBuildContext, buildContent?: (entity: Furni
   const addPart = (p: CabinetBox, section: string) => box(p.id, section, origin.x + p.position.x + p.dimensions.x / 2, origin.y + p.position.y + p.dimensions.y / 2, origin.z + p.position.z + p.dimensions.z / 2, p.dimensions.x, p.dimensions.y, p.dimensions.z, section === 'Shelves' ? bookcase?.shelves : undefined);
   for (const panel of layout.panels) { const group = addPart(resolvePanel(layout, c.entity.dimensions, panel), panel.kind === 'shelf' ? 'Shelves' : 'Dividers'); group.traverse(child => { child.userData.cabinetPanel = panel; }); }
   const leaves = cabinetLeaves(layout, c.entity.dimensions), pivots = new Map<string, THREE.Group>();
+  const panelGlass = layout.doorStyle === 'panel_glass';
+  const glass = panelGlass ? c.materials.glass.clone() : c.materials.glass;
+  if (panelGlass) { glass.transmission = 0; glass.opacity = .16; glass.depthWrite = false; glass.onBeforeCompile = c.materials.glass.onBeforeCompile; glass.customProgramCacheKey = c.materials.glass.customProgramCacheKey; }
   for (const door of leaves) {
-    const { index, left, width, tilt, drawer } = door, height = Math.max(.001, door.top - door.bottom - .004);
+    const { index, left, width, tilt, drawer } = door, glazed = panelGlass && !tilt && !drawer, height = Math.max(.001, door.top - door.bottom - (glazed ? 0 : .004));
     const pivot = new THREE.Group(); pivot.name = `cabinet_door_${index}`;
     pivot.userData = { cabinetDoor: index, cabinetPart: `door_${index}`, swingSign: tilt ? 1 : left ? -1 : 1, swingAxis: tilt ? 'x' : 'y', slide: drawer };
     const pose = cabinetDoorPose(c.entity.dimensions, layout, index), closed = cabinetDoorPose(c.entity.dimensions, layout, index, 0);
@@ -52,9 +56,10 @@ export function buildCabinet(c: AssetBuildContext, buildContent?: (entity: Furni
       part.userData = { section, cabinetPart: `door_${index}`, cabinetDoor: index, isSwingCollider: true };
       part.castShadow = part.receiveShadow = true; pivot.add(part); return part;
     };
-    const leaf = mesh(new THREE.BoxGeometry(Math.max(.001, width), height, t), mirrorCabinet ? c.materials.mirrorNonReflective : body, mirrorCabinet ? 'Mirrors' : `Door ${index + 1}`, (tilt || drawer) ? 0 : (left ? 1 : -1) * width / 2, (tilt || drawer) ? height / 2 : (height + .004) / 2, pose.leafOffsetZ);
+    const leaf = glazed ? panelGlassDoor(mesh, body, glass, width, height, t, left, pose.leafOffsetZ, index)
+      : mesh(new THREE.BoxGeometry(Math.max(.001, width), height, t), mirrorCabinet ? c.materials.mirrorNonReflective : body, mirrorCabinet ? 'Mirrors' : `Door ${index + 1}`, (tilt || drawer) ? 0 : (left ? 1 : -1) * width / 2, (tilt || drawer) ? height / 2 : (height + .004) / 2, pose.leafOffsetZ);
     leaf.userData.isSwingLeaf = true;
-    if (layout.frontDetail && !mirrorCabinet) {
+    if (!glazed && layout.frontDetail && !mirrorCabinet) {
       const detail = layout.frontDetail, centreX = leaf.position.x, centreY = leaf.position.y;
       // Shallow raised rails leave a recessed field, with the same opening pivot as the door.
       const rail = .035, inset = .025, faceZ = pose.leafOffsetZ + t / 2 + .002;
@@ -74,7 +79,7 @@ export function buildCabinet(c: AssetBuildContext, buildContent?: (entity: Furni
         mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points), 16, .0035, 6, false), c.materials.metalChrome, 'Handles', 0, 0, 0);
         for (const end of [-1, 1]) mesh(new THREE.SphereGeometry(.005, 8, 6), c.materials.metalChrome, 'Handles', x + (horizontal ? end * centres / 2 : 0), pullY + (horizontal ? 0 : end * centres / 2), pose.leafOffsetZ + t / 2 + .006);
       }
-    } else if (!mirrorCabinet) mesh(new THREE.BoxGeometry((tilt || drawer) ? Math.min(.128, width * .6) : .012, (tilt || drawer) ? .012 : Math.min(.128, height / 3), .025), c.materials.metalChrome, 'Handles', (tilt || drawer) ? 0 : (left ? 1 : -1) * (width - .035), drawer ? height * .70 : tilt ? height - .04 : height / 2, pose.leafOffsetZ + t / 2 + .0125);
+    } else if (!glazed && !mirrorCabinet) mesh(new THREE.BoxGeometry((tilt || drawer) ? Math.min(.128, width * .6) : .012, (tilt || drawer) ? .012 : Math.min(.128, height / 3), .025), c.materials.metalChrome, 'Handles', (tilt || drawer) ? 0 : (left ? 1 : -1) * (width - .035), drawer ? height * .70 : tilt ? height - .04 : height / 2, pose.leafOffsetZ + t / 2 + .0125);
     const basket = cabinetBasket(layout, c.entity.dimensions, door);
     if (basket) {
       pivots.set(basket.floor.id, pivot);

@@ -314,7 +314,7 @@ export class SurfaceMaterialFactory implements ISurfaceFinishService {
         case 'wood':
           texture = this.getWoodTexture(config.variant);
           roughness = config.variant?.startsWith('parquet') ? (config.roughness ?? 0.35) : (config.roughness ?? 0.45);
-          metalness = config.variant?.startsWith('parquet') ? 0.05 : 0.02;
+          metalness = config.metalness ?? (config.variant?.startsWith('parquet') ? 0.05 : 0.02);
           defaultColor = 0xffffff;
           break;
         case 'plaster':

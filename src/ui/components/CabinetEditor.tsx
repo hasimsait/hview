@@ -168,7 +168,12 @@ function CabinetWorkspace({ original, onCancel, onDone }: { original: Furniture;
             <p className="text-slate-400">Copies stay individually editable and follow their supporting object. Red warnings show stacks that do not fit.</p>
           </div>
         </div>}
-        <Inspector item={inspected} className="w-full bg-slate-900 p-4 text-xs" onClose={() => select(null)} onOpenReplaceModal={() => { setReplacing(true); setAdding(true); }} interior={{ panel: !!panel, sections: [...sections], section, selectSection: setSection, transform, finish, configureLight, remove: () => { update(removeCabinetPart(layout, size, inspected.id), 'Delete cabinet part'); select(null); } }} />
+        <Inspector item={inspected} className="w-full bg-slate-900 p-4 text-xs" onClose={() => select(null)} onOpenReplaceModal={() => { setReplacing(true); setAdding(true); }} interior={{ panel: !!panel, sections: [...sections], section, selectSection: setSection, transform, finish, configureLight,
+          duplicate: content && layout.contents.length < 256 ? () => {
+            const copy = structuredClone(content); copy.id = createElementId(); copy.position.x += .05;
+            update({ ...layout, contents: [...layout.contents, copy] }, 'Duplicate cabinet asset'); select(copy.id);
+          } : undefined,
+          remove: () => { update(removeCabinetPart(layout, size, inspected.id), 'Delete cabinet part'); select(null); } }} />
       </aside>}
     </div>
     <AssetReplacementModal isOpen={adding} mode="add" onClose={() => { setAdding(false); setPlaceOnSelected(false); setSupportTarget(undefined); }} onSelectAsset={chooseAsset} filterAsset={asset => cabinetDoorCount(asset) === undefined} />

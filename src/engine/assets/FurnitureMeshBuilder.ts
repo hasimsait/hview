@@ -4,6 +4,8 @@ import type { Furniture } from '../../domain/elements/Furniture';
 import { applyBasicOcclusionShader,createOcclusionUniforms } from '../materials/OcclusionShader';
 import { ensureLocalMetricBounds,ensureStretchedUvs } from "../materials/SurfaceMaterialFactory";
 import { TextureSource } from '../materials/TextureSource';
+import { WoodTextureStrategy } from '../materials/strategies/WoodTextureStrategy';
+import { BrowserCanvasFactory } from '../materials/CanvasFactory';
 import { AssetBuildContext,ProceduralMaterials } from "./builders/AssetBuildContext";
 import { FURNITURE_GEOMETRY } from "./FurnitureGeometryLibrary";
 import { mobileRendering } from '../RenderQuality';
@@ -25,6 +27,9 @@ export class FurnitureMeshBuilder {
     glassBlack: new THREE.MeshStandardMaterial({ color: 0x101116, roughness: 0.12, metalness: 0.15 }),
     woodLight: new THREE.MeshStandardMaterial({ color: 0xdfcbaf, roughness: 0.5 }),
     woodDark: new THREE.MeshStandardMaterial({ color: 0x4a3b32, roughness: 0.6 }),
+    billyWhite: new THREE.MeshStandardMaterial({ color: 0xf3f1eb, roughness: .65 }),
+    billyWalnut: new THREE.MeshStandardMaterial({ color: 0x9d7b5b, roughness: .65 }),
+    billyOak: new THREE.MeshStandardMaterial({ color: 0xc0b099, roughness: .65 }),
     fabricLight: new THREE.MeshStandardMaterial({ color: 0xe8e6e1, roughness: 0.85 }),
     fabricBlue: new THREE.MeshStandardMaterial({ color: 0x3d5a80, roughness: 0.8 }),
     fabricDark: new THREE.MeshStandardMaterial({ color: 0x2b2d42, roughness: 0.9 }),
@@ -62,6 +67,7 @@ export class FurnitureMeshBuilder {
     const foregroundMaterials = [
       this.materials.whitePaint, this.materials.woodBlackBrown, this.materials.plasticBeige, this.materials.glassBlack,
       this.materials.woodLight, this.materials.woodDark,
+      this.materials.billyWhite, this.materials.billyWalnut, this.materials.billyOak,
       this.materials.fabricLight, this.materials.fabricBlue,
       this.materials.fabricDark, this.materials.fabricBeige,
       this.materials.softFabric,
@@ -78,6 +84,9 @@ export class FurnitureMeshBuilder {
 
     // Load photographic wood veneers for default architectural furniture
     if (typeof document !== 'undefined' && typeof (document as any).createElementNS === 'function') {
+      const billyTextures = new WoodTextureStrategy(new BrowserCanvasFactory(), textures);
+      this.materials.billyWalnut.map = billyTextures.getWoodTexture('billy_walnut_effect'); this.materials.billyWalnut.color.setHex(0xffffff);
+      this.materials.billyOak.map = billyTextures.getWoodTexture('billy_oak_effect'); this.materials.billyOak.color.setHex(0xffffff);
       const loader = textures.textureLoader();
       loader.load('/textures/wood/wood_natural_oak.jpg', (tex) => {
         tex.wrapS = THREE.RepeatWrapping;

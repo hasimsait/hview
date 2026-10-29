@@ -62,6 +62,16 @@ export class AddFurniture implements EditorCommand {
   constructor(private readonly data: FurnitureData) { }
   execute(document: PlanDocument, { factory }: CommandContext): PlanDocument { return document.addFurniture(factory.furniture(this.data)); }
 }
+export class DuplicateFurniture implements EditorCommand {
+  readonly label = 'Duplicate asset';
+  readonly selectionRemap: ReadonlyMap<string, string>;
+  constructor(private readonly id: string, private readonly copyId: string) { this.selectionRemap = new Map([[id, copyId]]); }
+  execute(document: PlanDocument, { factory }: CommandContext): PlanDocument {
+    const original = document.requireFurniture(this.id), data = original.toData();
+    const position = { ...data.position, x: data.position.x + Math.cos(data.rotationY) * .15, z: data.position.z - Math.sin(data.rotationY) * .15 };
+    return document.addFurniture(factory.furniture({ ...data, id: this.copyId, position }));
+  }
+}
 export class RemoveElement implements EditorCommand {
   readonly label = 'Delete element';
   constructor(private readonly id: string) { }

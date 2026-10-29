@@ -2,6 +2,7 @@ import { SurfaceFinishConfig } from '@core/types/plan';
 import { useRuntime,useSelection } from '@ui/context/RuntimeContext';
 import {
 ArrowUpDown,
+Copy,
 Layers,
 Lightbulb,
 MapPin,
@@ -14,7 +15,9 @@ Trash2,
 X,
 } from 'lucide-react';
 import React,{ useCallback,useState,useSyncExternalStore } from 'react';
-import { ConfigureLuminaire,ConfigureShelving,FinishFurniture,RemoveElement,TransformFurniture,SetWindowCoveringOpen } from '../../application/commands/FurnitureCommands';
+import { ConfigureLuminaire,ConfigureShelving,DuplicateFurniture,FinishFurniture,RemoveElement,TransformFurniture,SetWindowCoveringOpen } from '../../application/commands/FurnitureCommands';
+import { createElementId } from '../../platform/ElementId';
+import { billyAssetFinish } from '../../domain/catalog/BillyFinishes';
 import { cabinetDoorCount } from '../../domain/catalog/Cabinets';
 import { defaultCabinet } from '../../domain/cabinet/CabinetLayout';
 import { CabinetPlinthControls } from './CabinetPlinthControls';
@@ -32,6 +35,7 @@ export interface InteriorInspectorAdapter {
   finish: (finish?: SurfaceFinishConfig, section?: string) => void;
   configureLight: (config: Partial<LightFixtureConfig>) => void;
   remove: () => void;
+  duplicate?: () => void;
   sections: string[];
   section: string;
   selectSection: (section: string) => void;
@@ -68,6 +72,7 @@ export const Inspector: React.FC<InspectorProps> = ({
   const isShelving = presentation.sections.includes('shelving');
   const definition = runtime.catalog.get(item.assetKey);
   const isBookcase = ['hemnes_bookcase', 'billy_bookcase'].includes(definition?.recipe ?? '') || definition?.furnitureProduct?.kind === 'bookcase';
+  const isBilly = definition?.recipe === 'billy_bookcase';
   const sectionLabel = (section: string) => isBookcase ? (['back', 'back_panel'].includes(section) ? 'Back panel' : section.replace(/_/g, ' ').replace(/^\w/, letter => letter.toUpperCase())) : section;
   const legacyDoors = item.hasLids && cabinetDoorCount(definition) === 0 ? (item.dimensions.x >= .7 ? 2 : 1) : cabinetDoorCount(definition);
   const resizable = definition?.capabilities?.resizable !== false;
@@ -178,6 +183,10 @@ export const Inspector: React.FC<InspectorProps> = ({
           <X className="w-4 h-4" />
         </button>
       </div>
+
+      {(!interior || interior.duplicate) && <button type="button" className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-xs font-medium hover:bg-slate-700" onClick={() => {
+        if (interior) interior.duplicate?.(); else editor.execute(new DuplicateFurniture(item.id, createElementId()));
+      }}><Copy className="h-3.5 w-3.5" />Duplicate Asset</button>}
 
       {definition?.householdDetail?.practical && <p className="pt-3 text-[10px] text-slate-400">Dimensions describe the occupied space, including connectors. Cable and hose dimensions describe the route footprint, not their total length.</p>}
 
@@ -558,10 +567,11 @@ export const Inspector: React.FC<InspectorProps> = ({
 
         <SurfaceFinishPicker
           key={`${item.id}_${activeSection}`}
-          currentFinish={currentFinishForSection}
+          currentFinish={currentFinishForSection ?? (isBilly && activeSection !== 'glass' ? billyAssetFinish(item.assetKey).finish : undefined)}
           onSelectFinish={handleApplyFinish}
           onClearFinish={handleClearFinish}
-          defaultTab={InspectorPresenter.defaultFinishTabFor(item, activeSection, currentFinishForSection)}
+          defaultTab={isBilly ? activeSection === 'glass' ? 'glass' : 'lambri' : InspectorPresenter.defaultFinishTabFor(item, activeSection, currentFinishForSection)}
+          productFamily={isBilly && activeSection !== 'glass' ? 'billy' : undefined}
         />
       </div>
 

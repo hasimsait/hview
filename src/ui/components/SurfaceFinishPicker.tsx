@@ -1,4 +1,5 @@
 import { FinishColorInput } from './FinishColorInput';
+import { BillyFinishPicker } from './BillyFinishPicker';
 import { bauhausPanel } from '../../domain/catalog/BauhausPanelling';
 import { ReferencePanelPicker } from './ReferencePanelPicker';
 import { SurfaceFinishConfig } from '@core/types/plan';
@@ -41,6 +42,7 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
   onClearFinish,
   showCeilingsTab = false,
   defaultTab,
+  productFamily,
 }) => {
   const runtime = useRuntime();
   const onSelectFinish = (finish: SurfaceFinishConfig) => selectFinish(preserveSurfaceLayer(finish, currentFinish));
@@ -152,6 +154,7 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
 
   return (
     <div className="space-y-3">
+      {productFamily === 'billy' && <BillyFinishPicker current={currentFinish} onSelect={onSelectFinish} />}
       <SurfaceLayerControl layer={currentFinish?.layer} disabled={!currentFinish}
         onChange={(layer) => { if (currentFinish) onSelectFinish({ ...currentFinish, layer }); }} />
       {/* Universal Invisible Option Button */}
@@ -427,6 +430,7 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
       {/* Tab 2: Wood & Parquet (Furniture Hardwoods, Flooring, and Dual-Tone Lambri) */}
       {activeTab === 'lambri' && (
         <div className="space-y-4">
+          {productFamily !== 'billy' && <BillyFinishPicker current={currentFinish} onSelect={onSelectFinish} />}
           {currentFinish?.type === 'lambri' && !bauhausPanel(currentFinish.variant) && <div className="space-y-2 rounded border border-slate-700 p-2">
             <FinishColorInput label="Slat color" value={currentFinish.color ?? '#d4b996'} onChange={color => onSelectFinish({ ...currentFinish, color })} />
             <FinishColorInput label="Felt color" value={currentFinish.backingColor ?? '#121212'} onChange={backingColor => onSelectFinish({ ...currentFinish, backingColor })} />

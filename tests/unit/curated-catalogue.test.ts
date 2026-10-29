@@ -42,7 +42,9 @@ describe('sourced catalogue', () => {
       mesh.traverse(child => { if (child instanceof THREE.Mesh) count++; });
       expect(count, asset.key).toBeGreaterThanOrEqual(asset.recipe === 'curtain_pelmet' ? 1 : 2);
       if (asset.recipe !== 'towel_bar') {
-        const bounds = new THREE.Box3().setFromObject(mesh);
+        // Catalogue case depth excludes projecting cabinet knobs and pulls.
+        const bounds = new THREE.Box3(); mesh.updateMatrixWorld(true);
+        mesh.traverse(part => { if (part instanceof THREE.Mesh && part.userData.section !== 'Handles') { part.geometry.computeBoundingBox(); bounds.union(part.geometry.boundingBox!.clone().applyMatrix4(part.matrixWorld)); } });
         expect(bounds.min.y, asset.key).toBeGreaterThanOrEqual(-0.00001);
         expect(bounds.max.y, asset.key).toBeLessThanOrEqual(asset.defaultDimensions.y + .00001);
         expect(bounds.getSize(new THREE.Vector3()).x, asset.key).toBeCloseTo(asset.defaultDimensions.x, 2);

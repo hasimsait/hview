@@ -9,6 +9,9 @@ export interface ProceduralMaterials {
   glassBlack: THREE.MeshStandardMaterial;
   woodLight: THREE.MeshStandardMaterial;
   woodDark: THREE.MeshStandardMaterial;
+  billyWhite: THREE.MeshStandardMaterial;
+  billyWalnut: THREE.MeshStandardMaterial;
+  billyOak: THREE.MeshStandardMaterial;
   fabricLight: THREE.MeshStandardMaterial;
   fabricBlue: THREE.MeshStandardMaterial;
   fabricDark: THREE.MeshStandardMaterial;

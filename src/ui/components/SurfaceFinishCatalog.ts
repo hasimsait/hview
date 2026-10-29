@@ -35,6 +35,7 @@ export interface SurfaceFinishPickerProps {
   onClearFinish?: () => void;
   showCeilingsTab?: boolean;
   defaultTab?: TabType;
+  productFamily?: 'billy';
 }
 
 export type TabType = 'paint' | 'lambri' | 'tile' | 'glass' | 'metal' | 'ceiling' | 'fabric';

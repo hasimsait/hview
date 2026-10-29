@@ -1,4 +1,6 @@
 import { colorCanvasTexture } from '../SurfaceColor';
+import { billyFinish } from '../../../domain/catalog/BillyFinishes';
+import { matchGrainColour } from '../../../domain/catalog/BauhausPanelling';
 import * as THREE from 'three';
 import type { CanvasFactory } from '../CanvasFactory';
 import { TextureCache } from '../TextureCache';
@@ -9,6 +11,8 @@ export class WoodTextureStrategy {
   constructor(private readonly canvas: CanvasFactory, private readonly source = new TextureSource()) { }
   dispose(): void { this.textures.dispose(); }
   resolveWoodPhotoInfo(variant?: string): { url: string; name: string } {
+    const billy = billyFinish(variant);
+    if (billy?.grain) return { url: `/textures/wood/wood_${billy.grain === 'walnut' ? 'american_walnut' : 'natural_oak'}.jpg`, name: billy.name };
     const v = (variant || '').toLowerCase();
     if (v === 'light_beige_laminate') return { url: '/textures/wood/wood_light_beige_laminate.jpg', name: 'Light Beige Wood-Effect Laminate' };
     if (v.includes('wenge') || v.includes('black_oak') || v.includes('dark_oak')) {
@@ -36,6 +40,23 @@ export class WoodTextureStrategy {
   }
 
   getWoodTexture(variant: string = 'natural_oak'): THREE.Texture {
+    const billy = billyFinish(variant);
+    if (billy?.grain) {
+      const cached = this.textures.get(billy.id); if (cached) return cached;
+      const canvas = this.canvas.create(); canvas.width = canvas.height = 512;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
+      ctx.fillStyle = billy.color; ctx.fillRect(0, 0, 512, 512);
+      const texture = colorCanvasTexture(canvas); texture.wrapS = texture.wrapT = THREE.RepeatWrapping; this.textures.set(billy.id, texture);
+      this.source.imageLoader().load(this.resolveWoodPhotoInfo(variant).url, image => {
+        if (this.textures.get(billy.id) !== texture) return;
+        ctx.save(); if (billy.grain === 'walnut') { ctx.translate(512, 0); ctx.rotate(Math.PI / 2); }
+        ctx.drawImage(image, 0, 0, 512, 512); ctx.restore();
+        const pixels = ctx.getImageData(0, 0, 512, 512);
+        matchGrainColour(pixels.data, billy.color.match(/[a-f\d]{2}/gi)!.map(value => parseInt(value, 16)));
+        ctx.putImageData(pixels, 0, 0); texture.needsUpdate = true; this.source.notify();
+      });
+      return texture;
+    }
     if (variant?.startsWith('parquet') || variant === 'parquet') {
       const key = `wood_parquet_${variant}`;
       if (this.textures.has(key)) return this.textures.get(key)!;

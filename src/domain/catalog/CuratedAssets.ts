@@ -1,4 +1,5 @@
 import type { AssetDefinition } from './AssetDefinition';
+import { BILLY_FINISHES } from './BillyFinishes';
 
 const bauhaus = (slug: string, productCode: string, dimensions: 'listed' | 'estimated' = 'listed') => ({ retailer: 'BAUHAUS', url: `https://www.bauhaus.com.tr/${slug}-${productCode}`, productCode, dimensions });
 const ikea = (url: string, productCode: string) => ({ retailer: 'IKEA', url, productCode, dimensions: 'listed' as const });
@@ -101,4 +102,13 @@ export const CURATED_ASSETS: readonly AssetDefinition[] = [
     defaultDimensions: { x: 0.8, y: 2.02, z: 0.28 }, placement: { mount: 'floor' },
     source: ikea('https://www.ikea.com.tr/en/product/billy-white-80x28x202-cm-bookcase-00263850', '00263850'),
   },
+  ...BILLY_FINISHES.map(finish => ({
+    key: `ikea_billy_oxberg_80_${finish.id.replace('billy_', '')}`,
+    name: `IKEA BILLY / OXBERG Panel/Glass-Door Bookcase — ${finish.name.replace('BILLY ', '')}`,
+    category: 'storage', recipe: 'billy_bookcase' as const, cabinetDoors: 2 as const, collection: 'IKEA BILLY / OXBERG',
+    description: '80 × 30 × 202 cm bookcase with two 192 cm framed doors, upper clear glass, lower wood panels, round wood knobs and a recessed 10 cm plinth. Editable shelves and opening doors.',
+    defaultDimensions: { x: .8, y: 2.02, z: .3 }, placement: { mount: 'floor' as const },
+    aliases: [`billy_panel_glass_${finish.id.replace('billy_', '')}`, `billy_oxberg_${finish.id.replace('billy_', '')}`],
+    source: { retailer: 'IKEA / user photo reference', dimensions: 'reference' as const, dimensionNotes: 'Nominal 80 × 30 × 202 cm case and 192 cm doors supplied by the user; wood knobs project 24 mm beyond the case front. Frame, panel/glass split, knobs and finish tones matched visually to the supplied photos; wood grain reuses bundled photographic veneer.' },
+  })),
 ];
