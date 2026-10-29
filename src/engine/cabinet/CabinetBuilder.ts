@@ -30,9 +30,9 @@ export function buildCabinet(c: AssetBuildContext, buildContent?: (entity: Furni
   }
   box('shell_left', 'Frame', -c.w / 2 + t / 2, baseHeight + bodyHeight / 2, carcassZ, t, bodyHeight, carcassDepth);
   box('shell_right', 'Frame', c.w / 2 - t / 2, baseHeight + bodyHeight / 2, carcassZ, t, bodyHeight, carcassDepth);
-  box('shell_base', 'Frame', 0, baseHeight + t / 2, carcassZ, c.w - 2 * t, t, carcassDepth);
+  if (!layout.openBottom) box('shell_base', 'Frame', 0, baseHeight + t / 2, carcassZ, c.w - 2 * t, t, carcassDepth);
   box('shell_top', bookcase ? 'Top' : 'Frame', 0, c.h - t / 2, carcassZ, c.w - 2 * t, t, carcassDepth, bookcase?.top);
-  box('shell_back', 'Back Panel', 0, baseHeight + bodyHeight / 2, -c.d / 2 + b / 2, c.w - 2 * t, bodyHeight - 2 * t, b, bookcase?.back);
+  box('shell_back', 'Back Panel', 0, origin.y + (c.h - t - origin.y) / 2, -c.d / 2 + b / 2, c.w - 2 * t, c.h - t - origin.y, b, bookcase?.back);
   const cornice = layout.frontDetail?.corniceHeight ?? 0;
   if (cornice > 0) {
     box('cornice_fascia', 'Frame', 0, c.h - cornice / 2, c.d / 2 - t / 2, c.w, cornice, t);
@@ -42,7 +42,7 @@ export function buildCabinet(c: AssetBuildContext, buildContent?: (entity: Furni
   const addPart = (p: CabinetBox, section: string) => box(p.id, section, origin.x + p.position.x + p.dimensions.x / 2, origin.y + p.position.y + p.dimensions.y / 2, origin.z + p.position.z + p.dimensions.z / 2, p.dimensions.x, p.dimensions.y, p.dimensions.z, section === 'Shelves' ? bookcase?.shelves : undefined);
   for (const panel of layout.panels) { const group = addPart(resolvePanel(layout, c.entity.dimensions, panel), panel.kind === 'shelf' ? 'Shelves' : 'Dividers'); group.traverse(child => { child.userData.cabinetPanel = panel; }); }
   const leaves = cabinetLeaves(layout, c.entity.dimensions), pivots = new Map<string, THREE.Group>();
-  const panelGlass = layout.doorStyle === 'panel_glass';
+  const panelGlass = (layout.doorStyle === 'panel_glass' || layout.doorStyle === 'full_glass') && leaves.some(door => !door.tilt && !door.drawer);
   const glass = panelGlass ? c.materials.glass.clone() : c.materials.glass;
   if (panelGlass) { glass.transmission = 0; glass.opacity = .16; glass.depthWrite = false; glass.onBeforeCompile = c.materials.glass.onBeforeCompile; glass.customProgramCacheKey = c.materials.glass.customProgramCacheKey; }
   for (const door of leaves) {
@@ -56,7 +56,7 @@ export function buildCabinet(c: AssetBuildContext, buildContent?: (entity: Furni
       part.userData = { section, cabinetPart: `door_${index}`, cabinetDoor: index, isSwingCollider: true };
       part.castShadow = part.receiveShadow = true; pivot.add(part); return part;
     };
-    const leaf = glazed ? panelGlassDoor(mesh, body, glass, width, height, t, left, pose.leafOffsetZ, index)
+    const leaf = glazed ? panelGlassDoor(mesh, body, glass, width, height, t, left, pose.leafOffsetZ, index, layout.doorStyle === 'full_glass')
       : mesh(new THREE.BoxGeometry(Math.max(.001, width), height, t), mirrorCabinet ? c.materials.mirrorNonReflective : body, mirrorCabinet ? 'Mirrors' : `Door ${index + 1}`, (tilt || drawer) ? 0 : (left ? 1 : -1) * width / 2, (tilt || drawer) ? height / 2 : (height + .004) / 2, pose.leafOffsetZ);
     leaf.userData.isSwingLeaf = true;
     if (!glazed && layout.frontDetail && !mirrorCabinet) {

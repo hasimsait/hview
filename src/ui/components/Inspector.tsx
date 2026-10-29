@@ -15,7 +15,7 @@ Trash2,
 X,
 } from 'lucide-react';
 import React,{ useCallback,useState,useSyncExternalStore } from 'react';
-import { ConfigureLuminaire,ConfigureShelving,DuplicateFurniture,FinishFurniture,RemoveElement,TransformFurniture,SetWindowCoveringOpen } from '../../application/commands/FurnitureCommands';
+import { AddBillyExtension,ConfigureLuminaire,ConfigureShelving,DuplicateFurniture,FinishFurniture,RemoveElement,TransformFurniture,SetWindowCoveringOpen } from '../../application/commands/FurnitureCommands';
 import { createElementId } from '../../platform/ElementId';
 import { billyAssetFinish } from '../../domain/catalog/BillyFinishes';
 import { cabinetDoorCount } from '../../domain/catalog/Cabinets';
@@ -192,6 +192,18 @@ export const Inspector: React.FC<InspectorProps> = ({
 
       {!interior && (item.cabinet || cabinetDoorCount(definition) !== undefined) && <div className="py-3 space-y-2 border-b border-slate-800">
         <button className="w-full rounded bg-sky-600 p-2 font-semibold" onClick={onEditLayout}>Edit layout</button>
+        {isBilly && item.cabinet?.doorStyle && !item.assetKey.includes('_extension_') && <label className="block">BILLY doors
+          <select aria-label="BILLY door style" className="mt-1 w-full rounded bg-slate-800 p-2" value={item.cabinet.doorStyle} onChange={e => editor.execute(new ConfigureCabinet(item.id, { ...item.cabinet!, doorStyle: e.target.value as 'panel_glass' | 'full_glass' }, 'Change BILLY door style'))}>
+            <option value="panel_glass">Panel / glass</option><option value="full_glass">Full glass</option>
+          </select>
+        </label>}
+        {isBilly && !item.assetKey.includes('_extension_') && <div className="space-y-2">
+          <p className="text-slate-400">Add a matching 35 cm height extension on top.</p>
+          <div className="grid grid-cols-2 gap-2">{[false, true].map(glass => <button key={String(glass)} className="rounded border border-slate-600 bg-slate-800 p-2 hover:bg-slate-700" onClick={() => editor.execute(new AddBillyExtension(item.id, createElementId(), glass))}>
+            {glass ? 'Add glass extension' : 'Add open extension'}
+          </button>)}</div>
+          <p className="text-[10px] text-slate-500">Placed to match this case. The extension remains a separate object.</p>
+        </div>}
         {(supportsCabinetPlinth(item.assetKey) || item.cabinet?.plinth) && <CabinetPlinthControls layout={item.cabinet ?? defaultCabinet(item.toData(), legacyDoors ?? 2)} size={item.dimensions} onChange={layout => editor.execute(new ConfigureCabinet(item.id, layout, 'Configure cabinet plinth'))} />}
         <CabinetHingeControls showAngles layout={item.cabinet ?? defaultCabinet(item.toData(), legacyDoors ?? 2)} onChange={layout => editor.execute(new ConfigureCabinet(item.id, layout, 'Configure cabinet doors'))} />
         {item.cabinet?.internalDrawers?.map((drawer, i) => <label key={drawer.id} className="block text-xs text-slate-300">{drawer.name}: {Math.round(drawer.extension * 100)}%

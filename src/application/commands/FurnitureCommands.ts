@@ -2,6 +2,7 @@ import { Luminaire,Shelving } from '../../domain/elements/Furniture';
 import type { FurnitureData,LightFixtureConfig,SurfaceFinishConfig,Vector3D } from '../../domain/model/PlanData';
 import type { PlanDocument } from '../../domain/model/PlanDocument';
 import type { CommandContext,EditorCommand } from './EditorCommand';
+import { billyAssetFinish } from '../../domain/catalog/BillyFinishes';
 
 export class SetLightIntensity implements EditorCommand {
   readonly label = 'Change light intensity';
@@ -70,6 +71,23 @@ export class DuplicateFurniture implements EditorCommand {
     const original = document.requireFurniture(this.id), data = original.toData();
     const position = { ...data.position, x: data.position.x + Math.cos(data.rotationY) * .15, z: data.position.z - Math.sin(data.rotationY) * .15 };
     return document.addFurniture(factory.furniture({ ...data, id: this.copyId, position }));
+  }
+}
+export class AddBillyExtension implements EditorCommand {
+  readonly label = 'Add BILLY height extension';
+  readonly selectionRemap: ReadonlyMap<string, string>;
+  constructor(private readonly id: string, private readonly extensionId: string, private readonly glass: boolean) { this.selectionRemap = new Map([[id, extensionId]]); }
+  execute(document: PlanDocument, { factory }: CommandContext): PlanDocument {
+    const base = document.requireFurniture(this.id);
+    if (factory.catalog.get(base.assetKey)?.recipe !== 'billy_bookcase' || base.assetKey.includes('_extension_')) throw new Error('Select a BILLY bookcase');
+    const variant = billyAssetFinish(base.assetKey).id.replace('billy_', '');
+    const assetKey = `ikea_billy_${this.glass ? 'oxberg_' : ''}extension_80_${variant}`, asset = factory.catalog.get(assetKey)!;
+    const depth = asset.defaultDimensions.z, offset = (depth - base.dimensions.z) / 2;
+    // Align the backs in the bookcase's local coordinates, including rotated cases.
+    const position = { x: base.position.x + Math.sin(base.rotationY) * offset, y: base.position.y + base.dimensions.y, z: base.position.z + Math.cos(base.rotationY) * offset };
+    return document.addFurniture(factory.furniture({ id: this.extensionId, assetKey, name: assetKey, displayName: asset.name, category: 'storage',
+      dimensions: { ...asset.defaultDimensions, x: base.dimensions.x }, position, rotationY: base.rotationY, roomId: base.roomId,
+      finish: base.finish, sectionFinishes: base.toData().sectionFinishes }));
   }
 }
 export class RemoveElement implements EditorCommand {

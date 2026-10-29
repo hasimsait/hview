@@ -53,7 +53,9 @@ export interface CabinetInternalDrawer {
 }
 export interface CabinetLayout {
   version: 1;
-  doorStyle?: 'panel_glass';
+  doorStyle?: 'panel_glass' | 'full_glass';
+  /** Height extensions rest on the bookcase top instead of adding another base. */
+  openBottom?: boolean;
   /** Optional traditional fronts; fixing centres are measured between pull feet. */
   frontDetail?: { profile: 'framed'; handleCentres: number; pairedDrawerPulls: boolean; corniceHeight?: number };
   panelThickness: number;
@@ -69,7 +71,8 @@ export interface CabinetBox { id: string; name: string; position: Vector3D; dime
 export const CABINET_EPSILON = .0005;
 export function validateCabinet(layout: CabinetLayout): CabinetLayout {
   if (!layout || layout.version !== 1) throw new Error('Unsupported cabinet layout');
-  if (layout.doorStyle !== undefined && layout.doorStyle !== 'panel_glass') throw new Error('Invalid cabinet door style');
+  if (layout.doorStyle !== undefined && !['panel_glass', 'full_glass'].includes(layout.doorStyle)) throw new Error('Invalid cabinet door style');
+  if (layout.openBottom !== undefined && typeof layout.openBottom !== 'boolean') throw new Error('Invalid cabinet base');
   if (layout.frontDetail && (layout.frontDetail.profile !== 'framed' || !Number.isFinite(layout.frontDetail.handleCentres) || layout.frontDetail.handleCentres < .032 || layout.frontDetail.handleCentres > .32 || typeof layout.frontDetail.pairedDrawerPulls !== 'boolean')) throw new Error('Invalid cabinet front detail');
   if (layout.frontDetail?.corniceHeight !== undefined && (finite(layout.frontDetail.corniceHeight, 'Cornice height') < 0 || layout.frontDetail.corniceHeight > .25)) throw new Error('Invalid cabinet cornice height');
   for (const [key, value] of [['Panel', layout.panelThickness], ['Back', layout.backThickness]] as const) if (positive(value, `${key} thickness`) > .1) throw new Error('Cabinet panels must be at most 100 mm thick');
@@ -148,9 +151,9 @@ export function cabinetHinge(c: CabinetLayout, index: number): CabinetHinge {
   return leaf?.doors.hinges?.[leaf.localIndex] ?? { type: 'pivot', travel: 0 };
 }
 export function interior(size: Vector3D, c: CabinetLayout): Vector3D {
-  return { x: size.x - c.panelThickness * 2, y: size.y - cabinetBaseHeight(c) - c.panelThickness * 2, z: size.z - c.backThickness - (cabinetHasDoors(c) ? c.panelThickness : 0) };
+  return { x: size.x - c.panelThickness * 2, y: size.y - cabinetBaseHeight(c) - c.panelThickness * (c.openBottom ? 1 : 2), z: size.z - c.backThickness - (cabinetHasDoors(c) ? c.panelThickness : 0) };
 }
-export function interiorOrigin(size: Vector3D, c: CabinetLayout): Vector3D { return { x: -size.x / 2 + c.panelThickness, y: cabinetBaseHeight(c) + c.panelThickness, z: -size.z / 2 + c.backThickness }; }
+export function interiorOrigin(size: Vector3D, c: CabinetLayout): Vector3D { return { x: -size.x / 2 + c.panelThickness, y: cabinetBaseHeight(c) + (c.openBottom ? 0 : c.panelThickness), z: -size.z / 2 + c.backThickness }; }
 export function endpoint(c: CabinetLayout, size: Vector3D, ref: string | number, start: boolean): number {
   if (typeof ref === 'number') return ref;
   const inner = interior(size, c);
@@ -345,9 +348,14 @@ export function defaultCabinet(data: Pick<FurnitureData, 'dimensions' | 'assetKe
     panels: Array.from({ length: count }, (_, index) => ({ id: `shelf_${index + 1}`, name: `Shelf ${index + 1}`, kind: 'shelf', at: (data.dimensions.y - .036) * (index + 1) / (count + 1), start: 'left', end: 'right', depth: { mode: 'fit', value: .02 } })), contents: [] };
   if (data.assetKey === 'mirror_cabinet_upper') { layout.panelThickness = .015; layout.doors.count = 2; layout.doors.split = .625; }
   if (data.assetKey.startsWith('ikea_billy_oxberg_')) {
-    layout.backThickness = .003; layout.doorStyle = 'panel_glass'; layout.doors.count = 2;
+    layout.backThickness = .003; layout.doorStyle = data.assetKey.includes('_glass_') ? 'full_glass' : 'panel_glass'; layout.doors.count = 2;
     layout.plinth = { height: .10, setback: .03 };
     layout.panels = Array.from({ length: 5 }, (_, i) => ({ id: `shelf_${i + 1}`, name: `Shelf ${i + 1}`, kind: 'shelf', at: .1 + (data.dimensions.y - .1) * (i + 1) / 6 - .018, start: 'left', end: 'right', depth: { mode: 'fit', value: .012 } }));
+  }
+  if (data.assetKey.includes('billy_') && data.assetKey.includes('_extension_')) {
+    layout.backThickness = .018; layout.openBottom = true; layout.plinth = undefined; layout.panels = [];
+    layout.doors.count = data.assetKey.startsWith('ikea_billy_oxberg_') ? 2 : 0;
+    layout.doorStyle = 'full_glass';
   }
   if (data.assetKey === 'cabinet_drawers_three' || data.assetKey === 'cabinet_drawers_deep') {
     const cuts = data.assetKey === 'cabinet_drawers_three' ? [0, data.dimensions.y * .25, data.dimensions.y * .625] : [0, data.dimensions.y * .5];

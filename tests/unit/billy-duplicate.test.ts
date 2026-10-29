@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { describe, expect, it } from 'vitest';
 import { EditorSession } from '../../src/application/EditorSession';
-import { DuplicateFurniture, FinishFurniture, TransformFurniture } from '../../src/application/commands/FurnitureCommands';
+import { AddBillyExtension, DuplicateFurniture, FinishFurniture, TransformFurniture } from '../../src/application/commands/FurnitureCommands';
 import { PlanCodec } from '../../src/domain/codec/PlanCodec';
 import { LegacyPlanWriter } from '../../src/domain/codec/LegacyPlanWriter';
 import { PlanDocument } from '../../src/domain/model/PlanDocument';
@@ -10,12 +10,13 @@ import { FurnitureAppearance } from '../../src/engine/materials/FurnitureAppeara
 import { ResourcePool } from '../../src/engine/resources/ResourcePool';
 import { BILLY_FINISHES } from '../../src/domain/catalog/BillyFinishes';
 import { cabinetLeaves } from '../../src/domain/cabinet/CabinetFronts';
+import { interior, interiorOrigin, resolveContent } from '../../src/domain/cabinet/CabinetLayout';
 import type { SurfaceMaterialFactory } from '../../src/engine/materials/SurfaceMaterialFactory';
 import type { ViewportSettings } from '../../src/core/types/services';
 
 const codec = new PlanCodec(), factory = codec.factory;
-function bookcase() {
-  const asset = factory.catalog.get('ikea_billy_oxberg_80_walnut_effect')!;
+function bookcase(key = 'ikea_billy_oxberg_80_walnut_effect') {
+  const asset = factory.catalog.get(key)!;
   return factory.furniture({ id: 'bookcase', name: asset.key, assetKey: asset.key, displayName: asset.name, category: 'storage', dimensions: { ...asset.defaultDimensions }, position: { x: 1, y: 0, z: 2 }, rotationY: Math.PI / 2, roomId: 'room' });
 }
 
@@ -50,6 +51,56 @@ describe('duplicate assets', () => {
 });
 
 describe('BILLY / OXBERG bookcase', () => {
+  it('builds full glass doors in all BILLY finishes and preserves their opening style through both formats', () => {
+    const builder = new FurnitureMeshBuilder(factory.catalog);
+    for (const finish of BILLY_FINISHES) {
+      const item = bookcase(`ikea_billy_oxberg_glass_80_${finish.id.replace('billy_', '')}`);
+      const root = builder.build(item), panes: THREE.Mesh[] = [];
+      root.traverse(part => { if (part instanceof THREE.Mesh && part.userData.isGlazing) panes.push(part); });
+      expect(panes).toHaveLength(4);
+      expect(panes.filter(p => p.position.y < .96)).toHaveLength(2);
+      for (const pane of panes) { expect((pane.material as THREE.MeshPhysicalMaterial).transmission).toBe(0); expect(pane.material).toHaveProperty('opacity', .16); }
+      for (const encoded of [codec.encode(new PlanDocument([item])), new LegacyPlanWriter().encode(new PlanDocument([item]))]) {
+        const restored = codec.decode(encoded).requireFurniture(item.id);
+        expect(restored.cabinet?.doorStyle).toBe('full_glass');
+        expect(restored.cabinet?.plinth?.height).toBe(.1); expect(restored.cabinet?.panels).toHaveLength(5);
+      }
+    }
+  });
+  it('places independent open and glazed extensions on rotated bookcases, retains finishes and supports undo/redo', () => {
+    for (const glass of [false, true]) for (const rotation of [0, .7, Math.PI / 2]) {
+      const source = bookcase().withTransform({ x: 1, y: .2, z: 2 }, rotation).withFinish(BILLY_FINISHES[2].finish).withSectionFinish('Frame', { type: 'paint', color: '#dddccc' });
+      const editor = new EditorSession(factory); editor.load(new PlanDocument([source])); editor.selection.select('furniture', source);
+      editor.execute(new AddBillyExtension(source.id, 'extension', glass));
+      const extension = editor.getDocument().requireFurniture('extension'), depth = glass ? .3 : .28, offset = (depth - .3) / 2;
+      expect(editor.selection.getSnapshot()?.id).toBe('extension'); expect(extension.position.y + extension.dimensions.y).toBeCloseTo(.2 + 2.37);
+      expect(extension.position.x).toBeCloseTo(source.position.x + Math.sin(rotation) * offset);
+      expect(extension.position.z).toBeCloseTo(source.position.z + Math.cos(rotation) * offset);
+      expect(extension.dimensions).toEqual({ x: .8, y: .35, z: depth }); expect(extension.rotationY).toBe(rotation); expect(extension.roomId).toBe(source.roomId);
+      expect(extension.finish).toEqual(source.finish); expect(extension.sectionFinishes).toEqual(source.sectionFinishes);
+      expect(extension.cabinet?.openBottom).toBe(true); expect(extension.cabinet?.plinth).toBeUndefined(); expect(extension.cabinet?.panels).toHaveLength(0);
+      const root = new FurnitureMeshBuilder(factory.catalog).build(extension), panes: THREE.Mesh[] = [];
+      expect(root.getObjectByName('cabinet_part_shell_base')).toBeUndefined(); expect(root.getObjectByName('cabinet_part_plinth_front')).toBeUndefined();
+      root.traverse(part => { if (part instanceof THREE.Mesh && part.userData.isGlazing) panes.push(part); });
+      expect(panes).toHaveLength(glass ? 2 : 0);
+      const layout = extension.cabinet!; expect(interiorOrigin(extension.dimensions, layout).y).toBe(0);
+      expect(interior(extension.dimensions, layout).y).toBeCloseTo(.35 - .018);
+      const content = { id: 'vase', name: 'Vase', assetKey: 'chair', dimensions: { x: .1, y: .2, z: .1 }, position: { x: .1, y: 0, z: .05 }, rotationY: 0, supportId: 'base' };
+      expect(resolveContent(layout, extension.dimensions, content).position.y).toBe(0);
+      if (glass) {
+        expect(cabinetLeaves(layout, extension.dimensions).map(leaf => leaf.top - leaf.bottom)).toEqual([.35, .35]);
+        const openLayout = structuredClone(layout); openLayout.doors.angles[0] = 70;
+        expect(new FurnitureMeshBuilder(factory.catalog).build(extension.withCabinet(openLayout)).getObjectByName('cabinet_door_0')!.rotation.y).not.toBe(0);
+      }
+      for (const encoded of [codec.encode(editor.getDocument()), new LegacyPlanWriter().encode(editor.getDocument())]) {
+        const restored = codec.decode(encoded).requireFurniture('extension'); expect(restored.cabinet).toEqual(layout);
+        for (const axis of ['x', 'y', 'z'] as const) expect(restored.position[axis]).toBeCloseTo(extension.position[axis], 4);
+      }
+      expect(editor.getDocument().requireFurniture(source.id)).toBe(source);
+      editor.undo(); expect(editor.getDocument().get('extension')).toBeUndefined(); editor.redo(); expect(editor.getDocument().requireFurniture('extension')).toBe(extension);
+      expect(() => new AddBillyExtension('extension', 'extra', glass).execute(editor.getDocument(), { factory })).toThrow('Select a BILLY bookcase');
+    }
+  });
   it('has 80 × 30 × 202 cm nominal dimensions, two 192 cm opening doors and a 10 cm recessed plinth', () => {
     const item = bookcase(); expect(item.dimensions).toEqual({ x: .8, y: 2.02, z: .3 });
     expect(item.cabinet?.plinth).toEqual({ height: .1, setback: .03 }); expect(item.cabinet?.panels).toHaveLength(5);
