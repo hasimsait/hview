@@ -6,6 +6,7 @@
   "scripts": {
     "test:state": "node scripts/run_tests.mjs",
     "test:colors:browser": "node scripts/check_surface_colors.mjs",
+    "test:wood:browser": "node scripts/check_wood_tones.mjs",
     "test:lighting:browser": "node scripts/check_night_lighting.mjs",
     "test:layers:browser": "node scripts/check_surface_layers.mjs",
     "dev": "vite",

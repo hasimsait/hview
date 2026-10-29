@@ -7,6 +7,7 @@ import type { SurfaceFinishConfig } from '../../src/domain/model/PlanData';
 
 vi.mock('../../src/ui/context/RuntimeContext', () => ({ useRuntime: () => ({ tiles: { getAll: () => [], onCatalogLoaded: () => () => {} } }) }));
 vi.mock('../../src/ui/components/ReferencePanelPicker', () => ({ ReferencePanelPicker: () => null }));
+vi.mock('../../src/ui/components/WoodFinishSwatch', () => ({ WoodFinishSwatch: () => null }));
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 let root: ReturnType<typeof createRoot> | undefined;
 afterEach(() => { if (root) act(() => root!.unmount()); document.body.innerHTML = ''; });

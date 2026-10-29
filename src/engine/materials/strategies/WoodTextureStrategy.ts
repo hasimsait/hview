@@ -1,6 +1,8 @@
 import { colorCanvasTexture } from '../SurfaceColor';
 import { billyFinish } from '../../../domain/catalog/BillyFinishes';
 import { matchGrainColour } from '../../../domain/catalog/BauhausPanelling';
+import { FURNITURE_WOOD_FINISHES, woodFinish, type WoodFinish } from '../../../domain/catalog/WoodFinishes';
+import { matchWoodPhotoTone } from '../WoodPhotoTone';
 import * as THREE from 'three';
 import type { CanvasFactory } from '../CanvasFactory';
 import { TextureCache } from '../TextureCache';
@@ -13,6 +15,8 @@ export class WoodTextureStrategy {
   resolveWoodPhotoInfo(variant?: string): { url: string; name: string } {
     const billy = billyFinish(variant);
     if (billy?.grain) return { url: `/textures/wood/wood_${billy.grain === 'walnut' ? 'american_walnut' : 'natural_oak'}.jpg`, name: billy.name };
+    const finish = woodFinish(variant);
+    if (finish?.matchTone) return { url: finish.imageUrl, name: finish.name };
     const v = (variant || '').toLowerCase();
     if (v === 'light_beige_laminate') return { url: '/textures/wood/wood_light_beige_laminate.jpg', name: 'Light Beige Wood-Effect Laminate' };
     if (v.includes('wenge') || v.includes('black_oak') || v.includes('dark_oak')) {
@@ -165,6 +169,8 @@ export class WoodTextureStrategy {
     // Photographic Wood Veneer for Furniture & Solid Panels
     const photoInfo = this.resolveWoodPhotoInfo(variant);
     const photoUrl = photoInfo.url;
+    const finish = woodFinish(variant) ?? FURNITURE_WOOD_FINISHES.find(finish => finish.imageUrl === photoUrl);
+    if (finish?.matchTone) return this.matchedWoodTexture(finish);
     const key = `wood_photo_${photoUrl}`;
     if (this.textures.has(key)) return this.textures.get(key)!;
 
@@ -194,6 +200,27 @@ export class WoodTextureStrategy {
     const fallbackTex = this.createProceduralWoodTexture(variant);
     this.textures.set(key, fallbackTex);
     return fallbackTex;
+  }
+
+  private matchedWoodTexture(finish: WoodFinish): THREE.Texture {
+    // One final-colour texture per finish, even when several share a grain photo.
+    const key = `wood_tone_${finish.id}`, cached = this.textures.get(key);
+    if (cached) return cached;
+    const canvas = this.canvas.create(); canvas.width = canvas.height = 512;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
+    ctx.fillStyle = finish.color; ctx.fillRect(0, 0, 512, 512);
+    const texture = colorCanvasTexture(canvas); texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    this.textures.set(key, texture);
+    if (typeof document !== 'undefined' && typeof document.createElementNS === 'function') {
+      this.source.imageLoader().load(finish.imageUrl, image => {
+        if (this.textures.get(key) !== texture) return;
+        ctx.drawImage(image, 0, 0, 512, 512);
+        const pixels = ctx.getImageData(0, 0, 512, 512);
+        matchWoodPhotoTone(pixels.data, finish.color); ctx.putImageData(pixels, 0, 0);
+        texture.needsUpdate = true; this.source.notify();
+      }, undefined, () => console.warn(`Wood grain could not load: ${finish.imageUrl}`));
+    }
+    return texture;
   }
 
   private createProceduralWoodTexture(variant: string = 'natural_oak'): THREE.Texture {

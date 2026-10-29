@@ -1,5 +1,6 @@
 import { FinishColorInput } from './FinishColorInput';
 import { BillyFinishPicker } from './BillyFinishPicker';
+import { WoodFinishSwatch } from './WoodFinishSwatch';
 import { bauhausPanel } from '../../domain/catalog/BauhausPanelling';
 import { ReferencePanelPicker } from './ReferencePanelPicker';
 import { SurfaceFinishConfig } from '@core/types/plan';
@@ -461,7 +462,7 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-[10px] uppercase font-semibold text-slate-400">
               <span>Wood, Veneers &amp; Laminates</span>
-              <span className="text-[9px] text-amber-400 font-normal">Photographic PBR</span>
+              <span className="text-[9px] text-amber-400 font-normal">Photographic grain</span>
             </div>
             <div className="grid grid-cols-1 gap-1.5">
               {FURNITURE_WOOD_FINISHES.map((w) => {
@@ -484,14 +485,7 @@ export const SurfaceFinishPicker: React.FC<SurfaceFinishPickerProps> = ({
                       : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
                       }`}
                   >
-                    <div
-                      className="w-10 h-10 rounded-md border border-slate-700 shadow-inner shrink-0 bg-cover bg-center overflow-hidden"
-                      style={{
-                        backgroundImage: `url(${resolveEmbeddedTextureUrl(w.imageUrl)})`,
-                        backgroundColor: w.color,
-                        transform: active ? `rotate(${currentFinish?.rotation || 0}deg)` : undefined,
-                      }}
-                    />
+                    <WoodFinishSwatch variant={w.variant} name={w.name} color={w.color} rotation={active ? currentFinish?.rotation : undefined} />
                     <div className="flex-1 min-w-0">
                       <div className="text-xs text-slate-200 font-semibold truncate">{w.name}</div>
                       <div className="text-[10px] text-slate-400 truncate">{w.subtitle}</div>

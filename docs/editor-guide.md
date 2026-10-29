@@ -26,6 +26,8 @@ Cabinet, Countertop, handles and stored-object finishes are independent. **Edit 
 
 Select a surface section before choosing paint, wood, tile, glass or another material. Higher signed **Surface layer** values resolve overlapping finishes. Wood grain controls offer horizontal/vertical orientation. The kitchen laminate and striped mosaic are visual reconstructions from photographs, not calibrated manufacturer samples.
 
+**Wood & Parquet → Wood, Veneers & Laminates** includes American Walnut, Smoked Walnut and near-black Dark Wenge with distinct dark base tones and photographic grain. **Deep Chocolate Walnut**, **Espresso Walnut** and **Black-Brown Wood** add warmer and deeper browns. Picker previews use the same final texture as the scene. These dark wood tones are matched once in their textures; the existing oak, teak, birch, ash, laminate, parquet, BILLY and acoustic-panel tones are preserved. Existing saved wood selections receive the corrected appearance without changing the plan's finish data. **Compare surface colors** in Lighting shows the base tone without illumination or exposure changes; normal room lighting still affects the rendered result.
+
 ## Walls, windows and curtains
 
 Select a wall. **Wall Faces** controls Side A and Side B; **Ends, Edges & Sills** controls caps, top edges, sills and opening returns separately. **Wall Framing** controls skirting and wall-to-wall cornices, including profile, dimensions, clearance, finish, visibility and which sides are framed. Select None to remove a cornice. Compatible neighboring cornices meet at their corners and follow the adjoining rooms' finished ceiling heights.
