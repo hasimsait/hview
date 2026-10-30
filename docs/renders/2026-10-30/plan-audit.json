@@ -1,0 +1,5314 @@
+{
+  "sourceFile": "hview_1793317965664.plan",
+  "sha256": "fc1b8c8a10f84aede4ecbe2ba24bb849981e1b318ac211a44c7cdd4710392964",
+  "rooms": [
+    {
+      "id": "_y0oj2",
+      "name": "Living Room (13.3 m\u00b2)",
+      "area": 13.31,
+      "polygon": [
+        {
+          "x": -1.5955940000000002,
+          "y": 0.792282
+        },
+        {
+          "x": 1.529698,
+          "y": 0.751088
+        },
+        {
+          "x": 1.529699,
+          "y": 0.7010980000000001
+        },
+        {
+          "x": 1.842355,
+          "y": 0.7010980000000001
+        },
+        {
+          "x": 1.842475,
+          "y": -1.368636
+        },
+        {
+          "x": 1.676301,
+          "y": -1.368776
+        },
+        {
+          "x": 1.7002080000000002,
+          "y": -1.823064
+        },
+        {
+          "x": 1.842501,
+          "y": -1.824941
+        },
+        {
+          "x": 1.84258,
+          "y": -3.186642
+        },
+        {
+          "x": -1.5759729999999998,
+          "y": -3.0881619999999996
+        }
+      ],
+      "height": 2.7,
+      "wallFinish": {
+        "type": "paint",
+        "color": "#eae2d1",
+        "roughness": 0.85,
+        "layer": 0
+      },
+      "floorFinish": null,
+      "items": [
+        {
+          "id": "_3h4u6",
+          "assetKey": "ottoman_module_armrest",
+          "displayName": "Ottoman Module Armrest",
+          "position": {
+            "x": -1.0517,
+            "y": 0,
+            "z": -2.2529
+          },
+          "rotationY": 0.028797932657906422,
+          "dimensions": {
+            "x": 1,
+            "y": 0.9,
+            "z": 1.7
+          },
+          "finish": {
+            "type": "paint",
+            "color": "#94a3b8",
+            "roughness": 0.85
+          },
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_vsovw",
+          "assetKey": "work_table",
+          "displayName": "Work Table",
+          "position": {
+            "x": 0.4799,
+            "y": 0,
+            "z": 0.5149
+          },
+          "rotationY": 3.15485715590495,
+          "dimensions": {
+            "x": 1.5,
+            "y": 0.75,
+            "z": 0.5
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "tabletop": {
+              "type": "wood",
+              "variant": "bleached_birch",
+              "color": "#dfcfb6",
+              "roughness": 0.45,
+              "layer": 0
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_vsxdk",
+          "assetKey": "work_table",
+          "displayName": "Work Table",
+          "position": {
+            "x": 1.5424,
+            "y": 0,
+            "z": -0.5667
+          },
+          "rotationY": 4.71238898038469,
+          "dimensions": {
+            "x": 1.604,
+            "y": 0.75,
+            "z": 0.6
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "tabletop": {
+              "type": "wood",
+              "variant": "bleached_birch",
+              "color": "#dfcfb6",
+              "roughness": 0.45,
+              "layer": 0
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_gf38l",
+          "assetKey": "sofa_double",
+          "displayName": "Sofa Double",
+          "position": {
+            "x": 0.167,
+            "y": 0,
+            "z": -2.561
+          },
+          "rotationY": 0,
+          "dimensions": {
+            "x": 1.82,
+            "y": 0.9,
+            "z": 1
+          },
+          "finish": {
+            "type": "paint",
+            "color": "#94a3b8",
+            "roughness": 0.85
+          },
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_cka3k",
+          "assetKey": "office_chair",
+          "displayName": "Office Chair",
+          "position": {
+            "x": 0.3905,
+            "y": 0,
+            "z": -0.0273
+          },
+          "rotationY": 0.013264502315156523,
+          "dimensions": {
+            "x": 0.5,
+            "y": 1.12,
+            "z": 0.5
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "backrest": {
+              "type": "paint",
+              "color": "#27272a",
+              "roughness": 0.85
+            },
+            "seat": {
+              "type": "paint",
+              "color": "#27272a",
+              "roughness": 0.85
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_2ul3p",
+          "assetKey": "office_chair",
+          "displayName": "Office Chair",
+          "position": {
+            "x": 1.0505,
+            "y": 0,
+            "z": -0.3998
+          },
+          "rotationY": 1.5707963267948966,
+          "dimensions": {
+            "x": 0.5,
+            "y": 1.12,
+            "z": 0.5
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "backrest": {
+              "type": "paint",
+              "color": "#e8e0d5",
+              "roughness": 0.85
+            },
+            "seat": {
+              "type": "paint",
+              "color": "#e8e0d5",
+              "roughness": 0.85
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_9czct",
+          "assetKey": "chandelier_cascading",
+          "displayName": "Chandelier Cascading",
+          "position": {
+            "x": 0.0587,
+            "y": 2.15,
+            "z": -1.5383
+          },
+          "rotationY": 3.141592653589793,
+          "dimensions": {
+            "x": 0.52,
+            "y": 0.6,
+            "z": 0.52
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": {
+            "intensity": 0.4,
+            "color": "#e2f0ff",
+            "temperatureKelvin": 6500,
+            "lumens": 806
+          },
+          "visible": true
+        },
+        {
+          "id": "_1odey",
+          "assetKey": "conditioner",
+          "displayName": "Conditioner",
+          "position": {
+            "x": -0.8687,
+            "y": 1.85,
+            "z": -2.9835
+          },
+          "rotationY": 0.028797932657906422,
+          "dimensions": {
+            "x": 1.2,
+            "y": 0.37,
+            "z": 0.25
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "wood": {
+              "type": "paint",
+              "color": "#fbfbf9",
+              "roughness": 0.85
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_egeq1",
+          "assetKey": "wall_spot",
+          "displayName": "Wall Spot",
+          "position": {
+            "x": 1.1774,
+            "y": 1.85,
+            "z": 0.6757
+          },
+          "rotationY": 3.15485715590495,
+          "dimensions": {
+            "x": 0.24,
+            "y": 0.1,
+            "z": 0.16
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": {
+            "color": "#e2f0ff"
+          },
+          "visible": true
+        },
+        {
+          "id": "_jfq5u",
+          "assetKey": "socket",
+          "displayName": "Socket",
+          "position": {
+            "x": 0.793,
+            "y": 0.3,
+            "z": 0.6908
+          },
+          "rotationY": 3.15485715590495,
+          "dimensions": {
+            "x": 0.14,
+            "y": 0.1,
+            "z": 0.14
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_iokxx",
+          "assetKey": "socket",
+          "displayName": "Socket",
+          "position": {
+            "x": -0.3279,
+            "y": 0.3,
+            "z": 0.6856
+          },
+          "rotationY": 3.15485715590495,
+          "dimensions": {
+            "x": 0.14,
+            "y": 0.1,
+            "z": 0.18
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_ai8s0",
+          "assetKey": "socket",
+          "displayName": "Socket",
+          "position": {
+            "x": 1.7525,
+            "y": 0.3,
+            "z": -2.1566
+          },
+          "rotationY": 4.71238898038469,
+          "dimensions": {
+            "x": 0.14,
+            "y": 0.1,
+            "z": 0.18
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_044y4",
+          "assetKey": "socket",
+          "displayName": "Socket",
+          "position": {
+            "x": 1.7724,
+            "y": 0.3,
+            "z": -0.3952
+          },
+          "rotationY": 4.71238898038469,
+          "dimensions": {
+            "x": 0.14,
+            "y": 0.1,
+            "z": 0.14
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_b6ub2",
+          "assetKey": "socket",
+          "displayName": "Socket",
+          "position": {
+            "x": -1.3268,
+            "y": 0.3,
+            "z": -3.0253
+          },
+          "rotationY": 0.028797932657906422,
+          "dimensions": {
+            "x": 0.14,
+            "y": 0.1,
+            "z": 0.14
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_9s6tx",
+          "assetKey": "socket",
+          "displayName": "Socket",
+          "position": {
+            "x": -1.5152,
+            "y": 0.3,
+            "z": -1.2625
+          },
+          "rotationY": 1.5657348719641129,
+          "dimensions": {
+            "x": 0.21,
+            "y": 0.1,
+            "z": 0.14
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_cnjp7",
+          "assetKey": "socket",
+          "displayName": "Socket",
+          "position": {
+            "x": 1.7724,
+            "y": 0.3,
+            "z": 0.5189
+          },
+          "rotationY": 4.71238898038469,
+          "dimensions": {
+            "x": 0.14,
+            "y": 0.1,
+            "z": 0.14
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_mfgaf",
+          "assetKey": "robot_vacuum",
+          "displayName": "Robot Vacuum with Charging Dock",
+          "position": {
+            "x": -1.3528,
+            "y": 0,
+            "z": -1.7318
+          },
+          "rotationY": 1.5657348719641129,
+          "dimensions": {
+            "x": 0.35,
+            "y": 0.15,
+            "z": 0.46
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_qjlzy",
+          "assetKey": "coffee_table",
+          "displayName": "Coffee Table",
+          "position": {
+            "x": 0.1754,
+            "y": 0,
+            "z": -1.6796
+          },
+          "rotationY": 3.141592653589793,
+          "dimensions": {
+            "x": 0.8,
+            "y": 0.48,
+            "z": 0.6
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_vc6fi",
+          "assetKey": "tv",
+          "displayName": "Tv",
+          "position": {
+            "x": 0.4794,
+            "y": 1,
+            "z": 0.7149
+          },
+          "rotationY": 3.15485715590495,
+          "dimensions": {
+            "x": 0.91,
+            "y": 0.51,
+            "z": 0.1
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "stand": {
+              "type": "invisible",
+              "color": "invisible",
+              "layer": 0
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "26478a7b-93b7-43ed-adb7-123afe19c4e3",
+          "assetKey": "life_cat_house",
+          "displayName": "Waist-Height Cat House on Scratching Posts",
+          "position": {
+            "x": -1.2863461591774696,
+            "y": 0,
+            "z": -0.9661757670047879
+          },
+          "rotationY": 0,
+          "dimensions": {
+            "x": 0.65,
+            "y": 1,
+            "z": 0.5
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "8eb346f5-d261-4f48-a8ab-a8efb51f3ee9",
+          "assetKey": "life_cat_feeder",
+          "displayName": "Automatic Cat Feeder",
+          "position": {
+            "x": -0.4482042441380476,
+            "y": 0,
+            "z": 0.5142407375562248
+          },
+          "rotationY": -3.12846882329772,
+          "dimensions": {
+            "x": 0.2,
+            "y": 0.34,
+            "z": 0.34
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "7c49d27b-a771-4add-b9ad-c01b2a966d95",
+          "assetKey": "life_cat_feeder",
+          "displayName": "Automatic Cat Feeder",
+          "position": {
+            "x": 1.4098105208436769,
+            "y": 0,
+            "z": -2.964088705851338
+          },
+          "rotationY": 0.02879955555324182,
+          "dimensions": {
+            "x": 0.2,
+            "y": 0.34,
+            "z": 0.34
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        }
+      ],
+      "walls": [
+        {
+          "id": "_mgltn",
+          "side": "A",
+          "finish": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_ule1b_a",
+          "side": "A",
+          "finish": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_ule1b_b",
+          "side": "A",
+          "finish": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_g9657",
+          "side": "A",
+          "finish": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_rxf4v",
+          "side": "A",
+          "finish": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_nbso8",
+          "side": "B",
+          "finish": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_k2vy1_a_a",
+          "side": "B",
+          "finish": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_k2vy1_a_b",
+          "side": "B",
+          "finish": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_w5f7a_a",
+          "side": "A",
+          "finish": {
+            "type": "paint",
+            "color": "#bcd7ea",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_w5f7a_b",
+          "side": "A",
+          "finish": {
+            "type": "paint",
+            "color": "#bcd7ea",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        }
+      ],
+      "lights": [
+        {
+          "id": "_9czct",
+          "assetKey": "chandelier_cascading",
+          "position": {
+            "x": 0.0587,
+            "y": 2.15,
+            "z": -1.5383
+          },
+          "lightConfig": {
+            "intensity": 0.4,
+            "color": "#e2f0ff",
+            "temperatureKelvin": 6500,
+            "lumens": 806
+          }
+        },
+        {
+          "id": "_egeq1",
+          "assetKey": "wall_spot",
+          "position": {
+            "x": 1.1774,
+            "y": 1.85,
+            "z": 0.6757
+          },
+          "lightConfig": {
+            "color": "#e2f0ff"
+          }
+        }
+      ]
+    },
+    {
+      "id": "_v7m0m",
+      "name": "Bedroom (8.3 m\u00b2)",
+      "area": 8.32,
+      "polygon": [
+        {
+          "x": 3.1820019999999998,
+          "y": 3.070509
+        },
+        {
+          "x": 3.1098399999999997,
+          "y": 5.438102
+        },
+        {
+          "x": 1.756565,
+          "y": 5.472776
+        },
+        {
+          "x": 1.756639,
+          "y": 5.290906
+        },
+        {
+          "x": 1.224564,
+          "y": 5.306549
+        },
+        {
+          "x": 1.229077,
+          "y": 5.486292
+        },
+        {
+          "x": -0.45732100000000003,
+          "y": 5.529502
+        },
+        {
+          "x": -0.457376,
+          "y": 3.219773
+        },
+        {
+          "x": -0.134704,
+          "y": 3.211875
+        }
+      ],
+      "height": 2.7,
+      "wallFinish": {
+        "type": "paint",
+        "color": "#eae2d1",
+        "roughness": 0.85,
+        "layer": 0
+      },
+      "floorFinish": null,
+      "items": [
+        {
+          "id": "_i605g",
+          "assetKey": "bed_single",
+          "displayName": "Bed Single",
+          "position": {
+            "x": 2.5143,
+            "y": 0,
+            "z": 4.1768
+          },
+          "rotationY": -1.6013395887047972,
+          "dimensions": {
+            "x": 2,
+            "y": 0.77,
+            "z": 1.2
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_1bpv3",
+          "assetKey": "work_table",
+          "displayName": "Work Table",
+          "position": {
+            "x": -0.2324,
+            "y": 0,
+            "z": 3.777879575906101
+          },
+          "rotationY": 1.5707963267948966,
+          "dimensions": {
+            "x": 1,
+            "y": 0.9,
+            "z": 0.45
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_isp5i",
+          "assetKey": "chandelier_cascading",
+          "displayName": "Chandelier Cascading",
+          "position": {
+            "x": 1.3504,
+            "y": 2.15,
+            "z": 4.2993
+          },
+          "rotationY": 3.141592653589793,
+          "dimensions": {
+            "x": 0.52,
+            "y": 0.6,
+            "z": 0.52
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": {
+            "intensity": 0.35,
+            "temperatureKelvin": 6500,
+            "lumens": 806
+          },
+          "visible": true
+        },
+        {
+          "id": "_ysoor",
+          "assetKey": "socket",
+          "displayName": "Socket",
+          "position": {
+            "x": -0.3873,
+            "y": 0.3,
+            "z": 4.2334
+          },
+          "rotationY": 1.5707963267948966,
+          "dimensions": {
+            "x": 0.14,
+            "y": 0.1,
+            "z": 0.14
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_qbjjp",
+          "assetKey": "socket",
+          "displayName": "Socket",
+          "position": {
+            "x": -0.3673,
+            "y": 0.3,
+            "z": 4.4257
+          },
+          "rotationY": 1.5707963267948966,
+          "dimensions": {
+            "x": 0.14,
+            "y": 0.1,
+            "z": 0.18
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        }
+      ],
+      "walls": [
+        {
+          "id": "_kzq4r",
+          "side": "A",
+          "finish": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_54f0m",
+          "side": "A",
+          "finish": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_pnu8l",
+          "side": "A",
+          "finish": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_a0wf4",
+          "side": "B",
+          "finish": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_nsq8v",
+          "side": "B",
+          "finish": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_ra6yj",
+          "side": "B",
+          "finish": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        }
+      ],
+      "lights": [
+        {
+          "id": "_isp5i",
+          "assetKey": "chandelier_cascading",
+          "position": {
+            "x": 1.3504,
+            "y": 2.15,
+            "z": 4.2993
+          },
+          "lightConfig": {
+            "intensity": 0.35,
+            "temperatureKelvin": 6500,
+            "lumens": 806
+          }
+        }
+      ]
+    },
+    {
+      "id": "_vzdza",
+      "name": "Kitchen (8.0 m\u00b2)",
+      "area": 7.95,
+      "polygon": [
+        {
+          "x": 1.758056,
+          "y": 0.851097
+        },
+        {
+          "x": 1.7583430000000002,
+          "y": 1.0210970000000001
+        },
+        {
+          "x": 1.496029,
+          "y": 1.014155
+        },
+        {
+          "x": 1.3260290000000001,
+          "y": 1.01421
+        },
+        {
+          "x": 1.325977,
+          "y": 0.853779
+        },
+        {
+          "x": 0.169655,
+          "y": 0.8691549999999999
+        },
+        {
+          "x": 0.173142,
+          "y": 1.1391330000000002
+        },
+        {
+          "x": -0.445023,
+          "y": 1.147117
+        },
+        {
+          "x": -0.445456,
+          "y": 2.622239
+        },
+        {
+          "x": -0.034780000000000005,
+          "y": 2.63197
+        },
+        {
+          "x": -0.034717,
+          "y": 3.107523
+        },
+        {
+          "x": 3.081999,
+          "y": 2.974681
+        },
+        {
+          "x": 3.081997,
+          "y": 2.882807
+        },
+        {
+          "x": 3.222315,
+          "y": 2.8827789999999998
+        },
+        {
+          "x": 3.317627,
+          "y": 0.6422950000000001
+        },
+        {
+          "x": 1.942358,
+          "y": 0.6421760000000001
+        },
+        {
+          "x": 1.942346,
+          "y": 0.851098
+        }
+      ],
+      "height": 2.7,
+      "wallFinish": {
+        "type": "paint",
+        "color": "#eae2d1",
+        "roughness": 0.85,
+        "layer": 0
+      },
+      "floorFinish": {
+        "type": "tile",
+        "variant": "caramel_ripple_gloss_20x10",
+        "color": "#ffffff",
+        "roughness": 0.18,
+        "metalness": 0,
+        "rotation": 0,
+        "layer": 0,
+        "pattern": "running_bond",
+        "groutWidth": 2,
+        "groutColor": "#d1d5db"
+      },
+      "items": [
+        {
+          "id": "_fyo94",
+          "assetKey": "fridge",
+          "displayName": "Fridge",
+          "position": {
+            "x": 2.2987365555327814,
+            "y": 0,
+            "z": 0.9910124444242527
+          },
+          "rotationY": 0,
+          "dimensions": {
+            "x": 0.66,
+            "y": 1.9,
+            "z": 0.63
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "body": {
+              "type": "paint",
+              "color": "#e2e8f0",
+              "roughness": 0.85
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_0qfv6",
+          "assetKey": "kitchen_box_wall",
+          "displayName": "Kitchen Box Wall",
+          "position": {
+            "x": -0.2479600209829168,
+            "y": 1.45,
+            "z": 2.4292
+          },
+          "rotationY": 3.1178561757626704,
+          "dimensions": {
+            "x": 0.4,
+            "y": 1.19,
+            "z": 0.38
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "cabinet": {
+              "type": "paint",
+              "color": "#94a395",
+              "roughness": 0.85
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_hgv66",
+          "assetKey": "kitchen_box_wall",
+          "displayName": "Kitchen Box Wall",
+          "position": {
+            "x": 2.8758,
+            "y": 1.45,
+            "z": 2.8341
+          },
+          "rotationY": 3.1841786873384548,
+          "dimensions": {
+            "x": 0.7,
+            "y": 1.19,
+            "z": 0.3
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "cabinet": {
+              "type": "paint",
+              "color": "#94a395",
+              "roughness": 0.85
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_6hwqs",
+          "assetKey": "cabinet_base_single",
+          "displayName": "Single-Door Base Cabinet",
+          "position": {
+            "x": -0.24108765330477333,
+            "y": 0,
+            "z": 2.4147
+          },
+          "rotationY": 3.1178561757626704,
+          "dimensions": {
+            "x": 0.39,
+            "y": 0.85,
+            "z": 0.39
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "door_1": {
+              "type": "wood",
+              "variant": "light_beige_laminate",
+              "color": "#ffffff",
+              "roughness": 0.65,
+              "layer": 0
+            },
+            "frame": {
+              "type": "wood",
+              "variant": "light_beige_laminate",
+              "color": "#ffffff",
+              "roughness": 0.65,
+              "layer": 0
+            },
+            "plinth": {
+              "type": "paint",
+              "color": "#94a395",
+              "roughness": 0.85,
+              "layer": 0
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_plm37",
+          "assetKey": "kitchen_sink",
+          "displayName": "Kitchen Sink",
+          "position": {
+            "x": 2.7639,
+            "y": 0,
+            "z": 2.7484
+          },
+          "rotationY": 3.1841786873384548,
+          "dimensions": {
+            "x": 0.45,
+            "y": 0.85,
+            "z": 0.4
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "countertop": {
+              "type": "tile",
+              "variant": "canakkale_wabi_maburu_bej_34x111",
+              "color": "#cec8ba",
+              "roughness": 0.22,
+              "metalness": 0.08,
+              "rotation": 0,
+              "groutWidth": 0,
+              "groutColor": "#d1d5db"
+            },
+            "basin": {
+              "type": "tile",
+              "variant": "canakkale_wabi_maburu_bej_34x111",
+              "color": "#cec8ba",
+              "roughness": 0.22,
+              "metalness": 0.08,
+              "rotation": 0,
+              "groutWidth": 0,
+              "groutColor": "#d1d5db"
+            },
+            "faucet": {
+              "type": "metal",
+              "variant": "chrome_satin",
+              "color": "#e2e8f0",
+              "roughness": 0.2,
+              "metalness": 0.9
+            },
+            "cabinet": {
+              "type": "paint",
+              "color": "#526b7c",
+              "roughness": 0.85
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_2byp4",
+          "assetKey": "suspended_hood",
+          "displayName": "Suspended Hood",
+          "position": {
+            "x": 0.2982,
+            "y": 1.45,
+            "z": 2.8164044755387456
+          },
+          "rotationY": 3.1841786873384548,
+          "dimensions": {
+            "x": 0.6,
+            "y": 1.15,
+            "z": 0.5
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_3rcew",
+          "assetKey": "kitchen_box_door_double",
+          "displayName": "Kitchen Box Door Double",
+          "position": {
+            "x": 2.7256,
+            "y": 0,
+            "z": 2.6909
+          },
+          "rotationY": 3.1841786873384548,
+          "dimensions": {
+            "x": 0.904,
+            "y": 0.87,
+            "z": 0.58
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "countertop": {
+              "type": "tile",
+              "variant": "canakkale_wabi_maburu_bej_34x111",
+              "color": "#cec8ba",
+              "roughness": 0.22,
+              "metalness": 0.08,
+              "rotation": 0,
+              "groutWidth": 0,
+              "groutColor": "#d1d5db"
+            },
+            "cabinet": {
+              "type": "paint",
+              "color": "#94a395",
+              "roughness": 0.85
+            },
+            "door_2": {
+              "type": "wood",
+              "variant": "light_beige_laminate",
+              "color": "#ffffff",
+              "roughness": 0.65,
+              "layer": 0
+            },
+            "door_1": {
+              "type": "wood",
+              "variant": "light_beige_laminate",
+              "color": "#ffffff",
+              "roughness": 0.65,
+              "layer": 0
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_uxvvt",
+          "assetKey": "kitchen_box_door_double",
+          "displayName": "Kitchen Box Door Double",
+          "position": {
+            "x": 2.0308,
+            "y": 0,
+            "z": 2.7205
+          },
+          "rotationY": 3.1841786873384548,
+          "dimensions": {
+            "x": 0.487,
+            "y": 0.87,
+            "z": 0.58
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "countertop": {
+              "type": "tile",
+              "variant": "canakkale_wabi_maburu_bej_34x111",
+              "color": "#cec8ba",
+              "roughness": 0.22,
+              "metalness": 0.08,
+              "rotation": 0,
+              "layer": 1,
+              "groutWidth": 0,
+              "groutColor": "#d1d5db"
+            },
+            "cabinet": {
+              "type": "paint",
+              "color": "#94a395",
+              "roughness": 0.85
+            },
+            "door_2": {
+              "type": "wood",
+              "variant": "light_beige_laminate",
+              "color": "#ffffff",
+              "roughness": 0.65,
+              "layer": 0
+            },
+            "door_1": {
+              "type": "wood",
+              "variant": "light_beige_laminate",
+              "color": "#ffffff",
+              "roughness": 0.65,
+              "layer": 0
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_te4b4",
+          "assetKey": "kitchen_box_door_double",
+          "displayName": "Kitchen Box Door Double",
+          "position": {
+            "x": 0.8858,
+            "y": 0,
+            "z": 2.7693
+          },
+          "rotationY": 3.1841786873384548,
+          "dimensions": {
+            "x": 0.545,
+            "y": 0.87,
+            "z": 0.58
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "countertop": {
+              "type": "tile",
+              "variant": "canakkale_diadem_bej_59x59",
+              "color": "#d3c7b8",
+              "roughness": 0.76,
+              "metalness": 0.02,
+              "rotation": 0,
+              "layer": -2,
+              "groutWidth": 0,
+              "groutColor": "#d1d5db"
+            },
+            "cabinet": {
+              "type": "paint",
+              "color": "#94a395",
+              "roughness": 0.85
+            },
+            "door_4": {
+              "type": "wood",
+              "variant": "light_beige_laminate",
+              "color": "#ffffff",
+              "roughness": 0.65,
+              "layer": 0
+            },
+            "door_3": {
+              "type": "wood",
+              "variant": "light_beige_laminate",
+              "color": "#ffffff",
+              "roughness": 0.65,
+              "layer": 0
+            },
+            "door_2": {
+              "type": "wood",
+              "variant": "light_beige_laminate",
+              "color": "#ffffff",
+              "roughness": 0.65,
+              "layer": 0
+            },
+            "door_1": {
+              "type": "wood",
+              "variant": "light_beige_laminate",
+              "color": "#ffffff",
+              "roughness": 0.65,
+              "layer": 0
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_e3ego",
+          "assetKey": "kitchen_box_door_double",
+          "displayName": "Kitchen Box Door Double",
+          "position": {
+            "x": 1.4728,
+            "y": 0,
+            "z": 2.7443
+          },
+          "rotationY": 3.1841786873384548,
+          "dimensions": {
+            "x": 0.63,
+            "y": 0.87,
+            "z": 0.58
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "countertop": {
+              "type": "tile",
+              "variant": "canakkale_diadem_bej_59x59",
+              "color": "#d3c7b8",
+              "roughness": 0.76,
+              "metalness": 0.02,
+              "rotation": 0,
+              "layer": -1,
+              "pattern": "grid",
+              "groutWidth": 0,
+              "groutColor": "#d1d5db"
+            },
+            "cabinet": {
+              "type": "paint",
+              "color": "#94a395",
+              "roughness": 0.85
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_62uck",
+          "assetKey": "ceiling_spot",
+          "displayName": "Ceiling Spot",
+          "position": {
+            "x": 1.5045,
+            "y": 2.65,
+            "z": 1.909
+          },
+          "rotationY": 3.0543261909900767,
+          "dimensions": {
+            "x": 0.44,
+            "y": 0.05,
+            "z": 0.44
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": {
+            "intensity": 0.8,
+            "color": "#e2f0ff",
+            "lumens": 806
+          },
+          "visible": true
+        },
+        {
+          "id": "_xsugt",
+          "assetKey": "spotlight",
+          "displayName": "Spotlight",
+          "position": {
+            "x": 0.7291,
+            "y": 1.5,
+            "z": 2.9721
+          },
+          "rotationY": 3.141592653589793,
+          "dimensions": {
+            "x": 0.24,
+            "y": 0.6,
+            "z": 0.24
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": {
+            "enabled": false,
+            "intensity": 0,
+            "color": "#e2f0ff"
+          },
+          "visible": true
+        },
+        {
+          "id": "_1dtvn",
+          "assetKey": "spotlight",
+          "displayName": "Spotlight",
+          "position": {
+            "x": 2.2491,
+            "y": 1.5,
+            "z": 2.8507
+          },
+          "rotationY": 3.141592653589793,
+          "dimensions": {
+            "x": 0.24,
+            "y": 0.6,
+            "z": 0.24
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": {
+            "enabled": false,
+            "intensity": 0,
+            "color": "#e2f0ff"
+          },
+          "visible": true
+        },
+        {
+          "id": "_4jc14",
+          "assetKey": "kitchen_box_wall",
+          "displayName": "Kitchen Box Wall",
+          "position": {
+            "x": 2.1748,
+            "y": 1.45,
+            "z": 2.8632
+          },
+          "rotationY": 3.1841786873384548,
+          "dimensions": {
+            "x": 0.7,
+            "y": 1.19,
+            "z": 0.3
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "cabinet": {
+              "type": "paint",
+              "color": "#94a395",
+              "roughness": 0.85
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_vkw9v",
+          "assetKey": "kitchen_box_wall",
+          "displayName": "Kitchen Box Wall",
+          "position": {
+            "x": 1.4205,
+            "y": 1.45,
+            "z": 2.8955
+          },
+          "rotationY": 3.1841786873384548,
+          "dimensions": {
+            "x": 0.81,
+            "y": 1.19,
+            "z": 0.3
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "cabinet": {
+              "type": "paint",
+              "color": "#94a395",
+              "roughness": 0.85
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_tgbfm",
+          "assetKey": "kitchen_box_wall",
+          "displayName": "Kitchen Box Wall",
+          "position": {
+            "x": 0.4905,
+            "y": 1.45,
+            "z": 2.746
+          },
+          "rotationY": 3.1841786873384548,
+          "dimensions": {
+            "x": 1.05,
+            "y": 1.19,
+            "z": 0.3
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "cabinet": {
+              "type": "paint",
+              "color": "#94a395",
+              "roughness": 0.85
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_qbfn5",
+          "assetKey": "kitchen_box_door_double",
+          "displayName": "Kitchen Box Door Double",
+          "position": {
+            "x": 0.2856223869772165,
+            "y": 0,
+            "z": 2.7967
+          },
+          "rotationY": 3.1841786873384548,
+          "dimensions": {
+            "x": 0.65,
+            "y": 0.87,
+            "z": 0.6
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "cabinet": {
+              "type": "paint",
+              "color": "#94a395",
+              "roughness": 0.85
+            },
+            "handles": {
+              "type": "invisible",
+              "color": "invisible",
+              "layer": 0
+            },
+            "door_2": {
+              "type": "paint",
+              "color": "#ffffff",
+              "roughness": 0.85,
+              "layer": 0
+            },
+            "frame": {
+              "type": "paint",
+              "color": "#fbfbf9",
+              "roughness": 0.85,
+              "layer": 0
+            },
+            "door_1": {
+              "type": "paint",
+              "color": "#fbfbf9",
+              "roughness": 0.85,
+              "layer": 0
+            },
+            "countertop": {
+              "type": "paint",
+              "color": "#fbfbf9",
+              "roughness": 0.85,
+              "layer": 0
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_saokk",
+          "assetKey": "viko_karre_socket_white",
+          "displayName": "VIKO Karre Earthed Socket \u2014 White",
+          "position": {
+            "x": 2.6187,
+            "y": 0.3,
+            "z": 2.924
+          },
+          "rotationY": 3.1841786873384548,
+          "dimensions": {
+            "x": 0.1,
+            "y": 0.1,
+            "z": 0.04
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_j8b1f",
+          "assetKey": "viko_karre_socket_white",
+          "displayName": "VIKO Karre Earthed Socket \u2014 White",
+          "position": {
+            "x": 0.9273,
+            "y": 0.3,
+            "z": 2.9965
+          },
+          "rotationY": 3.1841786873384548,
+          "dimensions": {
+            "x": 0.08,
+            "y": 0.08,
+            "z": 0.04
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "f2fa3a52-6ff5-4086-9f37-ab094b9bf644",
+          "assetKey": "life_dishwasher",
+          "displayName": "Standard 60 cm Dishwasher",
+          "position": {
+            "x": 1.4776521421394446,
+            "y": 0,
+            "z": 2.730762973197395
+          },
+          "rotationY": -3.098996055989257,
+          "dimensions": {
+            "x": 0.6,
+            "y": 0.85,
+            "z": 0.6
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "door_rim": {
+              "type": "paint",
+              "color": "#fdfdfc",
+              "roughness": 0.85,
+              "layer": 0
+            },
+            "door": {
+              "type": "paint",
+              "color": "#ffffff",
+              "roughness": 0.85,
+              "layer": 0
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "7005a4c7-badd-40cc-a38f-7ab0f6c59967",
+          "assetKey": "black_four_burner_gas_cooktop",
+          "displayName": "Black Glass Four-Burner Gas Cooktop",
+          "position": {
+            "x": 0.31027702961356945,
+            "y": 0.9,
+            "z": 2.7518064757598992
+          },
+          "rotationY": -3.098996055989257,
+          "dimensions": {
+            "x": 0.6,
+            "y": 0.055,
+            "z": 0.52
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "56554e3a-da6a-4459-8c77-f258e45e364d",
+          "assetKey": "life_nespresso",
+          "displayName": "Nespresso Capsule Coffee Machine",
+          "position": {
+            "x": -0.2708754055029683,
+            "y": 0.85,
+            "z": 2.4200040904673084
+          },
+          "rotationY": 3.141592653589793,
+          "dimensions": {
+            "x": 0.11,
+            "y": 0.205,
+            "z": 0.325
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "2a105307-74d0-43f4-8ea3-81c3feaf540b",
+          "assetKey": "viko_karre_single_switch_white",
+          "displayName": "VIKO Karre Single Rocker Switch \u2014 White",
+          "position": {
+            "x": 1.7987300919795326,
+            "y": 1.5,
+            "z": 0.8550282616118424
+          },
+          "rotationY": -0.00018119028118869266,
+          "dimensions": {
+            "x": 0.082,
+            "y": 0.082,
+            "z": 0.014
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "a6e56374-ad2f-4678-88bf-e7b265755fae",
+          "assetKey": "viko_karre_socket_white",
+          "displayName": "VIKO Karre Earthed Socket \u2014 White",
+          "position": {
+            "x": 0.8632929873810082,
+            "y": 1.5,
+            "z": 0.8620980029802325
+          },
+          "rotationY": 1.2246467991473532e-16,
+          "dimensions": {
+            "x": 0.082,
+            "y": 0.082,
+            "z": 0.02
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "e4917d04-8d17-4645-a083-aa9b7d8beaeb",
+          "assetKey": "viko_karre_double_socket_white",
+          "displayName": "VIKO Karre Double Earthed Socket \u2014 White",
+          "position": {
+            "x": 1.7367270493550364,
+            "y": 1.1,
+            "z": 3.021010590006686
+          },
+          "rotationY": -3.098996055989257,
+          "dimensions": {
+            "x": 0.1254,
+            "y": 0.0816,
+            "z": 0.02
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "6e19d3b2-f173-4251-a523-4ec65391de13",
+          "assetKey": "viko_karre_single_switch_white",
+          "displayName": "VIKO Karre Single Rocker Switch \u2014 White",
+          "position": {
+            "x": -0.4374052167795427,
+            "y": 1.36,
+            "z": 2.4042536077402183
+          },
+          "rotationY": 1.5704215412067077,
+          "dimensions": {
+            "x": 0.082,
+            "y": 0.082,
+            "z": 0.014
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "2c82b14c-1e9e-4407-8411-b397c60eedd1",
+          "assetKey": "viko_karre_socket_white",
+          "displayName": "VIKO Karre Earthed Socket \u2014 White",
+          "position": {
+            "x": -0.43440521699023904,
+            "y": 1.36,
+            "z": 2.491624572712339
+          },
+          "rotationY": 1.5704215412067077,
+          "dimensions": {
+            "x": 0.082,
+            "y": 0.082,
+            "z": 0.02
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "68b014d8-f6b2-430d-a877-b8372fca5bbe",
+          "assetKey": "popular_519412067",
+          "displayName": "Kenzlife KIMI070 Compact Desk \u2014 White",
+          "position": {
+            "x": 0.80089552892618,
+            "y": 0,
+            "z": 1.0961293001172787
+          },
+          "rotationY": 0.013123830292073214,
+          "dimensions": {
+            "x": 1,
+            "y": 0.75,
+            "z": 0.45
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        }
+      ],
+      "walls": [
+        {
+          "id": "_mgltn",
+          "side": "B",
+          "finish": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_ule1b_a",
+          "side": "B",
+          "finish": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_4la13",
+          "side": "B",
+          "finish": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_kzq4r",
+          "side": "B",
+          "finish": {
+            "type": "tile",
+            "variant": "ivory_taupe_striped_mosaic_30x30",
+            "color": "#ffffff",
+            "roughness": 0.22,
+            "metalness": 0,
+            "rotation": 0,
+            "layer": 0,
+            "pattern": "grid",
+            "groutWidth": 0,
+            "groutColor": "#d1d5db"
+          }
+        },
+        {
+          "id": "_54f0m",
+          "side": "B",
+          "finish": {
+            "type": "tile",
+            "variant": "ivory_taupe_striped_mosaic_30x30",
+            "color": "#ffffff",
+            "roughness": 0.22,
+            "metalness": 0,
+            "rotation": 0,
+            "layer": 0,
+            "pattern": "grid",
+            "groutWidth": 0,
+            "groutColor": "#d1d5db"
+          }
+        },
+        {
+          "id": "_pnu8l",
+          "side": "B",
+          "finish": {
+            "type": "tile",
+            "variant": "ivory_taupe_striped_mosaic_30x30",
+            "color": "#ffffff",
+            "roughness": 0.22,
+            "metalness": 0,
+            "rotation": 0,
+            "layer": 0,
+            "pattern": "grid",
+            "groutWidth": 0,
+            "groutColor": "#d1d5db"
+          }
+        },
+        {
+          "id": "_23lv1",
+          "side": "B",
+          "finish": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_nbso8",
+          "side": "A",
+          "finish": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_f1kbv",
+          "side": "B",
+          "finish": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        }
+      ],
+      "lights": [
+        {
+          "id": "_62uck",
+          "assetKey": "ceiling_spot",
+          "position": {
+            "x": 1.5045,
+            "y": 2.65,
+            "z": 1.909
+          },
+          "lightConfig": {
+            "intensity": 0.8,
+            "color": "#e2f0ff",
+            "lumens": 806
+          }
+        },
+        {
+          "id": "_xsugt",
+          "assetKey": "spotlight",
+          "position": {
+            "x": 0.7291,
+            "y": 1.5,
+            "z": 2.9721
+          },
+          "lightConfig": {
+            "enabled": false,
+            "intensity": 0,
+            "color": "#e2f0ff"
+          }
+        },
+        {
+          "id": "_1dtvn",
+          "assetKey": "spotlight",
+          "position": {
+            "x": 2.2491,
+            "y": 1.5,
+            "z": 2.8507
+          },
+          "lightConfig": {
+            "enabled": false,
+            "intensity": 0,
+            "color": "#e2f0ff"
+          }
+        }
+      ]
+    },
+    {
+      "id": "_3h613",
+      "name": "Master Bedroom (11.4 m\u00b2)",
+      "area": 11.36,
+      "polygon": [
+        {
+          "x": 3.207072,
+          "y": 5.535644
+        },
+        {
+          "x": 3.2120990000000003,
+          "y": 8.635194
+        },
+        {
+          "x": -0.45705100000000004,
+          "y": 8.723975000000001
+        },
+        {
+          "x": -0.457318,
+          "y": 5.629535
+        }
+      ],
+      "height": 2.72,
+      "wallFinish": {
+        "type": "paint",
+        "color": "#ece5d4",
+        "roughness": 0.85,
+        "layer": 0
+      },
+      "floorFinish": null,
+      "items": [
+        {
+          "id": "_09swo",
+          "assetKey": "bed_double",
+          "displayName": "Bed Double",
+          "position": {
+            "x": 2.1736874890704945,
+            "y": 0.25,
+            "z": 6.3726
+          },
+          "rotationY": -1.5707963267948966,
+          "dimensions": {
+            "x": 1.6,
+            "y": 0.71,
+            "z": 2.2
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "duvet": {
+              "type": "paint",
+              "color": "#934d3f",
+              "roughness": 0.85
+            },
+            "headboard": {
+              "type": "invisible",
+              "color": "invisible"
+            },
+            "frame": {
+              "type": "fabric",
+              "variant": "velvet_champagne",
+              "color": "#ede6d6",
+              "roughness": 0.82,
+              "metalness": 0.02,
+              "layer": 0,
+              "scale": 1,
+              "mappingMode": "stretched"
+            },
+            "pillows": {
+              "type": "paint",
+              "color": "#2d4a3e",
+              "roughness": 0.85
+            },
+            "mattress": {
+              "type": "paint",
+              "color": "#dfbe7d",
+              "roughness": 0.85
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_dp8pj",
+          "assetKey": "chandelier_cascading",
+          "displayName": "Chandelier Cascading",
+          "position": {
+            "x": 1.3671,
+            "y": 2.15,
+            "z": 7.4583
+          },
+          "rotationY": 3.141592653589793,
+          "dimensions": {
+            "x": 0.52,
+            "y": 0.6,
+            "z": 0.52
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": {
+            "intensity": 0.35,
+            "color": "#ffffff",
+            "temperatureKelvin": 6500,
+            "lumens": 806
+          },
+          "visible": true
+        },
+        {
+          "id": "_q5hhg",
+          "assetKey": "conditioner",
+          "displayName": "Conditioner",
+          "position": {
+            "x": 3.102,
+            "y": 2,
+            "z": 5.9950161842631795
+          },
+          "rotationY": -1.5692255304681009,
+          "dimensions": {
+            "x": 0.82,
+            "y": 0.33,
+            "z": 0.25
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "wood": {
+              "type": "paint",
+              "color": "#d8d2c9",
+              "roughness": 0.85
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "874a5c59-d9ed-4bfa-9b05-ae6fbf3d2b40",
+          "assetKey": "finish_threshold_stone",
+          "displayName": "Stone Door Threshold",
+          "position": {
+            "x": -0.5059097429849022,
+            "y": 0,
+            "z": 6.15627435487248
+          },
+          "rotationY": -1.5707963267948966,
+          "dimensions": {
+            "x": 0.941,
+            "y": 0.018,
+            "z": 0.12
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "eb159165-5b84-441f-80f6-a699cc8d6529",
+          "assetKey": "viko_karre_socket_white",
+          "displayName": "VIKO Karre Earthed Socket \u2014 White",
+          "position": {
+            "x": 0.6461217490902312,
+            "y": 1.5,
+            "z": 5.612266500211247
+          },
+          "rotationY": 0.02561691367091449,
+          "dimensions": {
+            "x": 0.082,
+            "y": 0.082,
+            "z": 0.02
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "fa6673fc-361c-4437-aa8d-7f2e1dbbc6cf",
+          "assetKey": "viko_karre_single_switch_white",
+          "displayName": "VIKO Karre Single Rocker Switch \u2014 White",
+          "position": {
+            "x": -0.45116542172154445,
+            "y": 1.5,
+            "z": 6.960057181428437
+          },
+          "rotationY": 1.5707963267948966,
+          "dimensions": {
+            "x": 0.082,
+            "y": 0.082,
+            "z": 0.014
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "7958b36a-6569-4135-a1c2-74705eae89f8",
+          "assetKey": "ikea_90439218",
+          "displayName": "IKEA LINDBYN Round Mirror \u2014 Black, 110 cm",
+          "position": {
+            "x": -0.44728108374938913,
+            "y": 1.1,
+            "z": 3.8457485484984177
+          },
+          "rotationY": 1.5707963267948966,
+          "dimensions": {
+            "x": 1.1,
+            "y": 1.1,
+            "z": 0.025
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "b80d5082-2aa2-40b5-a2a7-9ddd78352d31",
+          "assetKey": "ikea_50605484",
+          "displayName": "IKEA NISSEDAL Square Mirror \u2014 Black, 65 \u00d7 65 cm",
+          "position": {
+            "x": -0.4421819223484474,
+            "y": 0,
+            "z": 7.255985547729315
+          },
+          "rotationY": 1.5708825123182335,
+          "dimensions": {
+            "x": 1,
+            "y": 2.2,
+            "z": 0.02
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "frame": {
+              "type": "invisible",
+              "color": "invisible",
+              "layer": 0
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "3a3e62a4-bd64-4cf7-a8ab-c1ba56f5f9c9",
+          "assetKey": "ward_double",
+          "displayName": "Master wardrobe \u2014 right double doors",
+          "position": {
+            "x": 0.19287490298782212,
+            "y": 0,
+            "z": 8.320234350595285
+          },
+          "rotationY": -3.1174009240297145,
+          "dimensions": {
+            "x": 1.3,
+            "y": 2.72,
+            "z": 0.75
+          },
+          "finish": {
+            "type": "paint",
+            "color": "#dedbd1",
+            "roughness": 0.5,
+            "layer": 0
+          },
+          "sectionFinishes": {
+            "handles": {
+              "type": "metal",
+              "color": "#9c8048",
+              "roughness": 0.32,
+              "metalness": 0.8,
+              "layer": 0
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "82ef26ba-9e0d-4be1-9fd3-ad24af106fc9",
+          "assetKey": "ward_double",
+          "displayName": "Master wardrobe \u2014 left double doors",
+          "position": {
+            "x": 2.262269209356977,
+            "y": 0,
+            "z": 8.270162354760044
+          },
+          "rotationY": -3.1174009240297145,
+          "dimensions": {
+            "x": 0.88,
+            "y": 2.72,
+            "z": 0.75
+          },
+          "finish": {
+            "type": "paint",
+            "color": "#dedbd1",
+            "roughness": 0.5,
+            "layer": 0
+          },
+          "sectionFinishes": {
+            "handles": {
+              "type": "metal",
+              "color": "#9c8048",
+              "roughness": 0.32,
+              "metalness": 0.8,
+              "layer": 0
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "3c445e7b-83dd-430a-9c83-c6f2fcda7a95",
+          "assetKey": "cabinet_wardrobe",
+          "displayName": "Master wardrobe \u2014 three drawers and double doors",
+          "position": {
+            "x": 1.332541332582429,
+            "y": 0,
+            "z": 8.29265846883095
+          },
+          "rotationY": -3.1174009240297145,
+          "dimensions": {
+            "x": 0.98,
+            "y": 2.72,
+            "z": 0.75
+          },
+          "finish": {
+            "type": "paint",
+            "color": "#dedbd1",
+            "roughness": 0.5,
+            "layer": 0
+          },
+          "sectionFinishes": {
+            "handles": {
+              "type": "metal",
+              "color": "#9c8048",
+              "roughness": 0.32,
+              "metalness": 0.8,
+              "layer": 0
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "master_wardrobe_left_single",
+          "assetKey": "ward_double",
+          "displayName": "Master wardrobe \u2014 left single door",
+          "position": {
+            "x": 2.957065848451935,
+            "y": 0,
+            "z": 8.253350742631786
+          },
+          "rotationY": -3.1174009240297145,
+          "dimensions": {
+            "x": 0.51,
+            "y": 2.72,
+            "z": 0.75
+          },
+          "finish": {
+            "type": "paint",
+            "color": "#dedbd1",
+            "roughness": 0.5,
+            "layer": 0
+          },
+          "sectionFinishes": {
+            "handles": {
+              "type": "metal",
+              "color": "#9c8048",
+              "roughness": 0.32,
+              "metalness": 0.8,
+              "layer": 0
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "ffe97c8b-9409-4558-97ef-8524263563c6",
+          "assetKey": "finish_panelling_beadboard",
+          "displayName": "Beadboard Wall Panelling",
+          "position": {
+            "x": 3.202099999254942,
+            "y": 0,
+            "z": 6.702345687253471
+          },
+          "rotationY": -1.5707963267948968,
+          "dimensions": {
+            "x": 2.34,
+            "y": 0.826,
+            "z": 0.018
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "boards": {
+              "type": "invisible",
+              "color": "invisible",
+              "layer": 3
+            },
+            "beads": {
+              "type": "invisible",
+              "color": "invisible",
+              "layer": 0
+            },
+            "top_cap": {
+              "type": "invisible",
+              "color": "invisible",
+              "layer": 10
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        }
+      ],
+      "walls": [
+        {
+          "id": "_ra6yj",
+          "side": "A",
+          "finish": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_tmb2o_a",
+          "side": "B",
+          "finish": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_tmb2o_b",
+          "side": "B",
+          "finish": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_l6kfb",
+          "side": "B",
+          "finish": {
+            "type": "paint",
+            "color": "#ece5d4",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_0jsab",
+          "side": "B",
+          "finish": {
+            "type": "paint",
+            "color": "#764a40",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_h1edo",
+          "side": "B",
+          "finish": {
+            "type": "paint",
+            "color": "#ece5d4",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        }
+      ],
+      "lights": [
+        {
+          "id": "_dp8pj",
+          "assetKey": "chandelier_cascading",
+          "position": {
+            "x": 1.3671,
+            "y": 2.15,
+            "z": 7.4583
+          },
+          "lightConfig": {
+            "intensity": 0.35,
+            "color": "#ffffff",
+            "temperatureKelvin": 6500,
+            "lumens": 806
+          }
+        }
+      ]
+    },
+    {
+      "id": "_qb2a4",
+      "name": "Guest WC (2.1 m\u00b2)",
+      "area": 2.12,
+      "polygon": [
+        {
+          "x": -1.6504759999999998,
+          "y": 6.947254
+        },
+        {
+          "x": -1.6506020000000001,
+          "y": 5.729673
+        },
+        {
+          "x": -3.381927,
+          "y": 5.755145
+        },
+        {
+          "x": -3.4186,
+          "y": 6.977736
+        },
+        {
+          "x": -3.05988,
+          "y": 6.9605690000000005
+        }
+      ],
+      "height": 2.7,
+      "wallFinish": null,
+      "floorFinish": {
+        "type": "tile",
+        "variant": "canakkale_diadem_bej_59x59",
+        "color": "#d3c7b8",
+        "roughness": 0.76,
+        "metalness": 0.02,
+        "rotation": 0,
+        "layer": 0,
+        "pattern": "grid",
+        "groutWidth": 2,
+        "groutColor": "#d9cbba"
+      },
+      "items": [
+        {
+          "id": "_8n59d",
+          "assetKey": "spotlight",
+          "displayName": "Spotlight",
+          "position": {
+            "x": -2.168,
+            "y": 2.68,
+            "z": 6.8519
+          },
+          "rotationY": -2.9670597283903595,
+          "dimensions": {
+            "x": 0.15,
+            "y": 0.18,
+            "z": 0.2
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_r0nme",
+          "assetKey": "sink_susp",
+          "displayName": "Sink Susp",
+          "position": {
+            "x": -1.9941,
+            "y": 0.8,
+            "z": 6.7505
+          },
+          "rotationY": 3.1510174315505624,
+          "dimensions": {
+            "x": 0.45,
+            "y": 0.12,
+            "z": 0.4
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_zm7ft",
+          "assetKey": "socket",
+          "displayName": "Socket",
+          "position": {
+            "x": -2.3617519251477006,
+            "y": 2,
+            "z": 6.887
+          },
+          "rotationY": 3.1510174315505624,
+          "dimensions": {
+            "x": 0.1,
+            "y": 0.1,
+            "z": 0.14
+          },
+          "finish": {
+            "type": "paint",
+            "color": "#f0ece2",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "c1704eb1-8571-4d87-83c6-b994b2d89035",
+          "assetKey": "demirdokum_dt4_65l",
+          "displayName": "Demirdokum DT4 65 L Storage Water Heater",
+          "position": {
+            "x": -2.664004348040347,
+            "y": 1.4,
+            "z": 6.703445065220088
+          },
+          "rotationY": -3.132145683439837,
+          "dimensions": {
+            "x": 0.5,
+            "y": 0.72,
+            "z": 0.5
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "c583fb83-5177-4069-be86-025ec41eda6b",
+          "assetKey": "life_cat_litter",
+          "displayName": "Covered Cat Litter Box",
+          "position": {
+            "x": -1.9340815638848114,
+            "y": 0,
+            "z": 6.730062644265633
+          },
+          "rotationY": -1.5707963267948966,
+          "dimensions": {
+            "x": 0.42,
+            "y": 0.43,
+            "z": 0.56
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "5ad9be9b-6267-410d-aba9-8ee577cfda0d",
+          "assetKey": "life_cat_litter",
+          "displayName": "Covered Cat Litter Box",
+          "position": {
+            "x": -3.1089492927030555,
+            "y": 0,
+            "z": 6.747531096373866
+          },
+          "rotationY": 1.5707963267948966,
+          "dimensions": {
+            "x": 0.42,
+            "y": 0.43,
+            "z": 0.56
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "9231e6fd-540e-466d-a283-0bc378bfb29a",
+          "assetKey": "ikea_80557165",
+          "displayName": "IKEA ALMTJARN Bath Mat \u2014 Beige, 60 \u00d7 120 cm",
+          "position": {
+            "x": -2.3293525748084076,
+            "y": 0,
+            "z": 6.316831591978957
+          },
+          "rotationY": -3.132145683439837,
+          "dimensions": {
+            "x": 1,
+            "y": 0.015,
+            "z": 1.2
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "cd6fecb0-7b8b-4fee-b8fd-0831cd37c8bd",
+          "assetKey": "squat_toilet",
+          "displayName": "Squat Toilet",
+          "position": {
+            "x": -3.0625377506906495,
+            "y": 0,
+            "z": 6.270612141675219
+          },
+          "rotationY": 1.5707963267948966,
+          "dimensions": {
+            "x": 0.55,
+            "y": 0.1,
+            "z": 0.65
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "5f47cf47-50fc-439b-9bcf-88ca7389adb9",
+          "assetKey": "washing_machine",
+          "displayName": "Standard White Washing Machine",
+          "position": {
+            "x": -0.2540072546994789,
+            "y": 0,
+            "z": 3.69197715236888
+          },
+          "rotationY": 1.5707963267948966,
+          "dimensions": {
+            "x": 0.6,
+            "y": 0.85,
+            "z": 0.6
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        }
+      ],
+      "walls": [
+        {
+          "id": "_ojjeh_a",
+          "side": "B",
+          "finish": {
+            "type": "tile",
+            "variant": "canakkale_wabi_maburu_bej_34x111",
+            "color": "#cec8ba",
+            "roughness": 0.22,
+            "metalness": 0.08,
+            "rotation": 0,
+            "layer": 0,
+            "pattern": "grid",
+            "groutWidth": 2,
+            "groutColor": "#d9cbba"
+          }
+        },
+        {
+          "id": "_u3jaj",
+          "side": "B",
+          "finish": {
+            "type": "tile",
+            "variant": "canakkale_wabi_maburu_bej_34x111",
+            "color": "#cec8ba",
+            "roughness": 0.22,
+            "metalness": 0.08,
+            "rotation": 0,
+            "layer": 0,
+            "pattern": "grid",
+            "groutWidth": 2,
+            "groutColor": "#d9cbba"
+          }
+        },
+        {
+          "id": "_zxsqn",
+          "side": "B",
+          "finish": {
+            "type": "tile",
+            "variant": "canakkale_wabi_maburu_bej_34x111",
+            "color": "#cec8ba",
+            "roughness": 0.22,
+            "metalness": 0.08,
+            "rotation": 0,
+            "layer": 0,
+            "pattern": "grid",
+            "groutWidth": 2,
+            "groutColor": "#d9cbba"
+          }
+        },
+        {
+          "id": "_46je5",
+          "side": "B",
+          "finish": {
+            "type": "tile",
+            "variant": "canakkale_wabi_maburu_bej_34x111",
+            "color": "#cec8ba",
+            "roughness": 0.22,
+            "metalness": 0.08,
+            "rotation": 0,
+            "layer": 0,
+            "pattern": "grid",
+            "groutWidth": 2,
+            "groutColor": "#d9cbba"
+          }
+        }
+      ],
+      "lights": [
+        {
+          "id": "_8n59d",
+          "assetKey": "spotlight",
+          "position": {
+            "x": -2.168,
+            "y": 2.68,
+            "z": 6.8519
+          },
+          "lightConfig": null
+        }
+      ]
+    },
+    {
+      "id": "_4wyay",
+      "name": "Hallway / Entry (11.7 m\u00b2)",
+      "area": 11.72,
+      "polygon": [
+        {
+          "x": -1.612049,
+          "y": 4.046641
+        },
+        {
+          "x": -1.5960990000000002,
+          "y": 0.8922140000000001
+        },
+        {
+          "x": -0.544917,
+          "y": 0.878387
+        },
+        {
+          "x": -0.5454869999999999,
+          "y": 2.7198970000000005
+        },
+        {
+          "x": -0.557378,
+          "y": 3.2222210000000002
+        },
+        {
+          "x": -0.557314,
+          "y": 6.936926
+        },
+        {
+          "x": -1.6004720000000001,
+          "y": 6.946781
+        },
+        {
+          "x": -1.600608,
+          "y": 5.678933
+        },
+        {
+          "x": -3.430471,
+          "y": 5.705852999999999
+        },
+        {
+          "x": -4.85027,
+          "y": 5.705852
+        },
+        {
+          "x": -4.850297,
+          "y": 4.046651
+        }
+      ],
+      "height": 2.7,
+      "wallFinish": {
+        "type": "paint",
+        "color": "#fbfaf5",
+        "roughness": 0.85,
+        "layer": 0
+      },
+      "floorFinish": {
+        "type": "tile",
+        "variant": "caramel_ripple_gloss_20x10",
+        "color": "#ffffff",
+        "roughness": 0.18,
+        "metalness": 0,
+        "rotation": 0,
+        "layer": 0,
+        "pattern": "running_bond",
+        "groutWidth": 1,
+        "groutColor": "#d1d5db"
+      },
+      "items": [
+        {
+          "id": "_il3po",
+          "assetKey": "lighting_pendant_globe",
+          "displayName": "Opal Globe Pendant Light",
+          "position": {
+            "x": -3.292,
+            "y": 2.15,
+            "z": 4.832504384398554
+          },
+          "rotationY": 3.141592653589793,
+          "dimensions": {
+            "x": 0.506,
+            "y": 0.6,
+            "z": 0.33299999999999996
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": {
+            "intensity": 0.55,
+            "temperatureKelvin": 6500,
+            "lumens": 806
+          },
+          "visible": true
+        },
+        {
+          "id": "_rkn37",
+          "assetKey": "ikea_20390970",
+          "displayName": "IKEA RANARP Pendant Lamp \u2014 Off-White, 38 cm",
+          "position": {
+            "x": -1.0714,
+            "y": 2.15,
+            "z": 2.834
+          },
+          "rotationY": 3.141592653589793,
+          "dimensions": {
+            "x": 0.52,
+            "y": 0.6,
+            "z": 0.52
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": {
+            "enabled": true,
+            "intensity": 0.25,
+            "temperatureKelvin": 6500,
+            "lumens": 806
+          },
+          "visible": true
+        },
+        {
+          "id": "_nzt85",
+          "assetKey": "socket",
+          "displayName": "Socket",
+          "position": {
+            "x": -4.8738,
+            "y": 2.2,
+            "z": 4.813
+          },
+          "rotationY": 1.5707963267948966,
+          "dimensions": {
+            "x": 0.3,
+            "y": 0.25,
+            "z": 0.1
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "wood": {
+              "type": "paint",
+              "color": "#e9e4dc",
+              "roughness": 0.85,
+              "layer": 0
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_spnok",
+          "assetKey": "vrc_bubble_single_switch_burgundy",
+          "displayName": "VRC Bubble Single Rocker Switch \u2014 Burgundy",
+          "position": {
+            "x": -2.730463349398676,
+            "y": 1.5,
+            "z": 5.682861223523806
+          },
+          "rotationY": -3.1269318878730408,
+          "dimensions": {
+            "x": 0.1,
+            "y": 0.1,
+            "z": 0.025
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_59r0o",
+          "assetKey": "vrc_bubble_single_switch_burgundy",
+          "displayName": "VRC Bubble Single Rocker Switch \u2014 Burgundy",
+          "position": {
+            "x": -2.985663349398676,
+            "y": 1.5,
+            "z": 5.680842964665754
+          },
+          "rotationY": -3.1269318878730408,
+          "dimensions": {
+            "x": 0.1,
+            "y": 0.1,
+            "z": 0.025
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_b4br6",
+          "assetKey": "socket",
+          "displayName": "Socket",
+          "position": {
+            "x": -1.8108,
+            "y": 0.3,
+            "z": 4.1166
+          },
+          "rotationY": 0,
+          "dimensions": {
+            "x": 0.14,
+            "y": 0.1,
+            "z": 0.14
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_1haeb",
+          "assetKey": "ward_double",
+          "displayName": "Ward Double",
+          "position": {
+            "x": -3.5268,
+            "y": 0,
+            "z": 4.3481
+          },
+          "rotationY": 0,
+          "dimensions": {
+            "x": 2.647,
+            "y": 2.4,
+            "z": 0.5797
+          },
+          "finish": {
+            "type": "paint",
+            "color": "#b7aea2",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "06f4c673-a7da-4c6c-99cf-d6f6fdb58121",
+          "assetKey": "finish_threshold_stone",
+          "displayName": "Stone Door Threshold",
+          "position": {
+            "x": -0.49241490736702476,
+            "y": 0,
+            "z": 5.051974234159697
+          },
+          "rotationY": -1.570772318861572,
+          "dimensions": {
+            "x": 0.9,
+            "y": 0.02,
+            "z": 0.15
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "64ba8cfc-ec6b-419b-bee0-42062d38a288",
+          "assetKey": "finish_threshold_stone",
+          "displayName": "Stone Door Threshold",
+          "position": {
+            "x": -4.165785843927183,
+            "y": 0,
+            "z": 5.777791978172483
+          },
+          "rotationY": 3.141592073958647,
+          "dimensions": {
+            "x": 1.05,
+            "y": 0.02,
+            "z": 0.15
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "af56b383-9029-430a-9a92-30b1f79338d7",
+          "assetKey": "life_cat_fountain",
+          "displayName": "Stainless-Steel Tray Cat Water Fountain",
+          "position": {
+            "x": -1.9098001939789406,
+            "y": 0,
+            "z": 4.265995898842961
+          },
+          "rotationY": 1.5657218381605447,
+          "dimensions": {
+            "x": 0.25,
+            "y": 0.16,
+            "z": 0.25
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "1b0e45d2-4299-4294-aef5-a078de280968",
+          "assetKey": "viko_karre_socket_white",
+          "displayName": "VIKO Karre Earthed Socket \u2014 White",
+          "position": {
+            "x": -1.5894239157916084,
+            "y": 1.5,
+            "z": 6.804561607616194
+          },
+          "rotationY": 1.5709618904449778,
+          "dimensions": {
+            "x": 0.082,
+            "y": 0.082,
+            "z": 0.02
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "a10dde3d-6e2e-4dce-b0c2-38d80d094f8d",
+          "assetKey": "viko_karre_single_switch_white",
+          "displayName": "VIKO Karre Single Rocker Switch \u2014 White",
+          "position": {
+            "x": -0.5653681284926694,
+            "y": 1.5,
+            "z": 3.6059877704888517
+          },
+          "rotationY": -1.570772318861572,
+          "dimensions": {
+            "x": 0.082,
+            "y": 0.082,
+            "z": 0.014
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "3c2bab4c-a4fc-48b0-8174-87dbf99cb363",
+          "assetKey": "detail_mirror_arch",
+          "displayName": "Arched Wall Mirror",
+          "position": {
+            "x": -4.820283550359066,
+            "y": 0.5,
+            "z": 5.18433316393978
+          },
+          "rotationY": 1.570812045941801,
+          "dimensions": {
+            "x": 1,
+            "y": 1.5,
+            "z": 0.025
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "mirror": {
+              "type": "paint",
+              "color": "#fbfbf9",
+              "roughness": 0.85,
+              "layer": 2
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        }
+      ],
+      "walls": [
+        {
+          "id": "_hr4kt",
+          "side": "A",
+          "finish": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_kmn82",
+          "side": "A",
+          "finish": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_ule1b_b",
+          "side": "B",
+          "finish": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_4la13",
+          "side": "A",
+          "finish": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_a0wf4",
+          "side": "A",
+          "finish": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_tmb2o_a",
+          "side": "A",
+          "finish": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_ojjeh_b",
+          "side": "B",
+          "finish": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_u3jaj",
+          "side": "A",
+          "finish": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_zxsqn",
+          "side": "A",
+          "finish": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_qtcgs",
+          "side": "B",
+          "finish": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_81pgi",
+          "side": "B",
+          "finish": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_n4rjf",
+          "side": "B",
+          "finish": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_k2vy1_b",
+          "side": "B",
+          "finish": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        }
+      ],
+      "lights": [
+        {
+          "id": "_il3po",
+          "assetKey": "lighting_pendant_globe",
+          "position": {
+            "x": -3.292,
+            "y": 2.15,
+            "z": 4.832504384398554
+          },
+          "lightConfig": {
+            "intensity": 0.55,
+            "temperatureKelvin": 6500,
+            "lumens": 806
+          }
+        },
+        {
+          "id": "_rkn37",
+          "assetKey": "ikea_20390970",
+          "position": {
+            "x": -1.0714,
+            "y": 2.15,
+            "z": 2.834
+          },
+          "lightConfig": {
+            "enabled": true,
+            "intensity": 0.25,
+            "temperatureKelvin": 6500,
+            "lumens": 806
+          }
+        }
+      ]
+    },
+    {
+      "id": "_8m0m9",
+      "name": "Dining / Office (5.5 m\u00b2)",
+      "area": 5.46,
+      "polygon": [
+        {
+          "x": 1.942364,
+          "y": 0.542104
+        },
+        {
+          "x": 3.32187,
+          "y": 0.542292
+        },
+        {
+          "x": 3.4895030000000005,
+          "y": -3.189503
+        },
+        {
+          "x": 1.9425810000000001,
+          "y": -3.189523
+        }
+      ],
+      "height": 2.7,
+      "wallFinish": null,
+      "floorFinish": null,
+      "items": [
+        {
+          "id": "_6pahk",
+          "assetKey": "chair",
+          "displayName": "Chair",
+          "position": {
+            "x": 2.2546,
+            "y": 0,
+            "z": -0.9614
+          },
+          "rotationY": 1.5707963267948966,
+          "dimensions": {
+            "x": 0.45,
+            "y": 0.77,
+            "z": 0.45
+          },
+          "finish": {
+            "type": "paint",
+            "color": "#2d4a3e",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_845va",
+          "assetKey": "chair",
+          "displayName": "Chair",
+          "position": {
+            "x": 2.2211,
+            "y": 0,
+            "z": -0.4624
+          },
+          "rotationY": 1.5707963267948966,
+          "dimensions": {
+            "x": 0.45,
+            "y": 0.77,
+            "z": 0.45
+          },
+          "finish": {
+            "type": "paint",
+            "color": "#2d4a3e",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_t8idw",
+          "assetKey": "table_round",
+          "displayName": "Table Round",
+          "position": {
+            "x": 2.3925,
+            "y": 0,
+            "z": -1.5653
+          },
+          "rotationY": 1.5707963267948966,
+          "dimensions": {
+            "x": 0.9,
+            "y": 0.75,
+            "z": 0.9
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "tabletop": {
+              "type": "paint",
+              "color": "#607262",
+              "roughness": 0.85,
+              "layer": 0
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_kgeiy",
+          "assetKey": "ceiling_spot",
+          "displayName": "Ceiling Spot",
+          "position": {
+            "x": 2.6749,
+            "y": 2.7,
+            "z": -1.3592
+          },
+          "rotationY": 3.141592653589793,
+          "dimensions": {
+            "x": 0.24,
+            "y": 0.05,
+            "z": 0.3
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "housing": {
+              "type": "metal",
+              "variant": "matte_white_powder",
+              "color": "#f8fafc",
+              "roughness": 0.7,
+              "metalness": 0.05
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_my64w",
+          "assetKey": "chair",
+          "displayName": "Chair",
+          "position": {
+            "x": 2.2684,
+            "y": 0,
+            "z": -2.0827
+          },
+          "rotationY": 1.5707963267948966,
+          "dimensions": {
+            "x": 0.45,
+            "y": 0.77,
+            "z": 0.45
+          },
+          "finish": {
+            "type": "paint",
+            "color": "#2d4a3e",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        }
+      ],
+      "walls": [
+        {
+          "id": "_g9657",
+          "side": "B",
+          "finish": null
+        },
+        {
+          "id": "_f1kbv",
+          "side": "A",
+          "finish": null
+        },
+        {
+          "id": "_vfhig",
+          "side": "A",
+          "finish": null
+        },
+        {
+          "id": "_76grj",
+          "side": "A",
+          "finish": null
+        },
+        {
+          "id": "_w5f7a_a",
+          "side": "B",
+          "finish": {
+            "type": "plaster",
+            "variant": "stucco",
+            "color": "#e5e0d8",
+            "roughness": 0.95
+          }
+        },
+        {
+          "id": "_w5f7a_b",
+          "side": "B",
+          "finish": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        }
+      ],
+      "lights": [
+        {
+          "id": "_kgeiy",
+          "assetKey": "ceiling_spot",
+          "position": {
+            "x": 2.6749,
+            "y": 2.7,
+            "z": -1.3592
+          },
+          "lightConfig": null
+        }
+      ]
+    },
+    {
+      "id": "_elc1j",
+      "name": "Living Room (22.0 m\u00b2)",
+      "area": 22,
+      "polygon": [
+        {
+          "x": -4.89,
+          "y": -1.9330619999999998
+        },
+        {
+          "x": -4.790068,
+          "y": -1.933199
+        },
+        {
+          "x": -4.789999,
+          "y": -1.411199
+        },
+        {
+          "x": -4.889999,
+          "y": -1.4112
+        },
+        {
+          "x": -4.89,
+          "y": 3.585
+        },
+        {
+          "x": -4.557621,
+          "y": 3.585
+        },
+        {
+          "x": -4.5574639999999995,
+          "y": 3.946697
+        },
+        {
+          "x": -1.7115440000000002,
+          "y": 3.9466430000000003
+        },
+        {
+          "x": -1.684691,
+          "y": -1.364136
+        },
+        {
+          "x": -1.7846899999999999,
+          "y": -1.364641
+        },
+        {
+          "x": -1.781989,
+          "y": -1.8868070000000001
+        },
+        {
+          "x": -1.6820519999999999,
+          "y": -1.88618
+        },
+        {
+          "x": -1.6759970000000002,
+          "y": -3.083538
+        },
+        {
+          "x": -4.89,
+          "y": -2.9372230000000004
+        }
+      ],
+      "height": 2.7,
+      "wallFinish": {
+        "type": "paint",
+        "color": "#c9975b",
+        "roughness": 0.85
+      },
+      "floorFinish": null,
+      "items": [
+        {
+          "id": "_ouz7e",
+          "assetKey": "sofa_double",
+          "displayName": "Sofa Double",
+          "position": {
+            "x": -2.9822,
+            "y": 0,
+            "z": -1.7937
+          },
+          "rotationY": 0,
+          "dimensions": {
+            "x": 1.4,
+            "y": 0.85,
+            "z": 0.8
+          },
+          "finish": {
+            "type": "paint",
+            "color": "#4a0000",
+            "roughness": 0.85
+          },
+          "sectionFinishes": {
+            "armrests": {
+              "type": "wood",
+              "variant": "dark_wenge",
+              "color": "#27201b",
+              "roughness": 0.5,
+              "rotation": 90,
+              "layer": 0
+            },
+            "seat": {
+              "type": "fabric",
+              "variant": "velvet_champagne",
+              "color": "#ede6d6",
+              "roughness": 0.82,
+              "metalness": 0.02,
+              "layer": -1,
+              "scale": 1,
+              "mappingMode": "stretched"
+            },
+            "backrest": {
+              "type": "fabric",
+              "variant": "velvet_champagne",
+              "color": "#ede6d6",
+              "roughness": 0.82,
+              "metalness": 0.02,
+              "layer": 1,
+              "scale": 1,
+              "mappingMode": "stretched"
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_vso7v",
+          "assetKey": "sofa_triple",
+          "displayName": "Sofa Triple",
+          "position": {
+            "x": -4.49,
+            "y": 0,
+            "z": -0.3429
+          },
+          "rotationY": 1.5707963267948966,
+          "dimensions": {
+            "x": 2,
+            "y": 0.85,
+            "z": 0.8
+          },
+          "finish": {
+            "type": "paint",
+            "color": "#707335",
+            "roughness": 0.85
+          },
+          "sectionFinishes": {
+            "armrests": {
+              "type": "wood",
+              "variant": "dark_wenge",
+              "color": "#27201b",
+              "roughness": 0.5,
+              "rotation": 90,
+              "layer": 0
+            },
+            "seat": {
+              "type": "fabric",
+              "variant": "velvet_wine_burgundy",
+              "color": "#54121d",
+              "roughness": 0.82,
+              "metalness": 0.02,
+              "layer": -1,
+              "scale": 1,
+              "mappingMode": "stretched"
+            },
+            "backrest": {
+              "type": "fabric",
+              "variant": "velvet_wine_burgundy",
+              "color": "#54121d",
+              "roughness": 0.82,
+              "metalness": 0.02,
+              "layer": 1,
+              "scale": 1,
+              "mappingMode": "stretched"
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_3qv7o",
+          "assetKey": "sofa_triple",
+          "displayName": "Sofa Triple",
+          "position": {
+            "x": -3.7989,
+            "y": 0,
+            "z": 1.246
+          },
+          "rotationY": 2.672448150653717,
+          "dimensions": {
+            "x": 0.9,
+            "y": 0.85,
+            "z": 0.8
+          },
+          "finish": {
+            "type": "paint",
+            "color": "#EAD2AC",
+            "roughness": 0.85
+          },
+          "sectionFinishes": {
+            "armrests": {
+              "type": "wood",
+              "variant": "dark_wenge",
+              "color": "#27201b",
+              "roughness": 0.5,
+              "rotation": 90,
+              "layer": 0
+            },
+            "backrest": {
+              "type": "fabric",
+              "variant": "velvet_champagne",
+              "color": "#ede6d6",
+              "roughness": 0.82,
+              "metalness": 0.02,
+              "layer": 1,
+              "scale": 1,
+              "mappingMode": "stretched"
+            },
+            "seat": {
+              "type": "fabric",
+              "variant": "velvet_champagne",
+              "color": "#ede6d6",
+              "roughness": 0.82,
+              "metalness": 0.02,
+              "layer": -1,
+              "scale": 1,
+              "mappingMode": "stretched"
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_ti80j",
+          "assetKey": "sofa_triple",
+          "displayName": "Sofa Triple",
+          "position": {
+            "x": -2.4669,
+            "y": 0,
+            "z": 1.1836
+          },
+          "rotationY": -2.730393081819929,
+          "dimensions": {
+            "x": 0.9,
+            "y": 0.85,
+            "z": 0.8
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "armrests": {
+              "type": "wood",
+              "variant": "light_ash",
+              "color": "#d4cbbe",
+              "roughness": 0.45,
+              "rotation": 90,
+              "layer": 0
+            },
+            "seat": {
+              "type": "fabric",
+              "variant": "velvet_wine_burgundy",
+              "color": "#54121d",
+              "roughness": 0.82,
+              "metalness": 0.02,
+              "layer": -1,
+              "scale": 1,
+              "mappingMode": "stretched"
+            },
+            "backrest": {
+              "type": "fabric",
+              "variant": "velvet_wine_burgundy",
+              "color": "#54121d",
+              "roughness": 0.82,
+              "metalness": 0.02,
+              "layer": 1,
+              "scale": 1,
+              "mappingMode": "stretched"
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_bdhcq",
+          "assetKey": "tv",
+          "displayName": "Tv",
+          "position": {
+            "x": -1.7398,
+            "y": 0.85,
+            "z": -0.3428
+          },
+          "rotationY": 4.7073275255539055,
+          "dimensions": {
+            "x": 1.6,
+            "y": 1,
+            "z": 0.02
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "stand": {
+              "type": "invisible",
+              "color": "invisible",
+              "layer": 0
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_78yip",
+          "assetKey": "chandelier_cascading",
+          "displayName": "Chandelier Cascading",
+          "position": {
+            "x": -3.2812,
+            "y": 2.15,
+            "z": -1.4871
+          },
+          "rotationY": 3.141592653589793,
+          "dimensions": {
+            "x": 0.52,
+            "y": 0.6,
+            "z": 0.52
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": {
+            "intensity": 0.95,
+            "color": "#e2f0ff",
+            "temperatureKelvin": 4000
+          },
+          "visible": true
+        },
+        {
+          "id": "_rm88m",
+          "assetKey": "chandelier_cascading",
+          "displayName": "Chandelier Cascading",
+          "position": {
+            "x": -3.292,
+            "y": 2.15,
+            "z": 1.8567
+          },
+          "rotationY": 3.141592653589793,
+          "dimensions": {
+            "x": 0.52,
+            "y": 0.6,
+            "z": 0.52
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": {
+            "intensity": 0.5,
+            "color": "#fff2dc",
+            "temperatureKelvin": 6500
+          },
+          "visible": true
+        },
+        {
+          "id": "_1oz5x",
+          "assetKey": "socket",
+          "displayName": "Socket",
+          "position": {
+            "x": -3.0384,
+            "y": 0.3,
+            "z": 3.8767
+          },
+          "rotationY": 3.141592653589793,
+          "dimensions": {
+            "x": 0.14,
+            "y": 0.1,
+            "z": 0.14
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_n4lmy",
+          "assetKey": "socket",
+          "displayName": "Socket",
+          "position": {
+            "x": -4.82,
+            "y": 0.3,
+            "z": 0.8158
+          },
+          "rotationY": 1.5707963267948966,
+          "dimensions": {
+            "x": 0.14,
+            "y": 0.1,
+            "z": 0.14
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_z84d9",
+          "assetKey": "air_purifier",
+          "displayName": "Cylindrical Air Purifier \u2014 White",
+          "position": {
+            "x": -1.838,
+            "y": 0,
+            "z": -1.0902
+          },
+          "rotationY": 4.7073275255539055,
+          "dimensions": {
+            "x": 0.29,
+            "y": 0.6,
+            "z": 0.31
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "wood": {
+              "type": "paint",
+              "color": "#f1f5f9",
+              "roughness": 0.85
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "c13460b8-62e9-4f24-9397-1c4721a8a7f8",
+          "assetKey": "viko_karre_double_switch_white",
+          "displayName": "VIKO Karre Double Rocker Switch \u2014 White",
+          "position": {
+            "x": -1.7083023238034725,
+            "y": 1.5,
+            "z": 2.141380604436831
+          },
+          "rotationY": -1.5758708154292487,
+          "dimensions": {
+            "x": 0.082,
+            "y": 0.082,
+            "z": 0.014
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "3464f8fc-2f40-4dda-a1cd-1bd30c0e0ad2",
+          "assetKey": "viko_karre_double_switch_white",
+          "displayName": "VIKO Karre Double Rocker Switch \u2014 White",
+          "position": {
+            "x": -1.7083023238034722,
+            "y": 1.5,
+            "z": 2.288454113757438
+          },
+          "rotationY": -1.5758708154292487,
+          "dimensions": {
+            "x": 0.082,
+            "y": 0.082,
+            "z": 0.014
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "31da797d-46df-43b3-9fc9-20665525ca2b",
+          "assetKey": "viko_karre_double_socket_white",
+          "displayName": "VIKO Karre Double Earthed Socket \u2014 White",
+          "position": {
+            "x": -1.7042967283760146,
+            "y": 0.3,
+            "z": 0.02678257300464737
+          },
+          "rotationY": -1.575773661257507,
+          "dimensions": {
+            "x": 0.1254,
+            "y": 0.0816,
+            "z": 0.02
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "c9f9c62e-ae0b-4e5a-b91d-ad01ab333f91",
+          "assetKey": "viko_karre_double_socket_white",
+          "displayName": "VIKO Karre Double Earthed Socket \u2014 White",
+          "position": {
+            "x": -1.7042967283760146,
+            "y": 0.3,
+            "z": -0.17524216829463174
+          },
+          "rotationY": -1.575773661257507,
+          "dimensions": {
+            "x": 0.1254,
+            "y": 0.0816,
+            "z": 0.02
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "bb33792b-ec5b-4abc-b172-c3a98f8387ab",
+          "assetKey": "ikea_billy_oxberg_glass_80_walnut_effect",
+          "displayName": "IKEA BILLY / OXBERG Full Glass-Door Bookcase \u2014 Walnut Effect",
+          "position": {
+            "x": -2.913,
+            "y": 0,
+            "z": 3.7566715338487553
+          },
+          "rotationY": -3.141573408918168,
+          "dimensions": {
+            "x": 0.8,
+            "y": 2.02,
+            "z": 0.3
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "door_1": {
+              "type": "metal",
+              "variant": "matte_black_powder",
+              "color": "#18181b",
+              "roughness": 0.7,
+              "metalness": 0.15,
+              "layer": 0
+            },
+            "door_2": {
+              "type": "metal",
+              "variant": "matte_black_powder",
+              "color": "#18181b",
+              "roughness": 0.7,
+              "metalness": 0.15,
+              "layer": 0
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "c5c830cf-5d14-4311-9464-836455b6c83f",
+          "assetKey": "ikea_billy_oxberg_extension_80_walnut_effect",
+          "displayName": "IKEA BILLY / OXBERG Height Extension \u2014 Glass Doors \u2014 Walnut Effect",
+          "position": {
+            "x": -3.713,
+            "y": 2.02,
+            "z": 3.7566715338487553
+          },
+          "rotationY": -3.141573408918168,
+          "dimensions": {
+            "x": 0.8,
+            "y": 0.35,
+            "z": 0.3
+          },
+          "finish": {
+            "type": "wood",
+            "variant": "billy_oak_effect",
+            "color": "#c0b099",
+            "roughness": 0.65,
+            "metalness": 0,
+            "rotation": 0,
+            "layer": 0
+          },
+          "sectionFinishes": {
+            "door_1": {
+              "type": "paint",
+              "variant": "billy_white",
+              "color": "#f3f1eb",
+              "roughness": 0.65,
+              "rotation": 0,
+              "layer": 0
+            },
+            "door_2": {
+              "type": "paint",
+              "variant": "billy_white",
+              "color": "#f3f1eb",
+              "roughness": 0.65,
+              "rotation": 0,
+              "layer": 0
+            }
+          },
+          "lightConfig": null,
+          "visible": null
+        },
+        {
+          "id": "f8b9a395-1270-4620-bcff-85fe20b6f7b1",
+          "assetKey": "ikea_billy_oxberg_glass_80_walnut_effect",
+          "displayName": "IKEA BILLY / OXBERG Full Glass-Door Bookcase \u2014 Walnut Effect",
+          "position": {
+            "x": -3.713,
+            "y": 0,
+            "z": 3.756674420549499
+          },
+          "rotationY": -3.141573408918168,
+          "dimensions": {
+            "x": 0.8,
+            "y": 2.02,
+            "z": 0.3
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "door_1": {
+              "type": "metal",
+              "variant": "matte_black_powder",
+              "color": "#18181b",
+              "roughness": 0.7,
+              "metalness": 0.15,
+              "layer": 0
+            },
+            "door_2": {
+              "type": "metal",
+              "variant": "matte_black_powder",
+              "color": "#18181b",
+              "roughness": 0.7,
+              "metalness": 0.15,
+              "layer": 0
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "9aeb3038-cc58-445f-bb5e-a4cb8baa4d9a",
+          "assetKey": "ikea_billy_oxberg_glass_80_walnut_effect",
+          "displayName": "IKEA BILLY / OXBERG Full Glass-Door Bookcase \u2014 Walnut Effect",
+          "position": {
+            "x": -2.113,
+            "y": 0,
+            "z": 3.756674420549499
+          },
+          "rotationY": -3.141573408918168,
+          "dimensions": {
+            "x": 0.8,
+            "y": 2.02,
+            "z": 0.3
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "door_1": {
+              "type": "metal",
+              "variant": "matte_black_powder",
+              "color": "#18181b",
+              "roughness": 0.7,
+              "metalness": 0.15,
+              "layer": 0
+            },
+            "door_2": {
+              "type": "metal",
+              "variant": "matte_black_powder",
+              "color": "#18181b",
+              "roughness": 0.7,
+              "metalness": 0.15,
+              "layer": 0
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "435c51e9-6f6f-4b6f-a2e3-10ad61ce07b0",
+          "assetKey": "ikea_billy_oxberg_extension_80_walnut_effect",
+          "displayName": "IKEA BILLY / OXBERG Height Extension \u2014 Glass Doors \u2014 Walnut Effect",
+          "position": {
+            "x": -2.913,
+            "y": 2.02,
+            "z": 3.756674420549499
+          },
+          "rotationY": -3.141573408918168,
+          "dimensions": {
+            "x": 0.8,
+            "y": 0.35,
+            "z": 0.3
+          },
+          "finish": {
+            "type": "wood",
+            "variant": "billy_oak_effect",
+            "color": "#c0b099",
+            "roughness": 0.65,
+            "metalness": 0,
+            "rotation": 0,
+            "layer": 0
+          },
+          "sectionFinishes": {
+            "door_1": {
+              "type": "paint",
+              "variant": "billy_white",
+              "color": "#f3f1eb",
+              "roughness": 0.65,
+              "rotation": 0,
+              "layer": 0
+            },
+            "door_2": {
+              "type": "paint",
+              "variant": "billy_white",
+              "color": "#f3f1eb",
+              "roughness": 0.65,
+              "rotation": 0,
+              "layer": 0
+            }
+          },
+          "lightConfig": null,
+          "visible": null
+        },
+        {
+          "id": "1ad5dfb2-c8f0-4474-8e01-46d536ca7a0c",
+          "assetKey": "ikea_billy_oxberg_extension_80_walnut_effect",
+          "displayName": "IKEA BILLY / OXBERG Height Extension \u2014 Glass Doors \u2014 Walnut Effect",
+          "position": {
+            "x": -2.113,
+            "y": 2.02,
+            "z": 3.756674420549499
+          },
+          "rotationY": -3.141573408918168,
+          "dimensions": {
+            "x": 0.8,
+            "y": 0.35,
+            "z": 0.3
+          },
+          "finish": {
+            "type": "wood",
+            "variant": "billy_oak_effect",
+            "color": "#c0b099",
+            "roughness": 0.65,
+            "metalness": 0,
+            "rotation": 0,
+            "layer": 0
+          },
+          "sectionFinishes": {
+            "door_1": {
+              "type": "paint",
+              "variant": "billy_white",
+              "color": "#f3f1eb",
+              "roughness": 0.65,
+              "rotation": 0,
+              "layer": 0
+            },
+            "door_2": {
+              "type": "paint",
+              "variant": "billy_white",
+              "color": "#f3f1eb",
+              "roughness": 0.65,
+              "rotation": 0,
+              "layer": 0
+            }
+          },
+          "lightConfig": null,
+          "visible": null
+        }
+      ],
+      "walls": [
+        {
+          "id": "_5k50y",
+          "side": "B",
+          "finish": {
+            "type": "paint",
+            "color": "#D4CBB9",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_7dakl",
+          "side": "B",
+          "finish": {
+            "type": "paint",
+            "color": "#D4CBB9",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_hr4kt",
+          "side": "B",
+          "finish": {
+            "type": "paint",
+            "color": "#D4CBB9",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_kmn82",
+          "side": "B",
+          "finish": {
+            "type": "paint",
+            "color": "#D4CBB9",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_l8dpu",
+          "side": "A",
+          "finish": {
+            "type": "paint",
+            "color": "#D4CBB9",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_qtcgs",
+          "side": "A",
+          "finish": {
+            "type": "paint",
+            "color": "#c9975b",
+            "roughness": 0.85
+          }
+        },
+        {
+          "id": "_k2vy1_b",
+          "side": "A",
+          "finish": {
+            "type": "paint",
+            "color": "#D4CBB9",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_k2vy1_a_a",
+          "side": "A",
+          "finish": {
+            "type": "paint",
+            "color": "#D4CBB9",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        },
+        {
+          "id": "_k2vy1_a_b",
+          "side": "A",
+          "finish": {
+            "type": "paint",
+            "color": "#D4CBB9",
+            "roughness": 0.85,
+            "layer": 0
+          }
+        }
+      ],
+      "lights": [
+        {
+          "id": "_78yip",
+          "assetKey": "chandelier_cascading",
+          "position": {
+            "x": -3.2812,
+            "y": 2.15,
+            "z": -1.4871
+          },
+          "lightConfig": {
+            "intensity": 0.95,
+            "color": "#e2f0ff",
+            "temperatureKelvin": 4000
+          }
+        },
+        {
+          "id": "_rm88m",
+          "assetKey": "chandelier_cascading",
+          "position": {
+            "x": -3.292,
+            "y": 2.15,
+            "z": 1.8567
+          },
+          "lightConfig": {
+            "intensity": 0.5,
+            "color": "#fff2dc",
+            "temperatureKelvin": 6500
+          }
+        }
+      ]
+    },
+    {
+      "id": "_v2u5b",
+      "name": "Bathroom (1.3 m\u00b2)",
+      "area": 1.26,
+      "polygon": [
+        {
+          "x": -3.4393740000000004,
+          "y": 7.610100999999999
+        },
+        {
+          "x": -2.9598989999999996,
+          "y": 7.610068999999999
+        },
+        {
+          "x": -2.589898,
+          "y": 7.610059
+        },
+        {
+          "x": -2.589898,
+          "y": 9.095093
+        },
+        {
+          "x": -3.4393979999999997,
+          "y": 9.095023
+        }
+      ],
+      "height": 2.7,
+      "wallFinish": null,
+      "floorFinish": {
+        "type": "tile",
+        "variant": "canakkale_diadem_bej_59x59",
+        "color": "#d3c7b8",
+        "roughness": 0.76,
+        "rotation": 0,
+        "groutWidth": 2,
+        "groutColor": "#9ca3af"
+      },
+      "items": [
+        {
+          "id": "_lbxob",
+          "assetKey": "shower_system",
+          "displayName": "Shower System",
+          "position": {
+            "x": -3.1095126668888877,
+            "y": 0,
+            "z": 8.765553611631564
+          },
+          "rotationY": 3.141592653589793,
+          "dimensions": {
+            "x": 0.23,
+            "y": 3.74,
+            "z": 0.65
+          },
+          "finish": {
+            "type": "metal",
+            "variant": "chrome_satin",
+            "color": "#e2e8f0",
+            "roughness": 0.2,
+            "metalness": 0.9,
+            "layer": 0
+          },
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_lom3f",
+          "assetKey": "fan_wall",
+          "displayName": "Fan Wall",
+          "position": {
+            "x": -3.198917412204783,
+            "y": 1.8,
+            "z": 7.6129
+          },
+          "rotationY": 0,
+          "dimensions": {
+            "x": 0.45,
+            "y": 0.45,
+            "z": 0.05
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_recess_shower",
+          "assetKey": "wall_recess",
+          "displayName": "Wall Recess",
+          "position": {
+            "x": -3.4893856150134983,
+            "y": 0.7,
+            "z": 8.28999994197187
+          },
+          "rotationY": 1.57078,
+          "dimensions": {
+            "x": 1.09,
+            "y": 2,
+            "z": 0.1
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "recess_wall": {
+              "type": "tile",
+              "variant": "kale_parlak_sage_10x30",
+              "color": "#9aa397",
+              "roughness": 0.12,
+              "metalness": 0.05,
+              "rotation": 0,
+              "layer": 0,
+              "pattern": "vertical_stack",
+              "groutWidth": 2,
+              "groutColor": "#d1d5db"
+            },
+            "sides": {
+              "type": "tile",
+              "variant": "canakkale_wabi_maburu_bej_34x111",
+              "color": "#cec8ba",
+              "roughness": 0.22,
+              "metalness": 0.08,
+              "rotation": 0,
+              "layer": 0,
+              "pattern": "grid",
+              "groutWidth": 2,
+              "groutColor": "#d1d5db"
+            },
+            "wood": {
+              "type": "tile",
+              "variant": "kale_parlak_sage_10x30",
+              "color": "#9aa397",
+              "roughness": 0.12,
+              "metalness": 0.05,
+              "rotation": 0,
+              "pattern": "diagonal_herringbone",
+              "groutWidth": 2,
+              "groutColor": "#d1d5db"
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        }
+      ],
+      "walls": [
+        {
+          "id": "_s7f6s",
+          "side": "A",
+          "finish": {
+            "type": "tile",
+            "variant": "canakkale_wabi_maburu_bej_34x111",
+            "color": "#cec8ba",
+            "roughness": 0.22,
+            "metalness": 0.08,
+            "rotation": 0,
+            "pattern": "grid",
+            "groutWidth": 2,
+            "groutColor": "#9ca3af"
+          }
+        },
+        {
+          "id": "_gmcn4",
+          "side": "A",
+          "finish": {
+            "type": "glass",
+            "variant": "frosted",
+            "color": "#f1f5f9",
+            "roughness": 0.1
+          }
+        },
+        {
+          "id": "_1m08x_a",
+          "side": "A",
+          "finish": {
+            "type": "glass",
+            "variant": "clear",
+            "color": "#d8eeff",
+            "roughness": 0.1
+          }
+        },
+        {
+          "id": "_1m08x_b",
+          "side": "A",
+          "finish": {
+            "type": "glass",
+            "variant": "frosted_mica",
+            "color": "#f8fafc",
+            "roughness": 0.1
+          }
+        }
+      ],
+      "lights": []
+    },
+    {
+      "id": "_rscdq",
+      "name": "Bathroom (4.2 m\u00b2)",
+      "area": 4.15,
+      "polygon": [
+        {
+          "x": -0.6070949999999999,
+          "y": 8.528633
+        },
+        {
+          "x": -0.843197,
+          "y": 8.528911
+        },
+        {
+          "x": -0.8431770000000001,
+          "y": 9.095236
+        },
+        {
+          "x": -2.539898,
+          "y": 9.095096999999999
+        },
+        {
+          "x": -2.539898,
+          "y": 7.5600570000000005
+        },
+        {
+          "x": -2.959898,
+          "y": 7.560068
+        },
+        {
+          "x": -2.9598829999999996,
+          "y": 7.009627
+        },
+        {
+          "x": -0.607306,
+          "y": 6.987401
+        }
+      ],
+      "height": 2.7,
+      "wallFinish": null,
+      "floorFinish": {
+        "type": "tile",
+        "variant": "canakkale_diadem_bej_59x59",
+        "color": "#d3c7b8",
+        "roughness": 0.76,
+        "metalness": 0.02,
+        "rotation": 0,
+        "groutWidth": 2,
+        "groutColor": "#9ca3af"
+      },
+      "items": [
+        {
+          "id": "_60bv8",
+          "assetKey": "toilet",
+          "displayName": "Toilet",
+          "position": {
+            "x": -1.9468,
+            "y": 0,
+            "z": 7.3251
+          },
+          "rotationY": 0.009424777960769237,
+          "dimensions": {
+            "x": 0.38,
+            "y": 0.79,
+            "z": 0.65
+          },
+          "finish": {
+            "type": "porcelain",
+            "variant": "porcelain_white",
+            "color": "#ffffff",
+            "roughness": 0.04,
+            "metalness": 0.02
+          },
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_3v3a1",
+          "assetKey": "basin_cabinet_lower",
+          "displayName": "Basin Cabinet Lower",
+          "position": {
+            "x": -1.2568,
+            "y": 0.33,
+            "z": 8.8702
+          },
+          "rotationY": 3.1414181206645937,
+          "dimensions": {
+            "x": 0.8,
+            "y": 0.65,
+            "z": 0.45
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_vw5zq",
+          "assetKey": "washing_machine",
+          "displayName": "Washing Machine",
+          "position": {
+            "x": -2.0646,
+            "y": 0,
+            "z": 10.2089
+          },
+          "rotationY": 3.141592653589793,
+          "dimensions": {
+            "x": 0.6,
+            "y": 1.7,
+            "z": 0.6
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_2yt5z",
+          "assetKey": "open_shelving",
+          "displayName": "Open Shelving",
+          "position": {
+            "x": -0.7353,
+            "y": 0.35,
+            "z": 8.1276
+          },
+          "rotationY": -1.5706217938696971,
+          "dimensions": {
+            "x": 0.8021,
+            "y": 1.65,
+            "z": 0.2396
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "frame": {
+              "type": "lambri",
+              "variant": "fluted_panel",
+              "color": "#3a4843",
+              "roughness": 0.6
+            },
+            "shelves": {
+              "type": "lambri",
+              "variant": "fluted_panel",
+              "color": "#3a4843",
+              "roughness": 0.6
+            },
+            "body": {
+              "type": "lambri",
+              "variant": "fluted_panel",
+              "color": "#3a4843",
+              "roughness": 0.6
+            },
+            "handles": {
+              "type": "paint",
+              "color": "#18181b",
+              "roughness": 0.85
+            },
+            "door_1": {
+              "type": "lambri",
+              "variant": "fluted_panel",
+              "color": "#3a4843",
+              "roughness": 0.55,
+              "layer": 0,
+              "backingColor": "#121212"
+            },
+            "door_2": {
+              "type": "lambri",
+              "variant": "fluted_panel",
+              "color": "#3a4843",
+              "roughness": 0.55,
+              "layer": 0,
+              "backingColor": "#121212"
+            },
+            "back_panel": {
+              "type": "paint",
+              "color": "#fbfbf9",
+              "roughness": 0.85,
+              "layer": 0
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_f2i0v",
+          "assetKey": "mirror_cabinet_upper",
+          "displayName": "Mirror Cabinet Upper",
+          "position": {
+            "x": -1.2568,
+            "y": 1.3,
+            "z": 9.0353
+          },
+          "rotationY": 3.1414181206645937,
+          "dimensions": {
+            "x": 0.8,
+            "y": 0.7,
+            "z": 0.12
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "frame": {
+              "type": "lambri",
+              "variant": "fluted_panel",
+              "color": "#3a4843",
+              "roughness": 0.55,
+              "layer": 0,
+              "backingColor": "#121212"
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_fyhiy",
+          "assetKey": "ceiling_spot",
+          "displayName": "Ceiling Spot",
+          "position": {
+            "x": -1.9911,
+            "y": 2.4,
+            "z": 8.0671
+          },
+          "rotationY": 3.141592653589793,
+          "dimensions": {
+            "x": 0.24,
+            "y": 0.1,
+            "z": 0.24
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": {
+            "intensity": 3,
+            "color": "#e2f0ff",
+            "temperatureKelvin": 6500
+          },
+          "visible": true
+        },
+        {
+          "id": "_ie0xi",
+          "assetKey": "ward_single",
+          "displayName": "Ward Single",
+          "position": {
+            "x": -2.75,
+            "y": 0.15,
+            "z": 7.295021506271356
+          },
+          "rotationY": 1.5707963267948966,
+          "dimensions": {
+            "x": 0.53,
+            "y": 2.15,
+            "z": 0.4245
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "handles": {
+              "type": "metal",
+              "variant": "matte_black_powder",
+              "color": "#18181b",
+              "roughness": 0.7,
+              "metalness": 0.15
+            },
+            "body": {
+              "type": "lambri",
+              "variant": "fluted_panel",
+              "color": "#3a4843",
+              "roughness": 0.6,
+              "layer": -1
+            },
+            "door_3": {
+              "type": "lambri",
+              "variant": "fluted_panel",
+              "color": "#3a4843",
+              "roughness": 0.55,
+              "layer": 0,
+              "backingColor": "#121212"
+            },
+            "door_2": {
+              "type": "lambri",
+              "variant": "fluted_panel",
+              "color": "#3a4843",
+              "roughness": 0.55,
+              "layer": 0,
+              "backingColor": "#121212"
+            },
+            "door_1": {
+              "type": "lambri",
+              "variant": "fluted_panel",
+              "color": "#3a4843",
+              "roughness": 0.55,
+              "layer": 0,
+              "backingColor": "#121212"
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_l311d",
+          "assetKey": "towel_hooks",
+          "displayName": "Towel Hooks",
+          "position": {
+            "x": -0.6807,
+            "y": 1.8,
+            "z": 7.4359
+          },
+          "rotationY": -1.5706217938696971,
+          "dimensions": {
+            "x": 0.01,
+            "y": 0.045,
+            "z": 0.01
+          },
+          "finish": {
+            "type": "metal",
+            "variant": "chrome_shiny",
+            "color": "#f1f5f9",
+            "roughness": 0.05,
+            "metalness": 0.98
+          },
+          "sectionFinishes": {
+            "wood": {
+              "type": "metal",
+              "variant": "brass_brushed",
+              "color": "#d97706",
+              "roughness": 0.32,
+              "metalness": 0.85
+            },
+            "hooks": {
+              "type": "metal",
+              "variant": "chrome_satin",
+              "color": "#e2e8f0",
+              "roughness": 0.2,
+              "metalness": 0.9
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_iih7s",
+          "assetKey": "wastebin",
+          "displayName": "Wastebin",
+          "position": {
+            "x": -1.6115,
+            "y": 0,
+            "z": 7.1282
+          },
+          "rotationY": 0.744208393050382,
+          "dimensions": {
+            "x": 0.25,
+            "y": 0.41,
+            "z": 0.25
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_54nar",
+          "assetKey": "toilet_brush",
+          "displayName": "Toilet Brush",
+          "position": {
+            "x": -2.2084,
+            "y": 0,
+            "z": 7.2033
+          },
+          "rotationY": 3.141592653589793,
+          "dimensions": {
+            "x": 0.12,
+            "y": 0.46,
+            "z": 0.12
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_6dabc",
+          "assetKey": "toilet_paper",
+          "displayName": "Toilet Paper",
+          "position": {
+            "x": -2.249,
+            "y": 0.6,
+            "z": 7.0596
+          },
+          "rotationY": 0.009424777960769237,
+          "dimensions": {
+            "x": 0.13,
+            "y": 0.35,
+            "z": 0.13
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_x3jdj",
+          "assetKey": "single_towel_hook",
+          "displayName": "Single Towel Hook",
+          "position": {
+            "x": -1.807,
+            "y": 1.1,
+            "z": 9.0929
+          },
+          "rotationY": 3.141592653589793,
+          "dimensions": {
+            "x": 0.1464,
+            "y": 0.46,
+            "z": 0.0766
+          },
+          "finish": null,
+          "sectionFinishes": {
+            "wood": {
+              "type": "metal",
+              "variant": "gunmetal",
+              "color": "#374151",
+              "roughness": 0.25,
+              "metalness": 0.85
+            },
+            "towel": {
+              "type": "paint",
+              "color": "#934d3f",
+              "roughness": 0.85
+            }
+          },
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "_inyxv",
+          "assetKey": "ceiling_spot",
+          "displayName": "Ceiling Spot",
+          "position": {
+            "x": -1.9911,
+            "y": 2.4,
+            "z": 7.3127
+          },
+          "rotationY": 3.141592653589793,
+          "dimensions": {
+            "x": 0.24,
+            "y": 0.1,
+            "z": 0.24
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": {
+            "intensity": 1.35,
+            "color": "#e2f0ff",
+            "temperatureKelvin": 6500
+          },
+          "visible": true
+        },
+        {
+          "id": "a59f1ee9-36ae-4fe0-9e51-d37fba833942",
+          "assetKey": "ikea_80557170",
+          "displayName": "IKEA ALMTJARN Bath Mat \u2014 Blue, 60 \u00d7 120 cm",
+          "position": {
+            "x": -1.273753035592822,
+            "y": 0,
+            "z": 7.921290964434323
+          },
+          "rotationY": 1.5707963267948966,
+          "dimensions": {
+            "x": 1.2,
+            "y": 0.01,
+            "z": 0.6
+          },
+          "finish": {
+            "type": "paint",
+            "color": "#9f8d83",
+            "roughness": 0.85,
+            "layer": 2
+          },
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "aa09fc9a-e187-47ef-af39-e0e0db28b36a",
+          "assetKey": "ikea_60489422",
+          "displayName": "IKEA ALMTJARN Bath Mat \u2014 Dark Grey, 60 \u00d7 90 cm",
+          "position": {
+            "x": -2.0412651471427585,
+            "y": 0,
+            "z": 8.011403592442385
+          },
+          "rotationY": 1.5707963267948968,
+          "dimensions": {
+            "x": 0.6,
+            "y": 0.02,
+            "z": 0.9
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "ac315a70-51e3-4cf7-b864-0766d5aa23c7",
+          "assetKey": "viko_karre_single_switch_white",
+          "displayName": "VIKO Karre Single Rocker Switch \u2014 White",
+          "position": {
+            "x": -1.5912739769971354,
+            "y": 1.5,
+            "z": 7.005834436420832
+          },
+          "rotationY": 0.00944697014995622,
+          "dimensions": {
+            "x": 0.082,
+            "y": 0.082,
+            "z": 0.014
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "b7467e8c-92de-45c2-b4e6-e45377e97785",
+          "assetKey": "viko_karre_socket_white",
+          "displayName": "VIKO Karre Earthed Socket \u2014 White",
+          "position": {
+            "x": -2.0591378968089913,
+            "y": 1,
+            "z": 9.084121783865173
+          },
+          "rotationY": 3.1415133324026927,
+          "dimensions": {
+            "x": 0.082,
+            "y": 0.082,
+            "z": 0.02
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "d7ac4736-8022-4680-aa31-8529dee8c495",
+          "assetKey": "viko_karre_socket_white",
+          "displayName": "VIKO Karre Earthed Socket \u2014 White",
+          "position": {
+            "x": -2.0595648737665018,
+            "y": 1.08,
+            "z": 9.084134548155314
+          },
+          "rotationY": 3.141592653589793,
+          "dimensions": {
+            "x": 0.082,
+            "y": 0.082,
+            "z": 0.02
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        },
+        {
+          "id": "08befc82-a55d-41d5-99c8-c5de15edfe78",
+          "assetKey": "viko_karre_socket_white",
+          "displayName": "VIKO Karre Earthed Socket \u2014 White",
+          "position": {
+            "x": -1.7473781427439967,
+            "y": 1,
+            "z": 9.084166345819346
+          },
+          "rotationY": 3.1415133324026927,
+          "dimensions": {
+            "x": 0.082,
+            "y": 0.082,
+            "z": 0.02
+          },
+          "finish": null,
+          "sectionFinishes": null,
+          "lightConfig": null,
+          "visible": true
+        }
+      ],
+      "walls": [
+        {
+          "id": "_tmb2o_b",
+          "side": "A",
+          "finish": null
+        },
+        {
+          "id": "_h1edo",
+          "side": "A",
+          "finish": {
+            "type": "tile",
+            "variant": "canakkale_wabi_maburu_bej_34x111",
+            "color": "#cec8ba",
+            "roughness": 0.22,
+            "rotation": 0,
+            "groutWidth": 2,
+            "groutColor": "#9ca3af"
+          }
+        },
+        {
+          "id": "_ojjeh_a",
+          "side": "A",
+          "finish": {
+            "type": "tile",
+            "variant": "canakkale_wabi_maburu_bej_34x111",
+            "color": "#cec8ba",
+            "roughness": 0.22,
+            "rotation": 0,
+            "groutWidth": 2,
+            "groutColor": "#9ca3af"
+          }
+        },
+        {
+          "id": "_ojjeh_b",
+          "side": "A",
+          "finish": {
+            "type": "tile",
+            "variant": "canakkale_wabi_maburu_bej_34x111",
+            "color": "#cec8ba",
+            "roughness": 0.22,
+            "rotation": 0,
+            "groutWidth": 2,
+            "groutColor": "#9ca3af"
+          }
+        },
+        {
+          "id": "_gmcn4",
+          "side": "B",
+          "finish": {
+            "type": "glass",
+            "variant": "frosted_mica",
+            "color": "#f8fafc",
+            "roughness": 0.1
+          }
+        },
+        {
+          "id": "_7sezn",
+          "side": "B",
+          "finish": {
+            "type": "tile",
+            "variant": "canakkale_wabi_maburu_bej_34x111",
+            "color": "#cec8ba",
+            "roughness": 0.22,
+            "metalness": 0.08,
+            "rotation": 0,
+            "groutWidth": 2,
+            "groutColor": "#9ca3af"
+          }
+        },
+        {
+          "id": "_1m08x_a",
+          "side": "B",
+          "finish": {
+            "type": "glass",
+            "variant": "clear",
+            "color": "#d8eeff",
+            "roughness": 0.1
+          }
+        },
+        {
+          "id": "_1m08x_b",
+          "side": "B",
+          "finish": {
+            "type": "glass",
+            "variant": "frosted_mica",
+            "color": "#f8fafc",
+            "roughness": 0.1
+          }
+        }
+      ],
+      "lights": [
+        {
+          "id": "_fyhiy",
+          "assetKey": "ceiling_spot",
+          "position": {
+            "x": -1.9911,
+            "y": 2.4,
+            "z": 8.0671
+          },
+          "lightConfig": {
+            "intensity": 3,
+            "color": "#e2f0ff",
+            "temperatureKelvin": 6500
+          }
+        },
+        {
+          "id": "_inyxv",
+          "assetKey": "ceiling_spot",
+          "position": {
+            "x": -1.9911,
+            "y": 2.4,
+            "z": 7.3127
+          },
+          "lightConfig": {
+            "intensity": 1.35,
+            "color": "#e2f0ff",
+            "temperatureKelvin": 6500
+          }
+        }
+      ]
+    }
+  ],
+  "elementCounts": {
+    "wall": 45,
+    "column": 8,
+    "room": 10,
+    "furniture.standard": 116,
+    "furniture.basin": 1,
+    "furniture.shelving": 7,
+    "furniture.luminaire": 16,
+    "furniture.recess": 1
+  }
+}

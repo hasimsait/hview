@@ -1,0 +1,1354 @@
+{
+  "sourceSHA256": "fc1b8c8a10f84aede4ecbe2ba24bb849981e1b318ac211a44c7cdd4710392964",
+  "stage": "originals",
+  "settings": {
+    "night": true,
+    "foreground": "solid",
+    "sockets": true,
+    "ceilings": true,
+    "wallCutaway": false,
+    "whiteBalanceAdaptation": 0
+  },
+  "temporaryLighting": [
+    "render_shower_light: 806 lm, ceiling-only review light below the 2.4 m shower ceiling"
+  ],
+  "lightAdjustments": [
+    {
+      "id": "_kgeiy",
+      "roomId": "_8m0m9",
+      "before": {
+        "position": {
+          "x": 2.6749,
+          "y": 2.7,
+          "z": -1.3592
+        }
+      },
+      "after": {
+        "position": {
+          "x": 2.6749,
+          "y": 2.6300000000000003,
+          "z": -1.3592
+        },
+        "lightConfig": {
+          "lumens": 806,
+          "intensity": 1
+        }
+      }
+    },
+    {
+      "id": "_fyhiy",
+      "roomId": "_rscdq",
+      "before": {
+        "position": {
+          "x": -1.9911,
+          "y": 2.4,
+          "z": 8.0671
+        },
+        "lightConfig": {
+          "intensity": 3,
+          "color": "#e2f0ff",
+          "temperatureKelvin": 6500
+        }
+      },
+      "after": {
+        "position": {
+          "x": -1.9911,
+          "y": 2.26,
+          "z": 8.0671
+        },
+        "lightConfig": {
+          "intensity": 1,
+          "color": "#e2f0ff",
+          "temperatureKelvin": 6500,
+          "lumens": 806
+        }
+      }
+    },
+    {
+      "id": "_8n59d",
+      "roomId": "_qb2a4",
+      "before": {
+        "position": {
+          "x": -2.168,
+          "y": 2.68,
+          "z": 6.8519
+        }
+      },
+      "after": {
+        "position": {
+          "x": -2.168,
+          "y": 2,
+          "z": 6.8519
+        },
+        "lightConfig": {
+          "lumens": 806,
+          "intensity": 1
+        }
+      }
+    },
+    {
+      "id": "_78yip",
+      "roomId": "_elc1j",
+      "before": {
+        "position": {
+          "x": -3.2812,
+          "y": 2.15,
+          "z": -1.4871
+        },
+        "lightConfig": {
+          "intensity": 0.95,
+          "color": "#e2f0ff",
+          "temperatureKelvin": 4000
+        }
+      },
+      "after": {
+        "position": {
+          "x": -3.2812,
+          "y": 2.15,
+          "z": -1.4871
+        },
+        "lightConfig": {
+          "intensity": 1,
+          "color": "#e2f0ff",
+          "temperatureKelvin": 4000,
+          "lumens": 806
+        }
+      }
+    },
+    {
+      "id": "_rm88m",
+      "roomId": "_elc1j",
+      "before": {
+        "position": {
+          "x": -3.292,
+          "y": 2.15,
+          "z": 1.8567
+        },
+        "lightConfig": {
+          "intensity": 0.5,
+          "color": "#fff2dc",
+          "temperatureKelvin": 6500
+        }
+      },
+      "after": {
+        "position": {
+          "x": -3.292,
+          "y": 2.15,
+          "z": 1.8567
+        },
+        "lightConfig": {
+          "intensity": 1,
+          "color": "#fff2dc",
+          "temperatureKelvin": 6500,
+          "lumens": 806
+        }
+      }
+    },
+    {
+      "id": "_9czct",
+      "roomId": "_y0oj2",
+      "before": {
+        "position": {
+          "x": 0.0587,
+          "y": 2.15,
+          "z": -1.5383
+        },
+        "lightConfig": {
+          "intensity": 0.4,
+          "color": "#e2f0ff",
+          "temperatureKelvin": 6500,
+          "lumens": 806
+        }
+      },
+      "after": {
+        "position": {
+          "x": 0.0587,
+          "y": 2.15,
+          "z": -1.5383
+        },
+        "lightConfig": {
+          "intensity": 1,
+          "color": "#e2f0ff",
+          "temperatureKelvin": 6500,
+          "lumens": 806
+        }
+      }
+    },
+    {
+      "id": "_dp8pj",
+      "roomId": "_3h613",
+      "before": {
+        "position": {
+          "x": 1.3671,
+          "y": 2.15,
+          "z": 7.4583
+        },
+        "lightConfig": {
+          "intensity": 0.35,
+          "color": "#ffffff",
+          "temperatureKelvin": 6500,
+          "lumens": 806
+        }
+      },
+      "after": {
+        "position": {
+          "x": 1.3671,
+          "y": 2.15,
+          "z": 7.4583
+        },
+        "lightConfig": {
+          "intensity": 1,
+          "color": "#ffffff",
+          "temperatureKelvin": 6500,
+          "lumens": 806
+        }
+      }
+    },
+    {
+      "id": "_62uck",
+      "roomId": "_vzdza",
+      "before": {
+        "position": {
+          "x": 1.5045,
+          "y": 2.65,
+          "z": 1.909
+        },
+        "lightConfig": {
+          "intensity": 0.8,
+          "color": "#e2f0ff",
+          "lumens": 806
+        }
+      },
+      "after": {
+        "position": {
+          "x": 1.5045,
+          "y": 2.6300000000000003,
+          "z": 1.909
+        },
+        "lightConfig": {
+          "intensity": 1,
+          "color": "#e2f0ff",
+          "lumens": 806
+        }
+      }
+    },
+    {
+      "id": "_il3po",
+      "roomId": "_4wyay",
+      "before": {
+        "position": {
+          "x": -3.292,
+          "y": 2.15,
+          "z": 4.832504384398554
+        },
+        "lightConfig": {
+          "intensity": 0.55,
+          "temperatureKelvin": 6500,
+          "lumens": 806
+        }
+      },
+      "after": {
+        "position": {
+          "x": -3.292,
+          "y": 2.15,
+          "z": 4.832504384398554
+        },
+        "lightConfig": {
+          "intensity": 1,
+          "temperatureKelvin": 6500,
+          "lumens": 806
+        }
+      }
+    },
+    {
+      "id": "_rkn37",
+      "roomId": "_4wyay",
+      "before": {
+        "position": {
+          "x": -1.0714,
+          "y": 2.15,
+          "z": 2.834
+        },
+        "lightConfig": {
+          "enabled": true,
+          "intensity": 0.25,
+          "temperatureKelvin": 6500,
+          "lumens": 806
+        }
+      },
+      "after": {
+        "position": {
+          "x": -1.0714,
+          "y": 2.15,
+          "z": 2.834
+        },
+        "lightConfig": {
+          "enabled": true,
+          "intensity": 1,
+          "temperatureKelvin": 6500,
+          "lumens": 806
+        }
+      }
+    },
+    {
+      "id": "_xsugt",
+      "roomId": "_vzdza",
+      "before": {
+        "position": {
+          "x": 0.7291,
+          "y": 1.5,
+          "z": 2.9721
+        },
+        "lightConfig": {
+          "enabled": false,
+          "intensity": 0,
+          "color": "#e2f0ff"
+        }
+      },
+      "after": {
+        "position": {
+          "x": 0.7291,
+          "y": 1.5,
+          "z": 2.9721
+        },
+        "lightConfig": {
+          "enabled": false,
+          "intensity": 0,
+          "color": "#e2f0ff",
+          "lumens": 806
+        }
+      }
+    },
+    {
+      "id": "_1dtvn",
+      "roomId": "_vzdza",
+      "before": {
+        "position": {
+          "x": 2.2491,
+          "y": 1.5,
+          "z": 2.8507
+        },
+        "lightConfig": {
+          "enabled": false,
+          "intensity": 0,
+          "color": "#e2f0ff"
+        }
+      },
+      "after": {
+        "position": {
+          "x": 2.2491,
+          "y": 1.5,
+          "z": 2.8507
+        },
+        "lightConfig": {
+          "enabled": false,
+          "intensity": 0,
+          "color": "#e2f0ff",
+          "lumens": 806
+        }
+      }
+    },
+    {
+      "id": "_isp5i",
+      "roomId": "_v7m0m",
+      "before": {
+        "position": {
+          "x": 1.3504,
+          "y": 2.15,
+          "z": 4.2993
+        },
+        "lightConfig": {
+          "intensity": 0.35,
+          "temperatureKelvin": 6500,
+          "lumens": 806
+        }
+      },
+      "after": {
+        "position": {
+          "x": 1.3504,
+          "y": 2.15,
+          "z": 4.2993
+        },
+        "lightConfig": {
+          "intensity": 1,
+          "temperatureKelvin": 6500,
+          "lumens": 806
+        }
+      }
+    },
+    {
+      "id": "_egeq1",
+      "roomId": "_y0oj2",
+      "before": {
+        "position": {
+          "x": 1.1774,
+          "y": 1.85,
+          "z": 0.6757
+        },
+        "lightConfig": {
+          "color": "#e2f0ff"
+        }
+      },
+      "after": {
+        "position": {
+          "x": 1.1774,
+          "y": 1.85,
+          "z": 0.6757
+        },
+        "lightConfig": {
+          "color": "#e2f0ff",
+          "lumens": 806,
+          "intensity": 1
+        }
+      }
+    },
+    {
+      "id": "_inyxv",
+      "roomId": "_rscdq",
+      "before": {
+        "position": {
+          "x": -1.9911,
+          "y": 2.4,
+          "z": 7.3127
+        },
+        "lightConfig": {
+          "intensity": 1.35,
+          "color": "#e2f0ff",
+          "temperatureKelvin": 6500
+        }
+      },
+      "after": {
+        "position": {
+          "x": -1.9911,
+          "y": 2.26,
+          "z": 7.3127
+        },
+        "lightConfig": {
+          "intensity": 1,
+          "color": "#e2f0ff",
+          "temperatureKelvin": 6500,
+          "lumens": 806
+        }
+      }
+    },
+    {
+      "id": "furniture_1790623871933_laj8s",
+      "before": {
+        "position": {
+          "x": -1.2557,
+          "y": 2.1,
+          "z": 9.0747
+        },
+        "lightConfig": {
+          "intensity": 2.8,
+          "color": "#e2f0ff"
+        }
+      },
+      "after": {
+        "position": {
+          "x": -1.2557,
+          "y": 2.1,
+          "z": 9.0747
+        },
+        "lightConfig": {
+          "intensity": 1,
+          "color": "#e2f0ff",
+          "lumens": 806
+        }
+      }
+    }
+  ],
+  "rooms": [
+    {
+      "id": "_elc1j",
+      "slug": "living-room-22",
+      "name": "Living Room (22.0 m²)",
+      "exposure": 0.06334433064223866,
+      "fov": 102,
+      "files": [
+        {
+          "file": "living-room-22--corner-1--6500k.png",
+          "kelvin": 6500,
+          "corner": 1,
+          "camera": [
+            -4.62,
+            1.95,
+            -2.72,
+            -2.9,
+            1.15,
+            0.7
+          ],
+          "histogram": {
+            "median": 117.47619999999999,
+            "p75": 132.6166,
+            "p95": 226.6366,
+            "clipped": 0.00048828125,
+            "black": 0.1337158203125
+          }
+        },
+        {
+          "file": "living-room-22--corner-2--6500k.png",
+          "kelvin": 6500,
+          "corner": 2,
+          "camera": [
+            -1.96,
+            1.95,
+            3.3,
+            -3.65,
+            1.15,
+            -0.6
+          ],
+          "histogram": {
+            "median": 106.55239999999999,
+            "p75": 135.13920000000002,
+            "p95": 209.42399999999998,
+            "clipped": 0.0003662109375,
+            "black": 0.07392578125
+          }
+        },
+        {
+          "file": "living-room-22--corner-1--2700k.png",
+          "kelvin": 2700,
+          "corner": 1,
+          "camera": [
+            -4.62,
+            1.95,
+            -2.72,
+            -2.9,
+            1.15,
+            0.7
+          ],
+          "histogram": {
+            "median": 115.6178,
+            "p75": 128.3748,
+            "p95": 184.8228,
+            "clipped": 0,
+            "black": 0.1244384765625
+          }
+        },
+        {
+          "file": "living-room-22--corner-2--2700k.png",
+          "kelvin": 2700,
+          "corner": 2,
+          "camera": [
+            -1.96,
+            1.95,
+            3.3,
+            -3.65,
+            1.15,
+            -0.6
+          ],
+          "histogram": {
+            "median": 106.6138,
+            "p75": 130.5874,
+            "p95": 179.88299999999998,
+            "clipped": 0,
+            "black": 0.071240234375
+          }
+        }
+      ]
+    },
+    {
+      "id": "_y0oj2",
+      "slug": "living-room-13",
+      "name": "Living Room (13.3 m²)",
+      "exposure": 0.05887647992558525,
+      "fov": 104,
+      "files": [
+        {
+          "file": "living-room-13--corner-1--6500k.png",
+          "kelvin": 6500,
+          "corner": 1,
+          "camera": [
+            -1.36,
+            1.9,
+            -2.85,
+            0.55,
+            1,
+            -0.65
+          ],
+          "histogram": {
+            "median": 108.1232,
+            "p75": 133.3358,
+            "p95": 215.7088,
+            "clipped": 0.000537109375,
+            "black": 0.1410888671875
+          }
+        },
+        {
+          "file": "living-room-13--corner-2--6500k.png",
+          "kelvin": 6500,
+          "corner": 2,
+          "camera": [
+            1.59,
+            1.9,
+            0.46,
+            -0.55,
+            1,
+            -1.8
+          ],
+          "histogram": {
+            "median": 84.1954,
+            "p75": 130.5484,
+            "p95": 214.6366,
+            "clipped": 0.0059326171875,
+            "black": 0.113818359375
+          }
+        },
+        {
+          "file": "living-room-13--corner-1--2700k.png",
+          "kelvin": 2700,
+          "corner": 1,
+          "camera": [
+            -1.36,
+            1.9,
+            -2.85,
+            0.55,
+            1,
+            -0.65
+          ],
+          "histogram": {
+            "median": 105.9526,
+            "p75": 129.094,
+            "p95": 181.887,
+            "clipped": 0,
+            "black": 0.1011962890625
+          }
+        },
+        {
+          "file": "living-room-13--corner-2--2700k.png",
+          "kelvin": 2700,
+          "corner": 2,
+          "camera": [
+            1.59,
+            1.9,
+            0.46,
+            -0.55,
+            1,
+            -1.8
+          ],
+          "histogram": {
+            "median": 87.60759999999999,
+            "p75": 126.01559999999998,
+            "p95": 180.9552,
+            "clipped": 0.004541015625,
+            "black": 0.09501953125
+          }
+        }
+      ]
+    },
+    {
+      "id": "_3h613",
+      "slug": "master-bedroom",
+      "name": "Master Bedroom (11.4 m²)",
+      "exposure": 0.0729492970900942,
+      "fov": 105,
+      "files": [
+        {
+          "file": "master-bedroom--corner-1--6500k.png",
+          "kelvin": 6500,
+          "corner": 1,
+          "camera": [
+            -0.2,
+            1.85,
+            5.91,
+            2,
+            1.2,
+            7.2
+          ],
+          "histogram": {
+            "median": 112.40799999999999,
+            "p75": 130.5484,
+            "p95": 218.48019999999997,
+            "clipped": 0.0006103515625,
+            "black": 0.0224365234375
+          }
+        },
+        {
+          "file": "master-bedroom--corner-2--6500k.png",
+          "kelvin": 6500,
+          "corner": 2,
+          "camera": [
+            2.95,
+            1.85,
+            7.66,
+            0.5,
+            1.2,
+            6.35
+          ],
+          "histogram": {
+            "median": 111.13119999999999,
+            "p75": 144.13119999999998,
+            "p95": 240.424,
+            "clipped": 0.002099609375,
+            "black": 0.0075439453125
+          }
+        },
+        {
+          "file": "master-bedroom--corner-1--2700k.png",
+          "kelvin": 2700,
+          "corner": 1,
+          "camera": [
+            -0.2,
+            1.85,
+            5.91,
+            2,
+            1.2,
+            7.2
+          ],
+          "histogram": {
+            "median": 110.82639999999999,
+            "p75": 126.8092,
+            "p95": 181.95919999999998,
+            "clipped": 0,
+            "black": 0.021923828125
+          }
+        },
+        {
+          "file": "master-bedroom--corner-2--2700k.png",
+          "kelvin": 2700,
+          "corner": 2,
+          "camera": [
+            2.95,
+            1.85,
+            7.66,
+            0.5,
+            1.2,
+            6.35
+          ],
+          "histogram": {
+            "median": 109.61379999999998,
+            "p75": 137.8774,
+            "p95": 195.84799999999998,
+            "clipped": 0,
+            "black": 0.0065673828125
+          }
+        }
+      ]
+    },
+    {
+      "id": "_v7m0m",
+      "slug": "bedroom",
+      "name": "Bedroom (8.3 m²)",
+      "exposure": 0.05143251932692636,
+      "fov": 105,
+      "files": [
+        {
+          "file": "bedroom--corner-1--6500k.png",
+          "kelvin": 6500,
+          "corner": 1,
+          "camera": [
+            -0.2,
+            1.85,
+            3.47,
+            1.9,
+            1,
+            4.6
+          ],
+          "histogram": {
+            "median": 110.33579999999999,
+            "p75": 135.54840000000002,
+            "p95": 201.6366,
+            "clipped": 0.000341796875,
+            "black": 0.1660888671875
+          }
+        },
+        {
+          "file": "bedroom--corner-2--6500k.png",
+          "kelvin": 6500,
+          "corner": 2,
+          "camera": [
+            2.87,
+            1.85,
+            5.19,
+            0.45,
+            1,
+            3.95
+          ],
+          "histogram": {
+            "median": 109.1232,
+            "p75": 130.5484,
+            "p95": 202.6366,
+            "clipped": 0.0002685546875,
+            "black": 0.052294921875
+          }
+        },
+        {
+          "file": "bedroom--corner-1--2700k.png",
+          "kelvin": 2700,
+          "corner": 1,
+          "camera": [
+            -0.2,
+            1.85,
+            3.47,
+            1.9,
+            1,
+            4.6
+          ],
+          "histogram": {
+            "median": 109.61379999999998,
+            "p75": 131.30259999999998,
+            "p95": 176.8068,
+            "clipped": 0,
+            "black": 0.1660400390625
+          }
+        },
+        {
+          "file": "bedroom--corner-2--2700k.png",
+          "kelvin": 2700,
+          "corner": 2,
+          "camera": [
+            2.87,
+            1.85,
+            5.19,
+            0.45,
+            1,
+            3.95
+          ],
+          "histogram": {
+            "median": 108.40119999999999,
+            "p75": 126.8092,
+            "p95": 177.1638,
+            "clipped": 0,
+            "black": 0.05205078125
+          }
+        }
+      ]
+    },
+    {
+      "id": "_vzdza",
+      "slug": "kitchen",
+      "name": "Kitchen (8.0 m²)",
+      "exposure": 0.08095644196040194,
+      "fov": 108,
+      "files": [
+        {
+          "file": "kitchen--corner-1--6500k.png",
+          "kelvin": 6500,
+          "corner": 1,
+          "camera": [
+            -0.12,
+            1.7,
+            1.4,
+            1.8,
+            1.25,
+            2.3
+          ],
+          "histogram": {
+            "median": 82.71,
+            "p75": 130.063,
+            "p95": 217.56039999999996,
+            "clipped": 0.003662109375,
+            "black": 0.08271484375
+          }
+        },
+        {
+          "file": "kitchen--corner-2--6500k.png",
+          "kelvin": 6500,
+          "corner": 2,
+          "camera": [
+            2.94,
+            1.7,
+            2.32,
+            0.55,
+            1.2,
+            1.55
+          ],
+          "histogram": {
+            "median": 82.5564,
+            "p75": 117.6498,
+            "p95": 214.3698,
+            "clipped": 0.0044921875,
+            "black": 0.144580078125
+          }
+        },
+        {
+          "file": "kitchen--corner-1--2700k.png",
+          "kelvin": 2700,
+          "corner": 1,
+          "camera": [
+            -0.12,
+            1.7,
+            1.4,
+            1.8,
+            1.25,
+            2.3
+          ],
+          "histogram": {
+            "median": 86.21379999999999,
+            "p75": 125.10719999999999,
+            "p95": 182.88699999999997,
+            "clipped": 0,
+            "black": 0.06552734375
+          }
+        },
+        {
+          "file": "kitchen--corner-2--2700k.png",
+          "kelvin": 2700,
+          "corner": 2,
+          "camera": [
+            2.94,
+            1.7,
+            2.32,
+            0.55,
+            1.2,
+            1.55
+          ],
+          "histogram": {
+            "median": 86.4854,
+            "p75": 113.71079999999999,
+            "p95": 181.95919999999998,
+            "clipped": 0,
+            "black": 0.1426025390625
+          }
+        }
+      ]
+    },
+    {
+      "id": "_4wyay",
+      "slug": "hallway-entry",
+      "name": "Hallway / Entry (11.7 m²)",
+      "exposure": 0.10430366109366172,
+      "fov": 108,
+      "files": [
+        {
+          "file": "hallway-entry--corner-1--6500k.png",
+          "kelvin": 6500,
+          "corner": 1,
+          "camera": [
+            -4.6,
+            1.8,
+            5.38,
+            -1.62,
+            1.25,
+            4.75
+          ],
+          "histogram": {
+            "median": 77.765,
+            "p75": 128.6326,
+            "p95": 249.1392,
+            "clipped": 0.0397216796875,
+            "black": 0.0092041015625
+          }
+        },
+        {
+          "file": "hallway-entry--corner-2--6500k.png",
+          "kelvin": 6500,
+          "corner": 2,
+          "camera": [
+            -0.79,
+            1.8,
+            1.12,
+            -1.2,
+            1.25,
+            4.7
+          ],
+          "histogram": {
+            "median": 132.063,
+            "p75": 164.3478,
+            "p95": 245.5604,
+            "clipped": 0.0178955078125,
+            "black": 0.0606689453125
+          }
+        },
+        {
+          "file": "hallway-entry--corner-1--2700k.png",
+          "kelvin": 2700,
+          "corner": 1,
+          "camera": [
+            -4.6,
+            1.8,
+            5.38,
+            -1.62,
+            1.25,
+            4.75
+          ],
+          "histogram": {
+            "median": 83.43039999999999,
+            "p75": 124.37879999999998,
+            "p95": 218.9798,
+            "clipped": 0.0040771484375,
+            "black": 0.0053466796875
+          }
+        },
+        {
+          "file": "hallway-entry--corner-2--2700k.png",
+          "kelvin": 2700,
+          "corner": 2,
+          "camera": [
+            -0.79,
+            1.8,
+            1.12,
+            -1.2,
+            1.25,
+            4.7
+          ],
+          "histogram": {
+            "median": 127.035,
+            "p75": 157.0086,
+            "p95": 206.7328,
+            "clipped": 0.0002685546875,
+            "black": 0.0611572265625
+          }
+        }
+      ]
+    },
+    {
+      "id": "_rscdq",
+      "slug": "bathroom",
+      "name": "Bathroom (4.2 m²)",
+      "exposure": 0.04249166218520778,
+      "fov": 110,
+      "files": [
+        {
+          "file": "bathroom--corner-1--6500k.png",
+          "kelvin": 6500,
+          "corner": 1,
+          "camera": [
+            -2.29,
+            1.7,
+            8.86,
+            -1.03,
+            1.1,
+            7.5
+          ],
+          "histogram": {
+            "median": 54.67839999999999,
+            "p75": 139.3518,
+            "p95": 234.3558,
+            "clipped": 0.008056640625,
+            "black": 0.1341796875
+          }
+        },
+        {
+          "file": "bathroom--corner-2--6500k.png",
+          "kelvin": 6500,
+          "corner": 2,
+          "camera": [
+            -0.84,
+            1.7,
+            7.18,
+            -1.9,
+            1.1,
+            8.55
+          ],
+          "histogram": {
+            "median": 151.8624,
+            "p75": 204.42399999999998,
+            "p95": 233.70080000000002,
+            "clipped": 0.0074951171875,
+            "black": 0.094140625
+          }
+        },
+        {
+          "file": "bathroom--corner-1--2700k.png",
+          "kelvin": 2700,
+          "corner": 1,
+          "camera": [
+            -2.29,
+            1.7,
+            8.86,
+            -1.03,
+            1.1,
+            7.5
+          ],
+          "histogram": {
+            "median": 69.008,
+            "p75": 134.0178,
+            "p95": 193.9162,
+            "clipped": 0.0004638671875,
+            "black": 0.064501953125
+          }
+        },
+        {
+          "file": "bathroom--corner-2--2700k.png",
+          "kelvin": 2700,
+          "corner": 2,
+          "camera": [
+            -0.84,
+            1.7,
+            7.18,
+            -1.9,
+            1.1,
+            8.55
+          ],
+          "histogram": {
+            "median": 144.2132,
+            "p75": 177.9512,
+            "p95": 192.05540000000002,
+            "clipped": 0.000439453125,
+            "black": 0.073095703125
+          }
+        }
+      ]
+    },
+    {
+      "id": "_8m0m9",
+      "slug": "dining-office",
+      "name": "Dining / Office (5.5 m²)",
+      "exposure": 0.14565436101569523,
+      "fov": 108,
+      "files": [
+        {
+          "file": "dining-office--corner-1--6500k.png",
+          "kelvin": 6500,
+          "corner": 1,
+          "camera": [
+            3.22,
+            1.85,
+            -2.88,
+            2.37,
+            1.1,
+            -0.75
+          ],
+          "histogram": {
+            "median": 22.671,
+            "p75": 129.55239999999998,
+            "p95": 241.12199999999999,
+            "clipped": 0.0131591796875,
+            "black": 0.2515625
+          }
+        },
+        {
+          "file": "dining-office--corner-2--6500k.png",
+          "kelvin": 6500,
+          "corner": 2,
+          "camera": [
+            2.14,
+            1.85,
+            0.22,
+            2.85,
+            1.1,
+            -1.95
+          ],
+          "histogram": {
+            "median": 37.5266,
+            "p75": 85.5988,
+            "p95": 207.7088,
+            "clipped": 0.011572265625,
+            "black": 0.042529296875
+          }
+        },
+        {
+          "file": "dining-office--corner-1--2700k.png",
+          "kelvin": 2700,
+          "corner": 1,
+          "camera": [
+            3.22,
+            1.85,
+            -2.88,
+            2.37,
+            1.1,
+            -0.75
+          ],
+          "histogram": {
+            "median": 22.671,
+            "p75": 125.0258,
+            "p95": 201.3626,
+            "clipped": 0.000439453125,
+            "black": 0.2485595703125
+          }
+        },
+        {
+          "file": "dining-office--corner-2--2700k.png",
+          "kelvin": 2700,
+          "corner": 2,
+          "camera": [
+            2.14,
+            1.85,
+            0.22,
+            2.85,
+            1.1,
+            -1.95
+          ],
+          "histogram": {
+            "median": 40.528,
+            "p75": 86.74640000000001,
+            "p95": 179.88299999999998,
+            "clipped": 0.0004638671875,
+            "black": 0.024853515625
+          }
+        }
+      ]
+    },
+    {
+      "id": "_v2u5b",
+      "slug": "shower",
+      "name": "Bathroom (1.3 m²)",
+      "exposure": 0.28,
+      "fov": 114,
+      "files": [
+        {
+          "file": "shower--corner-1--6500k.png",
+          "kelvin": 6500,
+          "corner": 1,
+          "camera": [
+            -2.73,
+            1.7,
+            7.76,
+            -3.17,
+            1.1,
+            8.78
+          ],
+          "histogram": {
+            "median": 56.386199999999995,
+            "p75": 78.318,
+            "p95": 203.9346,
+            "clipped": 0,
+            "black": 0.328955078125
+          }
+        },
+        {
+          "file": "shower--corner-2--6500k.png",
+          "kelvin": 6500,
+          "corner": 2,
+          "camera": [
+            -3.3,
+            1.7,
+            8.93,
+            -2.83,
+            1.1,
+            7.98
+          ],
+          "histogram": {
+            "median": 91.5736,
+            "p75": 194.9346,
+            "p95": 210.2206,
+            "clipped": 0.0000244140625,
+            "black": 0.3604736328125
+          }
+        },
+        {
+          "file": "shower--corner-1--2700k.png",
+          "kelvin": 2700,
+          "corner": 1,
+          "camera": [
+            -2.73,
+            1.7,
+            7.76,
+            -3.17,
+            1.1,
+            8.78
+          ],
+          "histogram": {
+            "median": 54.4722,
+            "p75": 76.3868,
+            "p95": 175.2268,
+            "clipped": 0,
+            "black": 0.327685546875
+          }
+        },
+        {
+          "file": "shower--corner-2--2700k.png",
+          "kelvin": 2700,
+          "corner": 2,
+          "camera": [
+            -3.3,
+            1.7,
+            8.93,
+            -2.83,
+            1.1,
+            7.98
+          ],
+          "histogram": {
+            "median": 85.62859999999999,
+            "p75": 163.0188,
+            "p95": 188.585,
+            "clipped": 0,
+            "black": 0.347998046875
+          }
+        }
+      ]
+    },
+    {
+      "id": "_qb2a4",
+      "slug": "guest-wc",
+      "name": "Guest WC (2.1 m²)",
+      "exposure": 0.04739867216987839,
+      "fov": 112,
+      "files": [
+        {
+          "file": "guest-wc--corner-1--6500k.png",
+          "kelvin": 6500,
+          "corner": 1,
+          "camera": [
+            -3.21,
+            1.65,
+            5.94,
+            -2.1,
+            1,
+            6.63
+          ],
+          "histogram": {
+            "median": 78.404,
+            "p75": 98.749,
+            "p95": 201.3558,
+            "clipped": 0.00283203125,
+            "black": 0.0939208984375
+          }
+        },
+        {
+          "file": "guest-wc--corner-2--6500k.png",
+          "kelvin": 6500,
+          "corner": 2,
+          "camera": [
+            -1.84,
+            1.65,
+            6.79,
+            -2.95,
+            1,
+            6.1
+          ],
+          "histogram": {
+            "median": 148.39999999999998,
+            "p75": 207.3558,
+            "p95": 247.4882,
+            "clipped": 0.030615234375,
+            "black": 0.0083251953125
+          }
+        },
+        {
+          "file": "guest-wc--corner-1--2700k.png",
+          "kelvin": 2700,
+          "corner": 1,
+          "camera": [
+            -3.21,
+            1.65,
+            5.94,
+            -2.1,
+            1,
+            6.63
+          ],
+          "histogram": {
+            "median": 84.99719999999999,
+            "p75": 100.333,
+            "p95": 177.45379999999997,
+            "clipped": 0.00009765625,
+            "black": 0.0861328125
+          }
+        },
+        {
+          "file": "guest-wc--corner-2--2700k.png",
+          "kelvin": 2700,
+          "corner": 2,
+          "camera": [
+            -1.84,
+            1.65,
+            6.79,
+            -2.95,
+            1,
+            6.1
+          ],
+          "histogram": {
+            "median": 142.6728,
+            "p75": 179.526,
+            "p95": 222.41819999999998,
+            "clipped": 0.000048828125,
+            "black": 0.0064697265625
+          }
+        }
+      ]
+    }
+  ],
+  "errors": []
+}

@@ -351,6 +351,12 @@
           "roomSideB": "_elc1j",
           "startOffset": 0.05,
           "endOffset": -0.05,
+          "finishSideA": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          },
           "finishSideB": {
             "type": "paint",
             "color": "#D4CBB9",
@@ -490,12 +496,6 @@
             "startOffset": 0.05,
             "endOffset": -0.05
           },
-          "finishSideA": {
-            "type": "paint",
-            "color": "#fbfaf5",
-            "roughness": 0.85,
-            "layer": 0
-          },
           "openings": []
         }
       },
@@ -522,6 +522,12 @@
           "roomSideB": "_elc1j",
           "startOffset": 0.024999789079988084,
           "endOffset": -0.04979931542250782,
+          "finishSideA": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          },
           "finishSideB": {
             "type": "paint",
             "color": "#D4CBB9",
@@ -654,12 +660,6 @@
             },
             "startOffset": 0.02499978907998808,
             "endOffset": -0.04979931542250782
-          },
-          "finishSideA": {
-            "type": "paint",
-            "color": "#fbfaf5",
-            "roughness": 0.85,
-            "layer": 0
           },
           "openings": []
         }
@@ -1251,7 +1251,7 @@
               "windowDressing": {
                 "style": "blackout",
                 "openness": 0.45,
-                "color": "#9394b8",
+                "color": "#8aa6cc",
                 "liningColor": "#f2eee4"
               }
             }
@@ -1282,6 +1282,18 @@
           "startOffset": -0.04964821950342575,
           "endOffset": 0,
           "finishSideA": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "finishSideB": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "finishEdgeEnd": {
             "type": "paint",
             "color": "#eae2d1",
             "roughness": 0.85,
@@ -1389,18 +1401,6 @@
             },
             "startOffset": -0.04964821950342575,
             "endOffset": 0
-          },
-          "finishSideB": {
-            "type": "paint",
-            "color": "#fbfaf5",
-            "roughness": 0.85,
-            "layer": 0
-          },
-          "finishEdgeEnd": {
-            "type": "paint",
-            "color": "#eae2d1",
-            "roughness": 0.85,
-            "layer": 0
           },
           "openings": []
         }
@@ -2403,6 +2403,12 @@
           "roomSideB": "_8m0m9",
           "startOffset": -0.05,
           "endOffset": 0,
+          "finishSideA": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          },
           "rawWall": {
             "id": "_g9657",
             "plan": "a",
@@ -2501,12 +2507,6 @@
             "startOffset": 0,
             "endOffset": 0
           },
-          "finishSideA": {
-            "type": "paint",
-            "color": "#eae2d1",
-            "roughness": 0.85,
-            "layer": 0
-          },
           "openings": []
         }
       },
@@ -2532,6 +2532,36 @@
           "startOffset": 0.025033174281584702,
           "endOffset": 0.025009830527855846,
           "finishSideA": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "finishEdges": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "finishEdgeStart": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "finishEdgeEnd": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "finishEdgeTop": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "finishSill": {
             "type": "paint",
             "color": "#eae2d1",
             "roughness": 0.85,
@@ -2869,36 +2899,6 @@
             },
             "startOffset": 0.025033174281584705,
             "endOffset": -0.05
-          },
-          "finishEdges": {
-            "type": "paint",
-            "color": "#eae2d1",
-            "roughness": 0.85,
-            "layer": 0
-          },
-          "finishEdgeStart": {
-            "type": "paint",
-            "color": "#eae2d1",
-            "roughness": 0.85,
-            "layer": 0
-          },
-          "finishEdgeEnd": {
-            "type": "paint",
-            "color": "#eae2d1",
-            "roughness": 0.85,
-            "layer": 0
-          },
-          "finishEdgeTop": {
-            "type": "paint",
-            "color": "#eae2d1",
-            "roughness": 0.85,
-            "layer": 0
-          },
-          "finishSill": {
-            "type": "paint",
-            "color": "#eae2d1",
-            "roughness": 0.85,
-            "layer": 0
           },
           "openings": [
             {
@@ -3499,6 +3499,12 @@
               "swingSide": "r",
               "hingeSide": "r",
               "openAngle": 180,
+              "finish": {
+                "type": "paint",
+                "color": "#fbfbf9",
+                "roughness": 0.85,
+                "layer": 0
+              },
               "frameColor": "#f8fafc",
               "rawOpening": {
                 "plan": "a",
@@ -3696,12 +3702,6 @@
                 "room_l": "_vzdza",
                 "room_r": "_4wyay",
                 "openAngle": 180
-              },
-              "finish": {
-                "type": "paint",
-                "color": "#fbfbf9",
-                "roughness": 0.85,
-                "layer": 0
               }
             }
           ]
@@ -3743,9 +3743,17 @@
             "roughness": 0.22,
             "metalness": 0,
             "rotation": 0,
+            "layer": 0,
             "pattern": "grid",
             "groutWidth": 0,
-            "groutColor": "#d1d5db",
+            "groutColor": "#d1d5db"
+          },
+          "finishBaseboard": {
+            "type": "wood",
+            "variant": "parquet_light",
+            "color": "#f0ece1",
+            "roughness": 0.35,
+            "rotation": 0,
             "layer": 0
           },
           "rawWall": {
@@ -3865,14 +3873,6 @@
             "startOffset": 0.025022797585884254,
             "endOffset": 0.05
           },
-          "finishBaseboard": {
-            "type": "wood",
-            "variant": "parquet_light",
-            "color": "#f0ece1",
-            "roughness": 0.35,
-            "rotation": 0,
-            "layer": 0
-          },
           "openings": []
         }
       },
@@ -3899,6 +3899,12 @@
           "roomSideB": "_vzdza",
           "startOffset": -0.05,
           "endOffset": 0.025,
+          "finishSideA": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          },
           "finishSideB": {
             "type": "tile",
             "variant": "ivory_taupe_striped_mosaic_30x30",
@@ -3906,10 +3912,10 @@
             "roughness": 0.22,
             "metalness": 0,
             "rotation": 0,
+            "layer": 0,
             "pattern": "grid",
             "groutWidth": 0,
-            "groutColor": "#d1d5db",
-            "layer": 0
+            "groutColor": "#d1d5db"
           },
           "finishEdgeEnd": {
             "type": "tile",
@@ -4035,12 +4041,6 @@
             "startOffset": -0.05,
             "endOffset": 0.025
           },
-          "finishSideA": {
-            "type": "paint",
-            "color": "#eae2d1",
-            "roughness": 0.85,
-            "layer": 0
-          },
           "openings": []
         }
       },
@@ -4067,6 +4067,12 @@
           "roomSideB": "_vzdza",
           "startOffset": -0.05,
           "endOffset": -0.05,
+          "finishSideA": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          },
           "finishSideB": {
             "type": "tile",
             "variant": "ivory_taupe_striped_mosaic_30x30",
@@ -4074,10 +4080,10 @@
             "roughness": 0.22,
             "metalness": 0,
             "rotation": 0,
+            "layer": 0,
             "pattern": "grid",
             "groutWidth": 0,
-            "groutColor": "#d1d5db",
-            "layer": 0
+            "groutColor": "#d1d5db"
           },
           "rawWall": {
             "id": "_pnu8l",
@@ -4191,12 +4197,6 @@
             "startOffset": -0.05,
             "endOffset": -0.05
           },
-          "finishSideA": {
-            "type": "paint",
-            "color": "#eae2d1",
-            "roughness": 0.85,
-            "layer": 0
-          },
           "openings": []
         }
       },
@@ -4227,8 +4227,38 @@
             "roughness": 0.85,
             "layer": 0
           },
+          "finishEdges": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "finishEdgeStart": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "finishEdgeEnd": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "finishEdgeTop": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "finishSill": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          },
           "cornice": {
-            "profile": "cove",
+            "profile": "none",
             "height": 0.12,
             "depth": 0.12,
             "offset": 0.17,
@@ -4556,36 +4586,6 @@
             "startOffset": 0.013326962907834727,
             "endOffset": 0.025022476234171646
           },
-          "finishEdges": {
-            "type": "paint",
-            "color": "#eae2d1",
-            "roughness": 0.85,
-            "layer": 0
-          },
-          "finishEdgeStart": {
-            "type": "paint",
-            "color": "#eae2d1",
-            "roughness": 0.85,
-            "layer": 0
-          },
-          "finishEdgeEnd": {
-            "type": "paint",
-            "color": "#eae2d1",
-            "roughness": 0.85,
-            "layer": 0
-          },
-          "finishEdgeTop": {
-            "type": "paint",
-            "color": "#eae2d1",
-            "roughness": 0.85,
-            "layer": 0
-          },
-          "finishSill": {
-            "type": "paint",
-            "color": "#eae2d1",
-            "roughness": 0.85,
-            "layer": 0
-          },
           "openings": [
             {
               "id": "_w57z0",
@@ -4845,6 +4845,12 @@
             "roughness": 0.85,
             "layer": 0
           },
+          "finishSideB": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          },
           "finishEdgeEnd": {
             "type": "paint",
             "color": "#fbfaf5",
@@ -4948,12 +4954,6 @@
             "holes": {},
             "startOffset": 0,
             "endOffset": 0
-          },
-          "finishSideB": {
-            "type": "paint",
-            "color": "#eae2d1",
-            "roughness": 0.85,
-            "layer": 0
           },
           "openings": []
         }
@@ -5572,6 +5572,14 @@
             "color": "#efede8",
             "roughness": 0.85
           },
+          "finishBaseboard": {
+            "type": "wood",
+            "variant": "parquet_light",
+            "color": "#f0ece1",
+            "roughness": 0.35,
+            "rotation": 0,
+            "layer": 0
+          },
           "rawWall": {
             "id": "_a0wf4",
             "plan": "a",
@@ -5905,14 +5913,6 @@
             "startOffset": 0.025029723420479415,
             "endOffset": 0.025007781412493307
           },
-          "finishBaseboard": {
-            "type": "wood",
-            "variant": "parquet_light",
-            "color": "#f0ece1",
-            "roughness": 0.35,
-            "rotation": 0,
-            "layer": 0
-          },
           "openings": [
             {
               "id": "_ujl45",
@@ -6170,6 +6170,30 @@
             "layer": 0
           },
           "finishEdges": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "finishEdgeStart": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "finishEdgeEnd": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "finishEdgeTop": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "finishSill": {
             "type": "paint",
             "color": "#eae2d1",
             "roughness": 0.85,
@@ -6513,30 +6537,6 @@
             "startOffset": -0.04999999999999999,
             "endOffset": 0.013326962907834727
           },
-          "finishEdgeStart": {
-            "type": "paint",
-            "color": "#eae2d1",
-            "roughness": 0.85,
-            "layer": 0
-          },
-          "finishEdgeEnd": {
-            "type": "paint",
-            "color": "#eae2d1",
-            "roughness": 0.85,
-            "layer": 0
-          },
-          "finishEdgeTop": {
-            "type": "paint",
-            "color": "#eae2d1",
-            "roughness": 0.85,
-            "layer": 0
-          },
-          "finishSill": {
-            "type": "paint",
-            "color": "#eae2d1",
-            "roughness": 0.85,
-            "layer": 0
-          },
           "openings": [
             {
               "id": "_77yrm",
@@ -6786,7 +6786,7 @@
           "endOffset": 0.05,
           "finishSideA": {
             "type": "paint",
-            "color": "#ece5d4",
+            "color": "#eae2d1",
             "roughness": 0.85,
             "layer": 0
           },
@@ -6794,6 +6794,14 @@
             "type": "paint",
             "color": "#eae2d1",
             "roughness": 0.85,
+            "layer": 0
+          },
+          "finishBaseboard": {
+            "type": "wood",
+            "variant": "parquet_light",
+            "color": "#f0ece1",
+            "roughness": 0.35,
+            "rotation": 0,
             "layer": 0
           },
           "rawWall": {
@@ -6920,14 +6928,6 @@
             "startOffset": -0.05,
             "endOffset": 0.05
           },
-          "finishBaseboard": {
-            "type": "wood",
-            "variant": "parquet_light",
-            "color": "#f0ece1",
-            "roughness": 0.35,
-            "rotation": 0,
-            "layer": 0
-          },
           "openings": []
         }
       },
@@ -6954,10 +6954,24 @@
           "roomSideB": "_3h613",
           "startOffset": 0.025007781412493307,
           "endOffset": 0,
+          "finishSideA": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          },
           "finishSideB": {
             "type": "paint",
-            "color": "#ece5d4",
+            "color": "#eae2d1",
             "roughness": 0.85,
+            "layer": 0
+          },
+          "finishBaseboard": {
+            "type": "wood",
+            "variant": "parquet_light",
+            "color": "#f0ece1",
+            "roughness": 0.35,
+            "rotation": 0,
             "layer": 0
           },
           "rawWall": {
@@ -7285,20 +7299,6 @@
             "startOffset": 0.025007781412493307,
             "endOffset": -0.05
           },
-          "finishSideA": {
-            "type": "paint",
-            "color": "#fbfaf5",
-            "roughness": 0.85,
-            "layer": 0
-          },
-          "finishBaseboard": {
-            "type": "wood",
-            "variant": "parquet_light",
-            "color": "#f0ece1",
-            "roughness": 0.35,
-            "rotation": 0,
-            "layer": 0
-          },
           "openings": [
             {
               "id": "_87omj",
@@ -7314,7 +7314,7 @@
               },
               "swingSide": "l",
               "hingeSide": "l",
-              "openAngle": 180,
+              "openAngle": 0,
               "finish": {
                 "type": "paint",
                 "color": "#ffffff",
@@ -7552,8 +7552,16 @@
           "endOffset": -0.05,
           "finishSideB": {
             "type": "paint",
-            "color": "#ece5d4",
+            "color": "#eae2d1",
             "roughness": 0.85,
+            "layer": 0
+          },
+          "finishBaseboard": {
+            "type": "wood",
+            "variant": "parquet_light",
+            "color": "#f0ece1",
+            "roughness": 0.35,
+            "rotation": 0,
             "layer": 0
           },
           "rawWall": {
@@ -7881,14 +7889,6 @@
             "startOffset": 0.025007781412493307,
             "endOffset": -0.05
           },
-          "finishBaseboard": {
-            "type": "wood",
-            "variant": "parquet_light",
-            "color": "#f0ece1",
-            "roughness": 0.35,
-            "rotation": 0,
-            "layer": 0
-          },
           "openings": []
         }
       },
@@ -7913,6 +7913,42 @@
           "roomSideB": "_3h613",
           "startOffset": 0.05,
           "endOffset": 0.05,
+          "finishSideB": {
+            "type": "paint",
+            "color": "#ece5d4",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "finishEdges": {
+            "type": "paint",
+            "color": "#ece5d4",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "finishEdgeStart": {
+            "type": "paint",
+            "color": "#ece5d4",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "finishEdgeEnd": {
+            "type": "paint",
+            "color": "#ece5d4",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "finishEdgeTop": {
+            "type": "paint",
+            "color": "#ece5d4",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "finishSill": {
+            "type": "paint",
+            "color": "#ece5d4",
+            "roughness": 0.85,
+            "layer": 0
+          },
           "rawWall": {
             "id": "_l6kfb",
             "plan": "a",
@@ -8024,9 +8060,33 @@
             "startOffset": 0.05,
             "endOffset": 0.05
           },
+          "openings": []
+        }
+      },
+      {
+        "kind": "wall",
+        "data": {
+          "id": "_0jsab",
+          "p1": {
+            "x": 3.2620999999999998,
+            "y": 8.684000000000001
+          },
+          "p2": {
+            "x": 3.2620999999999998,
+            "y": 5.471399999999976
+          },
+          "thickness": 0.1,
+          "height": 2.72,
+          "material": "a_block",
+          "roomIds": [
+            "_3h613"
+          ],
+          "roomSideB": "_3h613",
+          "startOffset": -0.05,
+          "endOffset": 0,
           "finishSideB": {
             "type": "paint",
-            "color": "#ece5d4",
+            "color": "#764a40",
             "roughness": 0.85,
             "layer": 0
           },
@@ -8054,46 +8114,24 @@
             "roughness": 0.85,
             "layer": 0
           },
+          "finishBaseboard": {
+            "type": "wood",
+            "variant": "parquet_light",
+            "color": "#f0ece1",
+            "roughness": 0.35,
+            "rotation": 0,
+            "layer": 0
+          },
           "finishSill": {
             "type": "paint",
             "color": "#ece5d4",
             "roughness": 0.85,
             "layer": 0
           },
-          "openings": []
-        }
-      },
-      {
-        "kind": "wall",
-        "data": {
-          "id": "_0jsab",
-          "p1": {
-            "x": 3.2620999999999998,
-            "y": 8.684000000000001
-          },
-          "p2": {
-            "x": 3.2620999999999998,
-            "y": 5.471399999999976
-          },
-          "thickness": 0.1,
-          "height": 2.72,
-          "material": "a_block",
-          "roomIds": [
-            "_3h613"
-          ],
-          "roomSideB": "_3h613",
-          "startOffset": -0.05,
-          "endOffset": 0,
-          "finishSideB": {
-            "type": "paint",
-            "color": "#864954",
-            "roughness": 0.85,
-            "layer": 0
-          },
           "cornice": {
             "profile": "cove",
-            "height": 0.12,
-            "depth": 0.12,
+            "height": 0.08,
+            "depth": 0.08,
             "offset": 0.17,
             "side": "interior"
           },
@@ -8405,44 +8443,6 @@
             "startOffset": -0.05,
             "endOffset": 0
           },
-          "finishEdges": {
-            "type": "paint",
-            "color": "#ece5d4",
-            "roughness": 0.85,
-            "layer": 0
-          },
-          "finishEdgeStart": {
-            "type": "paint",
-            "color": "#ece5d4",
-            "roughness": 0.85,
-            "layer": 0
-          },
-          "finishEdgeEnd": {
-            "type": "paint",
-            "color": "#ece5d4",
-            "roughness": 0.85,
-            "layer": 0
-          },
-          "finishEdgeTop": {
-            "type": "paint",
-            "color": "#ece5d4",
-            "roughness": 0.85,
-            "layer": 0
-          },
-          "finishSill": {
-            "type": "paint",
-            "color": "#ece5d4",
-            "roughness": 0.85,
-            "layer": 0
-          },
-          "finishBaseboard": {
-            "type": "wood",
-            "variant": "parquet_light",
-            "color": "#f0ece1",
-            "roughness": 0.35,
-            "rotation": 0,
-            "layer": 0
-          },
           "openings": [
             {
               "id": "_v72ul",
@@ -8666,8 +8666,8 @@
               },
               "windowDressing": {
                 "style": "blackout",
-                "openness": 0.25,
-                "color": "#100c09",
+                "openness": 0.7,
+                "color": "#d7ceb3",
                 "liningColor": "#f2eee4"
               }
             }
@@ -8705,6 +8705,12 @@
             "rotation": 0,
             "groutWidth": 2,
             "groutColor": "#9ca3af"
+          },
+          "finishSideB": {
+            "type": "paint",
+            "color": "#ece5d4",
+            "roughness": 0.85,
+            "layer": 0
           },
           "finishEdgeStart": {
             "type": "plaster",
@@ -8833,12 +8839,6 @@
             },
             "startOffset": -0.025,
             "endOffset": 0
-          },
-          "finishSideB": {
-            "type": "paint",
-            "color": "#ece5d4",
-            "roughness": 0.85,
-            "layer": 0
           },
           "openings": []
         }
@@ -9425,6 +9425,12 @@
             "groutWidth": 2,
             "groutColor": "#9ca3af"
           },
+          "finishSideB": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          },
           "rawWall": {
             "id": "_ojjeh",
             "plan": "a",
@@ -9750,12 +9756,6 @@
             "startOffset": 0.025000950461594708,
             "endOffset": 0.025
           },
-          "finishSideB": {
-            "type": "paint",
-            "color": "#fbfaf5",
-            "roughness": 0.85,
-            "layer": 0
-          },
           "openings": [
             {
               "id": "_buz1m",
@@ -10007,6 +10007,12 @@
           "roomSideB": "_qb2a4",
           "startOffset": 0,
           "endOffset": -0.025,
+          "finishSideA": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          },
           "finishSideB": {
             "type": "tile",
             "variant": "canakkale_wabi_maburu_bej_34x111",
@@ -10132,12 +10138,6 @@
             "startOffset": 0,
             "endOffset": -0.025
           },
-          "finishSideA": {
-            "type": "paint",
-            "color": "#fbfaf5",
-            "roughness": 0.85,
-            "layer": 0
-          },
           "openings": []
         }
       },
@@ -10164,6 +10164,12 @@
           "roomSideB": "_qb2a4",
           "startOffset": 0.025,
           "endOffset": 0.013070712976859968,
+          "finishSideA": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          },
           "finishSideB": {
             "type": "tile",
             "variant": "canakkale_wabi_maburu_bej_34x111",
@@ -10496,12 +10502,6 @@
             },
             "startOffset": 0.025,
             "endOffset": 0.013070712976859968
-          },
-          "finishSideA": {
-            "type": "paint",
-            "color": "#fbfaf5",
-            "roughness": 0.85,
-            "layer": 0
           },
           "openings": [
             {
@@ -10908,6 +10908,12 @@
             "color": "#c9975b",
             "roughness": 0.85
           },
+          "finishSideB": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          },
           "finishEdges": {
             "type": "paint",
             "color": "#c9975b",
@@ -11037,12 +11043,6 @@
             "startOffset": 0.02499978907998808,
             "endOffset": -0.05
           },
-          "finishSideB": {
-            "type": "paint",
-            "color": "#fbfaf5",
-            "roughness": 0.85,
-            "layer": 0
-          },
           "openings": []
         }
       },
@@ -11067,6 +11067,42 @@
           "roomSideB": "_4wyay",
           "startOffset": 0.05,
           "endOffset": 0.05,
+          "finishSideB": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "finishEdges": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "finishEdgeStart": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "finishEdgeEnd": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "finishEdgeTop": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "finishSill": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          },
           "rawWall": {
             "id": "_81pgi",
             "plan": "a",
@@ -11178,6 +11214,30 @@
             "startOffset": 0.05,
             "endOffset": 0.05
           },
+          "openings": []
+        }
+      },
+      {
+        "kind": "wall",
+        "data": {
+          "id": "_n4rjf",
+          "p1": {
+            "x": -4.90027033647777,
+            "y": 5.755852999999999
+          },
+          "p2": {
+            "x": -3.431971250378185,
+            "y": 5.7558538510718815
+          },
+          "thickness": 0.1,
+          "height": 2.7,
+          "material": "a_block",
+          "roomIds": [
+            "_4wyay"
+          ],
+          "roomSideB": "_4wyay",
+          "startOffset": -0.05,
+          "endOffset": 0.013070712976859968,
           "finishSideB": {
             "type": "paint",
             "color": "#fbfaf5",
@@ -11214,30 +11274,6 @@
             "roughness": 0.85,
             "layer": 0
           },
-          "openings": []
-        }
-      },
-      {
-        "kind": "wall",
-        "data": {
-          "id": "_n4rjf",
-          "p1": {
-            "x": -4.90027033647777,
-            "y": 5.755852999999999
-          },
-          "p2": {
-            "x": -3.431971250378185,
-            "y": 5.7558538510718815
-          },
-          "thickness": 0.1,
-          "height": 2.7,
-          "material": "a_block",
-          "roomIds": [
-            "_4wyay"
-          ],
-          "roomSideB": "_4wyay",
-          "startOffset": -0.05,
-          "endOffset": 0.013070712976859968,
           "rawWall": {
             "id": "_n4rjf",
             "plan": "a",
@@ -11550,42 +11586,6 @@
             "startOffset": -0.05,
             "endOffset": 0.013070712976859968
           },
-          "finishSideB": {
-            "type": "paint",
-            "color": "#fbfaf5",
-            "roughness": 0.85,
-            "layer": 0
-          },
-          "finishEdges": {
-            "type": "paint",
-            "color": "#fbfaf5",
-            "roughness": 0.85,
-            "layer": 0
-          },
-          "finishEdgeStart": {
-            "type": "paint",
-            "color": "#fbfaf5",
-            "roughness": 0.85,
-            "layer": 0
-          },
-          "finishEdgeEnd": {
-            "type": "paint",
-            "color": "#fbfaf5",
-            "roughness": 0.85,
-            "layer": 0
-          },
-          "finishEdgeTop": {
-            "type": "paint",
-            "color": "#fbfaf5",
-            "roughness": 0.85,
-            "layer": 0
-          },
-          "finishSill": {
-            "type": "paint",
-            "color": "#fbfaf5",
-            "roughness": 0.85,
-            "layer": 0
-          },
           "openings": [
             {
               "id": "_ibnpc",
@@ -11601,7 +11601,7 @@
               },
               "swingSide": "l",
               "hingeSide": "l",
-              "openAngle": 40,
+              "openAngle": 5,
               "finish": {
                 "type": "wood",
                 "variant": "smoked_walnut",
@@ -12940,7 +12940,7 @@
               },
               "swingSide": "r",
               "hingeSide": "l",
-              "openAngle": 0,
+              "openAngle": 180,
               "finish": {
                 "type": "paint",
                 "color": "#ffffff",
@@ -13976,9 +13976,21 @@
             "_y0oj2",
             "_vzdza"
           ],
+          "finish": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          },
           "finishFront": {
             "type": "paint",
             "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          },
+          "finishBack": {
+            "type": "paint",
+            "color": "#fbfaf5",
             "roughness": 0.85,
             "layer": 0
           },
@@ -13989,18 +14001,6 @@
             "layer": 0
           },
           "finishRight": {
-            "type": "paint",
-            "color": "#fbfaf5",
-            "roughness": 0.85,
-            "layer": 0
-          },
-          "finish": {
-            "type": "paint",
-            "color": "#eae2d1",
-            "roughness": 0.85,
-            "layer": 0
-          },
-          "finishBack": {
             "type": "paint",
             "color": "#fbfaf5",
             "roughness": 0.85,
@@ -14028,6 +14028,12 @@
             "_v7m0m",
             "_3h613"
           ],
+          "finish": {
+            "type": "paint",
+            "color": "#ece5d4",
+            "roughness": 0.85,
+            "layer": 0
+          },
           "finishFront": {
             "type": "paint",
             "color": "#ece5d4",
@@ -14043,12 +14049,6 @@
           "finishLeft": {
             "type": "paint",
             "color": "#eae2d1",
-            "roughness": 0.85,
-            "layer": 0
-          },
-          "finish": {
-            "type": "paint",
-            "color": "#ece5d4",
             "roughness": 0.85,
             "layer": 0
           },
@@ -14132,6 +14132,12 @@
             "_y0oj2",
             "_elc1j"
           ],
+          "finish": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          },
           "finishFront": {
             "type": "paint",
             "color": "#eae2d1",
@@ -14151,12 +14157,6 @@
             "layer": 0
           },
           "finishRight": {
-            "type": "paint",
-            "color": "#eae2d1",
-            "roughness": 0.85,
-            "layer": 0
-          },
-          "finish": {
             "type": "paint",
             "color": "#eae2d1",
             "roughness": 0.85,
@@ -14236,24 +14236,6 @@
             "_vzdza",
             "_4wyay"
           ],
-          "finishBack": {
-            "type": "tile",
-            "variant": "ivory_taupe_striped_mosaic_30x30",
-            "color": "#ffffff",
-            "roughness": 0.22,
-            "metalness": 0,
-            "rotation": 0,
-            "pattern": "grid",
-            "groutWidth": 0,
-            "groutColor": "#d1d5db",
-            "layer": 0
-          },
-          "finishLeft": {
-            "type": "paint",
-            "color": "#fbfaf5",
-            "roughness": 0.85,
-            "layer": 0
-          },
           "finish": {
             "type": "paint",
             "color": "#fbfaf5",
@@ -14266,6 +14248,24 @@
             "roughness": 0.85,
             "layer": 0
           },
+          "finishBack": {
+            "type": "tile",
+            "variant": "ivory_taupe_striped_mosaic_30x30",
+            "color": "#ffffff",
+            "roughness": 0.22,
+            "metalness": 0,
+            "rotation": 0,
+            "layer": 0,
+            "pattern": "grid",
+            "groutWidth": 0,
+            "groutColor": "#d1d5db"
+          },
+          "finishLeft": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
+          },
           "finishRight": {
             "type": "tile",
             "variant": "ivory_taupe_striped_mosaic_30x30",
@@ -14273,10 +14273,10 @@
             "roughness": 0.22,
             "metalness": 0,
             "rotation": 0,
+            "layer": 0,
             "pattern": "grid",
             "groutWidth": 0,
-            "groutColor": "#d1d5db",
-            "layer": 0
+            "groutColor": "#d1d5db"
           }
         }
       },
@@ -14380,6 +14380,12 @@
             }
           ],
           "height": 2.7,
+          "wallFinish": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          },
           "rawRoom": {
             "points": [
               {
@@ -18982,12 +18988,6 @@
             "is_micro_room": 0,
             "role": "room",
             "title": "Living Room (13.3 m²)"
-          },
-          "wallFinish": {
-            "type": "paint",
-            "color": "#eae2d1",
-            "roughness": 0.85,
-            "layer": 0
           }
         }
       },
@@ -19036,6 +19036,12 @@
             }
           ],
           "height": 2.7,
+          "wallFinish": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
+          },
           "rawRoom": {
             "points": [
               {
@@ -22740,12 +22746,6 @@
             "is_micro_room": 0,
             "role": "room",
             "title": "Bedroom (8.3 m²)"
-          },
-          "wallFinish": {
-            "type": "paint",
-            "color": "#eae2d1",
-            "roughness": 0.85,
-            "layer": 0
           }
         }
       },
@@ -22837,6 +22837,12 @@
             "pattern": "running_bond",
             "groutWidth": 2,
             "groutColor": "#d1d5db"
+          },
+          "wallFinish": {
+            "type": "paint",
+            "color": "#eae2d1",
+            "roughness": 0.85,
+            "layer": 0
           },
           "rawRoom": {
             "points": [
@@ -28532,12 +28538,6 @@
               "groutWidth": 2,
               "groutColor": "#d1d5db"
             }
-          },
-          "wallFinish": {
-            "type": "paint",
-            "color": "#eae2d1",
-            "roughness": 0.85,
-            "layer": 0
           }
         }
       },
@@ -28566,6 +28566,13 @@
             }
           ],
           "height": 2.72,
+          "ceilingType": "gypsum",
+          "wallFinish": {
+            "type": "paint",
+            "color": "#ece5d4",
+            "roughness": 0.85,
+            "layer": 0
+          },
           "rawRoom": {
             "points": [
               {
@@ -31586,12 +31593,6 @@
             "is_micro_room": 0,
             "role": "room",
             "title": "Master Bedroom (11.4 m²)"
-          },
-          "wallFinish": {
-            "type": "paint",
-            "color": "#ece5d4",
-            "roughness": 0.85,
-            "layer": 0
           }
         }
       },
@@ -33228,6 +33229,12 @@
             "pattern": "running_bond",
             "groutWidth": 1,
             "groutColor": "#d1d5db"
+          },
+          "wallFinish": {
+            "type": "paint",
+            "color": "#fbfaf5",
+            "roughness": 0.85,
+            "layer": 0
           },
           "rawRoom": {
             "points": [
@@ -37133,12 +37140,6 @@
             "is_micro_room": 0,
             "role": "room",
             "title": "Hallway / Entry (11.7 m²)"
-          },
-          "wallFinish": {
-            "type": "paint",
-            "color": "#fbfaf5",
-            "roughness": 0.85,
-            "layer": 0
           }
         }
       },
@@ -60659,15 +60660,15 @@
           "category": "bed",
           "assetKey": "bed_double",
           "position": {
-            "x": 2.2921,
-            "y": 0,
+            "x": 2.1736874890704945,
+            "y": 0.25,
             "z": 6.3726
           },
           "rotationY": -1.5707963267948966,
           "dimensions": {
             "x": 1.6,
-            "y": 0.77,
-            "z": 2
+            "y": 0.71,
+            "z": 2.2
           },
           "roomId": "_3h613",
           "visible": true,
@@ -60868,12 +60869,12 @@
           "position": {
             "x": -0.2324,
             "y": 0,
-            "z": 3.7198
+            "z": 3.777879575906101
           },
           "rotationY": 1.5707963267948966,
           "dimensions": {
             "x": 1,
-            "y": 0.75,
+            "y": 0.9,
             "z": 0.45
           },
           "roomId": "_v7m0m",
@@ -63475,123 +63476,6 @@
         }
       },
       {
-        "kind": "furniture.shelving",
-        "data": {
-          "id": "_2t86p",
-          "name": "open_shelving",
-          "displayName": "IKEA HEMNES Bookcase — White Stain / Light Brown",
-          "category": "storage",
-          "assetKey": "ikea_hemnes_90_white_light_brown",
-          "position": {
-            "x": -2.1615,
-            "y": 0,
-            "z": 3.7617
-          },
-          "rotationY": 3.141592653589793,
-          "dimensions": {
-            "x": 0.9,
-            "y": 1.98,
-            "z": 0.37
-          },
-          "roomId": "_elc1j",
-          "visible": true,
-          "shelfCount": 6,
-          "sectionFinishes": {
-            "back_panel": {
-              "type": "paint",
-              "color": "#fdfdfc",
-              "roughness": 0.85,
-              "layer": 0
-            }
-          },
-          "rawItem": {
-            "name": "open_shelving",
-            "pc": {
-              "x": -216.15,
-              "y": 376.17
-            },
-            "angle": 0,
-            "projection": {
-              "x": -216.154,
-              "y": 394.665
-            },
-            "width": 90,
-            "height": 37,
-            "plan": {
-              "furniture": 6
-            },
-            "item_id": 537,
-            "over_floor": {
-              "value": 0,
-              "display": false
-            },
-            "self_height": 198,
-            "comment": {
-              "id": ""
-            },
-            "dimensions": {
-              "x": 0.9,
-              "y": 1.98,
-              "z": 0.37
-            },
-            "icon_center": {
-              "x": -216.154,
-              "y": 376.165
-            },
-            "id": "_2t86p",
-            "f0offset": 0,
-            "dls": {
-              "l": {},
-              "r": {}
-            },
-            "dls_prs": {
-              "v": {},
-              "h": {}
-            },
-            "center3d": {
-              "x": -216.154,
-              "y": 376.165
-            },
-            "id_room": "_elc1j",
-            "id_room_zone": "_ne9oj",
-            "id_wall": "_kmn82",
-            "id_wall_old": "_kmn82",
-            "wall_direction": "l",
-            "wall_line": {
-              "p1": {
-                "x": -171.154,
-                "y": 394.665
-              },
-              "p2": {
-                "x": -261.154,
-                "y": 394.665
-              }
-            },
-            "position": {
-              "x": -2.1615,
-              "y": 0,
-              "z": 3.7617
-            },
-            "rotationY": 3.141592653589793,
-            "sectionFinishes": {
-              "Frame": {
-                "type": "wood",
-                "variant": "parquet_herringbone",
-                "color": "#d4b896",
-                "roughness": 0.35
-              },
-              "Shelves": {
-                "type": "wood",
-                "variant": "parquet_herringbone",
-                "color": "#d4b896",
-                "roughness": 0.35
-              }
-            },
-            "assetKey": "open_shelving"
-          }
-        }
-      },
-      {
         "kind": "furniture.standard",
         "data": {
           "id": "_ouz7e",
@@ -63620,8 +63504,8 @@
           "sectionFinishes": {
             "armrests": {
               "type": "wood",
-              "variant": "smoked_walnut",
-              "color": "#42362f",
+              "variant": "dark_wenge",
+              "color": "#27201b",
               "roughness": 0.5,
               "rotation": 90,
               "layer": 0
@@ -63757,8 +63641,8 @@
           "sectionFinishes": {
             "armrests": {
               "type": "wood",
-              "variant": "smoked_walnut",
-              "color": "#42362f",
+              "variant": "dark_wenge",
+              "color": "#27201b",
               "roughness": 0.5,
               "rotation": 90,
               "layer": 0
@@ -63913,8 +63797,8 @@
           "sectionFinishes": {
             "armrests": {
               "type": "wood",
-              "variant": "smoked_walnut",
-              "color": "#42362f",
+              "variant": "dark_wenge",
+              "color": "#27201b",
               "roughness": 0.5,
               "rotation": 90,
               "layer": 0
@@ -64046,9 +63930,9 @@
           "sectionFinishes": {
             "armrests": {
               "type": "wood",
-              "variant": "smoked_walnut",
-              "color": "#42362f",
-              "roughness": 0.5,
+              "variant": "light_ash",
+              "color": "#d4cbbe",
+              "roughness": 0.45,
               "rotation": 90,
               "layer": 0
             },
@@ -64616,8 +64500,8 @@
           },
           "rotationY": 4.7073275255539055,
           "dimensions": {
-            "x": 1.33,
-            "y": 0.76,
+            "x": 1.6,
+            "y": 1,
             "z": 0.02
           },
           "roomId": "_elc1j",
@@ -65074,8 +64958,8 @@
               "count": 2,
               "hinge": "left",
               "angles": [
-                0,
-                0
+                54,
+                88
               ]
             },
             "panels": [
@@ -66020,8 +65904,9 @@
           "roomId": "_elc1j",
           "visible": true,
           "lightConfig": {
+            "intensity": 0.5,
             "color": "#fff2dc",
-            "temperatureKelvin": 4000
+            "temperatureKelvin": 6500
           },
           "rawItem": {
             "name": "chandelier_cascading",
@@ -66103,8 +65988,8 @@
           "lightConfig": {
             "intensity": 0.4,
             "color": "#e2f0ff",
-            "lumens": 806,
-            "temperatureKelvin": 6500
+            "temperatureKelvin": 6500,
+            "lumens": 806
           },
           "rawItem": {
             "name": "chandelier_cascading",
@@ -66188,9 +66073,10 @@
           "roomId": "_3h613",
           "visible": true,
           "lightConfig": {
-            "intensity": 0.8,
+            "intensity": 0.35,
             "color": "#ffffff",
-            "temperatureKelvin": 5500
+            "temperatureKelvin": 6500,
+            "lumens": 806
           },
           "rawItem": {
             "name": "chandelier_cascading",
@@ -66262,10 +66148,10 @@
           "assetKey": "ceiling_spot",
           "position": {
             "x": 1.5045,
-            "y": 2.7,
+            "y": 2.65,
             "z": 1.909
           },
-          "rotationY": 3.141592653589793,
+          "rotationY": 3.0543261909900767,
           "dimensions": {
             "x": 0.44,
             "y": 0.05,
@@ -66345,7 +66231,7 @@
           "position": {
             "x": -3.292,
             "y": 2.15,
-            "z": 4.8024
+            "z": 4.832504384398554
           },
           "rotationY": 3.141592653589793,
           "dimensions": {
@@ -66355,6 +66241,11 @@
           },
           "roomId": "_4wyay",
           "visible": true,
+          "lightConfig": {
+            "intensity": 0.55,
+            "temperatureKelvin": 6500,
+            "lumens": 806
+          },
           "rawItem": {
             "name": "chandelier_cascading",
             "pc": {
@@ -66408,11 +66299,6 @@
             },
             "rotationY": 3.141592653589793,
             "assetKey": "chandelier_cascading"
-          },
-          "lightConfig": {
-            "temperatureKelvin": 6500,
-            "lumens": 806,
-            "intensity": 0.55
           }
         }
       },
@@ -66437,6 +66323,12 @@
           },
           "roomId": "_4wyay",
           "visible": true,
+          "lightConfig": {
+            "enabled": true,
+            "intensity": 0.25,
+            "temperatureKelvin": 6500,
+            "lumens": 806
+          },
           "rawItem": {
             "name": "chandelier_cascading",
             "pc": {
@@ -66490,12 +66382,6 @@
             },
             "rotationY": 3.141592653589793,
             "assetKey": "chandelier_cascading"
-          },
-          "lightConfig": {
-            "temperatureKelvin": 6500,
-            "intensity": 0.25,
-            "enabled": true,
-            "lumens": 806
           }
         }
       },
@@ -66683,6 +66569,11 @@
           },
           "roomId": "_v7m0m",
           "visible": true,
+          "lightConfig": {
+            "intensity": 0.35,
+            "temperatureKelvin": 6500,
+            "lumens": 806
+          },
           "rawItem": {
             "name": "chandelier_cascading",
             "pc": {
@@ -66736,11 +66627,6 @@
             },
             "rotationY": 3.141592653589793,
             "assetKey": "chandelier_cascading"
-          },
-          "lightConfig": {
-            "temperatureKelvin": 6500,
-            "intensity": 0.35,
-            "lumens": 806
           }
         }
       },
@@ -66944,114 +66830,6 @@
             },
             "rotationY": 1.5707963267948966,
             "assetKey": "socket"
-          }
-        }
-      },
-      {
-        "kind": "furniture.standard",
-        "data": {
-          "id": "_1dy8i",
-          "name": "toilet",
-          "displayName": "Toilet",
-          "category": "bathroom",
-          "assetKey": "toilet",
-          "position": {
-            "x": -3.0743,
-            "y": 0,
-            "z": 6.3408
-          },
-          "rotationY": 1.5407766636605942,
-          "dimensions": {
-            "x": 0.38,
-            "y": 0.79,
-            "z": 0.65
-          },
-          "roomId": "_qb2a4",
-          "visible": true,
-          "finish": {
-            "type": "porcelain",
-            "variant": "porcelain_white",
-            "color": "#ffffff",
-            "roughness": 0.04,
-            "metalness": 0.02
-          },
-          "rawItem": {
-            "name": "toilet",
-            "pc": {
-              "x": -307.43,
-              "y": 634.08
-            },
-            "angle": 92,
-            "projection": {
-              "x": -339.92,
-              "y": 633.104
-            },
-            "width": 38,
-            "height": 65,
-            "plan": {
-              "santeh": 7
-            },
-            "id": "_1dy8i",
-            "item_id": 135,
-            "self_height": 79,
-            "comment": {
-              "id": ""
-            },
-            "dimensions": {
-              "x": 0.38,
-              "y": 0.79,
-              "z": 0.65
-            },
-            "f0offset": 0,
-            "dls": {
-              "l": {},
-              "r": {},
-              "f": {
-                "offset": 10,
-                "side": "r"
-              }
-            },
-            "dls_prs": {
-              "v": {},
-              "h": {}
-            },
-            "icon_center": {
-              "x": -307.434,
-              "y": 634.078
-            },
-            "center3d": {
-              "x": -307.434,
-              "y": 634.078
-            },
-            "id_room": "_qb2a4",
-            "id_room_zone": "_gdeu8",
-            "id_wall": "_46je5",
-            "id_wall_old": "_46je5",
-            "wall_direction": "l",
-            "wall_line": {
-              "p1": {
-                "x": -340.49,
-                "y": 652.094
-              },
-              "p2": {
-                "x": -339.349,
-                "y": 614.111
-              }
-            },
-            "position": {
-              "x": -3.0743,
-              "y": 0,
-              "z": 6.3408
-            },
-            "rotationY": 1.5407766636605942,
-            "finish": {
-              "type": "porcelain",
-              "variant": "porcelain_white",
-              "color": "#ffffff",
-              "roughness": 0.04,
-              "metalness": 0.02
-            },
-            "assetKey": "toilet"
           }
         }
       },
@@ -67991,244 +67769,6 @@
               }
             },
             "assetKey": "kitchen_box_door_double"
-          }
-        }
-      },
-      {
-        "kind": "furniture.shelving",
-        "data": {
-          "id": "_1p40t",
-          "name": "open_shelving",
-          "displayName": "IKEA HEMNES Bookcase — White Stain / Light Brown",
-          "category": "storage",
-          "assetKey": "ikea_hemnes_90_white_light_brown",
-          "position": {
-            "x": -3.9615,
-            "y": 0,
-            "z": 3.7617
-          },
-          "rotationY": 3.141592653589793,
-          "dimensions": {
-            "x": 0.9,
-            "y": 1.98,
-            "z": 0.37
-          },
-          "roomId": "_elc1j",
-          "visible": true,
-          "shelfCount": 6,
-          "sectionFinishes": {
-            "back_panel": {
-              "type": "paint",
-              "color": "#fdfdfc",
-              "roughness": 0.85,
-              "layer": 0
-            }
-          },
-          "rawItem": {
-            "name": "open_shelving",
-            "pc": {
-              "x": -396.15,
-              "y": 376.17
-            },
-            "angle": 0,
-            "projection": {
-              "x": -384.359,
-              "y": 394.668
-            },
-            "width": 90,
-            "height": 37,
-            "plan": {
-              "furniture": 6
-            },
-            "item_id": 537,
-            "over_floor": {
-              "value": 0,
-              "display": false
-            },
-            "self_height": 198,
-            "comment": {
-              "id": ""
-            },
-            "dimensions": {
-              "x": 0.9,
-              "y": 1.98,
-              "z": 0.37
-            },
-            "icon_center": {
-              "x": -396.154,
-              "y": 376.168
-            },
-            "id": "_1p40t",
-            "f0offset": 0,
-            "dls": {
-              "l": {},
-              "r": {},
-              "f": {
-                "offset": 22,
-                "side": "r"
-              }
-            },
-            "dls_prs": {
-              "v": {},
-              "h": {}
-            },
-            "center3d": {
-              "x": -396.154,
-              "y": 376.168
-            },
-            "id_room": "_elc1j",
-            "id_room_zone": "_ne9oj",
-            "id_wall": "_kmn82",
-            "id_wall_old": "_kmn82",
-            "wall_direction": "l",
-            "wall_line": {
-              "p1": {
-                "x": -351.154,
-                "y": 394.668
-              },
-              "p2": {
-                "x": -441.154,
-                "y": 394.668
-              }
-            },
-            "position": {
-              "x": -3.9615,
-              "y": 0,
-              "z": 3.7617
-            },
-            "rotationY": 3.141592653589793,
-            "sectionFinishes": {
-              "Frame": {
-                "type": "wood",
-                "variant": "parquet_herringbone",
-                "color": "#d4b896",
-                "roughness": 0.35
-              },
-              "Shelves": {
-                "type": "wood",
-                "variant": "parquet_herringbone",
-                "color": "#d4b896",
-                "roughness": 0.35
-              }
-            },
-            "assetKey": "open_shelving"
-          }
-        }
-      },
-      {
-        "kind": "furniture.shelving",
-        "data": {
-          "id": "_nt0zv",
-          "name": "open_shelving",
-          "displayName": "IKEA HEMNES Bookcase — White Stain / Light Brown",
-          "category": "storage",
-          "assetKey": "ikea_hemnes_90_white_light_brown",
-          "position": {
-            "x": -3.0615,
-            "y": 0,
-            "z": 3.7617
-          },
-          "rotationY": 3.141592653589793,
-          "dimensions": {
-            "x": 0.9,
-            "y": 1.98,
-            "z": 0.37
-          },
-          "roomId": "_elc1j",
-          "visible": true,
-          "shelfCount": 6,
-          "sectionFinishes": {
-            "back_panel": {
-              "type": "paint",
-              "color": "#fdfdfc",
-              "roughness": 0.85,
-              "layer": 0
-            }
-          },
-          "rawItem": {
-            "name": "open_shelving",
-            "pc": {
-              "x": -306.15,
-              "y": 376.17
-            },
-            "angle": 0,
-            "projection": {
-              "x": -283.239,
-              "y": 394.666
-            },
-            "width": 90,
-            "height": 37,
-            "plan": {
-              "furniture": 6
-            },
-            "item_id": 537,
-            "over_floor": {
-              "value": 0,
-              "display": false
-            },
-            "self_height": 198,
-            "comment": {
-              "id": ""
-            },
-            "dimensions": {
-              "x": 0.9,
-              "y": 1.98,
-              "z": 0.37
-            },
-            "icon_center": {
-              "x": -306.154,
-              "y": 376.166
-            },
-            "id": "_nt0zv",
-            "f0offset": 0,
-            "dls": {
-              "l": {},
-              "r": {}
-            },
-            "dls_prs": {
-              "v": {},
-              "h": {}
-            },
-            "center3d": {
-              "x": -306.154,
-              "y": 376.166
-            },
-            "id_room": "_elc1j",
-            "id_room_zone": "_ne9oj",
-            "id_wall": "_kmn82",
-            "id_wall_old": "_kmn82",
-            "wall_direction": "l",
-            "wall_line": {
-              "p1": {
-                "x": -261.154,
-                "y": 394.666
-              },
-              "p2": {
-                "x": -351.154,
-                "y": 394.666
-              }
-            },
-            "position": {
-              "x": -3.0615,
-              "y": 0,
-              "z": 3.7617
-            },
-            "rotationY": 3.141592653589793,
-            "sectionFinishes": {
-              "Frame": {
-                "type": "wood",
-                "variant": "parquet_herringbone",
-                "color": "#d4b896",
-                "roughness": 0.35
-              },
-              "Shelves": {
-                "type": "wood",
-                "variant": "parquet_herringbone",
-                "color": "#d4b896",
-                "roughness": 0.35
-              }
-            },
-            "assetKey": "open_shelving"
           }
         }
       },
@@ -70489,8 +70029,8 @@
                 "name": "Folded Bath Towel — Terracotta Chevrons",
                 "assetKey": "textile_towel_chevron",
                 "dimensions": {
-                  "x": 0.4,
-                  "y": 0.05,
+                  "x": 0.35,
+                  "y": 0.1,
                   "z": 0.3
                 },
                 "rotationY": 0,
@@ -70506,13 +70046,13 @@
                 "name": "Folded Hand Towel — Sage Checks",
                 "assetKey": "textile_towel_checker",
                 "dimensions": {
-                  "x": 0.3,
-                  "y": 0.04,
-                  "z": 0.23
+                  "x": 0.34,
+                  "y": 0.09,
+                  "z": 0.24
                 },
                 "rotationY": 1.5707963267948966,
                 "position": {
-                  "x": 0.26231151571457356,
+                  "x": 0.2519505914195951,
                   "y": 0,
                   "z": 0.010000000000000009
                 },
@@ -70523,13 +70063,13 @@
                 "name": "Folded Washcloth — Mustard Grid",
                 "assetKey": "textile_towel_grid",
                 "dimensions": {
-                  "x": 0.15,
-                  "y": 0.02,
-                  "z": 0.08
+                  "x": 0.23,
+                  "y": 0.121,
+                  "z": 0.14
                 },
                 "rotationY": 1.5707963267948966,
                 "position": {
-                  "x": 0.4132483811639691,
+                  "x": 0.3526706012872392,
                   "y": 0,
                   "z": 0.11875530990885065
                 },
@@ -70540,8 +70080,8 @@
                 "name": "Folded Hand Towel — Navy Diamonds",
                 "assetKey": "textile_towel_diamond",
                 "dimensions": {
-                  "x": 0.3,
-                  "y": 0.04,
+                  "x": 0.34,
+                  "y": 0.09,
                   "z": 0.25
                 },
                 "rotationY": 1.5707963267948966,
@@ -70675,6 +70215,23 @@
                   "roughness": 0.85,
                   "layer": 0
                 }
+              },
+              {
+                "id": "81d27eed-f470-4da8-bfab-d2d555cc821a",
+                "name": "Folded Bath Towel — Terracotta Chevrons",
+                "assetKey": "textile_towel_chevron",
+                "dimensions": {
+                  "x": 0.35,
+                  "y": 0.128,
+                  "z": 0.3
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "supportId": "c7dc1733-b38f-4953-ae4b-e7a117e9f242"
               }
             ],
             "frontSections": [
@@ -70919,15 +70476,15 @@
           "category": "bathroom",
           "assetKey": "shower_system",
           "position": {
-            "x": -3.1393,
-            "y": 0.5,
-            "z": 8.87
+            "x": -3.1095126668888877,
+            "y": 0,
+            "z": 8.765553611631564
           },
           "rotationY": 3.141592653589793,
           "dimensions": {
-            "x": 0.25,
-            "y": 1.5,
-            "z": 0.45
+            "x": 0.23,
+            "y": 3.74,
+            "z": 0.65
           },
           "roomId": "_v2u5b",
           "visible": true,
@@ -71902,6 +71459,34 @@
             "color": "#b7aea2",
             "roughness": 0.85,
             "layer": 0
+          },
+          "cabinet": {
+            "version": 1,
+            "panelThickness": 0.018,
+            "backThickness": 0.006,
+            "doors": {
+              "count": 2,
+              "hinge": "left",
+              "angles": [
+                0,
+                0
+              ]
+            },
+            "panels": [
+              {
+                "id": "shelf_1",
+                "name": "Shelf 1",
+                "kind": "shelf",
+                "at": 1.182,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0.02
+                }
+              }
+            ],
+            "contents": []
           },
           "rawItem": {
             "name": "ward_double",
@@ -72953,7 +72538,7 @@
           "category": "appliance",
           "assetKey": "life_nespresso",
           "position": {
-            "x": -0.38375072331858107,
+            "x": -0.2708754055029683,
             "y": 0.85,
             "z": 2.4200040904673084
           },
@@ -73024,7 +72609,7 @@
           "position": {
             "x": -3.1089492927030555,
             "y": 0,
-            "z": 5.98176052191308
+            "z": 6.747531096373866
           },
           "rotationY": 1.5707963267948966,
           "dimensions": {
@@ -73045,13 +72630,13 @@
           "category": "bathroom",
           "assetKey": "ikea_80557165",
           "position": {
-            "x": -2.5151942767170556,
+            "x": -2.3293525748084076,
             "y": 0,
             "z": 6.316831591978957
           },
           "rotationY": -3.132145683439837,
           "dimensions": {
-            "x": 0.6,
+            "x": 1,
             "y": 0.015,
             "z": 1.2
           },
@@ -73072,10 +72657,10 @@
             "y": 0,
             "z": -0.9661757670047879
           },
-          "rotationY": 1.565711624852928,
+          "rotationY": 0,
           "dimensions": {
             "x": 0.65,
-            "y": 1.3,
+            "y": 1,
             "z": 0.5
           },
           "roomId": "_y0oj2",
@@ -73149,55 +72734,6 @@
           },
           "roomId": "_y0oj2",
           "visible": true
-        }
-      },
-      {
-        "kind": "furniture.standard",
-        "data": {
-          "id": "fc6090b5-4c42-4bfb-a49a-a06581532e57",
-          "name": "life_cat_tree",
-          "displayName": "Cat Scratching Tower with Hideaway",
-          "category": "decor",
-          "assetKey": "life_cat_tree",
-          "position": {
-            "x": 1.5324419198040706,
-            "y": 0,
-            "z": 0.48047828969085493
-          },
-          "rotationY": -3.12846882329772,
-          "dimensions": {
-            "x": 0.65,
-            "y": 1.44,
-            "z": 0.55
-          },
-          "roomId": "_y0oj2",
-          "visible": true
-        }
-      },
-      {
-        "kind": "furniture.luminaire",
-        "data": {
-          "id": "2b1aafba-602d-4d57-bbb5-8cc16c3b996e",
-          "name": "wall_spot",
-          "displayName": "Wall Sconce / Spotlight",
-          "category": "decor",
-          "assetKey": "wall_spot",
-          "position": {
-            "x": -3.159913028653227,
-            "y": 2,
-            "z": 3.573075125085871
-          },
-          "rotationY": 3.141592653589793,
-          "dimensions": {
-            "x": 0.27,
-            "y": 0.15,
-            "z": 0.24
-          },
-          "roomId": "_elc1j",
-          "visible": true,
-          "lightConfig": {
-            "color": "#e2f0ff"
-          }
         }
       },
       {
@@ -73598,6 +73134,7 @@
           "name": "popular_519412067",
           "displayName": "Kenzlife KIMI070 Compact Desk — White",
           "category": "table",
+          "assetKey": "popular_519412067",
           "position": {
             "x": 0.80089552892618,
             "y": 0,
@@ -73606,10 +73143,9 @@
           "rotationY": 0.013123830292073214,
           "dimensions": {
             "x": 1,
-            "z": 0.45,
-            "y": 0.75
+            "y": 0.75,
+            "z": 0.45
           },
-          "assetKey": "popular_519412067",
           "roomId": "_vzdza",
           "visible": true
         }
@@ -73621,6 +73157,7 @@
           "name": "ikea_90439218",
           "displayName": "IKEA LINDBYN Round Mirror — Black, 110 cm",
           "category": "decor",
+          "assetKey": "ikea_90439218",
           "position": {
             "x": -0.44728108374938913,
             "y": 1.1,
@@ -73629,143 +73166,11 @@
           "rotationY": 1.5707963267948966,
           "dimensions": {
             "x": 1.1,
-            "z": 0.025,
-            "y": 1.1
+            "y": 1.1,
+            "z": 0.025
           },
-          "assetKey": "ikea_90439218",
           "roomId": "_3h613",
           "visible": true
-        }
-      },
-      {
-        "kind": "furniture.standard",
-        "data": {
-          "id": "a7887305-b0f3-4489-8c5b-253b72b7a60e",
-          "name": "popular_747347649",
-          "displayName": "Aeka AE-2022 London Two-Drawer Bedside Table — White",
-          "category": "storage",
-          "position": {
-            "x": 1.1043890442411315,
-            "y": 0,
-            "z": 6.369903081652423
-          },
-          "rotationY": -1.5707963267948966,
-          "dimensions": {
-            "x": 1.6,
-            "z": 0.35,
-            "y": 0.5
-          },
-          "assetKey": "popular_747347649",
-          "roomId": "_3h613",
-          "visible": true,
-          "cabinet": {
-            "version": 1,
-            "panelThickness": 0.018,
-            "backThickness": 0.006,
-            "doors": {
-              "count": 0,
-              "hinge": "left",
-              "angles": [
-                0,
-                0
-              ]
-            },
-            "panels": [],
-            "contents": [],
-            "frontSections": [
-              {
-                "id": "front",
-                "bottom": 0,
-                "top": 0.25,
-                "opening": "drawer",
-                "doors": {
-                  "count": 2,
-                  "hinge": "left",
-                  "angles": [
-                    0,
-                    0
-                  ]
-                },
-                "drawerExtensions": [
-                  0,
-                  0
-                ]
-              },
-              {
-                "id": "398f1f6b-7649-462e-b3b2-ec8335872d92",
-                "bottom": 0.25,
-                "top": "top",
-                "opening": "drawer",
-                "doors": {
-                  "count": 2,
-                  "hinge": "left",
-                  "angles": [
-                    0,
-                    0
-                  ]
-                },
-                "drawerExtensions": [
-                  0,
-                  0
-                ]
-              }
-            ]
-          },
-          "sectionFinishes": {
-            "top": {
-              "type": "fabric",
-              "variant": "velvet_champagne",
-              "color": "#ede6d6",
-              "roughness": 0.82,
-              "metalness": 0.02,
-              "mappingMode": "stretched",
-              "scale": 1,
-              "layer": 0
-            }
-          },
-          "finish": {
-            "type": "wood",
-            "variant": "smoked_walnut",
-            "color": "#42362f",
-            "roughness": 0.5,
-            "rotation": 0,
-            "layer": 0
-          }
-        }
-      },
-      {
-        "kind": "furniture.standard",
-        "data": {
-          "id": "a8d42338-f21f-4750-bd23-47cedf6c2bd4",
-          "name": "ikea_80598731",
-          "displayName": "IKEA GURLI Cushion Cover — Unbleached, 50 × 50 cm",
-          "category": "decor",
-          "position": {
-            "x": 1.1046573033192641,
-            "y": 0.35,
-            "z": 6.372625715155929
-          },
-          "rotationY": 1.5707963267948966,
-          "dimensions": {
-            "x": 1.6,
-            "z": 0.34,
-            "y": 0.21
-          },
-          "assetKey": "ikea_80598731",
-          "roomId": "_3h613",
-          "visible": true,
-          "sectionFinishes": {
-            "fabric": {
-              "type": "fabric",
-              "variant": "velvet_champagne",
-              "color": "#ede6d6",
-              "roughness": 0.82,
-              "metalness": 0.02,
-              "mappingMode": "stretched",
-              "scale": 1,
-              "layer": 0
-            }
-          }
         }
       },
       {
@@ -73775,18 +73180,18 @@
           "name": "ikea_50605484",
           "displayName": "IKEA NISSEDAL Square Mirror — Black, 65 × 65 cm",
           "category": "decor",
+          "assetKey": "ikea_50605484",
           "position": {
             "x": -0.4421819223484474,
-            "y": 0.01,
-            "z": 7.483198544057244
+            "y": 0,
+            "z": 7.255985547729315
           },
           "rotationY": 1.5708825123182335,
           "dimensions": {
             "x": 1,
-            "z": 0.02,
-            "y": 2
+            "y": 2.2,
+            "z": 0.02
           },
-          "assetKey": "ikea_50605484",
           "roomId": "_3h613",
           "visible": true,
           "sectionFinishes": {
@@ -73805,6 +73210,7 @@
           "name": "ward_double",
           "displayName": "Master wardrobe — right double doors",
           "category": "storage",
+          "assetKey": "ward_double",
           "position": {
             "x": 0.19287490298782212,
             "y": 0,
@@ -73816,9 +73222,23 @@
             "y": 2.72,
             "z": 0.75
           },
-          "assetKey": "ward_double",
           "roomId": "_3h613",
           "visible": true,
+          "finish": {
+            "type": "paint",
+            "color": "#dedbd1",
+            "roughness": 0.5,
+            "layer": 0
+          },
+          "sectionFinishes": {
+            "handles": {
+              "type": "metal",
+              "color": "#9c8048",
+              "roughness": 0.32,
+              "metalness": 0.8,
+              "layer": 0
+            }
+          },
           "cabinet": {
             "version": 1,
             "panelThickness": 0.018,
@@ -73855,9 +73275,39 @@
                   "mode": "fit",
                   "value": 0.02
                 }
+              },
+              {
+                "id": "f891eb24-2316-412d-8c4c-5f6b7235636c",
+                "name": "Shelf 3",
+                "kind": "shelf",
+                "at": 0.44030221699415084,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0.02
+                }
               }
             ],
-            "contents": [],
+            "contents": [
+              {
+                "id": "c8fe475e-a4e9-4b6f-9621-4a32ba29343c",
+                "name": "Rail with 10 Dresses on Hangers",
+                "assetKey": "fit_clothes_rail_dresses",
+                "dimensions": {
+                  "x": 0.8,
+                  "y": 1.5,
+                  "z": 0.5
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.020000000000000018,
+                  "y": 0,
+                  "z": 0.010000000000000009
+                },
+                "supportId": "f891eb24-2316-412d-8c4c-5f6b7235636c"
+              }
+            ],
             "internalDrawers": [],
             "frontSections": [
               {
@@ -73899,7 +73349,30 @@
               "height": 0.1,
               "setback": 0.025
             }
+          }
+        }
+      },
+      {
+        "kind": "furniture.standard",
+        "data": {
+          "id": "82ef26ba-9e0d-4be1-9fd3-ad24af106fc9",
+          "name": "ward_double",
+          "displayName": "Master wardrobe — left double doors",
+          "category": "storage",
+          "assetKey": "ward_double",
+          "position": {
+            "x": 2.262269209356977,
+            "y": 0,
+            "z": 8.270162354760044
           },
+          "rotationY": -3.1174009240297145,
+          "dimensions": {
+            "x": 0.88,
+            "y": 2.72,
+            "z": 0.75
+          },
+          "roomId": "_3h613",
+          "visible": true,
           "finish": {
             "type": "paint",
             "color": "#dedbd1",
@@ -73914,30 +73387,7 @@
               "metalness": 0.8,
               "layer": 0
             }
-          }
-        }
-      },
-      {
-        "kind": "furniture.standard",
-        "data": {
-          "id": "82ef26ba-9e0d-4be1-9fd3-ad24af106fc9",
-          "name": "ward_double",
-          "displayName": "Master wardrobe — left double doors",
-          "category": "storage",
-          "position": {
-            "x": 2.262269209356977,
-            "y": 0,
-            "z": 8.270162354760044
           },
-          "rotationY": -3.1174009240297145,
-          "dimensions": {
-            "x": 0.88,
-            "y": 2.72,
-            "z": 0.75
-          },
-          "assetKey": "ward_double",
-          "roomId": "_3h613",
-          "visible": true,
           "cabinet": {
             "version": 1,
             "panelThickness": 0.018,
@@ -73974,9 +73424,151 @@
                   "mode": "fit",
                   "value": 0.02
                 }
+              },
+              {
+                "id": "85cb1345-5871-4c3a-bd32-5871c72592a6",
+                "name": "Shelf 3",
+                "kind": "shelf",
+                "at": 0.41034602000781106,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0.02
+                }
               }
             ],
-            "contents": [],
+            "contents": [
+              {
+                "id": "66e7a639-10f0-4fe7-9908-9465faa2ae9c",
+                "name": "Rail with 10 Dresses on Hangers",
+                "assetKey": "fit_clothes_rail_dresses",
+                "dimensions": {
+                  "x": 0.8440000000000001,
+                  "y": 1.5,
+                  "z": 0.5
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0.010000000000000009
+                },
+                "supportId": "85cb1345-5871-4c3a-bd32-5871c72592a6",
+                "sectionFinishes": {
+                  "rail": {
+                    "type": "porcelain",
+                    "variant": "porcelain_white",
+                    "color": "#ffffff",
+                    "roughness": 0.04,
+                    "metalness": 0.02,
+                    "layer": 0
+                  }
+                }
+              },
+              {
+                "id": "9a2f20ac-48b2-4012-afef-eaafb0148fbd",
+                "name": "5 Folded Sweatshirts",
+                "assetKey": "fit_folded_sweatshirts_5",
+                "dimensions": {
+                  "x": 0.32,
+                  "y": 0.275,
+                  "z": 0.36
+                },
+                "rotationY": 1.5707963267948966,
+                "position": {
+                  "x": 0.020000000000000018,
+                  "y": 0,
+                  "z": 0.004727528511792256
+                },
+                "supportId": "base"
+              },
+              {
+                "id": "ba62167b-0480-4657-bc0f-c0e929fdc4eb",
+                "name": "5 Folded Sweatshirts",
+                "assetKey": "fit_folded_sweatshirts_5",
+                "dimensions": {
+                  "x": 0.32,
+                  "y": 0.275,
+                  "z": 0.36
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": -0.00024236351331755057,
+                  "y": 0,
+                  "z": 0.3361232960852015
+                },
+                "supportId": "base"
+              },
+              {
+                "id": "1cb2d744-7327-4a55-965f-4ca8e790926d",
+                "name": "5 Folded Sweatshirts",
+                "assetKey": "fit_folded_sweatshirts_5",
+                "dimensions": {
+                  "x": 0.32,
+                  "y": 0.275,
+                  "z": 0.36
+                },
+                "rotationY": 1.5707963267948966,
+                "position": {
+                  "x": 0.447600635472912,
+                  "y": 0,
+                  "z": 0.010010078662421207
+                },
+                "supportId": "base"
+              },
+              {
+                "id": "4580fa42-24f6-4876-a607-2b91396a694f",
+                "name": "5 Folded Sweatshirts",
+                "assetKey": "fit_folded_sweatshirts_5",
+                "dimensions": {
+                  "x": 0.32,
+                  "y": 0.2,
+                  "z": 0.36
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.000549353886481585,
+                  "y": 0,
+                  "z": 0.01451021812196307
+                },
+                "supportId": "93d05c4c-2e1a-462e-85d1-b8f83cc69888"
+              },
+              {
+                "id": "93d05c4c-2e1a-462e-85d1-b8f83cc69888",
+                "name": "5 Folded Sweatshirts",
+                "assetKey": "fit_folded_sweatshirts_5",
+                "dimensions": {
+                  "x": 0.32,
+                  "y": 0.2,
+                  "z": 0.36
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.31960113424126146,
+                  "y": 0,
+                  "z": 0.3361232960852015
+                },
+                "supportId": "base"
+              },
+              {
+                "id": "7b77d685-00eb-4949-9199-6a1802081464",
+                "name": "Hanging Long-Coat Garment Envelope",
+                "assetKey": "life_garment_coat",
+                "dimensions": {
+                  "x": 0.551,
+                  "y": 1.5390000000000001,
+                  "z": 0.085
+                },
+                "rotationY": 1.48352986419518,
+                "position": {
+                  "x": 0.006988565797235682,
+                  "y": 0,
+                  "z": -0.00047161208355683826
+                },
+                "supportId": "85cb1345-5871-4c3a-bd32-5871c72592a6"
+              }
+            ],
             "frontSections": [
               {
                 "id": "lower",
@@ -73989,6 +73581,16 @@
                   "angles": [
                     0,
                     0
+                  ],
+                  "hinges": [
+                    {
+                      "type": "straight-arm",
+                      "travel": 0.02
+                    },
+                    {
+                      "type": "straight-arm",
+                      "travel": 0.02
+                    }
                   ]
                 }
               },
@@ -74003,6 +73605,16 @@
                   "angles": [
                     0,
                     0
+                  ],
+                  "hinges": [
+                    {
+                      "type": "straight-arm",
+                      "travel": 0.02
+                    },
+                    {
+                      "type": "straight-arm",
+                      "travel": 0.02
+                    }
                   ]
                 }
               }
@@ -74018,21 +73630,6 @@
               "setback": 0.025
             },
             "internalDrawers": []
-          },
-          "sectionFinishes": {
-            "handles": {
-              "type": "metal",
-              "color": "#9c8048",
-              "roughness": 0.32,
-              "metalness": 0.8,
-              "layer": 0
-            }
-          },
-          "finish": {
-            "type": "paint",
-            "color": "#dedbd1",
-            "roughness": 0.5,
-            "layer": 0
           }
         }
       },
@@ -74043,6 +73640,7 @@
           "name": "cabinet_wardrobe",
           "displayName": "Master wardrobe — three drawers and double doors",
           "category": "storage",
+          "assetKey": "cabinet_wardrobe",
           "position": {
             "x": 1.332541332582429,
             "y": 0,
@@ -74054,9 +73652,23 @@
             "y": 2.72,
             "z": 0.75
           },
-          "assetKey": "cabinet_wardrobe",
           "roomId": "_3h613",
           "visible": true,
+          "finish": {
+            "type": "paint",
+            "color": "#dedbd1",
+            "roughness": 0.5,
+            "layer": 0
+          },
+          "sectionFinishes": {
+            "handles": {
+              "type": "metal",
+              "color": "#9c8048",
+              "roughness": 0.32,
+              "metalness": 0.8,
+              "layer": 0
+            }
+          },
           "cabinet": {
             "version": 1,
             "panelThickness": 0.018,
@@ -74105,9 +73717,363 @@
                   "mode": "fit",
                   "value": 0.02
                 }
+              },
+              {
+                "id": "fa22755e-f9ac-4085-8274-0be2aa23d4fd",
+                "name": "Shelf 4",
+                "kind": "shelf",
+                "at": 0.9768432356785871,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0.02
+                },
+                "thickness": 0.001
               }
             ],
-            "contents": [],
+            "contents": [
+              {
+                "id": "0e942df5-eb90-44b4-ace8-435db08a1891",
+                "name": "Rail with 10 Shirts on Hangers",
+                "assetKey": "fit_clothes_rail_shirts",
+                "dimensions": {
+                  "x": 0.9440000000000001,
+                  "y": 0.95,
+                  "z": 0.6
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0.010000000000000009
+                },
+                "supportId": "fa22755e-f9ac-4085-8274-0be2aa23d4fd"
+              },
+              {
+                "id": "27c11e6b-1ada-47ca-8ef0-7fcfe906d57b",
+                "name": "Hanging Shirt and Jacket Garment Envelope",
+                "assetKey": "life_garment_short",
+                "dimensions": {
+                  "x": 0.52,
+                  "y": 0.99,
+                  "z": 0.065
+                },
+                "rotationY": 1.5707963267948966,
+                "position": {
+                  "x": 0.011829780974700013,
+                  "y": 0,
+                  "z": 0.12673848820133682
+                },
+                "supportId": "fa22755e-f9ac-4085-8274-0be2aa23d4fd"
+              },
+              {
+                "id": "b41889a2-f638-4562-a990-b972267da97b",
+                "name": "3 Folded Pants",
+                "assetKey": "fit_folded_pants_3",
+                "dimensions": {
+                  "x": 0.26,
+                  "y": 0.105,
+                  "z": 0.54
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.020000000000000018,
+                  "y": 0,
+                  "z": 0.015249407442344654
+                },
+                "supportId": "drawer_cover"
+              },
+              {
+                "id": "656b8b72-56ac-42fc-b02f-c2f22889a2ae",
+                "name": "3 Folded Pants",
+                "assetKey": "fit_folded_pants_3",
+                "dimensions": {
+                  "x": 0.26,
+                  "y": 0.105,
+                  "z": 0.54
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "supportId": "b41889a2-f638-4562-a990-b972267da97b"
+              },
+              {
+                "id": "5cce43e1-7969-4d9d-be82-1d1ad778178b",
+                "name": "3 Folded Pants",
+                "assetKey": "fit_folded_pants_3",
+                "dimensions": {
+                  "x": 0.26,
+                  "y": 0.105,
+                  "z": 0.54
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "supportId": "656b8b72-56ac-42fc-b02f-c2f22889a2ae"
+              },
+              {
+                "id": "0ba79d0a-4d95-46fc-9446-32bfc76f7dc1",
+                "name": "5 Folded Sweatshirts",
+                "assetKey": "fit_folded_sweatshirts_5",
+                "dimensions": {
+                  "x": 0.32,
+                  "y": 0.275,
+                  "z": 0.36
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.290235300134136,
+                  "y": 0,
+                  "z": 0
+                },
+                "supportId": "drawer_cover"
+              },
+              {
+                "id": "0a23cbd4-91cf-479d-974c-30f9a533e864",
+                "name": "5 Folded Sweatshirts",
+                "assetKey": "fit_folded_sweatshirts_5",
+                "dimensions": {
+                  "x": 0.32,
+                  "y": 0.275,
+                  "z": 0.36
+                },
+                "rotationY": 1.5707963267948966,
+                "position": {
+                  "x": 0.28787659615107536,
+                  "y": 0,
+                  "z": 0.3639515389248261
+                },
+                "supportId": "drawer_cover"
+              },
+              {
+                "id": "b5262fc8-21b6-42a0-bbca-b7832de8bb57",
+                "name": "5 Folded Sweatshirts",
+                "assetKey": "fit_folded_sweatshirts_5",
+                "dimensions": {
+                  "x": 0.32,
+                  "y": 0.275,
+                  "z": 0.36
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.6230502072504056,
+                  "y": 0,
+                  "z": 0
+                },
+                "supportId": "drawer_cover"
+              },
+              {
+                "id": "01adae3f-a88d-4d37-882e-95ce7eb938a7",
+                "name": "5 Folded T-shirts",
+                "assetKey": "fit_folded_tshirts_5",
+                "dimensions": {
+                  "x": 0.28,
+                  "y": 0.125,
+                  "z": 0.32
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.013048436341000114,
+                  "y": 0,
+                  "z": 0.017029016132054348
+                },
+                "supportId": "drawer_drawer_3_0"
+              },
+              {
+                "id": "e4453d12-30bc-4218-831e-b819386a8c15",
+                "name": "5 Folded T-shirts",
+                "assetKey": "fit_folded_tshirts_5",
+                "dimensions": {
+                  "x": 0.28,
+                  "y": 0.125,
+                  "z": 0.32
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.3012530488005382,
+                  "y": 0,
+                  "z": 0.017029016132054348
+                },
+                "supportId": "drawer_drawer_3_0"
+              },
+              {
+                "id": "32df8e44-d3fb-4a5a-88e9-049a88f143be",
+                "name": "5 Folded T-shirts",
+                "assetKey": "fit_folded_tshirts_5",
+                "dimensions": {
+                  "x": 0.28,
+                  "y": 0.125,
+                  "z": 0.32
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.5907648957490566,
+                  "y": 0,
+                  "z": 0.013864862808195683
+                },
+                "supportId": "drawer_drawer_3_0"
+              },
+              {
+                "id": "9c64ddeb-943b-4ff1-903d-90787decfe86",
+                "name": "5 Folded T-shirts",
+                "assetKey": "fit_folded_tshirts_5",
+                "dimensions": {
+                  "x": 0.28,
+                  "y": 0.125,
+                  "z": 0.32
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.5914596476841263,
+                  "y": 0,
+                  "z": 0.338825217162081
+                },
+                "supportId": "drawer_drawer_3_0"
+              },
+              {
+                "id": "f2d4547f-0d39-46e4-8c2f-d72ed9b804d4",
+                "name": "5 Folded T-shirts",
+                "assetKey": "fit_folded_tshirts_5",
+                "dimensions": {
+                  "x": 0.28,
+                  "y": 0.125,
+                  "z": 0.32
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.3018491729857895,
+                  "y": 0,
+                  "z": 0.3442866850454377
+                },
+                "supportId": "drawer_drawer_3_0"
+              },
+              {
+                "id": "bd38a349-541f-4d70-b174-13b9ee4a6ff7",
+                "name": "5 Folded T-shirts",
+                "assetKey": "fit_folded_tshirts_5",
+                "dimensions": {
+                  "x": 0.28,
+                  "y": 0.125,
+                  "z": 0.32
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.016267391265034514,
+                  "y": 0,
+                  "z": 0.3388252171620809
+                },
+                "supportId": "drawer_drawer_3_0"
+              },
+              {
+                "id": "5a6a019f-a624-4614-b7a7-d0947557ce8e",
+                "name": "5 Folded T-shirts",
+                "assetKey": "fit_folded_tshirts_5",
+                "dimensions": {
+                  "x": 0.28,
+                  "y": 0.125,
+                  "z": 0.32
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.015,
+                  "y": 0,
+                  "z": 0.015
+                },
+                "supportId": "drawer_drawer_2_0"
+              },
+              {
+                "id": "bdd1ec32-cb8d-45db-af48-3a2e81f9b52f",
+                "name": "5 Folded T-shirts",
+                "assetKey": "fit_folded_tshirts_5",
+                "dimensions": {
+                  "x": 0.28,
+                  "y": 0.125,
+                  "z": 0.32
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.2971775205172227,
+                  "y": 0,
+                  "z": 0.015000000000000041
+                },
+                "supportId": "drawer_drawer_2_0"
+              },
+              {
+                "id": "87d6e61f-9962-41e0-a7d9-12a0e4823a1f",
+                "name": "5 Folded T-shirts",
+                "assetKey": "fit_folded_tshirts_5",
+                "dimensions": {
+                  "x": 0.28,
+                  "y": 0.125,
+                  "z": 0.32
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.5992141541205046,
+                  "y": 0,
+                  "z": 0.015000000000000041
+                },
+                "supportId": "drawer_drawer_2_0"
+              },
+              {
+                "id": "759cbc8f-dc5d-44ed-84ac-237713e1ea10",
+                "name": "5 Folded T-shirts",
+                "assetKey": "fit_folded_tshirts_5",
+                "dimensions": {
+                  "x": 0.28,
+                  "y": 0.125,
+                  "z": 0.32
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.5992141541205046,
+                  "y": 0,
+                  "z": 0.3548646212611597
+                },
+                "supportId": "drawer_drawer_2_0"
+              },
+              {
+                "id": "6df90b75-f411-48d0-b50a-47a5dbf8f057",
+                "name": "5 Folded T-shirts",
+                "assetKey": "fit_folded_tshirts_5",
+                "dimensions": {
+                  "x": 0.28,
+                  "y": 0.125,
+                  "z": 0.32
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.30695060161660104,
+                  "y": 0,
+                  "z": 0.3548646212611597
+                },
+                "supportId": "drawer_drawer_2_0"
+              },
+              {
+                "id": "95c2a718-d0c2-45c5-bfb0-66224ca0a648",
+                "name": "5 Folded T-shirts",
+                "assetKey": "fit_folded_tshirts_5",
+                "dimensions": {
+                  "x": 0.28,
+                  "y": 0.125,
+                  "z": 0.32
+                },
+                "rotationY": 0,
+                "position": {
+                  "x": 0.02030550589253166,
+                  "y": 0,
+                  "z": 0.3548646212611597
+                },
+                "supportId": "drawer_drawer_2_0"
+              }
+            ],
             "frontSections": [
               {
                 "id": "drawer_1",
@@ -74174,6 +74140,16 @@
                   "angles": [
                     0,
                     0
+                  ],
+                  "hinges": [
+                    {
+                      "type": "straight-arm",
+                      "travel": 0.02
+                    },
+                    {
+                      "type": "straight-arm",
+                      "travel": 0.02
+                    }
                   ]
                 }
               },
@@ -74188,6 +74164,16 @@
                   "angles": [
                     0,
                     0
+                  ],
+                  "hinges": [
+                    {
+                      "type": "straight-arm",
+                      "travel": 0.02
+                    },
+                    {
+                      "type": "straight-arm",
+                      "travel": 0.02
+                    }
                   ]
                 }
               }
@@ -74203,7 +74189,30 @@
               "setback": 0.025
             },
             "internalDrawers": []
+          }
+        }
+      },
+      {
+        "kind": "furniture.standard",
+        "data": {
+          "id": "master_wardrobe_left_single",
+          "name": "ward_double",
+          "displayName": "Master wardrobe — left single door",
+          "category": "storage",
+          "assetKey": "ward_double",
+          "position": {
+            "x": 2.957065848451935,
+            "y": 0,
+            "z": 8.253350742631786
           },
+          "rotationY": -3.1174009240297145,
+          "dimensions": {
+            "x": 0.51,
+            "y": 2.72,
+            "z": 0.75
+          },
+          "roomId": "_3h613",
+          "visible": true,
           "finish": {
             "type": "paint",
             "color": "#dedbd1",
@@ -74218,30 +74227,7 @@
               "metalness": 0.8,
               "layer": 0
             }
-          }
-        }
-      },
-      {
-        "kind": "furniture.standard",
-        "data": {
-          "id": "master_wardrobe_left_single",
-          "name": "ward_double",
-          "displayName": "Master wardrobe — left single door",
-          "category": "storage",
-          "position": {
-            "x": 2.957065848451935,
-            "y": 0,
-            "z": 8.253350742631786
           },
-          "rotationY": -3.1174009240297145,
-          "dimensions": {
-            "x": 0.51,
-            "y": 2.72,
-            "z": 0.75
-          },
-          "assetKey": "ward_double",
-          "roomId": "_3h613",
-          "visible": true,
           "cabinet": {
             "version": 1,
             "panelThickness": 0.018,
@@ -74322,22 +74308,694 @@
               "setback": 0.025
             },
             "internalDrawers": []
+          }
+        }
+      },
+      {
+        "kind": "furniture.standard",
+        "data": {
+          "id": "3c2bab4c-a4fc-48b0-8174-87dbf99cb363",
+          "name": "detail_mirror_arch",
+          "displayName": "Arched Wall Mirror",
+          "category": "decor",
+          "assetKey": "detail_mirror_arch",
+          "position": {
+            "x": -4.820283550359066,
+            "y": 0.5,
+            "z": 5.18433316393978
+          },
+          "rotationY": 1.570812045941801,
+          "dimensions": {
+            "x": 1,
+            "y": 1.5,
+            "z": 0.025
+          },
+          "roomId": "_4wyay",
+          "visible": true,
+          "sectionFinishes": {
+            "mirror": {
+              "type": "paint",
+              "color": "#fbfbf9",
+              "roughness": 0.85,
+              "layer": 2
+            }
+          }
+        }
+      },
+      {
+        "kind": "furniture.standard",
+        "data": {
+          "id": "cd6fecb0-7b8b-4fee-b8fd-0831cd37c8bd",
+          "name": "squat_toilet",
+          "displayName": "Squat Toilet",
+          "category": "bathroom",
+          "assetKey": "squat_toilet",
+          "position": {
+            "x": -3.0625377506906495,
+            "y": 0,
+            "z": 6.270612141675219
+          },
+          "rotationY": 1.5707963267948966,
+          "dimensions": {
+            "x": 0.55,
+            "y": 0.1,
+            "z": 0.65
+          },
+          "roomId": "_qb2a4",
+          "visible": true
+        }
+      },
+      {
+        "kind": "furniture.standard",
+        "data": {
+          "id": "5f47cf47-50fc-439b-9bcf-88ca7389adb9",
+          "name": "washing_machine",
+          "displayName": "Standard White Washing Machine",
+          "category": "appliance",
+          "assetKey": "washing_machine",
+          "position": {
+            "x": -0.2540072546994789,
+            "y": 0,
+            "z": 3.69197715236888
+          },
+          "rotationY": 1.5707963267948966,
+          "dimensions": {
+            "x": 0.6,
+            "y": 0.85,
+            "z": 0.6
+          },
+          "roomId": "_qb2a4",
+          "visible": true
+        }
+      },
+      {
+        "kind": "furniture.standard",
+        "data": {
+          "id": "ffe97c8b-9409-4558-97ef-8524263563c6",
+          "name": "finish_panelling_beadboard",
+          "displayName": "Beadboard Wall Panelling",
+          "category": "architecture",
+          "assetKey": "finish_panelling_beadboard",
+          "position": {
+            "x": 3.202099999254942,
+            "y": 0,
+            "z": 6.702345687253471
+          },
+          "rotationY": -1.5707963267948968,
+          "dimensions": {
+            "x": 2.34,
+            "y": 0.826,
+            "z": 0.018
+          },
+          "roomId": "_3h613",
+          "visible": true,
+          "sectionFinishes": {
+            "boards": {
+              "type": "invisible",
+              "color": "invisible",
+              "layer": 3
+            },
+            "beads": {
+              "type": "invisible",
+              "color": "invisible",
+              "layer": 0
+            },
+            "top_cap": {
+              "type": "invisible",
+              "color": "invisible",
+              "layer": 10
+            }
+          }
+        }
+      },
+      {
+        "kind": "furniture.shelving",
+        "data": {
+          "id": "bb33792b-ec5b-4abc-b172-c3a98f8387ab",
+          "name": "ikea_billy_oxberg_glass_80_walnut_effect",
+          "displayName": "IKEA BILLY / OXBERG Full Glass-Door Bookcase — Walnut Effect",
+          "category": "storage",
+          "position": {
+            "x": -2.913,
+            "y": 0,
+            "z": 3.7566715338487553
+          },
+          "rotationY": -3.141573408918168,
+          "dimensions": {
+            "x": 0.8,
+            "y": 2.02,
+            "z": 0.3
+          },
+          "assetKey": "ikea_billy_oxberg_glass_80_walnut_effect",
+          "roomId": "_elc1j",
+          "visible": true,
+          "cabinet": {
+            "version": 1,
+            "panelThickness": 0.018,
+            "backThickness": 0.003,
+            "doors": {
+              "count": 2,
+              "hinge": "left",
+              "angles": [
+                0,
+                0
+              ]
+            },
+            "panels": [
+              {
+                "id": "shelf_1",
+                "name": "Shelf 1",
+                "kind": "shelf",
+                "at": 0.402,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0.012
+                }
+              },
+              {
+                "id": "shelf_2",
+                "name": "Shelf 2",
+                "kind": "shelf",
+                "at": 0.722,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0.012
+                }
+              },
+              {
+                "id": "shelf_3",
+                "name": "Shelf 3",
+                "kind": "shelf",
+                "at": 1.042,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0.012
+                }
+              },
+              {
+                "id": "shelf_4",
+                "name": "Shelf 4",
+                "kind": "shelf",
+                "at": 1.362,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0.012
+                }
+              },
+              {
+                "id": "shelf_5",
+                "name": "Shelf 5",
+                "kind": "shelf",
+                "at": 1.682,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0.012
+                }
+              }
+            ],
+            "contents": [],
+            "doorStyle": "full_glass",
+            "plinth": {
+              "height": 0.1,
+              "setback": 0.03
+            }
+          },
+          "shelfCount": 6,
+          "sectionFinishes": {
+            "door_1": {
+              "type": "metal",
+              "variant": "matte_black_powder",
+              "color": "#18181b",
+              "roughness": 0.7,
+              "metalness": 0.15,
+              "layer": 0
+            },
+            "door_2": {
+              "type": "metal",
+              "variant": "matte_black_powder",
+              "color": "#18181b",
+              "roughness": 0.7,
+              "metalness": 0.15,
+              "layer": 0
+            }
+          }
+        }
+      },
+      {
+        "kind": "furniture.shelving",
+        "data": {
+          "id": "c5c830cf-5d14-4311-9464-836455b6c83f",
+          "assetKey": "ikea_billy_oxberg_extension_80_walnut_effect",
+          "name": "ikea_billy_oxberg_extension_80_walnut_effect",
+          "displayName": "IKEA BILLY / OXBERG Height Extension — Glass Doors — Walnut Effect",
+          "category": "storage",
+          "dimensions": {
+            "x": 0.8,
+            "y": 0.35,
+            "z": 0.3
+          },
+          "position": {
+            "x": -3.713,
+            "y": 2.02,
+            "z": 3.7566715338487553
+          },
+          "rotationY": -3.141573408918168,
+          "roomId": "_elc1j",
+          "finish": {
+            "type": "wood",
+            "variant": "billy_oak_effect",
+            "color": "#c0b099",
+            "roughness": 0.65,
+            "metalness": 0,
+            "rotation": 0,
+            "layer": 0
           },
           "sectionFinishes": {
-            "handles": {
-              "type": "metal",
-              "color": "#9c8048",
-              "roughness": 0.32,
-              "metalness": 0.8,
+            "door_1": {
+              "type": "paint",
+              "variant": "billy_white",
+              "color": "#f3f1eb",
+              "roughness": 0.65,
+              "rotation": 0,
+              "layer": 0
+            },
+            "door_2": {
+              "type": "paint",
+              "variant": "billy_white",
+              "color": "#f3f1eb",
+              "roughness": 0.65,
+              "rotation": 0,
               "layer": 0
             }
           },
-          "finish": {
-            "type": "paint",
-            "color": "#dedbd1",
-            "roughness": 0.5,
-            "layer": 0
+          "cabinet": {
+            "version": 1,
+            "panelThickness": 0.018,
+            "backThickness": 0.018,
+            "doors": {
+              "count": 2,
+              "hinge": "left",
+              "angles": [
+                0,
+                0
+              ]
+            },
+            "panels": [],
+            "contents": [],
+            "doorStyle": "full_glass",
+            "openBottom": true
+          },
+          "shelfCount": 2
+        }
+      },
+      {
+        "kind": "furniture.shelving",
+        "data": {
+          "id": "f8b9a395-1270-4620-bcff-85fe20b6f7b1",
+          "name": "ikea_billy_oxberg_glass_80_walnut_effect",
+          "displayName": "IKEA BILLY / OXBERG Full Glass-Door Bookcase — Walnut Effect",
+          "category": "storage",
+          "position": {
+            "x": -3.713,
+            "y": 0,
+            "z": 3.756674420549499
+          },
+          "rotationY": -3.141573408918168,
+          "dimensions": {
+            "x": 0.8,
+            "y": 2.02,
+            "z": 0.3
+          },
+          "assetKey": "ikea_billy_oxberg_glass_80_walnut_effect",
+          "roomId": "_elc1j",
+          "visible": true,
+          "cabinet": {
+            "version": 1,
+            "panelThickness": 0.018,
+            "backThickness": 0.003,
+            "doors": {
+              "count": 2,
+              "hinge": "left",
+              "angles": [
+                0,
+                0
+              ]
+            },
+            "panels": [
+              {
+                "id": "shelf_1",
+                "name": "Shelf 1",
+                "kind": "shelf",
+                "at": 0.402,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0.012
+                }
+              },
+              {
+                "id": "shelf_2",
+                "name": "Shelf 2",
+                "kind": "shelf",
+                "at": 0.722,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0.012
+                }
+              },
+              {
+                "id": "shelf_3",
+                "name": "Shelf 3",
+                "kind": "shelf",
+                "at": 1.042,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0.012
+                }
+              },
+              {
+                "id": "shelf_4",
+                "name": "Shelf 4",
+                "kind": "shelf",
+                "at": 1.362,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0.012
+                }
+              },
+              {
+                "id": "shelf_5",
+                "name": "Shelf 5",
+                "kind": "shelf",
+                "at": 1.682,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0.012
+                }
+              }
+            ],
+            "contents": [],
+            "doorStyle": "full_glass",
+            "plinth": {
+              "height": 0.1,
+              "setback": 0.03
+            }
+          },
+          "shelfCount": 6,
+          "sectionFinishes": {
+            "door_1": {
+              "type": "metal",
+              "variant": "matte_black_powder",
+              "color": "#18181b",
+              "roughness": 0.7,
+              "metalness": 0.15,
+              "layer": 0
+            },
+            "door_2": {
+              "type": "metal",
+              "variant": "matte_black_powder",
+              "color": "#18181b",
+              "roughness": 0.7,
+              "metalness": 0.15,
+              "layer": 0
+            }
           }
+        }
+      },
+      {
+        "kind": "furniture.shelving",
+        "data": {
+          "id": "9aeb3038-cc58-445f-bb5e-a4cb8baa4d9a",
+          "name": "ikea_billy_oxberg_glass_80_walnut_effect",
+          "displayName": "IKEA BILLY / OXBERG Full Glass-Door Bookcase — Walnut Effect",
+          "category": "storage",
+          "position": {
+            "x": -2.113,
+            "y": 0,
+            "z": 3.756674420549499
+          },
+          "rotationY": -3.141573408918168,
+          "dimensions": {
+            "x": 0.8,
+            "y": 2.02,
+            "z": 0.3
+          },
+          "assetKey": "ikea_billy_oxberg_glass_80_walnut_effect",
+          "roomId": "_elc1j",
+          "visible": true,
+          "cabinet": {
+            "version": 1,
+            "panelThickness": 0.018,
+            "backThickness": 0.003,
+            "doors": {
+              "count": 2,
+              "hinge": "left",
+              "angles": [
+                0,
+                0
+              ]
+            },
+            "panels": [
+              {
+                "id": "shelf_1",
+                "name": "Shelf 1",
+                "kind": "shelf",
+                "at": 0.402,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0.012
+                }
+              },
+              {
+                "id": "shelf_2",
+                "name": "Shelf 2",
+                "kind": "shelf",
+                "at": 0.722,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0.012
+                }
+              },
+              {
+                "id": "shelf_3",
+                "name": "Shelf 3",
+                "kind": "shelf",
+                "at": 1.042,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0.012
+                }
+              },
+              {
+                "id": "shelf_4",
+                "name": "Shelf 4",
+                "kind": "shelf",
+                "at": 1.362,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0.012
+                }
+              },
+              {
+                "id": "shelf_5",
+                "name": "Shelf 5",
+                "kind": "shelf",
+                "at": 1.682,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0.012
+                }
+              }
+            ],
+            "contents": [],
+            "doorStyle": "full_glass",
+            "plinth": {
+              "height": 0.1,
+              "setback": 0.03
+            }
+          },
+          "shelfCount": 6,
+          "sectionFinishes": {
+            "door_1": {
+              "type": "metal",
+              "variant": "matte_black_powder",
+              "color": "#18181b",
+              "roughness": 0.7,
+              "metalness": 0.15,
+              "layer": 0
+            },
+            "door_2": {
+              "type": "metal",
+              "variant": "matte_black_powder",
+              "color": "#18181b",
+              "roughness": 0.7,
+              "metalness": 0.15,
+              "layer": 0
+            }
+          }
+        }
+      },
+      {
+        "kind": "furniture.shelving",
+        "data": {
+          "id": "435c51e9-6f6f-4b6f-a2e3-10ad61ce07b0",
+          "assetKey": "ikea_billy_oxberg_extension_80_walnut_effect",
+          "name": "ikea_billy_oxberg_extension_80_walnut_effect",
+          "displayName": "IKEA BILLY / OXBERG Height Extension — Glass Doors — Walnut Effect",
+          "category": "storage",
+          "dimensions": {
+            "x": 0.8,
+            "y": 0.35,
+            "z": 0.3
+          },
+          "position": {
+            "x": -2.913,
+            "y": 2.02,
+            "z": 3.756674420549499
+          },
+          "rotationY": -3.141573408918168,
+          "roomId": "_elc1j",
+          "finish": {
+            "type": "wood",
+            "variant": "billy_oak_effect",
+            "color": "#c0b099",
+            "roughness": 0.65,
+            "metalness": 0,
+            "rotation": 0,
+            "layer": 0
+          },
+          "sectionFinishes": {
+            "door_1": {
+              "type": "paint",
+              "variant": "billy_white",
+              "color": "#f3f1eb",
+              "roughness": 0.65,
+              "rotation": 0,
+              "layer": 0
+            },
+            "door_2": {
+              "type": "paint",
+              "variant": "billy_white",
+              "color": "#f3f1eb",
+              "roughness": 0.65,
+              "rotation": 0,
+              "layer": 0
+            }
+          },
+          "cabinet": {
+            "version": 1,
+            "panelThickness": 0.018,
+            "backThickness": 0.018,
+            "doors": {
+              "count": 2,
+              "hinge": "left",
+              "angles": [
+                0,
+                0
+              ]
+            },
+            "panels": [],
+            "contents": [],
+            "doorStyle": "full_glass",
+            "openBottom": true
+          },
+          "shelfCount": 2
+        }
+      },
+      {
+        "kind": "furniture.shelving",
+        "data": {
+          "id": "1ad5dfb2-c8f0-4474-8e01-46d536ca7a0c",
+          "assetKey": "ikea_billy_oxberg_extension_80_walnut_effect",
+          "name": "ikea_billy_oxberg_extension_80_walnut_effect",
+          "displayName": "IKEA BILLY / OXBERG Height Extension — Glass Doors — Walnut Effect",
+          "category": "storage",
+          "dimensions": {
+            "x": 0.8,
+            "y": 0.35,
+            "z": 0.3
+          },
+          "position": {
+            "x": -2.113,
+            "y": 2.02,
+            "z": 3.756674420549499
+          },
+          "rotationY": -3.141573408918168,
+          "roomId": "_elc1j",
+          "finish": {
+            "type": "wood",
+            "variant": "billy_oak_effect",
+            "color": "#c0b099",
+            "roughness": 0.65,
+            "metalness": 0,
+            "rotation": 0,
+            "layer": 0
+          },
+          "sectionFinishes": {
+            "door_1": {
+              "type": "paint",
+              "variant": "billy_white",
+              "color": "#f3f1eb",
+              "roughness": 0.65,
+              "rotation": 0,
+              "layer": 0
+            },
+            "door_2": {
+              "type": "paint",
+              "variant": "billy_white",
+              "color": "#f3f1eb",
+              "roughness": 0.65,
+              "rotation": 0,
+              "layer": 0
+            }
+          },
+          "cabinet": {
+            "version": 1,
+            "panelThickness": 0.018,
+            "backThickness": 0.018,
+            "doors": {
+              "count": 2,
+              "hinge": "left",
+              "angles": [
+                0,
+                0
+              ]
+            },
+            "panels": [],
+            "contents": [],
+            "doorStyle": "full_glass",
+            "openBottom": true
+          },
+          "shelfCount": 2
         }
       }
     ],
