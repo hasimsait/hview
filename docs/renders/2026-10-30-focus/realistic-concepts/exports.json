@@ -1,0 +1,38 @@
+[
+  {
+    "id": "01-burgundy-flax",
+    "title": "Burgundy and Flax",
+    "scene": "01-burgundy-flax.png",
+    "withPalette": "01-burgundy-flax--palette.jpg",
+    "width": 1940,
+    "height": 1376,
+    "sha256": "96f104ba7414eb33286ff10ec1b6a5f7622ab396ce04a061ca21332257cebdc0"
+  },
+  {
+    "id": "02-olive-oat",
+    "title": "Olive and Oat",
+    "scene": "02-olive-oat.png",
+    "withPalette": "02-olive-oat--palette.jpg",
+    "width": 1940,
+    "height": 1376,
+    "sha256": "cd6929716ad54b88bb1dea5d328bf22f6b225e4a086e251ca3c5e7116e4265d9"
+  },
+  {
+    "id": "03-tobacco-stone",
+    "title": "Tobacco and Stone",
+    "scene": "03-tobacco-stone.png",
+    "withPalette": "03-tobacco-stone--palette.jpg",
+    "width": 1940,
+    "height": 1376,
+    "sha256": "f4d98b0cf06980220fd8f2a60102afcd4aac344b87e4cd46a287a3dbe0a8a321"
+  },
+  {
+    "id": "04-petrol-clay",
+    "title": "Petrol and Clay",
+    "scene": "04-petrol-clay.png",
+    "withPalette": "04-petrol-clay--palette.jpg",
+    "width": 1940,
+    "height": 1376,
+    "sha256": "0e050bb656a008f20d41979905f37daa613412a0d131566e5fe9e8752dd03d92"
+  }
+]

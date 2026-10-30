@@ -1,6 +1,8 @@
 # Focused room and material study
 
-[Open the comparison gallery](index.html).
+[Open the four photorealistic combinations with complete palettes](realistic-concepts/index.html).
+
+[Open the controlled HView comparison gallery](index.html).
 
 This supersedes the ten-room first pass. Only the **salon, living/work room and master bedroom** are in scope. The images are rendered directly in HView so door, mirror and object positions follow the actual plan. Kitchen, bathroom, WC, shower, small bedroom, dining area and hall are not being redesigned.
 
@@ -54,3 +56,7 @@ XDG_CACHE_HOME=/workspace/hview/work/fontcache node scripts/build_focus_review.c
 ```
 
 `--preview` captures neutral-light camera checks. `--only=baseline` or `--only=<decision-id>` updates a subset only when the source-plan hash matches the existing manifest.
+
+## Photorealistic proposals
+
+The [four coordinated concepts](realistic-concepts/index.html) add image-generated material realism and decoration to the HView references. Each shows all three rooms at 6500 K and 2700 K. The downloaded images have a labelled footer mapping every main wall, upholstery, curtain, desk, chair, wardrobe and BILLY finish to its selected base hex value. Bedroom curtains are one-sided, on the wardrobe side. These proposals do not change the saved plan.

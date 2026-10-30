@@ -1,0 +1,438 @@
+[
+  {
+    "id": "01-burgundy-flax",
+    "title": "Burgundy and Flax",
+    "salon": "Main long sofa and the matching burgundy armchair: deep wine burgundy velvet #54121d. Other sofa/armchair upholstery: champagne woven fabric #ede6d6. Keep ALL existing dark wenge wood arms as wood. Curtains: natural flax linen #b7a58d. Add a restrained ecru low-pile wool rug with quiet charcoal lines, a burgundy/cream abstract above the long sofa, two modest pillows, a few books behind the glass. Keep the middle walking route open.",
+    "living": "Keep the existing dusty blue fabric #94a3b8 on the ONE L-shaped sectional. Both existing desk tops: natural oak veneer, planning reference #dfcbaf, wood grain visible, original black desk legs. Curtains warm oat linen #b7aa95. Add small off-white desk organisers and one muted print, with a small textured ecru rug around the existing coffee table. Keep both different existing chairs.",
+    "bedroom": "Window/accent wall remains deep muted terracotta #764a40. The single curtain panel on the wardrobe side is flax linen #b8a48a; no panel on the opposite side. Ivory/flax bedding is a styling prop, a small rust throw optional. A single soft charcoal/flax print on the long blank wall. Existing pale left long wall #ece5d4, cream paneled wardrobes #dedbd1, brass handles and wood/slat headboard remain unchanged.",
+    "billy": {
+      "body": {
+        "name": "BILLY Walnut Effect",
+        "color": "#9d7b5b"
+      },
+      "doors": {
+        "name": "BILLY Walnut Effect",
+        "color": "#9d7b5b"
+      }
+    },
+    "palette": {
+      "salon": [
+        {
+          "label": "Wall \u00b7 Jotun 1876 (fixed)",
+          "color": "#d4cbb9"
+        },
+        {
+          "label": "Long sofa fabric \u00b7 Wine velvet",
+          "color": "#54121d"
+        },
+        {
+          "label": "Other sofa/chair fabric \u00b7 Champagne",
+          "color": "#ede6d6"
+        },
+        {
+          "label": "Curtains \u00b7 Flax",
+          "color": "#b7a58d"
+        },
+        {
+          "label": "Wood arms \u00b7 Dark wenge",
+          "color": "#27201b"
+        },
+        {
+          "label": "One armchair wood \u00b7 Light ash",
+          "color": "#d4cbbe"
+        },
+        {
+          "label": "BILLY body \u00b7 Walnut Effect",
+          "color": "#9d7b5b"
+        },
+        {
+          "label": "BILLY doors \u00b7 Walnut Effect",
+          "color": "#9d7b5b"
+        }
+      ],
+      "living": [
+        {
+          "label": "Main walls \u00b7 Warm ivory",
+          "color": "#eae2d1"
+        },
+        {
+          "label": "Existing feature wall \u00b7 Pale blue",
+          "color": "#bcd7ea"
+        },
+        {
+          "label": "L-sofa fabric \u00b7 Dusty blue",
+          "color": "#94a3b8"
+        },
+        {
+          "label": "Both desk tops \u00b7 Natural oak",
+          "color": "#dfcbaf"
+        },
+        {
+          "label": "Curtains \u00b7 Oat",
+          "color": "#b7aa95"
+        },
+        {
+          "label": "Desk chair \u00b7 Charcoal",
+          "color": "#27272a"
+        },
+        {
+          "label": "Second chair \u00b7 Cream",
+          "color": "#e8e0d5"
+        }
+      ],
+      "bedroom": [
+        {
+          "label": "Accent/window wall \u00b7 Muted terracotta",
+          "color": "#764a40"
+        },
+        {
+          "label": "ONE right curtain \u00b7 Flax",
+          "color": "#b8a48a"
+        },
+        {
+          "label": "Long pale wall (fixed)",
+          "color": "#ece5d4"
+        },
+        {
+          "label": "Wardrobes (fixed)",
+          "color": "#dedbd1"
+        },
+        {
+          "label": "Return walls \u00b7 Warm ivory",
+          "color": "#eae2d1"
+        },
+        {
+          "label": "Cabinet handles \u00b7 Brass (fixed)",
+          "color": "#9c8048"
+        }
+      ]
+    }
+  },
+  {
+    "id": "02-olive-oat",
+    "title": "Olive and Oat",
+    "salon": "Main long sofa and the matching armchair: muted olive upholstered velvet #62634d. Other sofa/armchair upholstery: warm oat textured fabric #c9bcaa. Keep ALL existing dark wenge wood arms as wood. Curtains natural flax linen #b7a58d. Add a pale oat low-pile wool rug, a restrained olive/charcoal abstract above the long sofa and a few terracotta/cream styling pillows. Keep the middle walking route open.",
+    "living": "Keep the existing dusty blue fabric #94a3b8 on the ONE L-shaped sectional. Both existing desk tops: pale bleached birch veneer, planning reference #dfcfb6, grain visible, original black desk legs. Curtains warm oat linen #b7aa95. Add tidy light ceramic desk organisers, one small olive-accented print and a thin pale oat rug at the existing coffee table. Keep both different existing chairs.",
+    "bedroom": "Window/accent wall: deep muted olive #59604c. The single curtain panel on the wardrobe side is warm stone linen #a89e91; no panel on the opposite side. Ivory bedding with a small muted rust throw and dark olive cushion as styling props. One small earth-tone print on the blank long wall. Existing pale left long wall #ece5d4, cream paneled wardrobes #dedbd1, brass handles and wood/slat headboard remain unchanged.",
+    "billy": {
+      "body": {
+        "name": "BILLY Oak Effect",
+        "color": "#c0b099"
+      },
+      "doors": {
+        "name": "BILLY Black Oak Effect",
+        "color": "#24211e"
+      }
+    },
+    "palette": {
+      "salon": [
+        {
+          "label": "Wall \u00b7 Jotun 1876 (fixed)",
+          "color": "#d4cbb9"
+        },
+        {
+          "label": "Long sofa fabric \u00b7 Muted olive",
+          "color": "#62634d"
+        },
+        {
+          "label": "Other sofa/chair fabric \u00b7 Warm oat",
+          "color": "#c9bcaa"
+        },
+        {
+          "label": "Curtains \u00b7 Flax",
+          "color": "#b7a58d"
+        },
+        {
+          "label": "Wood arms \u00b7 Dark wenge",
+          "color": "#27201b"
+        },
+        {
+          "label": "One armchair wood \u00b7 Light ash",
+          "color": "#d4cbbe"
+        },
+        {
+          "label": "BILLY body \u00b7 Oak Effect",
+          "color": "#c0b099"
+        },
+        {
+          "label": "BILLY doors \u00b7 Black Oak Effect",
+          "color": "#24211e"
+        }
+      ],
+      "living": [
+        {
+          "label": "Main walls \u00b7 Warm ivory",
+          "color": "#eae2d1"
+        },
+        {
+          "label": "Existing feature wall \u00b7 Pale blue",
+          "color": "#bcd7ea"
+        },
+        {
+          "label": "L-sofa fabric \u00b7 Dusty blue",
+          "color": "#94a3b8"
+        },
+        {
+          "label": "Both desk tops \u00b7 Bleached birch",
+          "color": "#dfcfb6"
+        },
+        {
+          "label": "Curtains \u00b7 Oat",
+          "color": "#b7aa95"
+        },
+        {
+          "label": "Desk chair \u00b7 Charcoal",
+          "color": "#27272a"
+        },
+        {
+          "label": "Second chair \u00b7 Cream",
+          "color": "#e8e0d5"
+        }
+      ],
+      "bedroom": [
+        {
+          "label": "Accent/window wall \u00b7 Muted olive",
+          "color": "#59604c"
+        },
+        {
+          "label": "ONE right curtain \u00b7 Warm stone",
+          "color": "#a89e91"
+        },
+        {
+          "label": "Long pale wall (fixed)",
+          "color": "#ece5d4"
+        },
+        {
+          "label": "Wardrobes (fixed)",
+          "color": "#dedbd1"
+        },
+        {
+          "label": "Return walls \u00b7 Warm ivory",
+          "color": "#eae2d1"
+        },
+        {
+          "label": "Cabinet handles \u00b7 Brass (fixed)",
+          "color": "#9c8048"
+        }
+      ]
+    }
+  },
+  {
+    "id": "03-tobacco-stone",
+    "title": "Tobacco and Stone",
+    "salon": "Main long sofa and matching armchair: warm tobacco velvet upholstery #88644c, visibly FABRIC, never leather. Other sofa/armchair upholstery: light flax fabric #c8b9a0. Keep ALL existing dark wenge wood arms as wood. Curtains softly desaturated blue-grey linen #7b8e91. Add a quiet warm ivory wool rug, one soft charcoal/brown abstract on the long wall and a few stone/blue-grey pillows. Keep the middle walking route open.",
+    "living": "Keep the existing dusty blue fabric #94a3b8 on the ONE L-shaped sectional. Both existing desk tops: dark American walnut veneer #543f31, warm chocolate, not orange oak and not BILLY walnut #9d7b5b. Keep original black desk legs. Curtains warm oat linen #b7aa95. Add cream ceramic desk organisers and one restrained graphic print, with a pale rug near the existing coffee table. Keep both different existing chairs.",
+    "bedroom": "Window/accent wall: warm mushroom taupe #83796c. The single curtain panel on the wardrobe side is desaturated slate-blue linen #7e8c90; no panel on the opposite side. Cream bedding with an understated tobacco throw, free styling props. One low-contrast charcoal/flax print on the long blank wall. Existing pale left long wall #ece5d4, cream paneled wardrobes #dedbd1, brass handles and wood/slat headboard remain unchanged.",
+    "billy": {
+      "body": {
+        "name": "BILLY White",
+        "color": "#f3f1eb"
+      },
+      "doors": {
+        "name": "BILLY Walnut Effect",
+        "color": "#9d7b5b"
+      }
+    },
+    "palette": {
+      "salon": [
+        {
+          "label": "Wall \u00b7 Jotun 1876 (fixed)",
+          "color": "#d4cbb9"
+        },
+        {
+          "label": "Long sofa fabric \u00b7 Tobacco velvet",
+          "color": "#88644c"
+        },
+        {
+          "label": "Other sofa/chair fabric \u00b7 Flax",
+          "color": "#c8b9a0"
+        },
+        {
+          "label": "Curtains \u00b7 Blue-grey",
+          "color": "#7b8e91"
+        },
+        {
+          "label": "Wood arms \u00b7 Dark wenge",
+          "color": "#27201b"
+        },
+        {
+          "label": "One armchair wood \u00b7 Light ash",
+          "color": "#d4cbbe"
+        },
+        {
+          "label": "BILLY body \u00b7 White",
+          "color": "#f3f1eb"
+        },
+        {
+          "label": "BILLY doors \u00b7 Walnut Effect",
+          "color": "#9d7b5b"
+        }
+      ],
+      "living": [
+        {
+          "label": "Main walls \u00b7 Warm ivory",
+          "color": "#eae2d1"
+        },
+        {
+          "label": "Existing feature wall \u00b7 Pale blue",
+          "color": "#bcd7ea"
+        },
+        {
+          "label": "L-sofa fabric \u00b7 Dusty blue",
+          "color": "#94a3b8"
+        },
+        {
+          "label": "Both desk tops \u00b7 American walnut",
+          "color": "#543f31"
+        },
+        {
+          "label": "Curtains \u00b7 Oat",
+          "color": "#b7aa95"
+        },
+        {
+          "label": "Desk chair \u00b7 Charcoal",
+          "color": "#27272a"
+        },
+        {
+          "label": "Second chair \u00b7 Cream",
+          "color": "#e8e0d5"
+        }
+      ],
+      "bedroom": [
+        {
+          "label": "Accent/window wall \u00b7 Warm mushroom",
+          "color": "#83796c"
+        },
+        {
+          "label": "ONE right curtain \u00b7 Slate-blue",
+          "color": "#7e8c90"
+        },
+        {
+          "label": "Long pale wall (fixed)",
+          "color": "#ece5d4"
+        },
+        {
+          "label": "Wardrobes (fixed)",
+          "color": "#dedbd1"
+        },
+        {
+          "label": "Return walls \u00b7 Warm ivory",
+          "color": "#eae2d1"
+        },
+        {
+          "label": "Cabinet handles \u00b7 Brass (fixed)",
+          "color": "#9c8048"
+        }
+      ]
+    }
+  },
+  {
+    "id": "04-petrol-clay",
+    "title": "Petrol and Clay",
+    "salon": "Main long sofa and matching armchair: deep muted petrol fabric #405957. Other sofa/armchair upholstery: warm stone fabric #b4aa98. Keep ALL existing dark wenge wood arms as wood. Curtains warm stone linen #a89e91. Add a pale stone wool rug with sparse charcoal lines, a petrol/clay/ivory abstract above the long sofa, and a few small rust styling pillows. Keep the middle walking route open.",
+    "living": "Keep the existing dusty blue fabric #94a3b8 on the ONE L-shaped sectional. Both existing desk tops: warm white matte laminate #e5dfd3, never bright blue white; original black desk legs. Curtains muted petrol linen #4f6262. Add small cream desk organisers, one clay-accented print and a pale warm stone rug near the existing coffee table. Keep both different existing chairs.",
+    "bedroom": "Window/accent wall: soft clay brown #927365. The single curtain panel on the wardrobe side is muted petrol linen #4f6262; no panel on the opposite side. Soft ivory bedding with small clay and petrol accents as free styling props. One restrained earth/charcoal print on the blank long wall. Existing pale left long wall #ece5d4, cream paneled wardrobes #dedbd1, brass handles and wood/slat headboard remain unchanged.",
+    "billy": {
+      "body": {
+        "name": "BILLY Walnut Effect",
+        "color": "#9d7b5b"
+      },
+      "doors": {
+        "name": "BILLY Black Oak Effect",
+        "color": "#24211e"
+      }
+    },
+    "palette": {
+      "salon": [
+        {
+          "label": "Wall \u00b7 Jotun 1876 (fixed)",
+          "color": "#d4cbb9"
+        },
+        {
+          "label": "Long sofa fabric \u00b7 Deep petrol",
+          "color": "#405957"
+        },
+        {
+          "label": "Other sofa/chair fabric \u00b7 Warm stone",
+          "color": "#b4aa98"
+        },
+        {
+          "label": "Curtains \u00b7 Warm stone",
+          "color": "#a89e91"
+        },
+        {
+          "label": "Wood arms \u00b7 Dark wenge",
+          "color": "#27201b"
+        },
+        {
+          "label": "One armchair wood \u00b7 Light ash",
+          "color": "#d4cbbe"
+        },
+        {
+          "label": "BILLY body \u00b7 Walnut Effect",
+          "color": "#9d7b5b"
+        },
+        {
+          "label": "BILLY doors \u00b7 Black Oak Effect",
+          "color": "#24211e"
+        }
+      ],
+      "living": [
+        {
+          "label": "Main walls \u00b7 Warm ivory",
+          "color": "#eae2d1"
+        },
+        {
+          "label": "Existing feature wall \u00b7 Pale blue",
+          "color": "#bcd7ea"
+        },
+        {
+          "label": "L-sofa fabric \u00b7 Dusty blue",
+          "color": "#94a3b8"
+        },
+        {
+          "label": "Both desk tops \u00b7 Warm white",
+          "color": "#e5dfd3"
+        },
+        {
+          "label": "Curtains \u00b7 Muted petrol",
+          "color": "#4f6262"
+        },
+        {
+          "label": "Desk chair \u00b7 Charcoal",
+          "color": "#27272a"
+        },
+        {
+          "label": "Second chair \u00b7 Cream",
+          "color": "#e8e0d5"
+        }
+      ],
+      "bedroom": [
+        {
+          "label": "Accent/window wall \u00b7 Soft clay",
+          "color": "#927365"
+        },
+        {
+          "label": "ONE right curtain \u00b7 Muted petrol",
+          "color": "#4f6262"
+        },
+        {
+          "label": "Long pale wall (fixed)",
+          "color": "#ece5d4"
+        },
+        {
+          "label": "Wardrobes (fixed)",
+          "color": "#dedbd1"
+        },
+        {
+          "label": "Return walls \u00b7 Warm ivory",
+          "color": "#eae2d1"
+        },
+        {
+          "label": "Cabinet handles \u00b7 Brass (fixed)",
+          "color": "#9c8048"
+        }
+      ]
+    }
+  }
+]

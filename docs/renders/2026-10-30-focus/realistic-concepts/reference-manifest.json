@@ -1,0 +1,43 @@
+{
+  "sourcePlanSHA256": "774b1ef403168f8588046e45b7c129564349eb76ec64242e3adca4b740c0da4c",
+  "sourceCommit": "9ec17792fe7bffb92c10006bd3a6f6d7e209f806",
+  "references": [
+    {
+      "usedPath": "/workspace/hview/work/realistic-three-room-reference.png",
+      "repositoryCopy": "geometry-reference.png",
+      "purpose": "Three room camera/layout pairs; first row 6500 K, second row 2700 K."
+    },
+    {
+      "usedPath": "/workspace/hview/docs/renders/2026-10-30-focus/comparisons/billy-combinations--walnut-black--6500k.jpg",
+      "purpose": "BILLY case construction, 3 x 80 cm plus 1 x 40 cm and matching extensions; finish pair varies by concept."
+    }
+  ],
+  "renderOnlyChanges": [
+    "Coordinated sofa fabric, BILLY body/door pair, bedroom accent, curtains and desk finishes per concept",
+    "Master bedroom uses one curtain panel on the wardrobe side only; left panel is absent",
+    "Restrained rugs, art, books and small decorative objects"
+  ],
+  "workingPlanChanged": false,
+  "outputType": "Image-generated photorealistic material and decoration studies based on exact HView reference views",
+  "paletteAttachment": "Every published --palette.jpg export contains a typeset object-to-colour legend below the generated room photographs. Labels are derived from concepts.json, rather than asking the image model to spell hex values.",
+  "outputs": {
+    "01-burgundy-flax": {
+      "initial": "/workspace/generated_images/exec-10e2d345-4eac-4ac7-b452-9113dede514e.png",
+      "refined": "/workspace/generated_images/exec-8256f564-c2b5-4784-af98-b79e5d0b97cf.png"
+    },
+    "02-olive-oat": {
+      "initial": "/workspace/generated_images/exec-3f82c630-f526-4cac-a851-60d2377a9bec.png",
+      "refined": "/workspace/generated_images/exec-c4313600-f221-4f36-8571-f2b60e991d15.png"
+    },
+    "03-tobacco-stone": {
+      "initial": "/workspace/generated_images/exec-7974dd34-0799-4c19-8d02-74d8d3322a58.png",
+      "refined": "/workspace/generated_images/exec-e19714b9-36bc-49d2-9639-f8f60cb8d298.png"
+    },
+    "04-petrol-clay": {
+      "initial": "/workspace/generated_images/exec-6c082b1f-c36a-4628-b14b-e2b0e4616d55.png"
+    },
+    "billy-detail": {
+      "initial": "/workspace/generated_images/exec-f93bc292-f08f-45b0-90e2-f48d792da6c7.png"
+    }
+  }
+}
