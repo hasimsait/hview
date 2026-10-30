@@ -2,6 +2,7 @@ const { chromium } = require('@playwright/test');
 const fs = require('node:fs'), path = require('node:path'), sharp = require('sharp'), crypto = require('node:crypto');
 const root = path.resolve(__dirname, '..'), dest = path.join(root, 'docs/renders/2026-10-30');
 const audit = JSON.parse(fs.readFileSync(path.join(dest, 'plan-audit.json'), 'utf8'));
+if(crypto.createHash('sha256').update(fs.readFileSync(path.join(root,'public/sample.plan'))).digest('hex')!==audit.sha256)throw new Error('The working plan differs from this dated review; restore its source before recapturing.');
 // Interior POVs approved after the initial isometric request; no walls or roofs are removed.
 const rooms = [
   ['_elc1j','living-room-22',[[ -4.62,1.95,-2.72,-2.9,1.15,.7],[-1.96,1.95,3.30,-3.65,1.15,-.6]],102],

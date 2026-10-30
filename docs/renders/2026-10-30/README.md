@@ -13,6 +13,8 @@ The initial isometric request was changed by the user to wide-angle interior POV
 - `realistic/`: image-generated material studies based on the captured views. These interpret texture, glazing, fabric and indirect lighting while retaining the layout as closely as possible. The HView images remain the geometric reference.
 - `concepts/`: optional decoration or alternative-palette proposals, separate from the original layout.
 
+Read [design notes](design-notes.md) for two salon textile directions, two bedroom palette directions and room-specific suggestions. The salon proposals preserve Jotun 1876 `#D4CBB9`.
+
 ## Authoritative choices and placeholders
 
 - **Salon walls:** Jotun 1876, selected base colour **`#D4CBB9`**. This supersedes stale values in legacy `rawWall` fields. Illumination can change displayed pixels; the underlying paint anchor is fixed.
@@ -31,6 +33,8 @@ The saved lumen output is used where present; fixtures without a saved lumen val
 Exposure is chosen per room to keep surfaces visible and restrain highlight clipping, then held fixed for its two cameras and two temperatures. The source set uses no viewing-white adaptation. The corrected set uses 55% adaptation for the selected lamp temperature and a modest room-isolated indirect-light proxy, because HView does not simulate interreflection; this helps reveal the recessed shower tile cavity. These are rendering decisions, not measured predictions of the actual bulbs or paint spectra.
 
 The manifests record all fixture adjustments, per-view camera coordinates, exposure, temperature and brightness statistics.
+
+Each realistic board contains the same four requested view/temperature combinations. Kitchen and bedroom studies received a further object/material check: the cooktop remains a four-burner gas hob, actual caramel-ripple and mosaic textures are supplied as references, and the tall bedroom mirror is interpreted as a mirror rather than another door. Image generation can still vary fine details and reflections; it is not a replacement for the exact HView geometry.
 
 ## Flagged plan anomalies — preserved at the user's request
 
