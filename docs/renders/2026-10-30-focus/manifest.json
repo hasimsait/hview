@@ -1,0 +1,1175 @@
+{
+  "sourceSHA256": "774b1ef403168f8588046e45b7c129564349eb76ec64242e3adca4b740c0da4c",
+  "settings": {
+    "night": true,
+    "foreground": "solid",
+    "sockets": true,
+    "ceilings": true,
+    "wallCutaway": false,
+    "whiteBalanceAdaptation": 0.55,
+    "indirectFill": 0.75,
+    "background": "#111110"
+  },
+  "rooms": [
+    {
+      "id": "_elc1j",
+      "slug": "salon",
+      "name": "Salon",
+      "fov": 102,
+      "cameras": [
+        [
+          -4.62,
+          1.95,
+          -2.72,
+          -2.9,
+          1.15,
+          0.7
+        ],
+        [
+          -1.96,
+          1.95,
+          3.3,
+          -3.65,
+          1.15,
+          -0.6
+        ]
+      ],
+      "exposure": 0.06334433064223866
+    },
+    {
+      "id": "_y0oj2",
+      "slug": "living-work",
+      "name": "Living / work room",
+      "fov": 104,
+      "cameras": [
+        [
+          -1.36,
+          1.9,
+          -2.85,
+          0.55,
+          1,
+          -0.65
+        ],
+        [
+          1.59,
+          1.9,
+          0.46,
+          -0.55,
+          1,
+          -1.8
+        ]
+      ],
+      "exposure": 0.05887647992558525
+    },
+    {
+      "id": "_3h613",
+      "slug": "master-bedroom",
+      "name": "Master bedroom",
+      "fov": 105,
+      "cameras": [
+        [
+          -0.2,
+          1.85,
+          5.91,
+          2,
+          1.2,
+          7.2
+        ],
+        [
+          2.95,
+          1.85,
+          7.66,
+          0.5,
+          1.2,
+          6.35
+        ]
+      ],
+      "exposure": 0.0729492970900942
+    }
+  ],
+  "studies": [
+    {
+      "id": "salon-fabric",
+      "title": "Salon sofa fabric",
+      "room": "salon",
+      "corner": 1,
+      "kind": "fabric",
+      "note": "Only seat and back upholstery changes. Wood arms, Jotun 1876 walls and furniture positions stay fixed.",
+      "options": [
+        {
+          "id": "current",
+          "label": "Current burgundy / champagne",
+          "swatches": [
+            "#54121d",
+            "#ede6d6"
+          ]
+        },
+        {
+          "id": "olive-oat",
+          "label": "Muted olive / oat",
+          "colors": [
+            "#62634d",
+            "#c9bcaa"
+          ],
+          "swatches": [
+            "#62634d",
+            "#c9bcaa"
+          ]
+        },
+        {
+          "id": "tobacco-flax",
+          "label": "Tobacco / flax",
+          "colors": [
+            "#88644c",
+            "#c8b9a0"
+          ],
+          "swatches": [
+            "#88644c",
+            "#c8b9a0"
+          ]
+        },
+        {
+          "id": "petrol-stone",
+          "label": "Deep petrol / warm stone",
+          "colors": [
+            "#405957",
+            "#b4aa98"
+          ],
+          "swatches": [
+            "#405957",
+            "#b4aa98"
+          ]
+        }
+      ],
+      "files": [
+        {
+          "option": "current",
+          "kelvin": 6500,
+          "file": "comparisons/salon-fabric--current--6500k.jpg"
+        },
+        {
+          "option": "current",
+          "kelvin": 2700,
+          "file": "comparisons/salon-fabric--current--2700k.jpg"
+        },
+        {
+          "option": "olive-oat",
+          "kelvin": 6500,
+          "file": "comparisons/salon-fabric--olive-oat--6500k.jpg"
+        },
+        {
+          "option": "olive-oat",
+          "kelvin": 2700,
+          "file": "comparisons/salon-fabric--olive-oat--2700k.jpg"
+        },
+        {
+          "option": "tobacco-flax",
+          "kelvin": 6500,
+          "file": "comparisons/salon-fabric--tobacco-flax--6500k.jpg"
+        },
+        {
+          "option": "tobacco-flax",
+          "kelvin": 2700,
+          "file": "comparisons/salon-fabric--tobacco-flax--2700k.jpg"
+        },
+        {
+          "option": "petrol-stone",
+          "kelvin": 6500,
+          "file": "comparisons/salon-fabric--petrol-stone--6500k.jpg"
+        },
+        {
+          "option": "petrol-stone",
+          "kelvin": 2700,
+          "file": "comparisons/salon-fabric--petrol-stone--2700k.jpg"
+        }
+      ]
+    },
+    {
+      "id": "bedroom-accent",
+      "title": "Master bedroom accent wall",
+      "room": "master-bedroom",
+      "corner": 0,
+      "kind": "accent",
+      "note": "Only the window-side accent wall changes. Pale long wall, cream joinery, brass handles, mirror, door and headboard remain fixed. Neutral bedding is a styling prop.",
+      "options": [
+        {
+          "id": "current",
+          "label": "Current muted terracotta",
+          "color": "#764a40",
+          "swatches": [
+            "#764a40"
+          ]
+        },
+        {
+          "id": "olive",
+          "label": "Deep muted olive",
+          "color": "#59604c",
+          "swatches": [
+            "#59604c"
+          ]
+        },
+        {
+          "id": "clay",
+          "label": "Soft clay brown",
+          "color": "#927365",
+          "swatches": [
+            "#927365"
+          ]
+        },
+        {
+          "id": "mushroom",
+          "label": "Warm mushroom",
+          "color": "#83796c",
+          "swatches": [
+            "#83796c"
+          ]
+        }
+      ],
+      "files": [
+        {
+          "option": "current",
+          "kelvin": 6500,
+          "file": "comparisons/bedroom-accent--current--6500k.jpg"
+        },
+        {
+          "option": "current",
+          "kelvin": 2700,
+          "file": "comparisons/bedroom-accent--current--2700k.jpg"
+        },
+        {
+          "option": "olive",
+          "kelvin": 6500,
+          "file": "comparisons/bedroom-accent--olive--6500k.jpg"
+        },
+        {
+          "option": "olive",
+          "kelvin": 2700,
+          "file": "comparisons/bedroom-accent--olive--2700k.jpg"
+        },
+        {
+          "option": "clay",
+          "kelvin": 6500,
+          "file": "comparisons/bedroom-accent--clay--6500k.jpg"
+        },
+        {
+          "option": "clay",
+          "kelvin": 2700,
+          "file": "comparisons/bedroom-accent--clay--2700k.jpg"
+        },
+        {
+          "option": "mushroom",
+          "kelvin": 6500,
+          "file": "comparisons/bedroom-accent--mushroom--6500k.jpg"
+        },
+        {
+          "option": "mushroom",
+          "kelvin": 2700,
+          "file": "comparisons/bedroom-accent--mushroom--2700k.jpg"
+        }
+      ]
+    },
+    {
+      "id": "desk-finishes",
+      "title": "Living / work room desks",
+      "room": "living-work",
+      "corner": 0,
+      "kind": "desk",
+      "note": "Both desk tops change together. Legs, chairs, sectional sofa and desk placements remain fixed.",
+      "options": [
+        {
+          "id": "birch",
+          "label": "Current bleached birch",
+          "finish": {
+            "type": "wood",
+            "variant": "bleached_birch",
+            "color": "#dfcfb6",
+            "roughness": 0.45
+          },
+          "swatches": [
+            "#dfcfb6"
+          ]
+        },
+        {
+          "id": "oak",
+          "label": "Natural oak",
+          "finish": {
+            "type": "wood",
+            "variant": "natural_oak",
+            "color": "#dfcbaf",
+            "roughness": 0.45
+          },
+          "swatches": [
+            "#dfcbaf"
+          ]
+        },
+        {
+          "id": "walnut",
+          "label": "American walnut",
+          "finish": {
+            "type": "wood",
+            "variant": "american_walnut",
+            "color": "#543f31",
+            "roughness": 0.45
+          },
+          "swatches": [
+            "#543f31"
+          ]
+        },
+        {
+          "id": "warm-white",
+          "label": "Warm white",
+          "finish": {
+            "type": "paint",
+            "color": "#e5dfd3",
+            "roughness": 0.65
+          },
+          "swatches": [
+            "#e5dfd3"
+          ]
+        }
+      ],
+      "files": [
+        {
+          "option": "birch",
+          "kelvin": 6500,
+          "file": "comparisons/desk-finishes--birch--6500k.jpg"
+        },
+        {
+          "option": "birch",
+          "kelvin": 2700,
+          "file": "comparisons/desk-finishes--birch--2700k.jpg"
+        },
+        {
+          "option": "oak",
+          "kelvin": 6500,
+          "file": "comparisons/desk-finishes--oak--6500k.jpg"
+        },
+        {
+          "option": "oak",
+          "kelvin": 2700,
+          "file": "comparisons/desk-finishes--oak--2700k.jpg"
+        },
+        {
+          "option": "walnut",
+          "kelvin": 6500,
+          "file": "comparisons/desk-finishes--walnut--6500k.jpg"
+        },
+        {
+          "option": "walnut",
+          "kelvin": 2700,
+          "file": "comparisons/desk-finishes--walnut--2700k.jpg"
+        },
+        {
+          "option": "warm-white",
+          "kelvin": 6500,
+          "file": "comparisons/desk-finishes--warm-white--6500k.jpg"
+        },
+        {
+          "option": "warm-white",
+          "kelvin": 2700,
+          "file": "comparisons/desk-finishes--warm-white--2700k.jpg"
+        }
+      ]
+    },
+    {
+      "id": "salon-curtains",
+      "title": "Salon curtains",
+      "room": "salon",
+      "window": "_eukwd",
+      "corner": 1,
+      "kind": "curtain",
+      "note": "Only curtain colour changes. Bedroom curtains are shown temporarily for this comparison; their saved hidden state is retained.",
+      "options": [
+        {
+          "id": "current",
+          "label": "Current muted blue",
+          "color": "#8aa6cc",
+          "swatches": [
+            "#8aa6cc"
+          ]
+        },
+        {
+          "id": "flax",
+          "label": "Flax",
+          "color": "#b7a58d",
+          "swatches": [
+            "#b7a58d"
+          ]
+        },
+        {
+          "id": "olive",
+          "label": "Muted olive",
+          "color": "#6b7053",
+          "swatches": [
+            "#6b7053"
+          ]
+        }
+      ],
+      "files": [
+        {
+          "option": "current",
+          "kelvin": 6500,
+          "file": "comparisons/salon-curtains--current--6500k.jpg"
+        },
+        {
+          "option": "current",
+          "kelvin": 2700,
+          "file": "comparisons/salon-curtains--current--2700k.jpg"
+        },
+        {
+          "option": "flax",
+          "kelvin": 6500,
+          "file": "comparisons/salon-curtains--flax--6500k.jpg"
+        },
+        {
+          "option": "flax",
+          "kelvin": 2700,
+          "file": "comparisons/salon-curtains--flax--2700k.jpg"
+        },
+        {
+          "option": "olive",
+          "kelvin": 6500,
+          "file": "comparisons/salon-curtains--olive--6500k.jpg"
+        },
+        {
+          "option": "olive",
+          "kelvin": 2700,
+          "file": "comparisons/salon-curtains--olive--2700k.jpg"
+        }
+      ]
+    },
+    {
+      "id": "living-curtains",
+      "title": "Living / work room curtains",
+      "room": "living-work",
+      "window": "_j0bn8",
+      "corner": 1,
+      "kind": "curtain",
+      "note": "Only curtain colour changes. Bedroom curtains are shown temporarily for this comparison; their saved hidden state is retained.",
+      "options": [
+        {
+          "id": "current",
+          "label": "Current burgundy",
+          "color": "#370101",
+          "swatches": [
+            "#370101"
+          ]
+        },
+        {
+          "id": "oat",
+          "label": "Warm oat",
+          "color": "#b7aa95",
+          "swatches": [
+            "#b7aa95"
+          ]
+        },
+        {
+          "id": "petrol",
+          "label": "Muted petrol",
+          "color": "#4f6262",
+          "swatches": [
+            "#4f6262"
+          ]
+        }
+      ],
+      "files": [
+        {
+          "option": "current",
+          "kelvin": 6500,
+          "file": "comparisons/living-curtains--current--6500k.jpg"
+        },
+        {
+          "option": "current",
+          "kelvin": 2700,
+          "file": "comparisons/living-curtains--current--2700k.jpg"
+        },
+        {
+          "option": "oat",
+          "kelvin": 6500,
+          "file": "comparisons/living-curtains--oat--6500k.jpg"
+        },
+        {
+          "option": "oat",
+          "kelvin": 2700,
+          "file": "comparisons/living-curtains--oat--2700k.jpg"
+        },
+        {
+          "option": "petrol",
+          "kelvin": 6500,
+          "file": "comparisons/living-curtains--petrol--6500k.jpg"
+        },
+        {
+          "option": "petrol",
+          "kelvin": 2700,
+          "file": "comparisons/living-curtains--petrol--2700k.jpg"
+        }
+      ]
+    },
+    {
+      "id": "bedroom-curtains",
+      "title": "Master bedroom curtains",
+      "room": "master-bedroom",
+      "window": "_v72ul",
+      "corner": 0,
+      "kind": "curtain",
+      "note": "Only curtain colour changes. Bedroom curtains are shown temporarily for this comparison; their saved hidden state is retained.",
+      "options": [
+        {
+          "id": "flax",
+          "label": "Flax",
+          "color": "#b8a48a",
+          "swatches": [
+            "#b8a48a"
+          ]
+        },
+        {
+          "id": "olive",
+          "label": "Muted olive",
+          "color": "#6b7053",
+          "swatches": [
+            "#6b7053"
+          ]
+        },
+        {
+          "id": "stone",
+          "label": "Warm stone",
+          "color": "#a89e91",
+          "swatches": [
+            "#a89e91"
+          ]
+        }
+      ],
+      "files": [
+        {
+          "option": "flax",
+          "kelvin": 6500,
+          "file": "comparisons/bedroom-curtains--flax--6500k.jpg"
+        },
+        {
+          "option": "flax",
+          "kelvin": 2700,
+          "file": "comparisons/bedroom-curtains--flax--2700k.jpg"
+        },
+        {
+          "option": "olive",
+          "kelvin": 6500,
+          "file": "comparisons/bedroom-curtains--olive--6500k.jpg"
+        },
+        {
+          "option": "olive",
+          "kelvin": 2700,
+          "file": "comparisons/bedroom-curtains--olive--2700k.jpg"
+        },
+        {
+          "option": "stone",
+          "kelvin": 6500,
+          "file": "comparisons/bedroom-curtains--stone--6500k.jpg"
+        },
+        {
+          "option": "stone",
+          "kelvin": 2700,
+          "file": "comparisons/bedroom-curtains--stone--2700k.jpg"
+        }
+      ]
+    },
+    {
+      "id": "billy-combinations",
+      "title": "BILLY body and door combinations",
+      "room": "salon",
+      "camera": [
+        -2.9,
+        1.45,
+        1.45,
+        -2.9,
+        1.25,
+        3.75
+      ],
+      "fov": 78,
+      "kind": "billy",
+      "note": "Body includes shelves and backs. Door finish includes frames and knobs, including the extensions. Glass stays clear. The room door is temporarily closed for this close-up; the saved plan keeps it at 90 degrees.",
+      "options": [
+        {
+          "id": "walnut-black",
+          "label": "Current walnut body / black doors",
+          "body": {
+            "type": "wood",
+            "variant": "billy_walnut_effect",
+            "color": "#9d7b5b",
+            "roughness": 0.65,
+            "metalness": 0
+          },
+          "door": {
+            "type": "wood",
+            "variant": "billy_black_oak_effect",
+            "color": "#24211e",
+            "roughness": 0.65,
+            "metalness": 0
+          },
+          "swatches": [
+            "#9d7b5b",
+            "#24211e"
+          ]
+        },
+        {
+          "id": "oak-black",
+          "label": "Oak body / black doors",
+          "body": {
+            "type": "wood",
+            "variant": "billy_oak_effect",
+            "color": "#c0b099",
+            "roughness": 0.65,
+            "metalness": 0
+          },
+          "door": {
+            "type": "wood",
+            "variant": "billy_black_oak_effect",
+            "color": "#24211e",
+            "roughness": 0.65,
+            "metalness": 0
+          },
+          "swatches": [
+            "#c0b099",
+            "#24211e"
+          ]
+        },
+        {
+          "id": "oak-oak",
+          "label": "Oak body / oak doors",
+          "body": {
+            "type": "wood",
+            "variant": "billy_oak_effect",
+            "color": "#c0b099",
+            "roughness": 0.65,
+            "metalness": 0
+          },
+          "door": {
+            "type": "wood",
+            "variant": "billy_oak_effect",
+            "color": "#c0b099",
+            "roughness": 0.65,
+            "metalness": 0
+          },
+          "swatches": [
+            "#c0b099",
+            "#c0b099"
+          ]
+        },
+        {
+          "id": "white-oak",
+          "label": "White body / oak doors",
+          "body": {
+            "type": "paint",
+            "variant": "billy_white",
+            "color": "#f3f1eb",
+            "roughness": 0.65,
+            "metalness": 0
+          },
+          "door": {
+            "type": "wood",
+            "variant": "billy_oak_effect",
+            "color": "#c0b099",
+            "roughness": 0.65,
+            "metalness": 0
+          },
+          "swatches": [
+            "#f3f1eb",
+            "#c0b099"
+          ]
+        }
+      ],
+      "files": [
+        {
+          "option": "walnut-black",
+          "kelvin": 6500,
+          "file": "comparisons/billy-combinations--walnut-black--6500k.jpg"
+        },
+        {
+          "option": "walnut-black",
+          "kelvin": 2700,
+          "file": "comparisons/billy-combinations--walnut-black--2700k.jpg"
+        },
+        {
+          "option": "oak-black",
+          "kelvin": 6500,
+          "file": "comparisons/billy-combinations--oak-black--6500k.jpg"
+        },
+        {
+          "option": "oak-black",
+          "kelvin": 2700,
+          "file": "comparisons/billy-combinations--oak-black--2700k.jpg"
+        },
+        {
+          "option": "oak-oak",
+          "kelvin": 6500,
+          "file": "comparisons/billy-combinations--oak-oak--6500k.jpg"
+        },
+        {
+          "option": "oak-oak",
+          "kelvin": 2700,
+          "file": "comparisons/billy-combinations--oak-oak--2700k.jpg"
+        },
+        {
+          "option": "white-oak",
+          "kelvin": 6500,
+          "file": "comparisons/billy-combinations--white-oak--6500k.jpg"
+        },
+        {
+          "option": "white-oak",
+          "kelvin": 2700,
+          "file": "comparisons/billy-combinations--white-oak--2700k.jpg"
+        }
+      ]
+    }
+  ],
+  "baseline": [
+    {
+      "room": "salon",
+      "corner": 1,
+      "kelvin": 6500,
+      "file": "views/salon--corner-1--6500k.jpg"
+    },
+    {
+      "room": "salon",
+      "corner": 2,
+      "kelvin": 6500,
+      "file": "views/salon--corner-2--6500k.jpg"
+    },
+    {
+      "room": "salon",
+      "corner": 1,
+      "kelvin": 2700,
+      "file": "views/salon--corner-1--2700k.jpg"
+    },
+    {
+      "room": "salon",
+      "corner": 2,
+      "kelvin": 2700,
+      "file": "views/salon--corner-2--2700k.jpg"
+    },
+    {
+      "room": "living-work",
+      "corner": 1,
+      "kelvin": 6500,
+      "file": "views/living-work--corner-1--6500k.jpg"
+    },
+    {
+      "room": "living-work",
+      "corner": 2,
+      "kelvin": 6500,
+      "file": "views/living-work--corner-2--6500k.jpg"
+    },
+    {
+      "room": "living-work",
+      "corner": 1,
+      "kelvin": 2700,
+      "file": "views/living-work--corner-1--2700k.jpg"
+    },
+    {
+      "room": "living-work",
+      "corner": 2,
+      "kelvin": 2700,
+      "file": "views/living-work--corner-2--2700k.jpg"
+    },
+    {
+      "room": "master-bedroom",
+      "corner": 1,
+      "kelvin": 6500,
+      "file": "views/master-bedroom--corner-1--6500k.jpg"
+    },
+    {
+      "room": "master-bedroom",
+      "corner": 2,
+      "kelvin": 6500,
+      "file": "views/master-bedroom--corner-2--6500k.jpg"
+    },
+    {
+      "room": "master-bedroom",
+      "corner": 1,
+      "kelvin": 2700,
+      "file": "views/master-bedroom--corner-1--2700k.jpg"
+    },
+    {
+      "room": "master-bedroom",
+      "corner": 2,
+      "kelvin": 2700,
+      "file": "views/master-bedroom--corner-2--2700k.jpg"
+    }
+  ],
+  "verification": {
+    "sofa": {
+      "assetKey": "sofa_sectional_left",
+      "dimensions": {
+        "x": 2.652967543609894,
+        "y": 0.9,
+        "z": 1.7280890782976208
+      }
+    },
+    "windows": [
+      {
+        "id": "_eukwd",
+        "width": 1.98125,
+        "height": 2.5,
+        "wallId": "_l8dpu",
+        "distanceAlongWall": 1.6967999377945453
+      },
+      {
+        "id": "_j0bn8",
+        "width": 1.19,
+        "height": 1.5,
+        "wallId": "_rxf4v",
+        "distanceAlongWall": 1.7130523138805749
+      },
+      {
+        "id": "_w57z0",
+        "width": 1.18,
+        "height": 1.5,
+        "wallId": "_23lv1",
+        "distanceAlongWall": 1.387421029092625
+      },
+      {
+        "id": "_77yrm",
+        "width": 1.15,
+        "height": 1.5,
+        "wallId": "_nsq8v",
+        "distanceAlongWall": 1.292884270367296
+      },
+      {
+        "id": "_v72ul",
+        "width": 1.18,
+        "height": 1.42,
+        "wallId": "_0jsab",
+        "distanceAlongWall": 1.5899999999999999
+      },
+      {
+        "id": "7b9010d4-073d-4fbf-9426-183b27e695cc",
+        "width": 1.4,
+        "height": 1.5,
+        "wallId": "_w5f7a_b",
+        "distanceAlongWall": 0.75
+      }
+    ],
+    "billy": [
+      {
+        "id": "bb33792b-ec5b-4abc-b172-c3a98f8387ab",
+        "finish": {
+          "type": "wood",
+          "variant": "billy_walnut_effect",
+          "color": "#9d7b5b",
+          "roughness": 0.65,
+          "metalness": 0
+        },
+        "sectionFinishes": {
+          "door_1": {
+            "type": "wood",
+            "variant": "billy_black_oak_effect",
+            "color": "#24211e",
+            "roughness": 0.65,
+            "metalness": 0
+          },
+          "door_2": {
+            "type": "wood",
+            "variant": "billy_black_oak_effect",
+            "color": "#24211e",
+            "roughness": 0.65,
+            "metalness": 0
+          },
+          "handles": {
+            "type": "wood",
+            "variant": "billy_black_oak_effect",
+            "color": "#24211e",
+            "roughness": 0.65,
+            "metalness": 0
+          }
+        }
+      },
+      {
+        "id": "c5c830cf-5d14-4311-9464-836455b6c83f",
+        "finish": {
+          "type": "wood",
+          "variant": "billy_walnut_effect",
+          "color": "#9d7b5b",
+          "roughness": 0.65,
+          "metalness": 0
+        },
+        "sectionFinishes": {
+          "door_1": {
+            "type": "wood",
+            "variant": "billy_black_oak_effect",
+            "color": "#24211e",
+            "roughness": 0.65,
+            "metalness": 0
+          },
+          "door_2": {
+            "type": "wood",
+            "variant": "billy_black_oak_effect",
+            "color": "#24211e",
+            "roughness": 0.65,
+            "metalness": 0
+          },
+          "handles": {
+            "type": "wood",
+            "variant": "billy_black_oak_effect",
+            "color": "#24211e",
+            "roughness": 0.65,
+            "metalness": 0
+          }
+        }
+      },
+      {
+        "id": "f8b9a395-1270-4620-bcff-85fe20b6f7b1",
+        "finish": {
+          "type": "wood",
+          "variant": "billy_walnut_effect",
+          "color": "#9d7b5b",
+          "roughness": 0.65,
+          "metalness": 0
+        },
+        "sectionFinishes": {
+          "door_1": {
+            "type": "wood",
+            "variant": "billy_black_oak_effect",
+            "color": "#24211e",
+            "roughness": 0.65,
+            "metalness": 0
+          },
+          "door_2": {
+            "type": "wood",
+            "variant": "billy_black_oak_effect",
+            "color": "#24211e",
+            "roughness": 0.65,
+            "metalness": 0
+          },
+          "handles": {
+            "type": "wood",
+            "variant": "billy_black_oak_effect",
+            "color": "#24211e",
+            "roughness": 0.65,
+            "metalness": 0
+          }
+        }
+      },
+      {
+        "id": "9aeb3038-cc58-445f-bb5e-a4cb8baa4d9a",
+        "finish": {
+          "type": "wood",
+          "variant": "billy_walnut_effect",
+          "color": "#9d7b5b",
+          "roughness": 0.65,
+          "metalness": 0
+        },
+        "sectionFinishes": {
+          "door_1": {
+            "type": "wood",
+            "variant": "billy_black_oak_effect",
+            "color": "#24211e",
+            "roughness": 0.65,
+            "metalness": 0
+          },
+          "door_2": {
+            "type": "wood",
+            "variant": "billy_black_oak_effect",
+            "color": "#24211e",
+            "roughness": 0.65,
+            "metalness": 0
+          },
+          "handles": {
+            "type": "wood",
+            "variant": "billy_black_oak_effect",
+            "color": "#24211e",
+            "roughness": 0.65,
+            "metalness": 0
+          }
+        }
+      },
+      {
+        "id": "435c51e9-6f6f-4b6f-a2e3-10ad61ce07b0",
+        "finish": {
+          "type": "wood",
+          "variant": "billy_walnut_effect",
+          "color": "#9d7b5b",
+          "roughness": 0.65,
+          "metalness": 0
+        },
+        "sectionFinishes": {
+          "door_1": {
+            "type": "wood",
+            "variant": "billy_black_oak_effect",
+            "color": "#24211e",
+            "roughness": 0.65,
+            "metalness": 0
+          },
+          "door_2": {
+            "type": "wood",
+            "variant": "billy_black_oak_effect",
+            "color": "#24211e",
+            "roughness": 0.65,
+            "metalness": 0
+          },
+          "handles": {
+            "type": "wood",
+            "variant": "billy_black_oak_effect",
+            "color": "#24211e",
+            "roughness": 0.65,
+            "metalness": 0
+          }
+        }
+      },
+      {
+        "id": "1ad5dfb2-c8f0-4474-8e01-46d536ca7a0c",
+        "finish": {
+          "type": "wood",
+          "variant": "billy_walnut_effect",
+          "color": "#9d7b5b",
+          "roughness": 0.65,
+          "metalness": 0
+        },
+        "sectionFinishes": {
+          "door_1": {
+            "type": "wood",
+            "variant": "billy_black_oak_effect",
+            "color": "#24211e",
+            "roughness": 0.65,
+            "metalness": 0
+          },
+          "door_2": {
+            "type": "wood",
+            "variant": "billy_black_oak_effect",
+            "color": "#24211e",
+            "roughness": 0.65,
+            "metalness": 0
+          },
+          "handles": {
+            "type": "wood",
+            "variant": "billy_black_oak_effect",
+            "color": "#24211e",
+            "roughness": 0.65,
+            "metalness": 0
+          }
+        }
+      },
+      {
+        "id": "salon_billy_40",
+        "finish": {
+          "type": "wood",
+          "variant": "billy_walnut_effect",
+          "color": "#9d7b5b",
+          "roughness": 0.65,
+          "metalness": 0
+        },
+        "sectionFinishes": {
+          "door_1": {
+            "type": "wood",
+            "variant": "billy_black_oak_effect",
+            "color": "#24211e",
+            "roughness": 0.65,
+            "metalness": 0
+          },
+          "door_2": {
+            "type": "wood",
+            "variant": "billy_black_oak_effect",
+            "color": "#24211e",
+            "roughness": 0.65,
+            "metalness": 0
+          },
+          "handles": {
+            "type": "wood",
+            "variant": "billy_black_oak_effect",
+            "color": "#24211e",
+            "roughness": 0.65,
+            "metalness": 0
+          }
+        }
+      },
+      {
+        "id": "salon_billy_extension_40",
+        "finish": {
+          "type": "wood",
+          "variant": "billy_walnut_effect",
+          "color": "#9d7b5b",
+          "roughness": 0.65,
+          "metalness": 0
+        },
+        "sectionFinishes": {
+          "door_1": {
+            "type": "wood",
+            "variant": "billy_black_oak_effect",
+            "color": "#24211e",
+            "roughness": 0.65,
+            "metalness": 0
+          },
+          "door_2": {
+            "type": "wood",
+            "variant": "billy_black_oak_effect",
+            "color": "#24211e",
+            "roughness": 0.65,
+            "metalness": 0
+          },
+          "handles": {
+            "type": "wood",
+            "variant": "billy_black_oak_effect",
+            "color": "#24211e",
+            "roughness": 0.65,
+            "metalness": 0
+          }
+        }
+      }
+    ],
+    "meshes": {
+      "arms": [
+        "sectional_chaise_outer_arm",
+        "sectional_other_outer_arm"
+      ],
+      "windows": [
+        {
+          "id": "_eukwd",
+          "panes": [
+            "windowGlass_left__eukwd",
+            "windowGlass_right__eukwd"
+          ],
+          "mullion": true
+        },
+        {
+          "id": "_j0bn8",
+          "panes": [
+            "windowGlass_left__j0bn8",
+            "windowGlass_right__j0bn8"
+          ],
+          "mullion": true
+        },
+        {
+          "id": "_w57z0",
+          "panes": [
+            "windowGlass_left__w57z0",
+            "windowGlass_right__w57z0"
+          ],
+          "mullion": true
+        },
+        {
+          "id": "_77yrm",
+          "panes": [
+            "windowGlass_left__77yrm",
+            "windowGlass_right__77yrm"
+          ],
+          "mullion": true
+        },
+        {
+          "id": "_v72ul",
+          "panes": [
+            "windowGlass_left__v72ul",
+            "windowGlass_right__v72ul"
+          ],
+          "mullion": true
+        },
+        {
+          "id": "7b9010d4-073d-4fbf-9426-183b27e695cc",
+          "panes": [
+            "windowGlass_left_7b9010d4-073d-4fbf-9426-183b27e695cc",
+            "windowGlass_right_7b9010d4-073d-4fbf-9426-183b27e695cc"
+          ],
+          "mullion": true
+        }
+      ]
+    }
+  },
+  "errors": []
+}

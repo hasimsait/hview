@@ -1,0 +1,552 @@
+{
+  "schemaVersion": 1,
+  "document": {
+    "version": 3,
+    "totalHeight": 2.72,
+    "elements": [
+      {
+        "kind": "furniture.standard",
+        "data": {
+          "id": "3a3e62a4-bd64-4cf7-a8ab-c1ba56f5f9c9",
+          "name": "ward_double",
+          "displayName": "Master wardrobe \u2014 right double doors",
+          "category": "storage",
+          "position": {
+            "x": 0.19287490298782212,
+            "y": 0,
+            "z": 8.320234350595285
+          },
+          "rotationY": -3.1174009240297145,
+          "dimensions": {
+            "x": 1.3,
+            "y": 2.72,
+            "z": 0.75
+          },
+          "assetKey": "ward_double",
+          "roomId": "_3h613",
+          "visible": true,
+          "cabinet": {
+            "version": 1,
+            "panelThickness": 0.018,
+            "backThickness": 0.006,
+            "doors": {
+              "count": 2,
+              "hinge": "left",
+              "angles": [
+                0,
+                0
+              ]
+            },
+            "panels": [
+              {
+                "id": "upper_division",
+                "name": "Shelf above front division",
+                "kind": "shelf",
+                "at": 1.973,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0.02
+                }
+              },
+              {
+                "id": "cornice_base",
+                "name": "Shelf above front division",
+                "kind": "shelf",
+                "at": 2.508,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0.02
+                }
+              }
+            ],
+            "contents": [],
+            "internalDrawers": [],
+            "frontSections": [
+              {
+                "id": "lower",
+                "bottom": 0.1,
+                "top": 2.1,
+                "opening": "swing",
+                "doors": {
+                  "count": 2,
+                  "hinge": "left",
+                  "angles": [
+                    0,
+                    0
+                  ]
+                }
+              },
+              {
+                "id": "upper",
+                "bottom": 2.1,
+                "top": 2.635,
+                "opening": "swing",
+                "doors": {
+                  "count": 2,
+                  "hinge": "left",
+                  "angles": [
+                    0,
+                    0
+                  ]
+                }
+              }
+            ],
+            "frontDetail": {
+              "profile": "framed",
+              "handleCentres": 0.096,
+              "pairedDrawerPulls": true,
+              "corniceHeight": 0.085
+            },
+            "plinth": {
+              "height": 0.1,
+              "setback": 0.025
+            }
+          },
+          "finish": {
+            "type": "paint",
+            "color": "#dedbd1",
+            "roughness": 0.5,
+            "layer": 0
+          },
+          "sectionFinishes": {
+            "handles": {
+              "type": "metal",
+              "color": "#9c8048",
+              "roughness": 0.32,
+              "metalness": 0.8,
+              "layer": 0
+            }
+          }
+        }
+      },
+      {
+        "kind": "furniture.standard",
+        "data": {
+          "id": "82ef26ba-9e0d-4be1-9fd3-ad24af106fc9",
+          "name": "ward_double",
+          "displayName": "Master wardrobe \u2014 left double doors",
+          "category": "storage",
+          "position": {
+            "x": 2.262269209356977,
+            "y": 0,
+            "z": 8.270162354760044
+          },
+          "rotationY": -3.1174009240297145,
+          "dimensions": {
+            "x": 0.88,
+            "y": 2.72,
+            "z": 0.75
+          },
+          "assetKey": "ward_double",
+          "roomId": "_3h613",
+          "visible": true,
+          "cabinet": {
+            "version": 1,
+            "panelThickness": 0.018,
+            "backThickness": 0.006,
+            "doors": {
+              "count": 2,
+              "hinge": "left",
+              "angles": [
+                0,
+                0
+              ]
+            },
+            "panels": [
+              {
+                "id": "upper_division",
+                "name": "Shelf above front division",
+                "kind": "shelf",
+                "at": 1.973,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0.02
+                }
+              },
+              {
+                "id": "cornice_base",
+                "name": "Shelf above front division",
+                "kind": "shelf",
+                "at": 2.508,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0.02
+                }
+              }
+            ],
+            "contents": [],
+            "frontSections": [
+              {
+                "id": "lower",
+                "bottom": 0.1,
+                "top": 2.1,
+                "opening": "swing",
+                "doors": {
+                  "count": 2,
+                  "hinge": "left",
+                  "angles": [
+                    0,
+                    0
+                  ]
+                }
+              },
+              {
+                "id": "upper",
+                "bottom": 2.1,
+                "top": 2.635,
+                "opening": "swing",
+                "doors": {
+                  "count": 2,
+                  "hinge": "left",
+                  "angles": [
+                    0,
+                    0
+                  ]
+                }
+              }
+            ],
+            "frontDetail": {
+              "profile": "framed",
+              "handleCentres": 0.096,
+              "pairedDrawerPulls": true,
+              "corniceHeight": 0.085
+            },
+            "plinth": {
+              "height": 0.1,
+              "setback": 0.025
+            },
+            "internalDrawers": []
+          },
+          "sectionFinishes": {
+            "handles": {
+              "type": "metal",
+              "color": "#9c8048",
+              "roughness": 0.32,
+              "metalness": 0.8,
+              "layer": 0
+            }
+          },
+          "finish": {
+            "type": "paint",
+            "color": "#dedbd1",
+            "roughness": 0.5,
+            "layer": 0
+          }
+        }
+      },
+      {
+        "kind": "furniture.standard",
+        "data": {
+          "id": "3c445e7b-83dd-430a-9c83-c6f2fcda7a95",
+          "name": "cabinet_wardrobe",
+          "displayName": "Master wardrobe \u2014 three drawers and double doors",
+          "category": "storage",
+          "position": {
+            "x": 1.332541332582429,
+            "y": 0,
+            "z": 8.29265846883095
+          },
+          "rotationY": -3.1174009240297145,
+          "dimensions": {
+            "x": 0.98,
+            "y": 2.72,
+            "z": 0.75
+          },
+          "assetKey": "cabinet_wardrobe",
+          "roomId": "_3h613",
+          "visible": true,
+          "cabinet": {
+            "version": 1,
+            "panelThickness": 0.018,
+            "backThickness": 0.006,
+            "doors": {
+              "count": 2,
+              "hinge": "left",
+              "angles": [
+                0,
+                0
+              ]
+            },
+            "panels": [
+              {
+                "id": "upper_division",
+                "name": "Shelf above front division",
+                "kind": "shelf",
+                "at": 1.973,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0.02
+                }
+              },
+              {
+                "id": "cornice_base",
+                "name": "Shelf above front division",
+                "kind": "shelf",
+                "at": 2.508,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0.02
+                }
+              },
+              {
+                "id": "drawer_cover",
+                "name": "Shelf above front division",
+                "kind": "shelf",
+                "at": 0.623,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0.02
+                }
+              }
+            ],
+            "contents": [],
+            "frontSections": [
+              {
+                "id": "drawer_1",
+                "bottom": 0.1,
+                "top": 0.317,
+                "opening": "drawer",
+                "doors": {
+                  "count": 1,
+                  "hinge": "left",
+                  "angles": [
+                    0,
+                    0
+                  ]
+                },
+                "drawerExtensions": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "id": "drawer_2",
+                "bottom": 0.317,
+                "top": 0.533,
+                "opening": "drawer",
+                "doors": {
+                  "count": 1,
+                  "hinge": "left",
+                  "angles": [
+                    0,
+                    0
+                  ]
+                },
+                "drawerExtensions": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "id": "drawer_3",
+                "bottom": 0.533,
+                "top": 0.75,
+                "opening": "drawer",
+                "doors": {
+                  "count": 1,
+                  "hinge": "left",
+                  "angles": [
+                    0,
+                    0
+                  ]
+                },
+                "drawerExtensions": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "id": "lower",
+                "bottom": 0.75,
+                "top": 2.1,
+                "opening": "swing",
+                "doors": {
+                  "count": 2,
+                  "hinge": "left",
+                  "angles": [
+                    0,
+                    0
+                  ]
+                }
+              },
+              {
+                "id": "upper",
+                "bottom": 2.1,
+                "top": 2.635,
+                "opening": "swing",
+                "doors": {
+                  "count": 2,
+                  "hinge": "left",
+                  "angles": [
+                    0,
+                    0
+                  ]
+                }
+              }
+            ],
+            "frontDetail": {
+              "profile": "framed",
+              "handleCentres": 0.096,
+              "pairedDrawerPulls": true,
+              "corniceHeight": 0.085
+            },
+            "plinth": {
+              "height": 0.1,
+              "setback": 0.025
+            },
+            "internalDrawers": []
+          },
+          "finish": {
+            "type": "paint",
+            "color": "#dedbd1",
+            "roughness": 0.5,
+            "layer": 0
+          },
+          "sectionFinishes": {
+            "handles": {
+              "type": "metal",
+              "color": "#9c8048",
+              "roughness": 0.32,
+              "metalness": 0.8,
+              "layer": 0
+            }
+          }
+        }
+      },
+      {
+        "kind": "furniture.standard",
+        "data": {
+          "id": "master_wardrobe_left_single",
+          "name": "ward_double",
+          "displayName": "Master wardrobe \u2014 left single door",
+          "category": "storage",
+          "position": {
+            "x": 2.957065848451935,
+            "y": 0,
+            "z": 8.253350742631786
+          },
+          "rotationY": -3.1174009240297145,
+          "dimensions": {
+            "x": 0.51,
+            "y": 2.72,
+            "z": 0.75
+          },
+          "assetKey": "ward_double",
+          "roomId": "_3h613",
+          "visible": true,
+          "cabinet": {
+            "version": 1,
+            "panelThickness": 0.018,
+            "backThickness": 0.006,
+            "doors": {
+              "count": 1,
+              "hinge": "left",
+              "angles": [
+                0,
+                0
+              ]
+            },
+            "panels": [
+              {
+                "id": "upper_division",
+                "name": "Shelf above front division",
+                "kind": "shelf",
+                "at": 1.973,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0.02
+                }
+              },
+              {
+                "id": "cornice_base",
+                "name": "Shelf above front division",
+                "kind": "shelf",
+                "at": 2.508,
+                "start": "left",
+                "end": "right",
+                "depth": {
+                  "mode": "fit",
+                  "value": 0.02
+                }
+              }
+            ],
+            "contents": [],
+            "frontSections": [
+              {
+                "id": "lower",
+                "bottom": 0.1,
+                "top": 2.1,
+                "opening": "swing",
+                "doors": {
+                  "count": 1,
+                  "hinge": "left",
+                  "angles": [
+                    0,
+                    0
+                  ]
+                }
+              },
+              {
+                "id": "upper",
+                "bottom": 2.1,
+                "top": 2.635,
+                "opening": "swing",
+                "doors": {
+                  "count": 1,
+                  "hinge": "left",
+                  "angles": [
+                    0,
+                    0
+                  ]
+                }
+              }
+            ],
+            "frontDetail": {
+              "profile": "framed",
+              "handleCentres": 0.096,
+              "pairedDrawerPulls": true,
+              "corniceHeight": 0.085
+            },
+            "plinth": {
+              "height": 0.1,
+              "setback": 0.025
+            },
+            "internalDrawers": []
+          },
+          "sectionFinishes": {
+            "handles": {
+              "type": "metal",
+              "color": "#9c8048",
+              "roughness": 0.32,
+              "metalness": 0.8,
+              "layer": 0
+            }
+          },
+          "finish": {
+            "type": "paint",
+            "color": "#dedbd1",
+            "roughness": 0.5,
+            "layer": 0
+          }
+        }
+      }
+    ],
+    "extensions": {}
+  }
+}

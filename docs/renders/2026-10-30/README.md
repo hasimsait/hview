@@ -1,8 +1,10 @@
 # House review — 30 October 2026
 
-[Open the comparison gallery](index.html).
+**Historical first pass.** The active study now covers only the salon, living/work room and master bedroom: [corrected geometry and controlled colour comparisons](../2026-10-30-focus/index.html). Kitchen and wet rooms are excluded. The AI images below contain interpretation errors and are not layout references.
 
-Source: `hview_1793317965664.plan`, preserved byte for byte as [`public/sample.plan`](../../../public/sample.plan). SHA-256: `fc1b8c8a10f84aede4ecbe2ba24bb849981e1b318ac211a44c7cdd4710392964`.
+[Open the historical comparison gallery](index.html).
+
+Source: `hview_1793317965664.plan`, preserved byte for byte in the editor at the time of this capture. The current [`public/sample.plan`](../../../public/sample.plan) includes the subsequently requested complete sectional and explicit BILLY body/door finishes; see the active study change report. SHA-256: `fc1b8c8a10f84aede4ecbe2ba24bb849981e1b318ac211a44c7cdd4710392964`.
 
 The initial isometric request was changed by the user to wide-angle interior POVs. Every room has two opposite-corner views at 6500 K and 2700 K: **40 views per complete set**. Ceilings and sockets are visible, foreground is solid, full-height walls remain, and daylight is off. Camera coordinates and FOV are recorded per view. Captures exclude the editor controls.
 
@@ -34,7 +36,7 @@ Exposure is chosen per room to keep surfaces visible and restrain highlight clip
 
 The manifests record all fixture adjustments, per-view camera coordinates, exposure, temperature and brightness statistics.
 
-Each realistic board contains the same four requested view/temperature combinations. Kitchen and bedroom studies received a further object/material check: the cooktop remains a four-burner gas hob, actual caramel-ripple and mosaic textures are supplied as references, and the tall bedroom mirror is interpreted as a mirror rather than another door. Image generation can still vary fine details and reflections; it is not a replacement for the exact HView geometry.
+Each realistic board contains the same four requested view/temperature combinations. Kitchen and bedroom studies received a further object/material check: the first pass incorrectly interpreted the cooktop as gas. The user has since specified a black glass induction hob and a mermerit cast-marble counter. These override the first-pass kitchen interpretation. The bedroom AI also misread the mirror/door placement; the active study uses HView geometry directly. Image generation can still vary fine details and reflections; it is not a replacement for the exact HView geometry.
 
 ## Flagged plan anomalies — preserved at the user's request
 

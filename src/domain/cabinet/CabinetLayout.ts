@@ -347,14 +347,15 @@ export function defaultCabinet(data: Pick<FurnitureData, 'dimensions' | 'assetKe
   const layout: CabinetLayout = { version: 1, panelThickness: .018, backThickness: .006, doors: { count: doors, hinge: 'left', angles: [0, 0] },
     panels: Array.from({ length: count }, (_, index) => ({ id: `shelf_${index + 1}`, name: `Shelf ${index + 1}`, kind: 'shelf', at: (data.dimensions.y - .036) * (index + 1) / (count + 1), start: 'left', end: 'right', depth: { mode: 'fit', value: .02 } })), contents: [] };
   if (data.assetKey === 'mirror_cabinet_upper') { layout.panelThickness = .015; layout.doors.count = 2; layout.doors.split = .625; }
-  if (data.assetKey.startsWith('ikea_billy_oxberg_')) {
-    layout.backThickness = .003; layout.doorStyle = data.assetKey.includes('_glass_') ? 'full_glass' : 'panel_glass'; layout.doors.count = 2;
+  if (data.assetKey.startsWith('ikea_billy_oxberg_') || data.assetKey.startsWith('ikea_billy_40_')) {
+    layout.backThickness = .003;
+    if (data.assetKey.startsWith('ikea_billy_oxberg_')) { layout.doorStyle = data.assetKey.includes('_glass_') ? 'full_glass' : 'panel_glass'; layout.doors.count = data.assetKey.includes('_40_') ? 1 : 2; }
     layout.plinth = { height: .10, setback: .03 };
     layout.panels = Array.from({ length: 5 }, (_, i) => ({ id: `shelf_${i + 1}`, name: `Shelf ${i + 1}`, kind: 'shelf', at: .1 + (data.dimensions.y - .1) * (i + 1) / 6 - .018, start: 'left', end: 'right', depth: { mode: 'fit', value: .012 } }));
   }
   if (data.assetKey.includes('billy_') && data.assetKey.includes('_extension_')) {
     layout.backThickness = .018; layout.openBottom = true; layout.plinth = undefined; layout.panels = [];
-    layout.doors.count = data.assetKey.startsWith('ikea_billy_oxberg_') ? 2 : 0;
+    layout.doors.count = data.assetKey.startsWith('ikea_billy_oxberg_') ? (data.assetKey.includes('_40_') ? 1 : 2) : 0;
     layout.doorStyle = 'full_glass';
   }
   if (data.assetKey === 'cabinet_drawers_three' || data.assetKey === 'cabinet_drawers_deep') {

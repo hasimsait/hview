@@ -12,6 +12,7 @@ export interface ProceduralMaterials {
   billyWhite: THREE.MeshStandardMaterial;
   billyWalnut: THREE.MeshStandardMaterial;
   billyOak: THREE.MeshStandardMaterial;
+  billyBlack: THREE.MeshStandardMaterial;
   fabricLight: THREE.MeshStandardMaterial;
   fabricBlue: THREE.MeshStandardMaterial;
   fabricDark: THREE.MeshStandardMaterial;

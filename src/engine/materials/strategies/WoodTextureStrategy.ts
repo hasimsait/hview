@@ -56,7 +56,8 @@ export class WoodTextureStrategy {
         ctx.save(); if (billy.grain === 'walnut') { ctx.translate(512, 0); ctx.rotate(Math.PI / 2); }
         ctx.drawImage(image, 0, 0, 512, 512); ctx.restore();
         const pixels = ctx.getImageData(0, 0, 512, 512);
-        matchGrainColour(pixels.data, billy.color.match(/[a-f\d]{2}/gi)!.map(value => parseInt(value, 16)));
+        if (billy.id === 'billy_black_oak_effect') matchWoodPhotoTone(pixels.data, billy.color);
+        else matchGrainColour(pixels.data, billy.color.match(/[a-f\d]{2}/gi)!.map(value => parseInt(value, 16)));
         ctx.putImageData(pixels, 0, 0); texture.needsUpdate = true; this.source.notify();
       });
       return texture;

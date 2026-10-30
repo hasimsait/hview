@@ -1,0 +1,97 @@
+{
+  "allowedEdits": [
+    "_gf38l",
+    "_3h4u6",
+    "bb33792b-ec5b-4abc-b172-c3a98f8387ab",
+    "c5c830cf-5d14-4311-9464-836455b6c83f",
+    "f8b9a395-1270-4620-bcff-85fe20b6f7b1",
+    "9aeb3038-cc58-445f-bb5e-a4cb8baa4d9a",
+    "435c51e9-6f6f-4b6f-a2e3-10ad61ce07b0",
+    "1ad5dfb2-c8f0-4474-8e01-46d536ca7a0c",
+    "salon_billy_40",
+    "salon_billy_extension_40",
+    "_k2vy1_b"
+  ],
+  "sectional": {
+    "id": "_gf38l",
+    "assetKey": "sofa_sectional_left",
+    "position": {
+      "x": -0.24948377180494696,
+      "y": 0,
+      "z": -2.2529
+    },
+    "rotationY": 0,
+    "dimensions": {
+      "x": 2.652967543609894,
+      "y": 0.9,
+      "z": 1.7280890782976208
+    }
+  },
+  "replacedModules": [
+    "_gf38l",
+    "_3h4u6"
+  ],
+  "allOtherPlanElementsUnchanged": true,
+  "windowOpeningDataUnchanged": true,
+  "uploadedSourceSHA256": "fc1b8c8a10f84aede4ecbe2ba24bb849981e1b318ac211a44c7cdd4710392964",
+  "workingPlanSHA256": "774b1ef403168f8588046e45b7c129564349eb76ec64242e3adca4b740c0da4c",
+  "addedBillyUnits": [
+    {
+      "id": "salon_billy_40",
+      "assetKey": "ikea_billy_oxberg_glass_40_walnut_effect",
+      "position": {
+        "x": -4.334999999888893,
+        "y": 0,
+        "z": 3.7566859673524737
+      },
+      "dimensions": {
+        "x": 0.4,
+        "y": 2.02,
+        "z": 0.3
+      },
+      "doors": 1
+    },
+    {
+      "id": "salon_billy_extension_40",
+      "assetKey": "ikea_billy_oxberg_extension_40_walnut_effect",
+      "position": {
+        "x": -4.334999999888893,
+        "y": 2.02,
+        "z": 3.7566859673524737
+      },
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.35,
+        "z": 0.3
+      },
+      "doors": 1
+    }
+  ],
+  "billyRunWidth": 2.8,
+  "billyFinishes": {
+    "body": "billy_walnut_effect",
+    "doors": "billy_black_oak_effect"
+  },
+  "clearanceAdjustment": {
+    "translatedBillyIds": [
+      "bb33792b-ec5b-4abc-b172-c3a98f8387ab",
+      "c5c830cf-5d14-4311-9464-836455b6c83f",
+      "f8b9a395-1270-4620-bcff-85fe20b6f7b1",
+      "9aeb3038-cc58-445f-bb5e-a4cb8baa4d9a",
+      "435c51e9-6f6f-4b6f-a2e3-10ad61ce07b0",
+      "1ad5dfb2-c8f0-4474-8e01-46d536ca7a0c",
+      "salon_billy_40",
+      "salon_billy_extension_40"
+    ],
+    "translationMetres": {
+      "x": -0.022,
+      "y": 0,
+      "z": 0
+    },
+    "doorId": "_5w0ui",
+    "openAngleBefore": 180,
+    "openAngleAfter": 90,
+    "doorFrameAndHingeUnchanged": true,
+    "wallGeometryUnchanged": true
+  }
+}

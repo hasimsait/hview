@@ -81,7 +81,8 @@ export class AddBillyExtension implements EditorCommand {
     const base = document.requireFurniture(this.id);
     if (factory.catalog.get(base.assetKey)?.recipe !== 'billy_bookcase' || base.assetKey.includes('_extension_')) throw new Error('Select a BILLY bookcase');
     const variant = billyAssetFinish(base.assetKey).id.replace('billy_', '');
-    const assetKey = `ikea_billy_${this.glass ? 'oxberg_' : ''}extension_80_${variant}`, asset = factory.catalog.get(assetKey)!;
+    const width = base.dimensions.x < .6 ? 40 : 80;
+    const assetKey = `ikea_billy_${this.glass ? 'oxberg_' : ''}extension_${width}_${variant}`, asset = factory.catalog.get(assetKey)!;
     const depth = asset.defaultDimensions.z, offset = (depth - base.dimensions.z) / 2;
     // Align the backs in the bookcase's local coordinates, including rotated cases.
     const position = { x: base.position.x + Math.sin(base.rotationY) * offset, y: base.position.y + base.dimensions.y, z: base.position.z + Math.cos(base.rotationY) * offset };

@@ -22,6 +22,7 @@ import { buildHouseholdDetail } from './builders/HouseholdDetailBuilder';
 import { buildSoftFurnishing } from './builders/SoftFurnishingBuilder';
 
 export const FURNITURE_GEOMETRY: Readonly<Record<AssetRecipeId, AssetBuilderFn>> = {
+  sectional_sofa: Furniture.buildSectionalSofa,
   kitchenware: buildKitchenware,
   daily_life: buildDailyLife,
   kitchen_worktop: buildWorktop,

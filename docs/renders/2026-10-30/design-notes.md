@@ -1,4 +1,6 @@
-# Decoration and palette proposals
+# Historical decoration and palette proposals
+
+**Superseded brief:** focus only on the salon, living/work room and master bedroom. Compare sofa fabric, independent BILLY body/door colours, bedroom accent paint, curtains and desk finishes. Bedding and sofa pillows are temporary styling props, not purchase decisions. Use the [active controlled study](../2026-10-30-focus/index.html).
 
 These are proposals after the baseline render exercise. They do not alter the saved plan or the original/corrected HView views. Unbranded hex values below are planning colour references, not claimed manufacturer matches.
 
@@ -28,7 +30,7 @@ See [bedroom palette comparison](concepts/master-bedroom-palette-options.png).
 | --- | --- | --- |
 | Sitting/work room, 13.3 m² | Dusty-blue seating, birch desks and existing work layout | Coordinate the small desk accessories and cat furniture in two neutral tones; repeat the curtain colour once in a cushion. Keep desk surfaces usable. |
 | Small bedroom, 8.3 m² | Blue bedding, light wood and warm-ivory walls | One small print above the desk and a light washable bedside textile. Keep the large wall mostly quiet; the room already has little spare floor area. |
-| Kitchen | Sage uppers, beige laminate bases, actual striped/ribbed mosaic and caramel ripple ceramic floor | Use a single warm-grey or black small-accessory group. The patterned floor and backsplash already supply texture, so another strong patterned runner would compete. Keep the hob gas and the lower fronts wood-effect. |
+| Kitchen | Sage uppers, beige laminate bases, actual striped/ribbed mosaic and caramel ripple ceramic floor | Use a single warm-grey or black small-accessory group. The patterned floor and backsplash already supply texture, so another strong patterned runner would compete. The hob is black glass induction and the mermerit cast-marble counter is fixed; the earlier gas-hob interpretation was incorrect. Kitchen work is paused. |
 | Dining/office nook | Sage tabletop, dark-green chairs, pale walls | Add only a shallow wall item where it does not interfere with the openings. Avoid floor decor in this narrow strip. If circulation is uncomfortable, test a 70–75 cm round table as a separate layout proposal before buying decor. |
 | Hallway/entry | Greige cabinetry, pale walls, mirror, existing two pendant types | Match visible hardware and keep the floor route unobstructed. An entry textile should be thin and short enough to clear the actual door swings. |
 | Main bathroom | Sage fluted fronts and beige tiles | Use cream towels with one muted rust accent, and group the exposed cleaning products in matching removable baskets. The existing colour palette is already coherent. |

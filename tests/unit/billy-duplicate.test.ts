@@ -51,6 +51,28 @@ describe('duplicate assets', () => {
 });
 
 describe('BILLY / OXBERG bookcase', () => {
+  it.each(BILLY_FINISHES)('keeps the 40 cm $name cases and single-door extensions distinct from 80 cm units', finish => {
+    const variant = finish.id.replace('billy_', '');
+    for (const [prefix, doors, panes] of [['ikea_billy_', 0, 0], ['ikea_billy_oxberg_', 1, 1], ['ikea_billy_oxberg_glass_', 1, 2]] as const) {
+      const narrow = bookcase(`${prefix}40_${variant}`).withFinish(finish.finish);
+      expect(narrow.dimensions.x).toBe(.4); expect(narrow.dimensions.y).toBe(2.02);
+      expect(narrow.cabinet?.doors.count).toBe(doors); expect(narrow.cabinet?.panels).toHaveLength(5); expect(narrow.cabinet?.plinth?.height).toBe(.1);
+      const mesh = new FurnitureMeshBuilder(factory.catalog).build(narrow), glass: THREE.Mesh[] = [];
+      mesh.traverse(p => { if (p instanceof THREE.Mesh && p.userData.isGlazing) glass.push(p); }); expect(glass).toHaveLength(panes);
+      expect(new THREE.Box3().setFromObject(mesh).getSize(new THREE.Vector3()).x).toBeCloseTo(.4);
+      for (const format of [codec.encode(new PlanDocument([narrow])), new LegacyPlanWriter().encode(new PlanDocument([narrow]))]) {
+        const restored = codec.decode(format).requireFurniture(narrow.id); expect(restored.dimensions.x).toBe(.4); expect(restored.cabinet?.doors.count).toBe(doors); expect(restored.assetKey).toBe(narrow.assetKey);
+      }
+      for (const glazed of [false, true]) {
+        const source = narrow.withSectionFinish('door_1', BILLY_FINISHES[3].finish), editor = new EditorSession(factory); editor.load(new PlanDocument([source]));
+        editor.execute(new AddBillyExtension(source.id, 'narrow_extension', glazed)); const extension = editor.getDocument().requireFurniture('narrow_extension');
+        expect(extension.assetKey).toContain('_extension_40_'); expect(extension.dimensions.x).toBe(.4); expect(extension.cabinet?.doors.count).toBe(glazed ? 1 : 0);
+        expect(extension.position.y).toBe(2.02); expect(extension.sectionFinishes?.door_1).toEqual(BILLY_FINISHES[3].finish); expect(extension.cabinet?.openBottom).toBe(true);
+        editor.undo(); expect(editor.getDocument().get(extension.id)).toBeUndefined(); editor.redo(); expect(editor.getDocument().requireFurniture(extension.id).assetKey).toContain('_40_');
+      }
+    }
+  });
+
   it('builds full glass doors in all BILLY finishes and preserves their opening style through both formats', () => {
     const builder = new FurnitureMeshBuilder(factory.catalog);
     for (const finish of BILLY_FINISHES) {

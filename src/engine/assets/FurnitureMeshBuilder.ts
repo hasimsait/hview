@@ -30,6 +30,7 @@ export class FurnitureMeshBuilder {
     billyWhite: new THREE.MeshStandardMaterial({ color: 0xf3f1eb, roughness: .65 }),
     billyWalnut: new THREE.MeshStandardMaterial({ color: 0x9d7b5b, roughness: .65 }),
     billyOak: new THREE.MeshStandardMaterial({ color: 0xc0b099, roughness: .65 }),
+    billyBlack: new THREE.MeshStandardMaterial({ color: 0x24211e, roughness: .65 }),
     fabricLight: new THREE.MeshStandardMaterial({ color: 0xe8e6e1, roughness: 0.85 }),
     fabricBlue: new THREE.MeshStandardMaterial({ color: 0x3d5a80, roughness: 0.8 }),
     fabricDark: new THREE.MeshStandardMaterial({ color: 0x2b2d42, roughness: 0.9 }),
@@ -67,7 +68,7 @@ export class FurnitureMeshBuilder {
     const foregroundMaterials = [
       this.materials.whitePaint, this.materials.woodBlackBrown, this.materials.plasticBeige, this.materials.glassBlack,
       this.materials.woodLight, this.materials.woodDark,
-      this.materials.billyWhite, this.materials.billyWalnut, this.materials.billyOak,
+      this.materials.billyWhite, this.materials.billyWalnut, this.materials.billyOak, this.materials.billyBlack,
       this.materials.fabricLight, this.materials.fabricBlue,
       this.materials.fabricDark, this.materials.fabricBeige,
       this.materials.softFabric,
@@ -87,6 +88,7 @@ export class FurnitureMeshBuilder {
       const billyTextures = new WoodTextureStrategy(new BrowserCanvasFactory(), textures);
       this.materials.billyWalnut.map = billyTextures.getWoodTexture('billy_walnut_effect'); this.materials.billyWalnut.color.setHex(0xffffff);
       this.materials.billyOak.map = billyTextures.getWoodTexture('billy_oak_effect'); this.materials.billyOak.color.setHex(0xffffff);
+      this.materials.billyBlack.map = billyTextures.getWoodTexture('billy_black_oak_effect'); this.materials.billyBlack.color.setHex(0xffffff);
       const loader = textures.textureLoader();
       loader.load('/textures/wood/wood_natural_oak.jpg', (tex) => {
         tex.wrapS = THREE.RepeatWrapping;

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { Shelving } from '../../../domain/elements/Furniture';
 import { AssetBuildContext } from "./AssetBuildContext";
 import { buildCabinetWorktop } from './WorktopBuilder';
@@ -102,6 +103,32 @@ export function buildSofa(context: AssetBuildContext): void {
   rightArm.userData.section = 'Armrests';
   rightArm.position.set(w / 2 - armW / 2, (backH * 0.75) / 2, 0);
   parent.add(leftArm, rightArm);
+}
+
+/** A complete sectional: the chaise meets the straight seats without an inner arm. */
+export function buildSectionalSofa({ parent, entity, w, h, d, materials }: AssetBuildContext): void {
+  const side = entity.assetKey.endsWith('_right') ? 1 : -1;
+  const chaiseWidth = w * .38, mainDepth = d * .58, arm = Math.min(.14, w * .055), back = Math.min(.17, d * .12);
+  const base = h * .35, cushion = h * .14;
+  const add = (name: string, section: string, x: number, y: number, z: number, width: number, height: number, depth: number) => {
+    const radius = Math.min(.035, width / 5, height / 5, depth / 5);
+    const mesh = new THREE.Mesh(new RoundedBoxGeometry(width, height, depth, 2, radius), materials.fabricDark);
+    mesh.name = name; mesh.userData.section = section; mesh.position.set(x, y, z); mesh.castShadow = mesh.receiveShadow = true; parent.add(mesh); return mesh;
+  };
+  const rearZ = -d / 2 + mainDepth / 2, chaiseX = side * (w - chaiseWidth) / 2;
+  add('sectional_main_base', 'Frame', 0, base / 2, rearZ, w, base, mainDepth);
+  add('sectional_chaise_base', 'Frame', chaiseX, base / 2, mainDepth / 2, chaiseWidth, base, d - mainDepth);
+  add('sectional_back', 'Backrest', 0, (h + base) / 2, -d / 2 + back / 2, w, h - base, back);
+  // Only the outer chaise edge and the opposite outside end carry arms.
+  add('sectional_chaise_outer_arm', 'Armrests', side * (w - arm) / 2, h * .35, 0, arm, h * .7, d);
+  add('sectional_other_outer_arm', 'Armrests', -side * (w - arm) / 2, h * .35, rearZ, arm, h * .7, mainDepth);
+  const chaiseSeatWidth = chaiseWidth - arm - .012;
+  add('sectional_chaise_cushion', 'Seat', chaiseX - side * arm / 2, base + cushion / 2, back / 2, chaiseSeatWidth, cushion, d - back - .02);
+  const available = w - chaiseWidth - arm - .024, seatWidth = available / 2;
+  for (let i = 0; i < 2; i++) {
+    const x = side * (-w / 2 + arm + .012 + seatWidth * (i + .5));
+    add(`sectional_seat_${i + 1}`, 'Seat', x, base + cushion / 2, rearZ + back / 2, seatWidth - .012, cushion, mainDepth - back - .02);
+  }
 }
 
 export function buildTable(context: AssetBuildContext): void {

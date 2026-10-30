@@ -9,12 +9,14 @@ export class OpeningMeshBuilder {
   private readonly leaves = new WeakMap<THREE.Object3D, THREE.Mesh>();
   private readonly pivots = new WeakMap<THREE.Object3D, THREE.Object3D>();
   private readonly frames = new WeakMap<THREE.Object3D, THREE.Mesh[]>();
+  private readonly windowPanes = new WeakMap<THREE.Object3D, THREE.Mesh[]>();
   interactionTarget(root: THREE.Object3D): THREE.Object3D | undefined { return this.pivots.get(root); }
 
   // Shared occlusion uniforms — driven each frame via updateOrbitPlane()
   private occlusionUniforms = createOcclusionUniforms();
 
   private frameMaterial: THREE.MeshStandardMaterial;
+  private windowFrameMaterial: THREE.MeshStandardMaterial;
   private doorMaterial: THREE.MeshStandardMaterial;
   private handleMaterial: THREE.MeshStandardMaterial;
   private glassMaterial: THREE.MeshPhysicalMaterial;
@@ -22,7 +24,7 @@ export class OpeningMeshBuilder {
   private curtainMaterial: THREE.MeshStandardMaterial;
   private curtainBuilder: CurtainMeshBuilder;
 
-  get palette(): readonly THREE.Material[] { return [this.frameMaterial, this.doorMaterial, this.handleMaterial, this.glassMaterial, this.sillMaterial, this.curtainMaterial]; }
+  get palette(): readonly THREE.Material[] { return [this.frameMaterial, this.windowFrameMaterial, this.doorMaterial, this.handleMaterial, this.glassMaterial, this.sillMaterial, this.curtainMaterial]; }
 
   constructor(private finishService?: SurfaceMaterialFactory) {
     this.frameMaterial = new THREE.MeshStandardMaterial({
@@ -31,6 +33,7 @@ export class OpeningMeshBuilder {
       metalness: 0.2,
       transparent: true,
     });
+    this.windowFrameMaterial = new THREE.MeshStandardMaterial({ color: 0xf5f4ef, roughness: .55, metalness: 0, transparent: true });
 
     this.doorMaterial = new THREE.MeshStandardMaterial({
       color: 0xd6cbb8,
@@ -47,12 +50,13 @@ export class OpeningMeshBuilder {
     });
 
     this.glassMaterial = new THREE.MeshPhysicalMaterial({
-      color: 0xd8eeff,
+      color: 0xffffff,
       transparent: true,
-      opacity: 0.35,
-      roughness: 0.1,
-      metalness: 0.1,
-      transmission: 0.7,
+      opacity: 0.18,
+      roughness: 0.05,
+      metalness: 0,
+      transmission: 0,
+      depthWrite: false,
       ior: 1.5,
     });
 
@@ -69,7 +73,7 @@ export class OpeningMeshBuilder {
       applyBasicOcclusionShader(material, this.occlusionUniforms, .6); return material;
     });
 
-    for (const mat of [this.frameMaterial, this.doorMaterial, this.handleMaterial, this.sillMaterial, this.curtainMaterial, this.glassMaterial]) {
+    for (const mat of [this.frameMaterial, this.windowFrameMaterial, this.doorMaterial, this.handleMaterial, this.sillMaterial, this.curtainMaterial, this.glassMaterial]) {
       applyBasicOcclusionShader(mat, this.occlusionUniforms, 0.6);
     }
   }
@@ -107,7 +111,7 @@ export class OpeningMeshBuilder {
     if (isDoor) {
       this.buildDoor(group, opening, wallThick);
     } else {
-      this.buildWindow(group, opening, wallThick);
+      this.buildWindow(group, opening, wallThick, mount.interiorSide ?? (wall.roomSideA || !wall.roomSideB ? 1 : -1));
       if (opening.curtainState !== 'removed') group.add(this.curtainBuilder.build(opening, wall, mount));
 
     }
@@ -267,9 +271,11 @@ export class OpeningMeshBuilder {
   }
 
   private frameFor(opening: OpeningEntity): THREE.Material {
-    if (!opening.frameColor) return this.frameMaterial;
-    if (this.finishService) return this.finishService.getMaterial({ type: 'paint', color: opening.frameColor, roughness: 0.5, metalness: 0.2 }, { projection: 'local' });
-    const material = this.frameMaterial.clone();
+    const window = opening.type === 'window' || opening.type === 'french_window';
+    const base = window ? this.windowFrameMaterial : this.frameMaterial;
+    if (!opening.frameColor) return base;
+    if (this.finishService) return this.finishService.getMaterial({ type: 'paint', color: opening.frameColor, roughness: window ? .55 : .5, metalness: window ? 0 : .2 }, { projection: 'local' });
+    const material = base.clone();
     material.color.set(opening.frameColor);
     applyBasicOcclusionShader(material, this.occlusionUniforms, 0.6);
     return material;
@@ -281,12 +287,13 @@ export class OpeningMeshBuilder {
       const material = this.frameFor(opening);
       for (const frame of frames) frame.material = material;
     }
-    const leaf = this.leaves.get(root), pivot = this.pivots.get(root);
-    if (!leaf) return;
     if (opening.type === 'window' || opening.type === 'french_window') {
-      leaf.material = opening.finish && this.finishService ? this.finishService.getMaterial(opening.finish, { side: THREE.DoubleSide, projection: 'local' }) : this.glassMaterial;
+      const material = opening.finish && this.finishService ? this.finishService.getMaterial(opening.finish, { side: THREE.DoubleSide, projection: 'local' }) : this.glassMaterial;
+      for (const pane of this.windowPanes.get(root) ?? []) pane.material = material;
       return;
     }
+    const leaf = this.leaves.get(root), pivot = this.pivots.get(root);
+    if (!leaf) return;
     leaf.material = opening.finish && this.finishService ? this.finishService.getMaterial(opening.finish, { projection: 'local' }) : this.doorMaterial;
     const left = (opening.swingSide ?? 'r') === (opening.hingeSide ?? 'r');
     if (pivot?.userData.slideAxis === 'x') {
@@ -297,56 +304,32 @@ export class OpeningMeshBuilder {
     }
   }
 
-  private buildWindow(parent: THREE.Group, opening: OpeningEntity, wallThick: number): void {
-    const w = opening.width;
-    const h = opening.height;
-    const baseY = opening.floorHeight;
-    const frameThick = 0.04;
-    const frameDepth = wallThick * 0.6;
-
-    const frameGroup = new THREE.Group();
-    frameGroup.position.y = baseY;
-
-    // Outer frame (4 sides)
-    const sideGeom = new THREE.BoxGeometry(frameThick, h, frameDepth);
-    const horizGeom = new THREE.BoxGeometry(w, frameThick, frameDepth);
-
-    const leftFrame = new THREE.Mesh(sideGeom, this.frameMaterial);
-    leftFrame.position.set(-w / 2 + frameThick / 2, h / 2, 0);
-
-    const rightFrame = new THREE.Mesh(sideGeom, this.frameMaterial);
-    rightFrame.position.set(w / 2 - frameThick / 2, h / 2, 0);
-
-    const bottomFrame = new THREE.Mesh(horizGeom, this.frameMaterial);
-    bottomFrame.position.set(0, frameThick / 2, 0);
-
-    const topFrame = new THREE.Mesh(horizGeom, this.frameMaterial);
-    topFrame.position.set(0, h - frameThick / 2, 0);
-
-    frameGroup.add(leftFrame, rightFrame, bottomFrame, topFrame);
-
-    // Central mullion if window is wider than 1.2m
-    if (w > 1.2) {
-      const mullion = new THREE.Mesh(new THREE.BoxGeometry(frameThick, h - frameThick * 2, frameDepth), this.frameMaterial);
-      mullion.position.set(0, h / 2, 0);
-      frameGroup.add(mullion);
+  private buildWindow(parent: THREE.Group, opening: OpeningEntity, wallThick: number, face: number): void {
+    const w = opening.width, h = opening.height, outer = Math.min(.05, w / 8, h / 8), rail = outer * .54, mullion = outer * .8;
+    const depth = Math.max(.065, wallThick * .7), material = this.frameFor(opening), frames: THREE.Mesh[] = [], panes: THREE.Mesh[] = [];
+    const group = new THREE.Group(); group.name = `windowFrame_${opening.id}`; group.position.y = opening.floorHeight;
+    group.userData.windowConstruction = 'two_side_hung_upvc';
+    const bar = (name: string, x: number, y: number, z: number, width: number, height: number, d: number) => {
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(Math.max(.001, width), Math.max(.001, height), d), material);
+      mesh.name = `${name}_${opening.id}`; mesh.position.set(x, y, z); mesh.castShadow = mesh.receiveShadow = true; group.add(mesh); frames.push(mesh); return mesh;
+    };
+    for (const side of [-1, 1]) bar(`windowOuter_${side}`, side * (w - outer) / 2, h / 2, 0, outer, h, depth);
+    for (const top of [false, true]) bar(`windowOuter_${top ? 'top' : 'bottom'}`, 0, top ? h - outer / 2 : outer / 2, 0, w - 2 * outer, outer, depth);
+    bar('windowFixedMullion', 0, h / 2, 0, mullion, h - 2 * outer, depth);
+    const sashWidth = Math.max(.02, (w - 2 * outer - mullion) / 2 - .004), sashHeight = Math.max(.02, h - 2 * outer - .004);
+    for (const side of [-1, 1]) {
+      const label = side < 0 ? 'left' : 'right', x = side * (mullion / 2 + .002 + sashWidth / 2), z = face * .01;
+      for (const edge of [-1, 1]) bar(`windowSash_${label}_${edge}`, x + edge * (sashWidth - rail) / 2, h / 2, z, rail, sashHeight, depth * .8);
+      for (const top of [false, true]) bar(`windowSash_${label}_${top ? 'top' : 'bottom'}`, x, h / 2 + (top ? 1 : -1) * (sashHeight - rail) / 2, z, sashWidth - 2 * rail, rail, depth * .8);
+      const glass = new THREE.Mesh(new THREE.BoxGeometry(Math.max(.001, sashWidth - 2 * rail), Math.max(.001, sashHeight - 2 * rail), .008), opening.finish && this.finishService ? this.finishService.getMaterial(opening.finish, { side: THREE.DoubleSide, projection: 'local' }) : this.glassMaterial);
+      glass.name = `windowGlass_${label}_${opening.id}`; glass.position.set(x, h / 2, z); glass.userData = { isGlazing: true, hingeSide: label }; glass.castShadow = false; group.add(glass); panes.push(glass);
+      bar(`windowHandle_${label}`, x - side * (sashWidth / 2 - rail - .014), h * .48, face * (depth / 2 + .018), .014, Math.min(.1, h / 5), .025);
+      for (const y of [.25, .75]) bar(`windowHinge_${label}_${y}`, x + side * (sashWidth - rail) / 2, h * y, face * depth * .42, .016, .045, .018);
     }
-
-    // Glass pane
-    const glassGeom = new THREE.BoxGeometry(w - frameThick * 2, h - frameThick * 2, 0.015);
-    const glassMesh = new THREE.Mesh(glassGeom, opening.finish && this.finishService ? this.finishService.getMaterial(opening.finish, { side: THREE.DoubleSide, projection: 'local' }) : this.glassMaterial);
-    this.leaves.set(parent, glassMesh);
-    glassMesh.position.set(0, h / 2, 0);
-    frameGroup.add(glassMesh);
-
-    // Window sill (exterior and interior ledge) if not a french window
-    if (opening.type !== 'french_window' && baseY > 0.1) {
-      const sillGeom = new THREE.BoxGeometry(w + 0.1, 0.03, wallThick + 0.08);
-      const sillMesh = new THREE.Mesh(sillGeom, this.sillMaterial);
-      sillMesh.position.set(0, 0, 0);
-      frameGroup.add(sillMesh);
+    this.frames.set(parent, frames); this.windowPanes.set(parent, panes);
+    if (opening.type !== 'french_window' && opening.floorHeight > .1) {
+      const sill = new THREE.Mesh(new THREE.BoxGeometry(w + .1, .03, wallThick + .08), this.sillMaterial); sill.name = `windowSill_${opening.id}`; group.add(sill);
     }
-
-    parent.add(frameGroup);
+    parent.add(group);
   }
 }

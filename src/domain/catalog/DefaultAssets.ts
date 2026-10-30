@@ -50,6 +50,12 @@ export const DEFAULT_ASSETS: readonly AssetDefinition[] = [
   },
 
   // Seating
+  ...(['left', 'right'] as const).map(side => ({
+    key: `sofa_sectional_${side}`, name: `L-Shaped Sofa — ${side === 'left' ? 'Left' : 'Right'} Chaise`, category: 'seating', recipe: 'sectional_sofa' as const,
+    description: 'One upholstered sectional with a continuous seating junction and arms only at the two outside ends. Chaise side is viewed facing the sofa.',
+    defaultDimensions: { x: 2.65, y: .9, z: 1.73 }, placement: { mount: 'floor' as const, defaultElevation: 0 },
+    aliases: [`${side}_chaise_sofa`, `l_shaped_sofa_${side}`],
+  })),
   {
     key: 'sofa_triple',
     name: '3-Seater Sofa',

@@ -31,8 +31,8 @@ describe('framed wardrobe fronts', () => {
     expect(() => validateCabinet({ ...wardrobe.cabinet!, frontDetail: { ...wardrobe.cabinet!.frontDetail!, handleCentres: NaN } })).toThrow();
     expect(() => validateCabinet({ ...wardrobe.cabinet!, frontDetail: { ...wardrobe.cabinet!.frontDetail!, corniceHeight: .4 } })).toThrow();
   });
-  it('loads and exports the photo-fitted working wardrobe with seven lower doors and three drawers', () => {
-    const document = codec.decode(readFileSync('public/sample.plan', 'utf8'));
+  it('loads and exports the photo-fitted wardrobe regression fixture with seven lower doors and three drawers', () => {
+    const document = codec.decode(readFileSync('tests/fixtures/fitted-wardrobes.json', 'utf8'));
     const fitted = document.elements.filter(e => e instanceof StandardFurniture && e.roomId === '_3h613' && e.cabinet?.frontDetail) as StandardFurniture[];
     expect(fitted).toHaveLength(4);
     const leaves = fitted.flatMap(e => cabinetLeaves(e.cabinet!, e.dimensions));

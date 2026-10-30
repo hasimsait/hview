@@ -11,6 +11,7 @@ async function check() {
   const plane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1)); factory.ensureLocalMetricBounds(plane); scene.add(plane);
   const materials = FURNITURE_WOOD_FINISHES.map(finish => factory.getMaterial(finish, { projection: 'local', foregroundOcclusion: false }) as THREE.MeshStandardMaterial);
   const billy = factory.getWoodTexture('billy_walnut_effect');
+  const billyBlack = factory.getMaterial({ type: 'wood', variant: 'billy_black_oak_effect', color: '#24211e', roughness: .65, metalness: 0 }, { projection: 'local', foregroundOcclusion: false }) as THREE.MeshStandardMaterial;
   const panel = factory.getLambriTexture('bauhaus_61598007');
   await factory.textures.ready(); await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
   const canvas = document.createElement('canvas'); canvas.width = canvas.height = 512;
@@ -46,6 +47,12 @@ async function check() {
   if (factory.getWoodTexture('american_walnut') === factory.getWoodTexture('deep_chocolate_walnut') || factory.getWoodTexture('dark_wenge') === factory.getWoodTexture('black_brown_wood') || factory.getWoodTexture('american_walnut') === billy) throw new Error('Independent wood tones share a final texture');
   const billyTone = stats(read(billy.image as CanvasImageSource));
   if (billyTone.mean.some((value, c) => Math.abs(value - [157, 123, 91][c]) > 1)) throw new Error('BILLY finish changed');
+  const blackTone = stats(read(billyBlack.map!.image as CanvasImageSource));
+  if (blackTone.mean.some((value, c) => Math.abs(value - [36, 33, 30][c]) > 1) || blackTone.variation < 8) throw new Error('BILLY Black Oak lost its dark tone or grain');
+  if (billyBlack.metalness !== 0 || billyBlack.color.getHexString() !== 'ffffff' || billyBlack.map!.colorSpace !== THREE.SRGBColorSpace) throw new Error('BILLY Black Oak has metal or double tint');
+  plane.material = billyBlack; view.update(scene, true); configureColorView(renderer, { surfaceColors: true }); renderer.render(scene, camera);
+  const blackPixels = new Uint8Array(256 * 256 * 4); renderer.getContext().readPixels(0, 0, 256, 256, renderer.getContext().RGBA, renderer.getContext().UNSIGNED_BYTE, blackPixels);
+  if (stats(blackPixels).mean.some((value, c) => Math.abs(value - blackTone.mean[c]) > 2)) throw new Error('BILLY Black Oak rendered with the wrong tone');
   // The existing photo-matched slat tone and felt must also remain unchanged.
   const panelCanvas = panel.image as HTMLCanvasElement, panelCtx = panelCanvas.getContext('2d')!;
   const felt = Array.from(panelCtx.getImageData(110, 512, 1, 1).data).slice(0, 3);
@@ -59,6 +66,6 @@ async function check() {
   await factory.textures.ready(); await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
   if (stats(read(replacement.image as CanvasImageSource)).mean.some((v, c) => Math.abs(v - expected.dark_wenge[c]) > 1)) throw new Error('Cached grain failed to rebuild');
   view.dispose(); factory.dispose(); renderer.dispose(); plane.geometry.dispose();
-  return { ok: true, woods: report, billyUnchanged: billyTone, referencePanelUnchanged: true, rebuildPassed: true };
+  return { ok: true, woods: report, billyUnchanged: billyTone, billyBlack: blackTone, referencePanelUnchanged: true, rebuildPassed: true };
 }
 void check().then(result => { document.getElementById('results')!.textContent = JSON.stringify(result); }).catch(error => { document.getElementById('results')!.textContent = JSON.stringify({ ok: false, error: String(error) }); });

@@ -102,6 +102,37 @@ export const CURATED_ASSETS: readonly AssetDefinition[] = [
     defaultDimensions: { x: 0.8, y: 2.02, z: 0.28 }, placement: { mount: 'floor' },
     source: ikea('https://www.ikea.com.tr/en/product/billy-white-80x28x202-cm-bookcase-00263850', '00263850'),
   },
+  ...BILLY_FINISHES.flatMap(finish => {
+    const variant = finish.id.replace('billy_', '');
+    return [
+      {
+        key: `ikea_billy_40_${variant}`, name: `IKEA BILLY 40 cm Bookcase — ${finish.name.replace('BILLY ', '')}`,
+        category: 'storage', recipe: 'billy_bookcase' as const, cabinetDoors: 0 as const, collection: 'IKEA BILLY / OXBERG',
+        description: 'Narrow open bookcase, 40 × 28 × 202 cm, with five editable shelves and a recessed 10 cm plinth.',
+        defaultDimensions: { x: .4, y: 2.02, z: .28 }, placement: { mount: 'floor' as const },
+        aliases: [`billy_40_${variant}`, ...(variant === 'white' ? ['billy40', 'billy_40', 'ikea_billy_40'] : [])],
+        source: { retailer: 'IKEA', dimensions: 'reference' as const, dimensionNotes: 'Narrow 40 cm BILLY planning case, using the existing 202 cm height and editable shelf construction.' },
+      },
+      ...([false, true] as const).map(fullGlass => ({
+        key: `ikea_billy_oxberg_${fullGlass ? 'glass_' : ''}40_${variant}`,
+        name: `IKEA BILLY / OXBERG 40 cm ${fullGlass ? 'Full Glass' : 'Panel/Glass'}-Door Bookcase — ${finish.name.replace('BILLY ', '')}`,
+        category: 'storage', recipe: 'billy_bookcase' as const, cabinetDoors: 1 as const, collection: 'IKEA BILLY / OXBERG',
+        description: `40 × 30 × 202 cm narrow bookcase with one 192 cm ${fullGlass ? 'full-glass framed' : 'panel/glass'} door, five editable shelves and a recessed 10 cm plinth.`,
+        defaultDimensions: { x: .4, y: 2.02, z: .3 }, placement: { mount: 'floor' as const },
+        aliases: [`billy_${fullGlass ? 'full_glass' : 'panel_glass'}_40_${variant}`],
+        source: { retailer: 'IKEA', dimensions: 'reference' as const, dimensionNotes: '40 cm single-door version of the existing BILLY / OXBERG planning model. Body, shelves, back and door remain independently finishable.' },
+      })),
+      ...([false, true] as const).map(glass => ({
+        key: `ikea_billy_${glass ? 'oxberg_' : ''}extension_40_${variant}`,
+        name: `IKEA BILLY${glass ? ' / OXBERG' : ''} 40 cm Height Extension — ${glass ? 'Glass Door' : 'Open'} — ${finish.name.replace('BILLY ', '')}`,
+        category: 'storage', recipe: 'billy_bookcase' as const, cabinetDoors: (glass ? 1 : 0) as 0 | 1, collection: 'IKEA BILLY / OXBERG',
+        description: `40 × ${glass ? '30' : '28'} × 35 cm narrow height extension. ${glass ? 'One opening glass door.' : 'Open front.'} Open bottom rests on the existing bookcase top; combined height 237 cm.`,
+        defaultDimensions: { x: .4, y: .35, z: glass ? .3 : .28 }, placement: { mount: 'surface' as const, defaultElevation: 2.02 },
+        aliases: [`billy_extender_${glass ? 'glass_' : ''}40_${variant}`],
+        source: { retailer: 'IKEA', dimensions: 'reference' as const, dimensionNotes: '40 cm narrow counterpart of the existing 35 cm height extension, with one door for the glazed version and no duplicate base.' },
+      })),
+    ];
+  }),
   ...BILLY_FINISHES.map(finish => ({
     key: `ikea_billy_oxberg_80_${finish.id.replace('billy_', '')}`,
     name: `IKEA BILLY / OXBERG Panel/Glass-Door Bookcase — ${finish.name.replace('BILLY ', '')}`,
